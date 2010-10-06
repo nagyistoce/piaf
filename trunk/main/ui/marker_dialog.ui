@@ -1,0 +1,706 @@
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<class>MarkerDialogForm</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>MarkerDialogForm</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>449</width>
+            <height>181</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Marker dialog</string>
+    </property>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>GroupBox2</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>150</x>
+                <y>90</y>
+                <width>100</width>
+                <height>90</height>
+            </rect>
+        </property>
+        <property name="frameShape">
+            <enum>Box</enum>
+        </property>
+        <property name="frameShadow">
+            <enum>Sunken</enum>
+        </property>
+        <property name="title">
+            <string>Position</string>
+        </property>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>xposTextLabel</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>16</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                </font>
+            </property>
+            <property name="text">
+                <string>x</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>yposTextLabel</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>50</y>
+                    <width>16</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                </font>
+            </property>
+            <property name="text">
+                <string>y</string>
+            </property>
+        </widget>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>xposEdit</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>30</x>
+                    <y>20</y>
+                    <width>60</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>yposEdit</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>30</x>
+                    <y>50</y>
+                    <width>60</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QListBox">
+        <property name="name">
+            <cstring>ListBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>350</x>
+                <y>10</y>
+                <width>96</width>
+                <height>130</height>
+            </rect>
+        </property>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>GroupBox5</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>150</x>
+                <y>0</y>
+                <width>100</width>
+                <height>90</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Symbol</string>
+        </property>
+        <widget class="QComboBox">
+            <item>
+                <property name="text">
+                    <string>None</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Ellipse</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image0</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Cross</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image1</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Diamond</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image2</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Rectangle</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image3</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Triangle</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image4</pixmap>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>symbolComboBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>80</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>PushButton6</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>50</x>
+                    <y>50</y>
+                    <width>40</width>
+                    <height>32</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string></string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>mrkColorLabel_2</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>50</y>
+                    <width>43</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                </font>
+            </property>
+            <property name="text">
+                <string>Color</string>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>newPushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>260</x>
+                <y>30</y>
+                <width>80</width>
+                <height>32</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>&amp;New</string>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>deletePushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>260</x>
+                <y>80</y>
+                <width>80</width>
+                <height>32</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>&amp;Delete</string>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>cancelPushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>360</x>
+                <y>150</y>
+                <width>91</width>
+                <height>32</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>&amp;Close</string>
+        </property>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>GroupBox1</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>150</width>
+                <height>180</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>marker Properties</string>
+        </property>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>TextLabel5</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>80</y>
+                    <width>40</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                </font>
+            </property>
+            <property name="text">
+                <string>Style</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>modeTextLabel</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>50</y>
+                    <width>40</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                </font>
+            </property>
+            <property name="text">
+                <string>Mode</string>
+            </property>
+        </widget>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>NameEdit</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>60</x>
+                    <y>20</y>
+                    <width>80</width>
+                    <height>23</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string></string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>nameLabel</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>38</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                    <bold>1</bold>
+                </font>
+            </property>
+            <property name="text">
+                <string>Label</string>
+            </property>
+        </widget>
+        <widget class="QSpinBox">
+            <property name="name">
+                <cstring>widthSpinBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>60</x>
+                    <y>110</y>
+                    <width>80</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+        <widget class="QComboBox">
+            <item>
+                <property name="text">
+                    <string></string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image5</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string></string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image6</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string></string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image7</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string></string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image8</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string></string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image9</pixmap>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>styleComboBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>60</x>
+                    <y>80</y>
+                    <width>80</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+        <widget class="QComboBox">
+            <item>
+                <property name="text">
+                    <string>No line</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Horizontal</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Vertical</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Cross</string>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>modeComboBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>60</x>
+                    <y>50</y>
+                    <width>80</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>widthLabel</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>110</y>
+                    <width>45</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                </font>
+            </property>
+            <property name="text">
+                <string>Width</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>mrkColorLabel</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>140</y>
+                    <width>45</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                </font>
+            </property>
+            <property name="text">
+                <string>Color</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>colorPushButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>60</x>
+                    <y>140</y>
+                    <width>40</width>
+                    <height>32</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string></string>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>applyPushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>260</x>
+                <y>150</y>
+                <width>80</width>
+                <height>32</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>&amp;Apply</string>
+        </property>
+        <property name="default">
+            <bool>true</bool>
+        </property>
+    </widget>
+</widget>
+<images>
+    <image name="image0">
+        <data format="XPM.GZ" length="229">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade6523234500022630543251d2e253d856405bffcbc54105b19c856360003103711c44d34004213b04a38c0c6530602384f59393111cc85f0128100170f55258a29b8ecabb5e6020041f82da3</data>
+    </image>
+    <image name="image1">
+        <data format="XPM.GZ" length="214">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade6523234500022230543251d2e253d856405bffcbc54105b19c856360003b0141c60e1298358ca7039650807a65259590f170f45259a2938ecabb5e60200b1922849</data>
+    </image>
+    <image name="image2">
+        <data format="XPM.GZ" length="229">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade6523234500022630543251d2e253d856405bffcbc54105b19c856360003103711c44d34004213b04a38c0ce5346e629272a2378ca89483c2007c285caa1a8443305bb7db5d65c0023902d45</data>
+    </image>
+    <image name="image3">
+        <data format="XPM.GZ" length="229">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade6523234500022630543251d2e253d856405bffcbc54105b19c856360003103711c44d34004213b04a38c0c2530603382f1108c8e1a19882cbbe5a6b2e007e4d2e7a</data>
+    </image>
+    <image name="image4">
+        <data format="XPM.GZ" length="229">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade6523234500022630543251d2e253d856405bffcbc54105b19c856360003103711c44d34004213b04a38c0ce5346e629a3f21295113ce544341e980be62983014e1ba0bc5a6b2e00f4e42cb3</data>
+    </image>
+    <image name="image5">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106835d99326130a8bd506bcd05009e87543f</data>
+    </image>
+    <image name="image6">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106835d99b2b2b29e1e7e62507ba1d69a0b0008c354d9</data>
+    </image>
+    <image name="image7">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106835d99320c00f938d883da0bb5d65c00da8e5497</data>
+    </image>
+    <image name="image8">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106835d99320c00f970125564507ba1d69a0b00f0db54b8</data>
+    </image>
+    <image name="image9">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106835d99320ce8e9a110488283da0bb5d65c00db335497</data>
+    </image>
+</images>
+<connections>
+    <connection>
+        <sender>xposEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>setMarkerXPos()</slot>
+    </connection>
+    <connection>
+        <sender>yposEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>setMarkerYPos()</slot>
+    </connection>
+    <connection>
+        <sender>NameEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>setMarkerLabel()</slot>
+    </connection>
+    <connection>
+        <sender>widthSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>setMarkerWidth()</slot>
+    </connection>
+    <connection>
+        <sender>colorPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>setMarkerColor()</slot>
+    </connection>
+    <connection>
+        <sender>PushButton6</sender>
+        <signal>clicked()</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>setSymbolColor()</slot>
+    </connection>
+    <connection>
+        <sender>deletePushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>removeMarker()</slot>
+    </connection>
+    <connection>
+        <sender>newPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>newMarker()</slot>
+    </connection>
+    <connection>
+        <sender>applyPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>applyProperties()</slot>
+    </connection>
+    <connection>
+        <sender>ListBox</sender>
+        <signal>selectionChanged(QListBoxItem*)</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>itemSelected(QListBoxItem*)</slot>
+    </connection>
+    <connection>
+        <sender>cancelPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>closeMarkerDialog()</slot>
+    </connection>
+    <connection>
+        <sender>symbolComboBox</sender>
+        <signal>highlighted(int)</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>setMarkerSymbol(int)</slot>
+    </connection>
+    <connection>
+        <sender>modeComboBox</sender>
+        <signal>highlighted(int)</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>setMarkerMode(int)</slot>
+    </connection>
+    <connection>
+        <sender>styleComboBox</sender>
+        <signal>highlighted(int)</signal>
+        <receiver>MarkerDialogForm</receiver>
+        <slot>setMarkerStyle(int)</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in declaration">qcolordialog.h</include>
+    <include location="local" impldecl="in declaration">qwt_ext_plot.h</include>
+    <include location="local" impldecl="in declaration">qlistboxmarker.h</include>
+    <include location="local" impldecl="in implementation">marker_dialog.ui.h</include>
+</includes>
+<variables>
+    <variable>QwtSymbol default_symbol</variable>
+    <variable>QPen symbol_pen</variable>
+    <variable>QwtExtPlot *my_plot</variable>
+    <variable>QPen mrk_pen</variable>
+    <variable>QwtSymbol my_symbol</variable>
+    <variable>QArray &lt;long&gt; mrk_keys;</variable>
+    <variable>double xpos</variable>
+    <variable>double ypos</variable>
+    <variable>QColorDialog * select</variable>
+    <variable>QwtMarker::LineStyle line_style</variable>
+    <variable>QListBoxMarker * pCurrLbm</variable>
+</variables>
+<signals>
+    <signal>set_marker_pos()</signal>
+</signals>
+<slots>
+    <slot>init( QwtExtPlot * plot )</slot>
+    <slot>destroy()</slot>
+    <slot>newMarker()</slot>
+    <slot>removeMarker()</slot>
+    <slot>itemSelected( QListBoxItem * pQlbi )</slot>
+    <slot>setMarkerLabel()</slot>
+    <slot>set_MarkerPos( double x, double y )</slot>
+    <slot>setMarkerXPos()</slot>
+    <slot>setMarkerYPos()</slot>
+    <slot>setMarkerWidth()</slot>
+    <slot>setMarkerColor()</slot>
+    <slot>setMarkerMode( int value )</slot>
+    <slot>setMarkerStyle( int value )</slot>
+    <slot>setSymbolColor()</slot>
+    <slot>setMarkerSymbol( int value )</slot>
+    <slot>applyProperties()</slot>
+    <slot>closeMarkerDialog()</slot>
+    <slot>purchaseStyle( long key, int &amp; mode, int &amp; style, int &amp; symbol )</slot>
+</slots>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

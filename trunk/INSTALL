@@ -1,0 +1,11 @@
+# INSTALLATION
+
+- As root : 
+	o Install the required packages for compiling piaf, and create local directory
+./prepare.sh
+./install-piaf
+
+- As user, build Piaf : 
+./build.sh
+
+

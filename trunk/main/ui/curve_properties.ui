@@ -1,0 +1,597 @@
+<!DOCTYPE UI><UI version="3.1" stdsetdef="1">
+<class>PropertiesForm</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>PropertiesForm</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>409</width>
+            <height>296</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Properties</string>
+    </property>
+    <property name="acceptDrops">
+        <bool>false</bool>
+    </property>
+    <property name="sizeGripEnabled">
+        <bool>false</bool>
+    </property>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>plotGroupBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>0</y>
+                <width>200</width>
+                <height>80</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Plot options</string>
+        </property>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>curve_Style</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>40</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                    <bold>1</bold>
+                </font>
+            </property>
+            <property name="text">
+                <string>Style</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>Name</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>50</y>
+                    <width>40</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                    <bold>1</bold>
+                </font>
+            </property>
+            <property name="text">
+                <string>Name</string>
+            </property>
+        </widget>
+        <widget class="QComboBox">
+            <item>
+                <property name="text">
+                    <string>Lines</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image0</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Sticks</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image1</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Steps</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image2</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Dots</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image3</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Spline</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image4</pixmap>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>curveComboBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>70</x>
+                    <y>20</y>
+                    <width>110</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+        <widget class="QLineEdit">
+            <property name="name">
+                <cstring>NameEdit</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>70</x>
+                    <y>50</y>
+                    <width>110</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>GroupBox4</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>0</x>
+                <y>80</y>
+                <width>200</width>
+                <height>90</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Dots options</string>
+        </property>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>plot_Style</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>52</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                    <bold>1</bold>
+                </font>
+            </property>
+            <property name="text">
+                <string>Symbol</string>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>dotsColorButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>50</y>
+                    <width>80</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>Color</string>
+            </property>
+            <property name="autoDefault">
+                <bool>true</bool>
+            </property>
+        </widget>
+        <widget class="QComboBox">
+            <item>
+                <property name="text">
+                    <string>None</string>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Ellipse</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image5</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Cross</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image6</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Diamond</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image7</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Rectangle</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image8</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Triangle</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image9</pixmap>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>plotComboBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>70</x>
+                    <y>20</y>
+                    <width>110</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>penGroupBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>200</x>
+                <y>0</y>
+                <width>210</width>
+                <height>120</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string>Pen options</string>
+        </property>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>pen_Style</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>20</y>
+                    <width>35</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                    <bold>1</bold>
+                </font>
+            </property>
+            <property name="text">
+                <string>Style</string>
+            </property>
+        </widget>
+        <widget class="QLabel">
+            <property name="name">
+                <cstring>Width</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>50</y>
+                    <width>40</width>
+                    <height>20</height>
+                </rect>
+            </property>
+            <property name="font">
+                <font>
+                    <bold>1</bold>
+                </font>
+            </property>
+            <property name="text">
+                <string>Width</string>
+            </property>
+        </widget>
+        <widget class="QComboBox">
+            <item>
+                <property name="text">
+                    <string>Solid line</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image10</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Dash line</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image11</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Dot line</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image12</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Dash dot line</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image13</pixmap>
+                </property>
+            </item>
+            <item>
+                <property name="text">
+                    <string>Dash dot dot line</string>
+                </property>
+                <property name="pixmap">
+                    <pixmap>image14</pixmap>
+                </property>
+            </item>
+            <property name="name">
+                <cstring>penComboBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>50</x>
+                    <y>20</y>
+                    <width>140</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>ColorButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>80</y>
+                    <width>80</width>
+                    <height>30</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>&amp;Color</string>
+            </property>
+            <property name="autoDefault">
+                <bool>true</bool>
+            </property>
+        </widget>
+        <widget class="QSpinBox">
+            <property name="name">
+                <cstring>widthSpinBox</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>50</x>
+                    <y>50</y>
+                    <width>140</width>
+                    <height>23</height>
+                </rect>
+            </property>
+        </widget>
+    </widget>
+    <widget class="QGroupBox">
+        <property name="name">
+            <cstring>validGroupBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>200</x>
+                <y>120</y>
+                <width>210</width>
+                <height>50</height>
+            </rect>
+        </property>
+        <property name="title">
+            <string></string>
+        </property>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>CancelButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>110</x>
+                    <y>10</y>
+                    <width>91</width>
+                    <height>32</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>&amp;Cancel</string>
+            </property>
+            <property name="autoDefault">
+                <bool>true</bool>
+            </property>
+        </widget>
+        <widget class="QPushButton">
+            <property name="name">
+                <cstring>OKButton</cstring>
+            </property>
+            <property name="geometry">
+                <rect>
+                    <x>10</x>
+                    <y>10</y>
+                    <width>91</width>
+                    <height>32</height>
+                </rect>
+            </property>
+            <property name="text">
+                <string>&amp;OK</string>
+            </property>
+            <property name="default">
+                <bool>true</bool>
+            </property>
+        </widget>
+    </widget>
+</widget>
+<images>
+    <image name="image0">
+        <data format="XPM.GZ" length="737">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345730523054d2e152d2534856f0cbcf4b05b195816c650330004b11060865ca6040481954010e7530657069eceaa0ca9024b15a0c51862a83451d5819ba38a63a70f860886288e008377475b88217cdb538634119858d3bb294915978e254192962f0463d388ec18a09a510a891242724fcca6aadb9000f4883a2</data>
+    </image>
+    <image name="image1">
+        <data format="XPM.GZ" length="737">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345730523054d2e152d2534856f0cbcf4b05b195816c650330004b110604952953499932ad942993a04c991465c8a2782cc550860c2851860968a54c8f06ca7000a55a6b2e002414838c</data>
+    </image>
+    <image name="image2">
+        <data format="XPM.GZ" length="737">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345730523054d2e152d2534856f0cbcf4b05b195816c650330004b11064428530602b0e1caca7895c14dc3a14c1902082a43731b9595c11d815719ba289595a1bb0297323473c95186b0099f3224838850862d08894d6fb5d65c00ccf18279</data>
+    </image>
+    <image name="image3">
+        <data format="XPM.GZ" length="737">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345730523054d2e152d2534856f0cbcf4b05b195816c650330004b11060865ca7002af32224d1b6865981e01870f9ddda64cb70051264e1949962a53d534a8b25a6b2e00cccc84d6</data>
+    </image>
+    <image name="image4">
+        <data format="XPM.GZ" length="737">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345730523054d2e152d2534856f0cbcf4b05b195816c650330004b110648ca944180903288125c0a61cae0d2d8d541952149625507518622854d1d58199a040e6518da31d5819561886288600f5e0cf371c402ba6b7145169adf71c6296a48e28e7a9478c1934260b10c62e34d488834436c7aabb5e60200edf182a5</data>
+    </image>
+    <image name="image5">
+        <data format="XPM.GZ" length="479">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030563054d2e152d2534856f0cbcf4b05b195816c65033000711341dc4403203401ab240c4852a60c04602e2e065899b272622258142703a22c1108c082b818242923d25298837132a81c6eb5d65c0093cd5f0d</data>
+    </image>
+    <image name="image6">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106242b538662ac0c883265281f27036a9ab232d4741c0c92941167294e97a379818400c1afacd69a0b00203e53bb</data>
+    </image>
+    <image name="image7">
+        <data format="XPM.GZ" length="479">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030563054d2e152d2534856f0cbcf4b05b195816c65033000711341dc4403203401ab240c4853a60ce3e3604094292742457131c0ca9413a1823819600f26264238b81910d36056e06490e405620384a0b25a6b2e0050425d95</data>
+    </image>
+    <image name="image8">
+        <data format="XPM.GZ" length="479">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030563054d2e152d2534856f0cbcf4b05b195816c65033000711341dc4403203401ab240c4850a60c06400e9ca1872e0456960804603118430f5d68e09411e7052a865bad3517001fc86269</data>
+    </image>
+    <image name="image9">
+        <data format="XPM.GZ" length="479">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030563054d2e152d2534856f0cbcf4b05b195816c65033000711341dc4403203401ab240c4853a60ce3e360409429c3047131a0ca12a1a2b8186065ca8950419c0c983288284e0638b8c000ec0e5c0c2a875bad351700581c5b4d</data>
+    </image>
+    <image name="image10">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106835d99326130a8bd506bcd05009e87543f</data>
+    </image>
+    <image name="image11">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106835d99320c00f938d883da0bb5d65c00da8e5497</data>
+    </image>
+    <image name="image12">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106835d99b2b2b29e1e7e62507ba1d69a0b0008c354d9</data>
+    </image>
+    <image name="image13">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106835d99320c00f970125564507ba1d69a0b00f0db54b8</data>
+    </image>
+    <image name="image14">
+        <data format="XPM.GZ" length="464">789cd3d7528808f055d0d2e72a2e492cc94c5648ce482c52d04a29cdcdad8c8eb5ade65232365530345030523054d2e152d2534856f0cbcf4b05b195816c650330004b1106835d99320ce8e9a110488283da0bb5d65c00db335497</data>
+    </image>
+</images>
+<connections>
+    <connection>
+        <sender>curveComboBox</sender>
+        <signal>activated(int)</signal>
+        <receiver>PropertiesForm</receiver>
+        <slot>set_CurveStyle(int)</slot>
+    </connection>
+    <connection>
+        <sender>penComboBox</sender>
+        <signal>activated(int)</signal>
+        <receiver>PropertiesForm</receiver>
+        <slot>set_PenStyle(int)</slot>
+    </connection>
+    <connection>
+        <sender>ColorButton</sender>
+        <signal>clicked()</signal>
+        <receiver>PropertiesForm</receiver>
+        <slot>setColor()</slot>
+    </connection>
+    <connection>
+        <sender>OKButton</sender>
+        <signal>clicked()</signal>
+        <receiver>PropertiesForm</receiver>
+        <slot>validProperties()</slot>
+    </connection>
+    <connection>
+        <sender>CancelButton</sender>
+        <signal>clicked()</signal>
+        <receiver>PropertiesForm</receiver>
+        <slot>close()</slot>
+    </connection>
+    <connection>
+        <sender>NameEdit</sender>
+        <signal>returnPressed()</signal>
+        <receiver>PropertiesForm</receiver>
+        <slot>setCurveName()</slot>
+    </connection>
+    <connection>
+        <sender>plotComboBox</sender>
+        <signal>activated(int)</signal>
+        <receiver>PropertiesForm</receiver>
+        <slot>drawMarker(int)</slot>
+    </connection>
+    <connection>
+        <sender>dotsColorButton</sender>
+        <signal>clicked()</signal>
+        <receiver>PropertiesForm</receiver>
+        <slot>setDotsColor()</slot>
+    </connection>
+    <connection>
+        <sender>widthSpinBox</sender>
+        <signal>valueChanged(int)</signal>
+        <receiver>PropertiesForm</receiver>
+        <slot>setWidth()</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in declaration">qwt_ext_plot.h</include>
+    <include location="local" impldecl="in declaration">qcolordialog.h</include>
+    <include location="local" impldecl="in implementation">curve_properties1.ui.h</include>
+</includes>
+<variables>
+    <variable>QPen symbol_pen</variable>
+    <variable>QwtSymbol *crv_symbol</variable>
+    <variable>QColorDialog *select</variable>
+    <variable>QString new_name</variable>
+    <variable>double x[50]</variable>
+    <variable>long curveID</variable>
+    <variable>int *style</variable>
+    <variable>QPen *pen</variable>
+    <variable>QwtExtPlot *myPlot</variable>
+    <variable>QPen myPen</variable>
+    <variable>QString *name</variable>
+    <variable>int myStyle</variable>
+    <variable>double y[50]</variable>
+    <variable>QwtSymbol my_symbol</variable>
+</variables>
+<slots>
+    <slot>init( const QString * last_name, QPen * last_pen, int * last_style, QwtSymbol * last_symbol )</slot>
+    <slot>destroy()</slot>
+    <slot>setCurveName()</slot>
+    <slot>setColor()</slot>
+    <slot>setDotsColor()</slot>
+    <slot>setWidth()</slot>
+    <slot>set_PenStyle( int value )</slot>
+    <slot>set_CurveStyle( int value )</slot>
+    <slot>drawMarker( int value )</slot>
+    <slot>validProperties()</slot>
+</slots>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

@@ -1,0 +1,42 @@
+****************************************************************************
+
+				PIAF / Image processing prototyping
+
+							GUI
+
+****************************************************************************
+
+GU is divided in 3 parts :
+- on top, a toolbar for actions you do not need often
+- on left, an explorer with the 3 categories : still images, movies, live inputs
+- on right, the workspace : display and process
+
+
+Toolbar:
+- convert a list of still images to AVI movie
+- add/remove plugins
+- configure directories
+
+Explorer:
+- add/remove sources: still images, movies
+- display list of live inputs
+- open a source
+
+Source browsers :
+
+- IMAGE TOOL:
+	- Display : zoom, move
+	- Change palette for 8bit images
+	- Snapshot
+	- record output
+
+- MOVIE TOOL:
+	- movie navigation :rewind, step back, play/pause, step forward, navigation slider
+	- at bottom : an image tool displays the current image
+
+- LIVE INPUT TOOL:
+	- input control: image settings, play/pause, ...
+	- at bottom : an image tool displays the current image
+
+
+
