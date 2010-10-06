@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<directory>
+  <file name="launcher-program.png" icon_position="428,99"/>
+  <file name="headers.png" icon_position="526,63"/>
+  <file name="gnome-application-pdf.png" icon_position="432,145"/>
+  <file name="gnome-application-postscript.png" icon_position="489,118"/>
+  <file name="gnome-text-html.png" icon_position="255,259"/>
+  <file name="gnome-text-x-readme.png" icon_position="402,326"/>
+</directory>

@@ -1,0 +1,240 @@
+<!DOCTYPE UI><UI version="3.3" stdsetdef="1">
+<class>PluginListDialog</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>PluginListDialog</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>504</width>
+            <height>278</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Plugin List Dialog</string>
+    </property>
+    <property name="sizeGripEnabled">
+        <bool>false</bool>
+    </property>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>delPushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>410</x>
+                <y>50</y>
+                <width>91</width>
+                <height>31</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Delete</string>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>iconPushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>410</x>
+                <y>90</y>
+                <width>91</width>
+                <height>31</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Icon</string>
+        </property>
+    </widget>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>Layout1</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>20</x>
+                <y>240</y>
+                <width>480</width>
+                <height>33</height>
+            </rect>
+        </property>
+        <hbox>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <spacer>
+                <property name="name">
+                    <cstring>Horizontal Spacing2</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                    <enum>Expanding</enum>
+                </property>
+                <property name="sizeHint">
+                    <size>
+                        <width>20</width>
+                        <height>20</height>
+                    </size>
+                </property>
+            </spacer>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>buttonOk</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;OK</string>
+                </property>
+                <property name="accel">
+                    <string></string>
+                </property>
+                <property name="autoDefault">
+                    <bool>true</bool>
+                </property>
+                <property name="default">
+                    <bool>true</bool>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>buttonCancel</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;Cancel</string>
+                </property>
+                <property name="accel">
+                    <string></string>
+                </property>
+                <property name="autoDefault">
+                    <bool>true</bool>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>addPushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>410</x>
+                <y>10</y>
+                <width>91</width>
+                <height>31</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Add</string>
+        </property>
+    </widget>
+    <widget class="QListView">
+        <column>
+            <property name="text">
+                <string>Plugin binary</string>
+            </property>
+            <property name="clickable">
+                <bool>true</bool>
+            </property>
+            <property name="resizable">
+                <bool>true</bool>
+            </property>
+        </column>
+        <column>
+            <property name="text">
+                <string>Icon</string>
+            </property>
+            <property name="clickable">
+                <bool>true</bool>
+            </property>
+            <property name="resizable">
+                <bool>true</bool>
+            </property>
+        </column>
+        <property name="name">
+            <cstring>pluginListView</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>10</y>
+                <width>390</width>
+                <height>211</height>
+            </rect>
+        </property>
+        <property name="allColumnsShowFocus">
+            <bool>true</bool>
+        </property>
+        <property name="rootIsDecorated">
+            <bool>true</bool>
+        </property>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>buttonOk</sender>
+        <signal>clicked()</signal>
+        <receiver>PluginListDialog</receiver>
+        <slot>accept()</slot>
+    </connection>
+    <connection>
+        <sender>buttonCancel</sender>
+        <signal>clicked()</signal>
+        <receiver>PluginListDialog</receiver>
+        <slot>reject()</slot>
+    </connection>
+    <connection>
+        <sender>pluginListView</sender>
+        <signal>currentChanged(QListViewItem*)</signal>
+        <receiver>PluginListDialog</receiver>
+        <slot>slotSelectPlugin(QListViewItem*)</slot>
+    </connection>
+    <connection>
+        <sender>addPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>PluginListDialog</receiver>
+        <slot>slotAddPlugin()</slot>
+    </connection>
+    <connection>
+        <sender>delPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>PluginListDialog</receiver>
+        <slot>slotDelPlugin()</slot>
+    </connection>
+    <connection>
+        <sender>iconPushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>PluginListDialog</receiver>
+        <slot>slotIconPlugin()</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in implementation">pluginlistdialog.ui.h</include>
+</includes>
+<variables>
+    <variable access="private">QListViewItem * selected;</variable>
+    <variable access="private">QString lastPluginDir;</variable>
+</variables>
+<slots>
+    <slot access="private">slotAddPlugin()</slot>
+    <slot access="private">slotDelPlugin()</slot>
+    <slot access="private">slotIconPlugin()</slot>
+    <slot access="private">slotSelectPlugin( QListViewItem * item )</slot>
+    <slot access="protected">accept()</slot>
+</slots>
+<functions>
+    <function access="private">init()</function>
+</functions>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

@@ -1,0 +1,330 @@
+<!DOCTYPE UI><UI version="3.2" stdsetdef="1">
+<class>PiafConfigurationDialog</class>
+<widget class="QDialog">
+    <property name="name">
+        <cstring>PiafConfigurationDialog</cstring>
+    </property>
+    <property name="geometry">
+        <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>571</width>
+            <height>264</height>
+        </rect>
+    </property>
+    <property name="caption">
+        <string>Piaf Configuration Dialog</string>
+    </property>
+    <property name="sizeGripEnabled">
+        <bool>false</bool>
+    </property>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>textLabel1</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>1</y>
+                <width>211</width>
+                <height>20</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Default measure directory :</string>
+        </property>
+    </widget>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>textLabel1_2</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>70</y>
+                <width>211</width>
+                <height>20</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Default image directory :</string>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>imagePushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>510</x>
+                <y>90</y>
+                <width>50</width>
+                <height>31</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>...</string>
+        </property>
+    </widget>
+    <widget class="QLabel">
+        <property name="name">
+            <cstring>textLabel1_3</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>130</y>
+                <width>211</width>
+                <height>20</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Default movie directory :</string>
+        </property>
+    </widget>
+    <widget class="QLayoutWidget">
+        <property name="name">
+            <cstring>Layout1</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>220</y>
+                <width>550</width>
+                <height>33</height>
+            </rect>
+        </property>
+        <hbox>
+            <property name="name">
+                <cstring>unnamed</cstring>
+            </property>
+            <property name="margin">
+                <number>0</number>
+            </property>
+            <property name="spacing">
+                <number>6</number>
+            </property>
+            <spacer>
+                <property name="name">
+                    <cstring>Horizontal Spacing2</cstring>
+                </property>
+                <property name="orientation">
+                    <enum>Horizontal</enum>
+                </property>
+                <property name="sizeType">
+                    <enum>Expanding</enum>
+                </property>
+                <property name="sizeHint">
+                    <size>
+                        <width>20</width>
+                        <height>20</height>
+                    </size>
+                </property>
+            </spacer>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>buttonOk</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;OK</string>
+                </property>
+                <property name="accel">
+                    <string></string>
+                </property>
+                <property name="autoDefault">
+                    <bool>true</bool>
+                </property>
+                <property name="default">
+                    <bool>true</bool>
+                </property>
+            </widget>
+            <widget class="QPushButton">
+                <property name="name">
+                    <cstring>buttonCancel</cstring>
+                </property>
+                <property name="text">
+                    <string>&amp;Cancel</string>
+                </property>
+                <property name="accel">
+                    <string></string>
+                </property>
+                <property name="autoDefault">
+                    <bool>true</bool>
+                </property>
+            </widget>
+        </hbox>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>moviePushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>510</x>
+                <y>150</y>
+                <width>50</width>
+                <height>31</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>...</string>
+        </property>
+    </widget>
+    <widget class="QPushButton">
+        <property name="name">
+            <cstring>measurePushButton</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>510</x>
+                <y>30</y>
+                <width>50</width>
+                <height>31</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>...</string>
+        </property>
+    </widget>
+    <widget class="QLineEdit">
+        <property name="name">
+            <cstring>defaultMovieLineEdit</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>150</y>
+                <width>490</width>
+                <height>31</height>
+            </rect>
+        </property>
+    </widget>
+    <widget class="QLineEdit">
+        <property name="name">
+            <cstring>defaultImageLineEdit</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>90</y>
+                <width>490</width>
+                <height>31</height>
+            </rect>
+        </property>
+    </widget>
+    <widget class="QCheckBox">
+        <property name="name">
+            <cstring>saveAtExitCheckBox</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>190</y>
+                <width>280</width>
+                <height>30</height>
+            </rect>
+        </property>
+        <property name="text">
+            <string>Save configuration at exit</string>
+        </property>
+        <property name="checked">
+            <bool>true</bool>
+        </property>
+    </widget>
+    <widget class="QLineEdit">
+        <property name="name">
+            <cstring>defaultMeasureLineEdit</cstring>
+        </property>
+        <property name="geometry">
+            <rect>
+                <x>10</x>
+                <y>30</y>
+                <width>490</width>
+                <height>31</height>
+            </rect>
+        </property>
+    </widget>
+</widget>
+<connections>
+    <connection>
+        <sender>buttonOk</sender>
+        <signal>clicked()</signal>
+        <receiver>PiafConfigurationDialog</receiver>
+        <slot>accept()</slot>
+    </connection>
+    <connection>
+        <sender>defaultImageLineEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>PiafConfigurationDialog</receiver>
+        <slot>slotImageChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>defaultMeasureLineEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>PiafConfigurationDialog</receiver>
+        <slot>slotMeasureChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>defaultMovieLineEdit</sender>
+        <signal>textChanged(const QString&amp;)</signal>
+        <receiver>PiafConfigurationDialog</receiver>
+        <slot>slotMovieChanged(const QString&amp;)</slot>
+    </connection>
+    <connection>
+        <sender>imagePushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>PiafConfigurationDialog</receiver>
+        <slot>slotImagePushed()</slot>
+    </connection>
+    <connection>
+        <sender>measurePushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>PiafConfigurationDialog</receiver>
+        <slot>slotMeasurePushed()</slot>
+    </connection>
+    <connection>
+        <sender>moviePushButton</sender>
+        <signal>clicked()</signal>
+        <receiver>PiafConfigurationDialog</receiver>
+        <slot>slotMoviePushed()</slot>
+    </connection>
+    <connection>
+        <sender>saveAtExitCheckBox</sender>
+        <signal>toggled(bool)</signal>
+        <receiver>PiafConfigurationDialog</receiver>
+        <slot>slotSaveAtExit(bool)</slot>
+    </connection>
+    <connection>
+        <sender>buttonCancel</sender>
+        <signal>clicked()</signal>
+        <receiver>PiafConfigurationDialog</receiver>
+        <slot>reject()</slot>
+    </connection>
+</connections>
+<includes>
+    <include location="local" impldecl="in implementation">stdlib.h</include>
+    <include location="local" impldecl="in implementation">piafconfigurationdialog.ui.h</include>
+</includes>
+<variables>
+    <variable access="private">QString measureDir;</variable>
+    <variable access="private">QString imageDir;</variable>
+    <variable access="private">QString movieDir;</variable>
+    <variable access="private">bool saveAtExit;</variable>
+    <variable access="private">QString homeDir;</variable>
+</variables>
+<slots>
+    <slot access="private">slotImageChanged( const QString &amp; str )</slot>
+    <slot access="private">slotMeasureChanged( const QString &amp; str )</slot>
+    <slot access="private">slotMovieChanged( const QString &amp; str )</slot>
+    <slot access="private">slotImagePushed()</slot>
+    <slot access="private">slotMoviePushed()</slot>
+    <slot access="private">slotMeasurePushed()</slot>
+    <slot access="private">slotSaveAtExit( bool on )</slot>
+    <slot access="protected">accept()</slot>
+</slots>
+<functions>
+    <function access="private">init()</function>
+</functions>
+<pixmapinproject/>
+<layoutdefaults spacing="6" margin="11"/>
+</UI>

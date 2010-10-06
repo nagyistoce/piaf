@@ -1,0 +1,516 @@
+Log for qt3to4 on Mon Mar 16 22:27:51 2009. Number of log entries: 489
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/main.cpp
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/objectsexplorer.cpp at line 17 column 20: qpopupmenu.h -> q3popupmenu.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/objectsexplorer.cpp at line 26 column 83: WFlags -> Qt::WFlags
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/objectsexplorer.cpp at line 27 column 16: QDockWindow -> Q3DockWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/objectsexplorer.cpp at line 34 column 74: WFlags -> Qt::WFlags
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/objectsexplorer.cpp at line 35 column 16: QDockWindow -> Q3DockWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/objectsexplorer.cpp at line 42 column 9: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/objectsexplorer.cpp at line 44 column 10: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/objectsexplorer.cpp at line 47 column 19: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/objectsexplorer.cpp: Added the following include directives:
+	#include <QContextMenuEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/sw_component.cpp at line 17 column 40: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/sw_component.cpp at line 17 column 83: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/sw_component.cpp: Added the following include directives:
+	#include <QPixmap> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/sw_library.cpp at line 18 column 36: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/sw_library.cpp at line 18 column 79: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/sw_library.cpp at line 49 column 24: IO_ReadOnly -> QIODevice::ReadOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/sw_library.cpp at line 52 column 12: QTextStream -> Q3TextStream
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/sw_library.cpp at line 77 column 26: QListViewItemIterator -> Q3ListViewItemIterator
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/sw_library.cpp: Added the following include directives:
+	#include <Q3TextStream> 	#include <QPixmap> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 23 column 15: qvbox.h -> q3vbox.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 24 column 16: qaccel.h -> q3accel.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 25 column 21: qdockwindow.h -> q3dockwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 27 column 19: qlistview.h -> q3listview.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 88 column 31: QPtrList -> Q3PtrList
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 91 column 26: QPtrList -> Q3PtrList
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 98 column 51: QDockWindow -> Q3DockWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 100 column 70: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 101 column 68: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 102 column 76: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 103 column 67: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 104 column 73: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 105 column 66: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 148 column 26: IO_ReadOnly -> QIODevice::ReadOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 195 column 26: IO_ReadOnly -> QIODevice::ReadOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 272 column 23: QListViewItemIterator -> Q3ListViewItemIterator
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 281 column 26: QListViewItemIterator -> Q3ListViewItemIterator
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 323 column 67: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 333 column 71: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 343 column 64: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 348 column 64: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 353 column 56: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 378 column 53: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 383 column 56: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 388 column 56: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 393 column 59: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 418 column 33: QActionGroup -> Q3ActionGroup
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 450 column 25: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 464 column 25: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 473 column 25: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 479 column 28: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 481 column 30: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 483 column 28: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 486 column 28: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 497 column 29: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 503 column 25: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 522 column 28: QToolBar -> Q3ToolBar
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 527 column 12: QWhatsThis -> Q3WhatsThis
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 542 column 6: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 542 column 29: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 543 column 33: QFrame -> Q3Frame
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 543 column 55: QFrame -> Q3Frame
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 770 column 13: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 770 column 32: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 900 column 57: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 958 column 45: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 958 column 63: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 964 column 12: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 964 column 44: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 977 column 13: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 977 column 42: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 980 column 13: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 980 column 42: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 1007 column 56: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 1011 column 11: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 1021 column 30: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 1065 column 30: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 1123 column 55: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 1539 column 25: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 1560 column 25: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp at line 1575 column 25: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshop.cpp: Added the following include directives:
+	#include <Q3PtrList> 	#include <QPixmap> 	#include <Q3Frame> 	#include <Q3PopupMenu> 	#include <QEvent> 	#include <Q3ActionGroup> 	#include <QCloseEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 37 column 71: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 62 column 14: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 66 column 14: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 66 column 46: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 97 column 35: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 106 column 48: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 111 column 23: IO_ReadOnly -> QIODevice::ReadOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 112 column 13: QTextStream -> Q3TextStream
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 140 column 14: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 140 column 43: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 149 column 23: IO_ReadOnly -> QIODevice::ReadOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 150 column 13: QTextStream -> Q3TextStream
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 168 column 16: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp at line 168 column 46: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/src/workshoplist.cpp: Added the following include directives:
+	#include <QPixmap> 	#include <Q3TextStream> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopcomponent.cpp at line 49 column 24: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopcomponent.cpp at line 64 column 23: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopcomponent.cpp at line 78 column 23: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopmeasure.cpp at line 33 column 30: IO_WriteOnly -> QIODevice::WriteOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopmeasure.cpp at line 37 column 24: QValueVector -> Q3ValueVector
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopmeasure.cpp at line 38 column 14: QValueVector -> Q3ValueVector
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopmeasure.cpp at line 66 column 29: IO_ReadOnly -> QIODevice::ReadOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopmeasure.cpp at line 73 column 14: QValueVector -> Q3ValueVector
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopimage.cpp at line 144 column 30: IO_WriteOnly -> QIODevice::WriteOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopimage.cpp at line 181 column 29: IO_ReadOnly -> QIODevice::ReadOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopimage.cpp: Added the following include directives:
+	#include <QPixmap> 	#include <QPaintEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/src/workshopmovie.cpp at line 57 column 29: IO_ReadOnly -> QIODevice::ReadOnly
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshoptool.cpp
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/previewimage.cpp
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/previewplot2d.cpp at line 33 column 22: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/previewplot2d.cpp at line 34 column 33: QFrame -> Q3Frame
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/previewplot2d.cpp at line 34 column 55: QFrame -> Q3Frame
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/previewplot2d.cpp at line 52 column 22: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/previewplot2d.cpp at line 53 column 33: QFrame -> Q3Frame
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/previewplot2d.cpp at line 53 column 55: QFrame -> Q3Frame
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/previewplot2d.cpp at line 125 column 27: QActionGroup -> Q3ActionGroup
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/previewplot2d.cpp at line 178 column 27: QToolBar -> Q3ToolBar
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/previewplot2d.cpp: Added the following include directives:
+	#include <Q3Frame> 	#include <QPixmap> 	#include <QMouseEvent> 	#include <Q3ActionGroup> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 28 column 22: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 29 column 33: QFrame -> Q3Frame
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 29 column 55: QFrame -> Q3Frame
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 54 column 22: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 55 column 33: QFrame -> Q3Frame
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 55 column 55: QFrame -> Q3Frame
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 168 column 27: QActionGroup -> Q3ActionGroup
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 297 column 13: QValueList -> Q3ValueList
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 322 column 27: QToolBar -> Q3ToolBar
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 341 column 17: QIntDictIterator -> Q3IntDictIterator
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 395 column 17: QIntDictIterator -> Q3IntDictIterator
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp at line 516 column 12: QValueList -> Q3ValueList
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopplot2d.cpp: Added the following include directives:
+	#include <Q3ValueList> 	#include <QPixmap> 	#include <Q3Frame> 	#include <QMouseEvent> 	#include <Q3ActionGroup> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 25 column 16: qaccel.h -> q3accel.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 32 column 21: qmainwindow.h -> q3mainwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 33 column 15: qgrid.h -> q3grid.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 173 column 20: QVBox -> Q3VBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 178 column 17: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 194 column 31: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 216 column 29: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 238 column 61: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 256 column 29: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 258 column 63: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 265 column 71: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 270 column 65: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 275 column 58: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 665 column 23: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 672 column 12: QGridLayout -> Q3GridLayout
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 672 column 37: QGridLayout -> Q3GridLayout
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 821 column 22: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 826 column 15: QGridLayout -> Q3GridLayout
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 826 column 40: QGridLayout -> Q3GridLayout
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 1295 column 56: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 1381 column 54: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 1420 column 56: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 1424 column 54: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp at line 1429 column 54: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopvideocapture.cpp: Added the following include directives:
+	#include <QLabel> 	#include <Q3GridLayout> 	#include <QPixmap> 	#include <QResizeEvent> 	#include <Q3PopupMenu> 	#include <QMouseEvent> 	#include <QPaintEvent> 	#include <QCloseEvent> 
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwPluginCore.cpp
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwMpegEncoder.cpp
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 26 column 15: qvbox.h -> q3vbox.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 28 column 21: qfiledialog.h -> q3filedialog.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 127 column 28: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 136 column 28: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 161 column 12: QGridLayout -> Q3GridLayout
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 161 column 38: QGridLayout -> Q3GridLayout
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 164 column 32: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 183 column 14: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 197 column 30: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 206 column 33: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 216 column 37: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 225 column 6: QVBox -> Q3VBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 225 column 32: QVBox -> Q3VBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 234 column 61: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 234 column 115: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 271 column 6: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 271 column 25: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 292 column 6: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 292 column 26: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 315 column 36: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 321 column 45: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 327 column 62: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 327 column 103: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 666 column 35: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 687 column 33: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 692 column 60: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 847 column 46: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 923 column 45: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 929 column 7: QVBox -> Q3VBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 929 column 26: QVBox -> Q3VBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 934 column 13: QGridLayout -> Q3GridLayout
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 934 column 39: QGridLayout -> Q3GridLayout
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 955 column 28: QTextEdit -> Q3TextEdit
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 980 column 40: QTextEdit -> Q3TextEdit
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 1015 column 12: QGridLayout -> Q3GridLayout
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 1015 column 37: QGridLayout -> Q3GridLayout
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 1243 column 31: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp at line 1300 column 31: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/SwFilters.cpp: Added the following include directives:
+	#include <Q3GridLayout> 	#include <QPixmap> 	#include <QCloseEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 21 column 16: qaccel.h -> q3accel.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 27 column 21: qmainwindow.h -> q3mainwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 28 column 15: qgrid.h -> q3grid.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 247 column 20: QVBox -> Q3VBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 251 column 17: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 277 column 29: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 279 column 63: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 286 column 71: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 291 column 65: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 296 column 58: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 309 column 27: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 314 column 59: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 320 column 76: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 325 column 85: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 330 column 83: QAccel -> Q3Accel
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 1125 column 49: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 1196 column 47: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 1201 column 49: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 1205 column 47: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp at line 1210 column 47: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/workshopimagetool.cpp: Added the following include directives:
+	#include <QPixmap> 	#include <QResizeEvent> 	#include <Q3PopupMenu> 	#include <QMouseEvent> 	#include <QPaintEvent> 	#include <QCloseEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/videoplayertool.cpp at line 31 column 58: WRepaintNoErase -> WNoAutoErase
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/videoplayertool.cpp at line 140 column 23: QVBox -> Q3VBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/videoplayertool.cpp at line 143 column 21: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/src/videoplayertool.cpp: Added the following include directives:
+	#include <QResizeEvent> 	#include <QPixmap> 
+In file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/src/qwt_buff_curve.cpp at line 102 column 15: QValueVector -> Q3ValueVector
+In file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/src/qwt_ext_plot.cpp at line 92 column 17: QIntDictIterator -> Q3IntDictIterator
+No changes made to file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/src/qwt_ext_cursor.cpp
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/v4lutils.c
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/VirtualDevice.cpp
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/v4l2uvc.c
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/utils.c
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/color.c
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/avilib.c
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/V4L2Device.cpp
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/SwVideoAcquisition.cpp
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/FileVideoAcquisition.cpp
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/videocapture.cpp at line 18 column 17: qmsgbox.h -> qmessagebox.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/videocapture.cpp at line 20 column 21: qfiledialog.h -> q3filedialog.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/videocapture.cpp at line 238 column 26: IO_ReadOnly -> QIODevice::ReadOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/videocapture.cpp at line 254 column 27: IO_WriteOnly -> QIODevice::WriteOnly
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/swvideodetector.cpp
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt_c.c
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 410 column 16: red -> Qt::red
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 426 column 16: red -> Qt::red
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 429 column 16: green -> Qt::green
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 432 column 15: blue -> Qt::blue
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 714 column 15: red -> Qt::red
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 715 column 17: green -> Qt::green
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 716 column 16: blue -> Qt::blue
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 818 column 15: red -> Qt::red
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 819 column 17: green -> Qt::green
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 820 column 16: blue -> Qt::blue
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 920 column 14: red -> Qt::red
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 922 column 26: red -> Qt::red
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 925 column 16: green -> Qt::green
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 927 column 28: green -> Qt::green
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 930 column 15: blue -> Qt::blue
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/src/ccvt.S at line 932 column 27: blue -> Qt::blue
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 22 column 21: qmainwindow.h -> q3mainwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 26 column 18: qtoolbar.h -> q3toolbar.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 28 column 20: qwhatsthis.h -> q3whatsthis.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 29 column 20: qpopupmenu.h -> q3popupmenu.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 30 column 16: qaccel.h -> q3accel.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 33 column 21: qfiledialog.h -> q3filedialog.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 67 column 38: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 112 column 45: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 113 column 44: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 114 column 43: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 185 column 9: QPtrList -> Q3PtrList
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 188 column 9: QPtrList -> Q3PtrList
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 220 column 33: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 220 column 51: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 223 column 14: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 225 column 14: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 227 column 14: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 229 column 14: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 231 column 14: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 235 column 11: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 236 column 11: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 237 column 11: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 238 column 11: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 240 column 12: QToolBar -> Q3ToolBar
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h at line 274 column 16: QActionGroup -> Q3ActionGroup
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshop.h: Added the following include directives:
+	#include <Q3PtrList> 	#include <QEvent> 	#include <Q3ActionGroup> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 17 column 21: qdockwindow.h -> q3dockwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 18 column 19: qlistview.h -> q3listview.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 53 column 41: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 56 column 23: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 57 column 17: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 58 column 27: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 59 column 17: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 75 column 42: QDockWindow -> Q3DockWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 80 column 78: WFlags -> Qt::WFlags
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 81 column 62: WFlags -> Qt::WFlags
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 84 column 10: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 92 column 10: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h at line 106 column 10: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/objectsexplorer.h: Added the following include directives:
+	#include <QContextMenuEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/sw_component.h at line 16 column 19: qlistview.h -> q3listview.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/sw_component.h at line 25 column 41: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/sw_component.h at line 27 column 27: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/sw_library.h at line 16 column 19: qlistview.h -> q3listview.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/sw_library.h at line 19 column 21: qtextstream.h -> q3textstream.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/sw_library.h at line 25 column 39: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/sw_library.h at line 28 column 25: QListViewItem -> Q3ListViewItem
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/sw_structure.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/sw_types.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshoplist.h at line 17 column 19: qlistview.h -> q3listview.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshoplist.h at line 55 column 37: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshoplist.h at line 68 column 35: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshoplist.h at line 69 column 34: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/workshoplist.h at line 72 column 14: QListViewItem -> Q3ListViewItem
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/SwTypes.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/inc/SwImage.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopcomponent.h at line 20 column 21: qfiledialog.h -> q3filedialog.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopmeasure.h at line 19 column 18: qptrlist.h -> q3ptrlist.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopmeasure.h at line 23 column 20: qpopupmenu.h -> q3popupmenu.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopmeasure.h at line 24 column 21: qfiledialog.h -> q3filedialog.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopmeasure.h at line 26 column 22: qvaluevector.h -> q3valuevector.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopmeasure.h at line 35 column 68: QValueVector -> Q3ValueVector
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopmeasure.h at line 42 column 48: QValueVector -> Q3ValueVector
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopimage.h at line 23 column 18: qptrlist.h -> q3ptrlist.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopimage.h at line 27 column 20: qpopupmenu.h -> q3popupmenu.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopimage.h at line 28 column 21: qfiledialog.h -> q3filedialog.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopimage.h at line 30 column 22: qvaluevector.h -> q3valuevector.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopimage.h at line 50 column 61: WFlags -> Qt::WFlags
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopimage.h: Added the following include directives:
+	#include <QPaintEvent> 	#include <QMouseEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopmovie.h at line 19 column 18: qptrlist.h -> q3ptrlist.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopmovie.h at line 23 column 20: qpopupmenu.h -> q3popupmenu.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopmovie.h at line 24 column 21: qfiledialog.h -> q3filedialog.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/components/inc/workshopmovie.h at line 26 column 22: qvaluevector.h -> q3valuevector.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshoptool.h at line 21 column 21: qmainwindow.h -> q3mainwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshoptool.h at line 23 column 18: qtoolbar.h -> q3toolbar.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshoptool.h at line 26 column 18: qintdict.h -> q3intdict.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshoptool.h at line 49 column 45: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshoptool.h at line 53 column 68: WFlags -> Qt::WFlags
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshoptool.h at line 54 column 14: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshoptool.h at line 104 column 12: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshoptool.h at line 117 column 9: QPtrList -> Q3PtrList
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshoptool.h at line 118 column 9: QPtrList -> Q3PtrList
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshoptool.h: Added the following include directives:
+	#include <QResizeEvent> 	#include <Q3PtrList> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewimage.h at line 21 column 21: qmainwindow.h -> q3mainwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewimage.h at line 24 column 18: qtoolbar.h -> q3toolbar.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewimage.h at line 42 column 59: WFlags -> Qt::WFlags
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewimage.h: Added the following include directives:
+	#include <QCloseEvent> 	#include <QPaintEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewplot2d.h at line 21 column 21: qmainwindow.h -> q3mainwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewplot2d.h at line 24 column 18: qtoolbar.h -> q3toolbar.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewplot2d.h at line 27 column 18: qintdict.h -> q3intdict.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewplot2d.h at line 28 column 15: qhbox.h -> q3hbox.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewplot2d.h at line 80 column 6: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewplot2d.h at line 92 column 13: QActionGroup -> Q3ActionGroup
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewplot2d.h at line 103 column 9: QToolBar -> Q3ToolBar
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/previewplot2d.h: Added the following include directives:
+	#include <Q3ActionGroup> 	#include <QMouseEvent> 	#include <QCloseEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 23 column 21: qmainwindow.h -> q3mainwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 26 column 18: qtoolbar.h -> q3toolbar.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 29 column 18: qintdict.h -> q3intdict.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 30 column 15: qhbox.h -> q3hbox.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 99 column 6: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 102 column 11: QValueList -> Q3ValueList
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 103 column 9: QIntDict -> Q3IntDict
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 104 column 9: QIntDict -> Q3IntDict
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 122 column 13: QActionGroup -> Q3ActionGroup
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 136 column 9: QToolBar -> Q3ToolBar
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h at line 159 column 15: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopplot2d.h: Added the following include directives:
+	#include <Q3ActionGroup> 	#include <QMouseEvent> 	#include <Q3ValueList> 	#include <QCloseEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 28 column 15: qvbox.h -> q3vbox.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 34 column 22: qbuttongroup.h -> q3buttongroup.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 37 column 20: qpopupmenu.h -> q3popupmenu.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 38 column 18: qtoolbar.h -> q3toolbar.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 41 column 19: qlistview.h -> q3listview.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 95 column 12: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 96 column 12: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 115 column 6: QVBox -> Q3VBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 116 column 6: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 121 column 14: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 127 column 14: QHButtonGroup -> Q3HButtonGroup
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 129 column 14: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 139 column 14: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 174 column 12: QToolBar -> Q3ToolBar
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 226 column 31: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 227 column 29: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 228 column 31: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 229 column 29: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h at line 231 column 29: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopvideocapture.h: Added the following include directives:
+	#include <QCloseEvent> 	#include <QPaintEvent> 	#include <QResizeEvent> 	#include <QMouseEvent> 
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwPluginCore.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwMpegEncoder.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 22 column 21: qmainwindow.h -> q3mainwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 24 column 22: qbuttongroup.h -> q3buttongroup.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 27 column 15: qhbox.h -> q3hbox.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 28 column 19: qlistview.h -> q3listview.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 29 column 19: qtextedit.h -> q3textedit.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 156 column 14: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 157 column 14: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 158 column 12: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 168 column 42: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 204 column 12: QMainWindow -> Q3MainWindow
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 205 column 6: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 206 column 10: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 207 column 10: QListView -> Q3ListView
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 209 column 14: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 225 column 10: QTextEdit -> Q3TextEdit
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 258 column 43: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 274 column 30: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h at line 297 column 9: QPtrList -> Q3PtrList
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/SwFilters.h: Added the following include directives:
+	#include <QCloseEvent> 	#include <Q3PtrList> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 28 column 15: qvbox.h -> q3vbox.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 34 column 22: qbuttongroup.h -> q3buttongroup.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 37 column 20: qpopupmenu.h -> q3popupmenu.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 38 column 18: qtoolbar.h -> q3toolbar.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 39 column 18: qptrlist.h -> q3ptrlist.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 43 column 19: qlistview.h -> q3listview.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 129 column 6: QVBox -> Q3VBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 130 column 6: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 136 column 14: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 137 column 11: QPopupMenu -> Q3PopupMenu
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 169 column 12: QToolBar -> Q3ToolBar
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 210 column 31: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 211 column 29: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 212 column 31: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 213 column 29: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h at line 215 column 29: ButtonState -> Qt::ButtonState
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/workshopimagetool.h: Added the following include directives:
+	#include <QCloseEvent> 	#include <QPaintEvent> 	#include <QResizeEvent> 	#include <QMouseEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/qlistboxmarker.h at line 4 column 18: qlistbox.h -> q3listbox.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/qlistboxmarker.h at line 6 column 42: QListBoxText -> Q3ListBoxText
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/qlistboxmarker.h at line 9 column 26: QListBox -> Q3ListBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/qlistboxmarker.h at line 11 column 17: QListBoxText -> Q3ListBoxText
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/qlistboxmarker.h at line 33 column 53: QListBoxItem -> Q3ListBoxItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/videoplayertool.h at line 23 column 19: qlistview.h -> q3listview.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/videoplayertool.h at line 26 column 21: qmainwindow.h -> q3mainwindow.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/videoplayertool.h at line 27 column 19: qiconview.h -> q3iconview.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/videoplayertool.h at line 28 column 15: qvbox.h -> q3vbox.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/videoplayertool.h at line 32 column 18: qptrlist.h -> q3ptrlist.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/videoplayertool.h at line 33 column 23: qdatetimeedit.h -> q3datetimeedit.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/videoplayertool.h at line 86 column 6: QHBox -> Q3HBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/videoplayertool.h at line 112 column 6: QVBox -> Q3VBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/tools/inc/videoplayertool.h: Added the following include directives:
+	#include <QResizeEvent> 
+In file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/inc/qwt_buff_curve.h at line 4 column 19: qptrqueue.h -> q3ptrqueue.h
+In file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/inc/qwt_buff_curve.h at line 5 column 22: qvaluevector.h -> q3valuevector.h
+In file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/inc/qwt_buff_curve.h at line 42 column 13: QValueVector -> Q3ValueVector
+In file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/inc/qwt_buff_curve.h at line 43 column 13: QValueVector -> Q3ValueVector
+In file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/inc/qwt_buff_curve.h at line 44 column 13: QValueVector -> Q3ValueVector
+In file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/inc/qwt_ext_plot.h at line 24 column 21: qintdict.h -> q3intdict.h
+In file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/inc/qwt_ext_plot.h at line 88 column 9: QIntDict -> Q3IntDict
+No changes made to file /home/tof/Vision/piaf-svn/piaf/otherlibs/qwt-sisell-0.1/inc/qwt_ext_cursor.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/v4lutils.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/ccvt.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/VirtualDevice.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/v4l2uvc.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/utils.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/color.h at line 21 column 20: blue -> Qt::blue
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/color.h at line 22 column 21: green -> Qt::green
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/color.h at line 23 column 19: red -> Qt::red
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/color.h at line 26 column 19: blue -> Qt::blue
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/color.h at line 27 column 20: green -> Qt::green
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/color.h at line 28 column 18: red -> Qt::red
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/color.h at line 31 column 19: blue -> Qt::blue
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/color.h at line 32 column 20: green -> Qt::green
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/color.h at line 33 column 18: red -> Qt::red
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/avilib.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/V4L2Device.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/SwVideoAcquisition.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/FileVideoAcquisition.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/videocapture.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/acquisitions/video/inc/swvideodetector.h
+No changes made to file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/randsignalform.ui.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/marker_dialog.ui.h at line 11 column 37: QListBox -> Q3ListBox
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/marker_dialog.ui.h at line 103 column 49: QListBoxItem -> Q3ListBoxItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/marker_dialog.ui.h at line 297 column 53: AlignRight -> Qt::AlignRight
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/marker_dialog.ui.h at line 297 column 65: AlignBottom -> Qt::AlignBottom
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/curve_properties.ui.h at line 122 column 32: NoPen -> Qt::NoPen
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/piafconfigurationdialog.ui.h at line 11 column 21: qfiledialog.h -> q3filedialog.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/piafconfigurationdialog.ui.h at line 33 column 26: IO_ReadOnly -> QIODevice::ReadOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/piafconfigurationdialog.ui.h at line 113 column 24: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/piafconfigurationdialog.ui.h at line 128 column 25: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/piafconfigurationdialog.ui.h at line 144 column 25: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h at line 14 column 21: qfiledialog.h -> q3filedialog.h
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h at line 20 column 32: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h at line 33 column 47: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h at line 57 column 24: QFileDialog -> Q3FileDialog
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h at line 73 column 54: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h at line 93 column 23: QListViewItemIterator -> Q3ListViewItemIterator
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h at line 95 column 16: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h at line 133 column 26: IO_ReadOnly -> QIODevice::ReadOnly
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h at line 147 column 18: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h at line 147 column 45: QListViewItem -> Q3ListViewItem
+In file /home/tof/Vision/piaf-svn/piaf/main-qt4/ui/pluginlistdialog.ui.h: Added the following include directives:
+	#include <QPixmap> 
+In file piaf.pro: Added entry QT +=  qt3support 
+In file piaf.pro: Added entry CONFIG += uic3
+
+In file piaf.pro: Renamed FORMS to FORMS3
+

@@ -1,0 +1,27 @@
+PIAF - Changelog
+
+Auhust 27th 2010
+----------------
+
+* Ported to Qt4
+* Suppressed 1D signal processing and viewing
+
+August 22th 2003
+----------------
+
+* Video file player and processing : an equivalent to live video tool, this tool 
+	can play MJPEG AVI files, with all advanced display utilities and support 
+	for plugin manager. Users now can record their video inputs to be processed 
+	afterwards, for easy algorithms study and comparision (you can process the 
+	same video dataset file with several video player tools. 
+* New FFMPEG version : FFMPEG website (http://ffmpegg.sourceforge.net/) 
+	officially claim version 0.4.6 obsolete. Indeed many bugs in API caused 
+	some problems to us. New version (ffmpeg-cvs-20030820).
+* Video encoder modification : for making easier to read the encoded videos, 
+	MJPEG has been chosen (JPEG frames, in the original order). Modifications of class SwMpegEncoder and calls from WorkshopVideoCapture with MJPEG codec.
+* Enables user-only installation : don't need to be root !
+* Bug fixes :
+	o Display refresh bug : fixes for display freeze while zooming/moving in 
+		pause mode on live video input.
+	o Preview image/plot 2D crash when closed and component selected again
+* Documentation : added Doxygen tags

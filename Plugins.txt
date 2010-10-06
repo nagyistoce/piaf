@@ -1,0 +1,63 @@
+****************************************************************************
+
+				PIAF / Image processing prototyping
+
+							Plugins
+
+****************************************************************************
+
+Plugins:
+
+FIRST TRY TO USE EXAMPLES:
+
+- open a source (still image, movie, webcam...)
+- launch the plugin manager :
+	On left column, all the available plugins are displayed
+	Choose a plugin (for ex: "Contour">"Sobel", and load it with button "=>": the image is processsed and the output is displayed
+	Click on the parameters button: a parameters window is generated from the exported parameters in plugin. Modify the parameters and apply.
+	Add another plugin (for ex: "Histogram">"Log stretch histo"), see the result
+
+
+PLUGIN PRINCIPLES:
+
+The plugin principles have been decided to be *very* simple for researchers, not for expert developpers
+By now, the plugins are compiled with g++ and the API is written in C/C++.
+
+- each plugin communicated with Piaf through stdin/stdout redirections in pipes
+	The libSwPluginCore is provided (C++). You just need to link with it and to create one instance of communication class.
+
+- each plugin is a separated processus/application
+	=> plugin can :
+		- crash without crashing Piaf
+		- be debuggued:
+				load the plugin in piaf, ex: my_plugin,
+				in a terminal, get its PID : ps aux | grep my_plugin => PID=14323
+				hang on processus : gdb ./my_plugin 14323
+(gdb) [...]
+				continue execution of plugin
+(gdb) c
+				...
+	- be profiled with valgrind : launch piaf with command :
+		valgrind --trace-children=yes ./piaf
+		Then load you plugin, it'll be very slow, but profiled ;)
+
+
+- each plugin can export several functions, one plugin executes only one function
+	Thus the global variables are dedicated to one single function.
+	So you can develop from the "fast & dirty" method to advanced object methods.
+
+- plugins can :
+	- declare parameters, exported into Piaf's GUI
+	- crash without restarting piaf
+	- use any library or ressources : files, ... (excluding stdout/stdin)
+	- be debugged with gdb, profiled by valgrind, ...
+- processed by plugins : input -> plugin 1 -> plugin 2 ...
+- interface library is released under LGPL : you can keep your intellectual property on your algorithms
+
+WRITE YOUR OWN PLUGIN
+
+Easiest way is to edit one of the examples.
+
+Examples of plugins are provided for simple operations : OpenCV basic tools (morphology, histograms, ...), FFTW (blur), ...
+
+

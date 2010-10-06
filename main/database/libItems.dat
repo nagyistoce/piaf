@@ -1,0 +1,17 @@
+ON_TOP
+USER_INTERFACE	User Interface	uilogo.png	uihelp.txt
+SIGNAL_ANALYSIS	Signal Analysis	signallogo.png	signalhelp.txt
+CONTROL	Control	controllogo.png	controlhelp.txt
+VISION	Vision	visionlogo.png	visionhelp.txt
+SIMULATION	Simulation	simulogo.png	simuhelp.txt
+GIS	Geographical Information	gislogo.png	geohelp.txt
+CAD	CAD	cadlogo.png	cadhelp.txt
+END_ON_TOP
+
+LIBRARIES
+QT	USER_INTERFACE	qtdb.dat	qtlogo.png
+GTK	USER_INTERFACE	gtkdb.dat	gtklogo.png
+FFTW	SIGNAL_ANALYSIS	fftwdb.dat	fftwlogo.png
+OpenCV	VISION	opencvdb.dat	opencvlogo.png
+OpenCascade	CAD	openccdb.dat	opencclogo.png
+END_LIBRARIES

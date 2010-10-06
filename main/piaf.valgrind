@@ -1,0 +1,5 @@
+#!/bin/bash
+export LD_LIBRARY_PATH=/home/cseyve/Vision/Sources/ffmpeg-0.4.8/libavcodec:/home/cseyve/Vision/Sources/ffmpeg-0.4.8/libavformat:$LD_LIBRARY_PATH
+
+valgrind --error-limit=no --trace-children=yes --log-file=/dev/shm/piaf ./piaf
+
