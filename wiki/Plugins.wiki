@@ -2,7 +2,7 @@
 
 = Introduction =
 
-http://tamanoir.googlecode.com/svn/wiki/screenshots/Piaf-global.png
+http://piaf.googlecode.com/svn/wiki/screenshots/Piaf-global.png
 
 Piaf's plugins are simple processus which do one or more image processing functions. It's easy to create your own plugin for specific processings or to integrate computer vision libraries' function as plugins. 
 
