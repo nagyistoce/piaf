@@ -13,7 +13,12 @@ Piaf's plugins are simple processus which do one or more image processing functi
 
 http://piaf.googlecode.com/svn/wiki/screenshots/PIAF-Plugin-manager.png
 
-	* On left column, all the available plugins are displayed
+          * On left column, all the available plugins are displayed
+          * in central column, the actions: add http://piaf.googlecode.com/svn/trunk/main/images/pixmaps/go-next.png, remove http://piaf.googlecode.com/svn/trunk/main/images/pixmaps/go-previous.png, edit params http://piaf.googlecode.com/svn/trunk/main/images/pixmaps/configure.png, disable http://piaf.googlecode.com/svn/trunk/main/images/pixmaps/network-disconnect16.png, measure time http://piaf.googlecode.com/svn/trunk/main/images/pixmaps/chronometer.png, move up/down http://piaf.googlecode.com/svn/trunk/main/images/pixmaps/go-up.png / http://piaf.googlecode.com/svn/trunk/main/images/pixmaps/go-down.png...
+          * On right column, the activated plugins 
+
+
+
 	* Choose a plugin (for ex: _"Contour">"Canny"_, and load it with button http://piaf.googlecode.com/svn/trunk/main/images/pixmaps/go-next.png : the image is processsed and the output is displayed
 
 http://piaf.googlecode.com/svn/wiki/screenshots/PIAF-Lena-Canny.png
