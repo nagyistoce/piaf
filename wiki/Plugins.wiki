@@ -12,6 +12,9 @@ Piaf's plugins are simple processus which do one or more image processing functi
 
   * launch the plugin manager :
 
+http://piaf.googlecode.com/svn/wiki/screenshots/PIAF-Plugin-manager.png
+
+
 	- On left column, all the available plugins are displayed
 
 	- Choose a plugin (for ex: "Contour">"Sobel", and load it with button "=>": the image is processsed and the output is displayed
