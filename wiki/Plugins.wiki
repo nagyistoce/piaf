@@ -9,19 +9,22 @@ Piaf's plugins are simple processus which do one or more image processing functi
 = First try examples =
 
   * open a source (still image, movie, webcam...)
-
-  * launch the plugin manager :
+  * launch the plugin manager with icon http://piaf.googlecode.com/svn/trunk/main/images/pixmaps/IconFilters.png
 
 http://piaf.googlecode.com/svn/wiki/screenshots/PIAF-Plugin-manager.png
 
+	* On left column, all the available plugins are displayed
+	* Choose a plugin (for ex: _"Contour">"Canny"_, and load it with button http://piaf.googlecode.com/svn/trunk/main/images/pixmaps/go-next.png : the image is processsed and the output is displayed
 
-	- On left column, all the available plugins are displayed
+http://piaf.googlecode.com/svn/wiki/screenshots/PIAF-Lena-Canny.png
 
-	- Choose a plugin (for ex: "Contour">"Sobel", and load it with button "=>": the image is processsed and the output is displayed
+	* Click on the parameters button: a parameters window is generated from the exported parameters in plugin. Modify the parameters and apply.
 
-	- Click on the parameters button: a parameters window is generated from the exported parameters in plugin. Modify the parameters and apply.
+http://piaf.googlecode.com/svn/wiki/screenshots/PIAF-Lena-Canny-params.png
 
-	- Add another plugin (for ex: "Histogram">"Log stretch histo"), see the result
+	* Add another plugin (for ex: "Morphology">"Dilate"), see the result
+
+http://piaf.googlecode.com/svn/wiki/screenshots/PIAF-Lena-Canny-Dilate.png
 
 
 = Principles of plugins =
@@ -29,23 +32,20 @@ http://piaf.googlecode.com/svn/wiki/screenshots/PIAF-Plugin-manager.png
 The plugin principles have been decided to be *very* simple for researchers, not for expert developpers.
 
 By now, the plugins are compiled with _g++_ and the API is written in C/C++.
-
-  * each plugin communicated with Piaf through stdin/stdout redirections in pipes
-	The libSwPluginCore is provided (C++). You just need to link with it and to create one instance of communication class.
-
+  * each plugin communicated with Piaf through stdin/stdout redirections in pipes. The _libSwPluginCore_ is provided (C++). You just need to link with it and to create one instance of communication class.
   * each plugin is a separated processus/application
-	=> plugin can :
-		- crash without crashing Piaf
-		- be debuggued:
-				load the plugin in piaf, ex: my_plugin,
-				in a terminal, get its PID : ps aux | grep my_plugin => PID=14323
-				hang on processus : gdb ./my_plugin 14323
-(gdb) [...]
-				continue execution of plugin
-(gdb) c
-				...
-	- be profiled with valgrind : launch piaf with command :
-		valgrind --trace-children=yes ./piaf
+    => this way, plugin can :
+    * crash without crashing Piaf
+    * be debuggued:
+      * load the plugin in piaf, ex: my_plugin,
+      * in a terminal, get its PID : ps aux | grep my_plugin => PID=14323
+      * hang on processus : gdb ./my_plugin 14323
+`(gdb) [...]`
+      * continue execution of plugin
+`(gdb) c`
+`...`
+     * be profiled with valgrind : launch piaf with command :
+`valgrind --trace-children=yes ./piaf`
 		Then load you plugin, it'll be very slow, but profiled ;)
 
 
