@@ -76,3 +76,5 @@ By now, the plugins are compiled with _g++_ and the API is written in C/C++.
 Easiest way is to edit one of the examples.
 
 Examples of plugins are provided for simple operations : OpenCV basic tools (morphology, histograms, ...), FFTW (blur), ...
+
+See HowToWritePlugins
