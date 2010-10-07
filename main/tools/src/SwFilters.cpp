@@ -240,7 +240,7 @@ void SwFilterManager::init() {
 				if(curF->icon)
 					bIcon.load( curF->icon );
 				else
-					bIcon = QPixmap("filter.xpm");
+					bIcon.load("filter.png");
 				subcatItem->setPixmap(0, bIcon);
 			}
 
