@@ -10,7 +10,7 @@ TARGET          =       $$(SRCNAME)
 OBJECTS_DIR 	= 	.obj
 
 # Include OpenCV definitions
-include(../../main-qt4/opencv.pri)
+include(../../main/opencv.pri)
 
 
 unix:LIBS += -L/usr/local/lib 
