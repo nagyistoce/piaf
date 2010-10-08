@@ -76,8 +76,9 @@ unsigned char median = 5;
 swFuncParams median_params[] = {
         {"iteration", swU8, (void *)&median}
 };
-
 }}}
+    The types of parameters are defines in `SwTypes.h`. The types are defined by their name : `sw\` + type, U8 for unsigned on 8 bits. The API handles: `swU8, swS8, swU16, swS16	swU32, swS32, swFloat, swDouble` and `swStringListStruct` for generating a menu in Piaf's GUI.
+    When a function is declared with parameters, the GUI will generate a parameters window automatically for editing those parameters.
 
   * List of functions:
 {{{
