@@ -43,8 +43,8 @@ By now, the plugins are compiled with _g++_ and the API is written in C/C++.
     * crash without crashing Piaf
     * be debuggued:
       * load the plugin in piaf, ex: my_plugin,
-      * in a terminal, get its PID : ps aux | grep my_plugin => PID=14323
-      * hang on processus : gdb ./my_plugin 14323
+      * in a terminal, get its PID : `ps aux | grep my_plugin` => PID=14323
+      * hang on processus : `gdb ./my_plugin 14323`
 `(gdb) [...]`
       * continue execution of plugin
 `(gdb) c`
