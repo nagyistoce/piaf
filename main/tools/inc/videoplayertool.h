@@ -91,6 +91,10 @@ private:
 	QPushButton * stepMovie;
 	QPushButton * rewindMovie;
 	QPushButton * rewindStartMovie;
+	QPushButton * grayButton;
+
+	bool playGrayscale;
+
 	Q3HBox * playHBox;
 	QLabel * playLabel;
 
@@ -131,7 +135,7 @@ private slots:
 	void slotRewindStartMovie();
 	void slotSpeedMovie(const QString & str);
 	void slotResizeTool(QResizeEvent *e);
-	
+	void on_grayButton_toggled(bool);
     void slotReleaseScrollbar();
     void slotChangedScrollbar(int);
 };

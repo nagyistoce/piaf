@@ -19,6 +19,7 @@
 #include <sys/time.h>
 #include <time.h>
 #include <QWorkspace>
+#include <QToolTip>
 
 #include <qmessagebox.h>
 //Added by qt3to4:
@@ -189,6 +190,8 @@ void VideoPlayerTool::initPlayer()
 	rewindMovie->setFlat(true);
 	rewindMovie->setToggleButton(false);
 
+
+
 	connect(rewindMovie, SIGNAL(clicked()), this, SLOT(slotRewindMovie()));
 
 
@@ -234,6 +237,22 @@ void VideoPlayerTool::initPlayer()
 	playCombo->insertItem("x 4", -1);
 	playCombo->setCurrentItem(2);
 	connect( playCombo, SIGNAL( activated( const QString &) ), this, SLOT( slotSpeedMovie( const QString & ) ) );
+
+	// play as grayscale
+	grayButton = new QPushButton( playHBox);
+	{
+		QPixmap pixIcon;
+		if(pixIcon.load(":images/22x22/view-color.png"))
+			grayButton->setPixmap(pixIcon);
+		else
+			grayButton->setText(tr("Rewind"));
+	}
+	grayButton->setFlat(true);
+	grayButton->setToggleButton(true);
+	QToolTip::add(grayButton, tr("Toggle grayscale/color"));
+	playGrayscale = false;
+	connect(grayButton, SIGNAL(toggled(bool)), this, SLOT(on_grayButton_toggled(bool)));
+
 
 	// Scrollbar
 	playScrollBar = new QSlider(Qt::Horizontal, playHBox);
@@ -513,20 +532,43 @@ void VideoPlayerTool::slotStepMovie()
 	gettimeofday(&tv2, &tz);
 }
 
+void VideoPlayerTool::on_grayButton_toggled(bool gray) {
+	playGrayscale = gray;
+	if(playGrayscale) {
+		QPixmap pixIcon;
+		if(pixIcon.load(":images/22x22/view-gray.png"))
+			grayButton->setPixmap(pixIcon);
+		else
+			grayButton->setText(tr("Gray"));
+	} else {
+		QPixmap pixIcon;
+		if(pixIcon.load(":images/22x22/view-color.png"))
+			grayButton->setPixmap(pixIcon);
+		else
+			grayButton->setText(tr("Color"));
+	}
+	display_frame();
+}
+
 void VideoPlayerTool::display_frame()
 {
 	tBoxSize theSize = m_fileVA->getImageSize();
 	long buffersize;
 
-	if( (detailsImage->width()!=(long)theSize.width)||(detailsImage->height()!=(long)theSize.height) )
+	if( (detailsImage->width()!=(long)theSize.width)
+		|| (detailsImage->height()!=(long)theSize.height)
+		|| (detailsImage->depth()!= (playGrayscale?8:32)))
 	{
-		detailsImage->create(theSize.width, theSize.height, 32);
+		detailsImage->create(theSize.width, theSize.height, (playGrayscale?8:32));
 	}
 
-	buffersize = theSize.width*theSize.height*4;
-	m_fileVA->readImageRGB32NoAcq(detailsImage->bits(), &buffersize);
-
-
+	if(!playGrayscale) {
+		buffersize = theSize.width*theSize.height*4;
+		m_fileVA->readImageRGB32NoAcq(detailsImage->bits(), &buffersize);
+	} else {
+		buffersize = theSize.width*theSize.height;
+		m_fileVA->readImageYNoAcq(detailsImage->bits(), &buffersize);
+	}
 	detailsView->setWorkshopImage(detailsImage);
 
 
