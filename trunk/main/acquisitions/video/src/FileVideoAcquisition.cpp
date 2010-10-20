@@ -1213,49 +1213,75 @@ int FileVideoAcquisition::readImageRGB32NoAcq(unsigned char* image, long * buffe
 
 	if(1 ) { // vp->bmp) {
 
-		//	  dst_pix_fmt = PIX_FMT_YUV420P;
-		dst_pix_fmt = PIX_FMT_RGB32;
+            //	  dst_pix_fmt = PIX_FMT_YUV420P;
+            dst_pix_fmt = PIX_FMT_RGB32;
 
-		// point pict at the queue
-		pict.data[0] = m_pFrameRGB->data[0];
-		pict.data[1] = m_pFrameRGB->data[1];
-		pict.data[2] = m_pFrameRGB->data[2];
+            // point pict at the queue
+            pict.data[0] = m_pFrameRGB->data[0];
+            pict.data[1] = m_pFrameRGB->data[1];
+            pict.data[2] = m_pFrameRGB->data[2];
 
-		// linesize
-		pict.linesize[0] = m_pFrameRGB->linesize[0];
-		pict.linesize[1] = m_pFrameRGB->linesize[1];
-		pict.linesize[2] = m_pFrameRGB->linesize[2];
+            // linesize
+            pict.linesize[0] = m_pFrameRGB->linesize[0];
+            pict.linesize[1] = m_pFrameRGB->linesize[1];
+            pict.linesize[2] = m_pFrameRGB->linesize[2];
 
-		// Convert the image into YUV format that SDL uses
-		if( img_convert_ctx == NULL ) {
-			int w = m_pCodecCtx->width;
-			int h = m_pCodecCtx->height;
+            // Convert the image into YUV format that SDL uses
+            if( img_convert_ctx == NULL ) {
+                int w = m_pCodecCtx->width;
+                int h = m_pCodecCtx->height;
 
-			img_convert_ctx = sws_getContext(w, h,
-											 m_pCodecCtx->pix_fmt,
-											 w, h, dst_pix_fmt, SWS_BICUBIC,
-											 NULL, NULL, NULL);
-			if(img_convert_ctx == NULL) {
-				fprintf(stderr, "Cannot initialize the conversion context!\n");
-				exit(1);
-			}
-		}
+                img_convert_ctx = sws_getContext(w, h,
+                                                 m_pCodecCtx->pix_fmt,
+                                                 w, h, dst_pix_fmt, SWS_FAST_BILINEAR, // SWS_BICUBIC,
+                                                 NULL, NULL, NULL);
+                if(img_convert_ctx == NULL) {
+                    fprintf(stderr, "Cannot initialize the conversion context!\n");
+                    exit(1);
+                }
+            }
 
-		sws_scale(img_convert_ctx,
-				  m_pFrame->data,
-				  m_pFrame->linesize, 0,
-				  m_pCodecCtx->height,
-				  pict.data, pict.linesize);
-/*
-		FILE * fdebug = fopen("/tmp/readImageRGB.pgm", "wb");
-		if(fdebug) {
-			fprintf(fdebug, "P5\n%d %d\n255\n", m_pCodecCtx->width*4, m_pCodecCtx->height);
-			fwrite(m_pFrameRGB->data[0], m_pCodecCtx->width*4, m_pCodecCtx->height, fdebug);
-			fclose(fdebug);
-		}
-*/
-		memcpy(image, m_pFrameRGB->data[0],
-			   avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height));
+            sws_scale(img_convert_ctx,
+                      m_pFrame->data,
+                      m_pFrame->linesize, 0,
+                      m_pCodecCtx->height,
+                      pict.data, pict.linesize);
+            /*
+                FILE * fdebug = fopen("/dev/shm/readImageRGB.pgm", "wb");
+                if(fdebug) {
+                        fprintf(fdebug, "P5\n%d %d\n255\n", m_pCodecCtx->width*4, m_pCodecCtx->height);
+                        fwrite(m_pFrameRGB->data[0], m_pCodecCtx->width*4, m_pCodecCtx->height, fdebug);
+                        fclose(fdebug);
+                }
+                fdebug = fopen("/dev/shm/pict.pgm", "wb");
+                if(fdebug) {
+                        fprintf(fdebug, "P5\n%d %d\n255\n", m_pCodecCtx->width*2, m_pCodecCtx->height);
+                        fwrite(m_pFrame->data, m_pCodecCtx->width*2, m_pCodecCtx->height, fdebug);
+                        fclose(fdebug);
+                }*/
+
+            // Correct image
+            if(0)
+            {
+                memcpy(image, m_pFrameRGB->data[0],
+                       avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height));
+            } else {
+                int pitch = avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height)/m_pCodecCtx->height;
+                u32 * output = (u32 *)image;
+                u32 * input = (u32 *)m_pFrameRGB->data[0];
+                for(int r = 0; r<m_pCodecCtx->height; r++)
+                {
+                    int pos = r * pitch / 4;
+                    if((r%2) == 0) {
+                        memcpy(output+pos, input+pos, pitch);
+                    } else {
+                        for(int c = 0; c<m_pCodecCtx->width; c+=2) {
+                            output[pos+c] = input[pos+c+1];
+                            output[pos+c+1] = input[pos+c];
+                        }
+                    }
+                }
+            }
 	}
 #endif
 

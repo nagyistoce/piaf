@@ -2,7 +2,7 @@
 	objectexplorer.cpp  -  components and tools explorer for Piaf
 							 -------------------
 	begin                : ven nov 29 15:53:48 UTC 2002
-	copyright            : (C) 2002 by Olivier Viné & Christophe Seyve
+	copyright            : (C) 2002 by Olivier VinÃ© & Christophe Seyve
 	email                : olivier.vine@sisell.com
 							christophe.seyve@sisell.com
  ***************************************************************************/
@@ -19,6 +19,7 @@
 // QT includes
 #include <qpixmap.h>
 #include <q3popupmenu.h>
+
 //Added by qt3to4:
 #include <QContextMenuEvent>
 
@@ -27,7 +28,6 @@
 #include "workshoptool.h"
 #include "videocapture.h"
 #include "objectsexplorer.h"
-
 
 
 ObjectsExplorer::ObjectsExplorer(Place p, QWidget *parent, const char *name, Qt::WFlags f)
