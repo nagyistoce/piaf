@@ -2,7 +2,7 @@
     objectexplorer.h  -  components and tools explorer for Piaf
                              -------------------
     begin                : ven nov 29 15:53:48 UTC 2002
-    copyright            : (C) 2002 by Olivier Viné & Christophe Seyve
+    copyright            : (C) 2002 by Olivier VinÃ© & Christophe Seyve
     email                : olivier.vine@sisell.com
 							christophe.seyve@sisell.com
  ***************************************************************************/
@@ -22,6 +22,7 @@
 #include <q3listview.h>
 //Added by qt3to4:
 #include <QContextMenuEvent>
+
 
 // Item types definition
 // --------------------------
@@ -71,7 +72,7 @@ public:
 		: Q3ListViewItem(parent), itemType(type), itemClasse(classe)  { itemPtr = NULL; }
 	ExplorerItem(Q3ListViewItem * parent, int type, int classe)
 		: Q3ListViewItem(parent), itemType(type), itemClasse(classe)  { itemPtr = NULL; }
-	~ExplorerItem() {}
+	~ExplorerItem() {};
 	
 	void *getItemPtr()	{ return itemPtr; }
 	void setItemPtr(void *ptr) { itemPtr = ptr; }
