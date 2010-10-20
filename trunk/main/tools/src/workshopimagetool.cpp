@@ -257,15 +257,31 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 
 
 	bool first = false;
-	if(oldSize.width != imageSize.width || oldSize.height != imageSize.height || !originalImage) {
+	if( oldSize.width != imageSize.width
+		|| oldSize.height != imageSize.height
+		|| !originalImage
+		|| OrigImgRGB.depth()!=ImgRGB.depth()
+		) {
 		if(originalImage)
 			delete [] originalImage;
 		else
 			first = true;
 
+		if(aMenuColor) {
+			if(OrigImgRGB.depth()==8)
+				aMenuColor->show();
+			else
+				aMenuColor->hide();
+		}
+
+
 		originalImage = new unsigned char [ imageSize.width * imageSize.height
 											* ( OrigImgRGB.depth() / 8)];
+		if(OrigImgRGB.depth()!=ImgRGB.depth()) { // updae ImgRGB
+			changeViewSize();
+		}
 	}
+
 	memcpy(originalImage, OrigImgRGB.bits(),
 		   OrigImgRGB.width()*OrigImgRGB.height()*(OrigImgRGB.depth()/8) );
 
@@ -311,7 +327,6 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 			vBox->updateGeometry();
 			pWin->resize( viewSize.width, TOOLBAR_HEIGHT + viewSize.height);
 			pWin->updateGeometry();
-
 		}
 		pWin->update();
 		slotUpdateView();
@@ -643,6 +658,7 @@ void WorkshopImageTool::slotUpdateView()
 #ifdef DEBUG_ZOOMING
 	fprintf(stderr, "WorkshopImageTool::slotUpdateView()\n");
 #endif
+
 	if(ImgRGB.depth() == 32) {
 		u32 * imgRgb = (u32 *)OrigImgRGB.bits();
 		// Display image (after zooming ...)
@@ -749,7 +765,6 @@ void WorkshopImageTool::slotUpdateView()
 	{
 		unsigned char * imgGray = (unsigned char *)originalImage;
 		unsigned char * outGray = (unsigned char *)ImgRGB.bits();
-
 
 		// Display image (after zooming ...)
 		if(ZoomScale == 1) {
@@ -865,7 +880,7 @@ void WorkshopImageTool::slotUpdateView()
 /////////////////////////////////////
 void WorkshopImageTool::slotSaveImage()
 {
-	fprintf(stderr, "WorkshopImageTool::slotSaveImage %dx%dx%d !\n",
+	fprintf(stderr, "WorkshopImageTool::slotSaveImage %lu x %lu x%d !\n",
 			imageSize.width, imageSize.height, 32);
 	savedImage.create(imageSize.width, imageSize.height, 32);
 

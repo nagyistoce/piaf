@@ -1145,10 +1145,20 @@ int FileVideoAcquisition::readImageY(unsigned char* image, long * buffersize)
 
 int FileVideoAcquisition::readImageYNoAcq(unsigned char* image, long * buffersize)
 {
-	if(!myAcqIsInitialised)
+	if(!myAcqIsInitialised){
+		fprintf(stderr, "FVA::%s:%d : acquisition is not started !!\n", __func__, __LINE__);
 		return -1;
+	}
+	if(!buffersize) {
+		fprintf(stderr, "FVA::%s:%d : buffersize is null !!\n", __func__, __LINE__);
+		return -1;
+	}
+	if(!m_pFrame) {
+		fprintf(stderr, "FVA::%s:%d : m_pFrame is null !!\n", __func__, __LINE__);
+		return -1;
+	}
 
-	unsigned char *imageBrute = bufY();
+	unsigned char *imageBrute = m_pFrame->data[0];
 
 	if( imageBrute==NULL )
 		return -1;
@@ -1156,10 +1166,23 @@ int FileVideoAcquisition::readImageYNoAcq(unsigned char* image, long * buffersiz
 	if(image == NULL)
 		return -1;
 
-	if( (*buffersize) < (long)(m_pCodecCtx->width*m_pCodecCtx->height))
-		return -1;
-
-	memcpy(image, imageBrute, m_pCodecCtx->width*m_pCodecCtx->height);
+	int pitch = m_pFrame->linesize[0];
+	if(m_pCodecCtx->width == pitch) {
+		memcpy(image, imageBrute, m_pCodecCtx->width*m_pCodecCtx->height);
+	} else {
+		for(int r = 0; r<m_pCodecCtx->height; r++) {
+			memcpy(image + r*m_pCodecCtx->width,
+				   imageBrute+r*pitch, m_pCodecCtx->width);
+		}
+	}
+/*
+	FILE * fdebug = fopen("/dev/shm/pictY.pgm", "wb");
+	if(fdebug) {
+			fprintf(fdebug, "P5\n%d %d\n255\n", m_pFrame->linesize[0], m_pCodecCtx->height);
+			fwrite(m_pFrame->data[0], m_pFrame->linesize[0], m_pCodecCtx->height, fdebug);
+			fclose(fdebug);
+	}
+*/
 	*buffersize = m_pCodecCtx->width*m_pCodecCtx->height;
 
 	return 0;
@@ -1252,14 +1275,14 @@ int FileVideoAcquisition::readImageRGB32NoAcq(unsigned char* image, long * buffe
                         fprintf(fdebug, "P5\n%d %d\n255\n", m_pCodecCtx->width*4, m_pCodecCtx->height);
                         fwrite(m_pFrameRGB->data[0], m_pCodecCtx->width*4, m_pCodecCtx->height, fdebug);
                         fclose(fdebug);
-                }
-                fdebug = fopen("/dev/shm/pict.pgm", "wb");
+				}
+				FILE * fdebug = fopen("/dev/shm/pict.pgm", "wb");
                 if(fdebug) {
-                        fprintf(fdebug, "P5\n%d %d\n255\n", m_pCodecCtx->width*2, m_pCodecCtx->height);
-                        fwrite(m_pFrame->data, m_pCodecCtx->width*2, m_pCodecCtx->height, fdebug);
+						fprintf(fdebug, "P5\n%d %d\n255\n", m_pFrame->linesize[0], m_pCodecCtx->height);
+						fwrite(m_pFrame->data[0], m_pFrame->linesize[0], m_pCodecCtx->height, fdebug);
                         fclose(fdebug);
-                }*/
-
+				}
+*/
             // Correct image
             if(0)
             {
