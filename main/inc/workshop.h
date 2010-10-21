@@ -2,7 +2,7 @@
 						  workshop.h  -  main IHM for Piaf
 							 -------------------
 	begin                : ven nov 29 15:53:48 UTC 2002
-	copyright            : (C) 2002 by Olivier Viné & Christophe Seyve
+	copyright            : (C) 2002 by Olivier VinÃ© & Christophe Seyve
 	email                : olivier.vine@sisell.com
 							christophe.seyve@sisell.com
  ***************************************************************************/
@@ -69,6 +69,19 @@ class WorkshopVideoCaptureView;
 #define COMP_VIDEO_LABEL    "Videos"
 #define COMP_MEASURE_LABEL  "Measures"
 
+#define IMAGEDIR "images/pixmaps/"
+
+
+#ifdef WORKSHOP_CPP
+#define WKP_EXTERN
+#else
+#define WKP_EXTERN extern
+#endif
+// Path for saving files (snapshots, ...)
+WKP_EXTERN QString g_imageDirName;
+WKP_EXTERN QString g_measureDirName;
+WKP_EXTERN QString g_movieDirName;
+
 
 /**
   This Class is the base class for your application. It sets up the main
@@ -123,6 +136,11 @@ protected:
 	void loadOnStart();
 	/** Save configuration on exit */
 	void saveSettings();
+
+	// Last opened path for each type
+	QString m_lastImageDirName;
+	QString m_lastMovieDirName;
+	QString m_lastMeasureDirName;
 
 private slots:
 
@@ -308,9 +326,6 @@ private slots:
 	// -----------------------------
 	// 		internal variables
 	// -----------------------------
-	QString imageDirName;
-	QString measureDirName;
-	QString movieDirName;
 	bool saveSettingsImmediatly;
 
 	float defaultFPS;
