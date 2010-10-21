@@ -35,6 +35,8 @@
 
 #include <QFileDialog>
 
+#define WORKSHOP_CPP
+
 // application specific includes
 #include "workshop.h"
 
@@ -162,14 +164,20 @@ void WorkshopApp::initVars()
 	if(getenv("HOME"))
 		strcpy(home, getenv("HOME"));
 
-	movieDirName = QString(home) + tr("/Movies");
-	imageDirName = QString(home) + tr("/Images");
-	measureDirName = QString(home) + tr("/Measures");
+	g_movieDirName = QString(home) + tr("/Movies");
+	g_imageDirName = QString(home) + tr("/Images");
+	g_measureDirName = QString(home) + tr("/Measures");
+
 
 	QDir dir;
-	dir.mkdir(movieDirName);
-	dir.mkdir(imageDirName);
-	dir.mkdir(measureDirName);
+	dir.mkdir(g_movieDirName);
+	dir.mkdir(g_imageDirName);
+	dir.mkdir(g_measureDirName);
+
+	// use defaut for seeking files
+	m_lastMovieDirName = g_movieDirName;
+	m_lastMeasureDirName = g_measureDirName;
+	m_lastImageDirName = g_imageDirName;
 
 	// Read configuration directories
 	QFile file;
@@ -196,11 +204,19 @@ void WorkshopApp::initVars()
 							val.truncate(val.length()-1);
 
 						if( cmd.contains("MeasureDir" ))
-							measureDirName = val;
+							g_measureDirName = val;
 						if( cmd.contains("ImageDir" ))
-							imageDirName = val;
+							g_imageDirName = val;
 						if( cmd.contains("MovieDir" ))
-							movieDirName = val;
+							g_movieDirName = val;
+
+						if( cmd.contains("LastMeasurePath" ))
+							m_lastMeasureDirName = val;
+						if( cmd.contains("LastImagePath" ))
+							m_lastImageDirName = val;
+						if( cmd.contains("LastMoviePath" ))
+							m_lastMovieDirName = val;
+
 						if( cmd.contains("saveSettings")) {
 							saveSettingsImmediatly = val.contains("true", FALSE);
 						}
@@ -717,7 +733,7 @@ void WorkshopApp::createImageView()
 	wit->setWorkspace(pWorkspace);
 
 	connect(wit,SIGNAL(ImageSaved(QImage *)),this,SLOT(slotSnapShot(QImage *)));
-	wit->setDefaultDirectories(imageDirName, movieDirName);
+	wit->setDefaultDirectories(g_imageDirName, g_movieDirName);
 
 	// install event filter on close event
 	wit->display()->installEventFilter(this);
@@ -1020,7 +1036,7 @@ void WorkshopApp::slotOnDoubleClickOnObject(Q3ListViewItem *item)
 																Qt::WA_DeleteOnClose);
 					vpt->setWorkshopMovie(wm);
 					vpt->setDefaultFPS(defaultFPS);
-					vpt->setDefaultDirectories(imageDirName, movieDirName);
+					vpt->setDefaultDirectories(g_imageDirName, g_movieDirName);
 					//XXX			vpt->start();
 
 					connect(vpt->imageTool(),SIGNAL(ImageSaved(QImage *)), this, SLOT(slotSnapShot(QImage *)));
@@ -1419,24 +1435,24 @@ void WorkshopApp::slotSnapShot(QImage * image)
 	QFileInfo fi;
 	do {
 		snapShotName = QString("snapshot%1").arg(long(untitledSnapShotCount));
-		fi.setFile(imageDirName + "/" + snapShotName + ".png");
+		fi.setFile(g_imageDirName + "/" + snapShotName + ".png");
 
 		untitledSnapShotCount++;
 	} while(fi.exists());
 
-	QDir dir(imageDirName);
+	QDir dir(g_imageDirName);
 	if(image->save( dir.absoluteFilePath(snapShotName + ".png"), "PNG")) {
 		fprintf(stderr, "WorkshopApp::%s:%d : saved %dx%dx%d as '%s'+'%s'.png\n",
 			__func__, __LINE__,
 			image->width(), image->height(), image->depth(),
-			imageDirName.toUtf8().data(),
+			g_imageDirName.toUtf8().data(),
 			snapShotName.toUtf8().data()
 			);
 	} else {
 		fprintf(stderr, "WorkshopApp::%s:%d : ERROR saving %dx%dx%d as '%s'+'%s'.png\n",
 			__func__, __LINE__,
 			image->width(), image->height(), image->depth(),
-			imageDirName.toUtf8().data(),
+			g_imageDirName.toUtf8().data(),
 			snapShotName.toUtf8().data()
 			);
 	}
@@ -1716,7 +1732,7 @@ void WorkshopApp::slotFileOpen()
 		case ROOT_MEASURE_ITEM:
 		case MEASURE_ITEM:
 			statusBar()->message(tr("Opening measure file..."));
-			fileName = Q3FileDialog::getOpenFileName(measureDirName, "Measures (*.meas)", this, "open file dialog", "Choose a measure to open" );
+			fileName = Q3FileDialog::getOpenFileName(g_measureDirName, "Measures (*.meas)", this, "open file dialog", "Choose a measure to open" );
 			fi.setFile(fileName);
 			if(!fi.exists() || !fi.isFile())
 				break;
@@ -1728,7 +1744,7 @@ void WorkshopApp::slotFileOpen()
 			printf("Pathename = %s.\n",pWm->getPathName().latin1());
 			printf("Labelname = %s.\n",pWm->getLabel());
 
-			measureDirName = fi.dirPath();
+			m_lastMeasureDirName = fi.dirPath();
 			pWm->setModified(false);
 
 			addNewMeasure(pWm);
@@ -1741,7 +1757,7 @@ void WorkshopApp::slotFileOpen()
 			QStringList files = QFileDialog::getOpenFileNames(
 									 NULL,
 									 tr("Select one or more image files to open"),
-									 imageDirName,
+									 m_lastImageDirName,
 									 tr("Images (*.png *.xpm *.jpg *.jpeg *.bmp *.tif*)"));
 /*
 			fileName = Q3FileDialog::getOpenFileName(imageDirName,
@@ -1762,7 +1778,7 @@ void WorkshopApp::slotFileOpen()
 					pWi->setPathName(fi.dirPath());
 					pWi->setFileName(fi.fileName());
 					pWi->setModified(false);
-					imageDirName = fi.dirPath();
+					m_lastImageDirName = fi.dirPath();
 					addNewImage(pWi);
 				}
 			}
@@ -1773,7 +1789,7 @@ void WorkshopApp::slotFileOpen()
 			QStringList files = QFileDialog::getOpenFileNames(
 									 NULL,
 									 tr("Select one or more movie files to open"),
-									 movieDirName,
+									 m_lastMovieDirName,
 									 tr("Movies (*.mpg *.avi *.wmv *.mov)"));
 			QStringList list = files;
 			QStringList::Iterator it = list.begin();
@@ -1791,7 +1807,7 @@ void WorkshopApp::slotFileOpen()
 				pWmov->openFile(fileName);
 				pWmov->setPathName(fi.dirPath());
 
-				movieDirName = fi.dirPath();
+				m_lastMovieDirName = fi.dirPath();
 				pWmov->setFileName(fi.fileName());
 				pWmov->setModified(false);
 

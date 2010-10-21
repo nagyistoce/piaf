@@ -2,7 +2,7 @@
 	workshoptool.cpp  -  generic tool for Piaf
 							 -------------------
 	begin                : ven nov 29 15:53:48 UTC 2002
-	copyright            : (C) 2002 by Olivier Viné - Christophe SEYVE
+	copyright            : (C) 2002 by Olivier VinÃ© - Christophe SEYVE
 	email                : olivier.vine@sisell.com christophe.seyve@sisell.com
  ***************************************************************************/
 
@@ -23,6 +23,7 @@ WorkshopTool::WorkshopTool (QWidget * p_parent, const char *p_name, Qt::WidgetAt
 	: QObject (p_parent, p_name)
 {
 	WorkshopTool_last_id++;
+
 	m_ID = WorkshopTool_last_id;
 
 	fprintf(stderr, "WorkshopTool::%s:%d : parent=%p\n", __func__, __LINE__, p_parent);

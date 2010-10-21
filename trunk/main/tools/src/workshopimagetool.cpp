@@ -40,7 +40,7 @@
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
-#define IMAGEDIR "images/pixmaps/"
+#include "workshop.h"
 
 //#define __DEBUG_ZOOMING__
 
@@ -222,6 +222,8 @@ void WorkshopImageTool::init()
 	filterManager = NULL;
 	m_colorMode = COLORMODE_GREY;
 
+	aMenuColor = NULL;
+
 	originalImage = NULL;
 	ViewWidget=NULL;
 	selectPressed = false;
@@ -238,8 +240,8 @@ void WorkshopImageTool::init()
 	char home[128] = "/home";
 	strcpy(home, getenv("HOME"));
 
-	movieDir = QString(home) + "/Movies";
-	imageDir = QString(home) + "/Images";
+	movieDir = g_movieDirName;
+	imageDir = g_imageDirName;
 }
 
 void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
@@ -355,7 +357,7 @@ void WorkshopImageTool::initTool()
 
 WorkshopImageTool::~WorkshopImageTool()
 {
-	fprintf(stderr, "WorkshopImageTool::~WorkshopImageTool()...\n");
+//	fprintf(stderr, "WorkshopImageTool::~WorkshopImageTool()...\n");
 	if(originalImage)
 		delete [] originalImage;
 	//if(OrigImgRGB)
@@ -367,7 +369,7 @@ WorkshopImageTool::~WorkshopImageTool()
 	// video encoder
 	if(mpegEncoder)
 		delete mpegEncoder;
-	fprintf(stderr, "%s::%s:%d : deleted.", __FILE__, __func__, __LINE__);
+//	fprintf(stderr, "%s::%s:%d : deleted.", __FILE__, __func__, __LINE__);
 
 }
 
