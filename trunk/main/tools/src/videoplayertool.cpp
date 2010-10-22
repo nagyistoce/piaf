@@ -41,7 +41,7 @@ VideoPlayerTool::VideoPlayerTool(QWidget *p_parent, const char *p_name,
 	: WorkshopTool(p_parent, p_name, wflags )//| Qt::WNoAutoErase)
 {
 	pWorkspace = p_parent;
-
+        VideoFile[0] = '\0';
 	fprintf(stderr, "VideoPlayerTool::%s:%d : parent=%p, pWin=%p\n",
 			__func__, __LINE__, p_parent, pWin);
 	((QWorkspace *)pWorkspace)->addWindow((QWidget *)display());

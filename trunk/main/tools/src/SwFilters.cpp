@@ -1732,7 +1732,6 @@ SwFilter::~SwFilter()
 }
 
 int SwFilter::destroy() {
-
 	fprintf(stderr, "DESTROY SwFilter '%s'...\n", exec_name);
 
 	swFreeFrame(&frame);
@@ -1789,7 +1788,7 @@ int SwFilter::forceCloseConnection() {
 //		fclose(pipeW);
 	pipeW = NULL;
 
-	fprintf(stderr, "SwFilter::forceCloseConnection : closing read pipe...\n");
+        fprintf(stderr, "SwFilter::forceCloseConnection : closing read pipe to child %d...\n",childpid );
 	fflush(stderr);
 	//if(pipeR)
 	//	fclose(pipeR);

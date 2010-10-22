@@ -5,10 +5,8 @@ CONFIG += qt \
     debug \
     thread
 
-win32:DEFINES += QT_DLL \
-    QWT_DLL
-unix:DEFINES += VERSION \
-    FFMPEG_0_4_8
+win32:DEFINES += QT_DLL 
+
 win32:LIBS += ../../release/qwt.lib
 macx: DEFINES+= __MACOSX__
 
