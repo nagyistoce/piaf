@@ -139,7 +139,7 @@ WorkshopApp::WorkshopApp()
 #endif
 
 	// create preview display for images
-	pPImage = new PreviewImage(pWorkspace, tr("Image Preview"), Qt::WA_DeleteOnClose);
+        pPImage = new PreviewImage(pWorkspace, tr("Image Preview"));
 	pPImage->display()->show();
 
 	// Load last session

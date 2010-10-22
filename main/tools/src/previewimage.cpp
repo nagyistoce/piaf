@@ -2,7 +2,7 @@
 	  previewimage.cpp  -  Image preview for Piaf project
 							 -------------------
 	begin                : July 2002
-	copyright            : (C) 2002 by Olivier Viné
+	copyright            : (C) 2002 by Olivier VinÃ©
 	email                : olivier.vine@sisell.com
  ***************************************************************************/
 
@@ -22,7 +22,7 @@
 #include "videocapture.h"
 
 PreviewImage::PreviewImage(QWidget* parent, const char *name, Qt::WidgetAttribute wflags):
-		WorkshopTool(parent, name, wflags)
+        WorkshopTool(parent, name, wflags | Qt::W)
 {
 	pWin->setCaption(name);
 
@@ -101,6 +101,7 @@ void PreviewImage::onNewImage(int ptr)
 			break;
 		}
 	}
+
 	if(!pWi) return;
 	pImage = pWi->copy();
 
