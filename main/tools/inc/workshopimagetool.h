@@ -3,7 +3,7 @@
 							 -------------------
 	begin                : Wed Nov 13 10:07:22 CET 2002
 	copyright            : (C) 2002 by Christophe Seyve
-	email                : christophe.seyve@sisell.com
+	email                : cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -59,12 +59,13 @@
 #define MovieEncoder OpenCVEncoder
 #include "OpenCVEncoder.h"
 #endif
+
 /** \brief Workshop image display and processing tool
 
 	Enables to display (zoom/move) image, plus advanced options such as snapshot
 	and plugin manager handling.
 
-	\author Christophe SEYVE \mail christophe.seyve@sisell.com
+	\author Christophe SEYVE \mail cseyve@free.fr
 */
 class WorkshopImageTool : public WorkshopTool
 {
@@ -175,9 +176,11 @@ private:
 	// Color menu widgets
 	QPushButton * aMenuColor;
 	QAction * actColorGrey;
+	QAction * actColorIndexed;
 	QAction * actColorGreyInverted;
 	QAction * actColorThermicBlack2Red;
 	QAction * actColorThermicBlue2Red;
+
 	void updateColorMenu();
 
 	// export button
@@ -220,6 +223,7 @@ private:
 	void slotColorGreyInvertMode();
 	void slotColorThermicBlackToRedMode();
 	void slotColorThermicBlueToRedMode();
+	void slotColorIndexedMode();
 
 	/// process again image with filters
 	void slotUpdateImage();
@@ -258,16 +262,20 @@ private:
 
 	// ---- VIDEO ENCODER SECTION -----
 
-  private:
+private:
+	/** Encoder for exporting images */
 	MovieEncoder * mpegEncoder;
+
 	bool record;
 	int recordNum;
 	/** start a new record */
 	void startRecording();
 	/** stop current record */
 	void stopRecording();
+
 	/** returns true if recording */
 	bool isRecording();
+
 	char movieFile[512];
 
 signals:

@@ -42,13 +42,18 @@
 #define COLORMODE_GREY_INVERTED			1
 #define COLORMODE_THERMIC_BLACK2RED 	2
 #define COLORMODE_THERMIC_BLUE2RED		3
+#define COLORMODE_INDEXED				4
+
+#define COLORMODE_MAX	COLORMODE_INDEXED
 
 // Sisell Workshop include files
 #include "sw_types.h"
 #include "workshopcomponent.h"
 
-/** Image display widget, modified for Piaf display use.
-	\brief Image display widget
+/** \brief Image display widget
+
+Image display widget, modified for Piaf display use.
+
 */
 class ImageWidget : public QWidget
 {
@@ -82,7 +87,7 @@ public:
 
 	void   paintEvent( QPaintEvent * );
 
-
+	/** @brief Change color display mode for 8bit images */
 	void setColorMode(int mode);
 signals:
 

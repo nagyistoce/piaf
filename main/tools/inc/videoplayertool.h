@@ -3,7 +3,16 @@
                              -------------------
     begin                : April 2003
     copyright            : (C) 2003 by Christophe SEYVE 
-    email                : christophe.seyve@sisell.com
+	email                : cseyve@free.fr
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
  ***************************************************************************/
 
 #ifndef VIDEOPLAYERTOOL_H
@@ -45,12 +54,19 @@
 #include "workshopimagetool.h"
 
 class WorkshopMovie;
+
+typedef struct {
+	QAction * pAction;
+	int index;
+	unsigned long long prevAbsPosition; /*! Absolute position in file */
+} video_bookmark_t;
+
 /** \brief Workshop videos display and processing tool
 
 	Enables to display (zoom/move) image, navigate (VCR style), and advanced 
 	options such as snapshot and plugin manager handling.
 
-	\author Christophe SEYVE \mail christophe.seyve@sisell.com
+	\author Christophe SEYVE \mail cseyve@free.fr
 */
 
 class VideoPlayerTool : public WorkshopTool
@@ -81,6 +97,8 @@ private:
 	// movie controls
 	char VideoFile[512];
 	
+	WorkshopMovie * m_pWorkshopMovie;
+
 	// default image directory
 	QString imageDir; 
 	// default movie directory
@@ -93,6 +111,10 @@ private:
 	QPushButton * rewindStartMovie;
 	QPushButton * grayButton;
 
+	QPushButton * buttonBookmarks;
+	QMenu * menuBookmarks;
+	QAction * actAddBookmark;
+	void appendBookmark(unsigned long long pos);
 	bool playGrayscale;
 
 	Q3HBox * playHBox;
@@ -125,6 +147,9 @@ private:
 	WorkshopImageTool * detailsView;
 	Q3VBox * playerVBox;
 	
+	// Bookmarks
+	QList<video_bookmark_t> m_listBookmarks;
+
 private slots:
 	// movie player
 	void slotPlayMovie();
@@ -132,12 +157,16 @@ private slots:
 	void slotStepMovie();
 	void slotStepBackwardMovie();
 	void slotRewindMovie();
+
 	void slotRewindStartMovie();
 	void slotSpeedMovie(const QString & str);
 	void slotResizeTool(QResizeEvent *e);
 	void on_grayButton_toggled(bool);
     void slotReleaseScrollbar();
     void slotChangedScrollbar(int);
+
+	// bookmarks
+	void on_menuBookmarks_triggered(QAction *);
 };
 
 #endif

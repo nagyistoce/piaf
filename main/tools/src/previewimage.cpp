@@ -21,16 +21,18 @@
 #include "previewimage.h"
 #include "videocapture.h"
 
-PreviewImage::PreviewImage(QWidget* parent, const char *name, Qt::WidgetAttribute wflags):
-        WorkshopTool(parent, name, wflags | Qt::W)
+PreviewImage::PreviewImage(QWidget* p_parent, const char *p_name)
+	: WorkshopTool(p_parent, p_name, Qt::WA_AcceptDrops)
 {
-	pWin->setCaption(name);
+	pWin->setCaption(p_name);
 
 	initTool();
 	initVars();
 	initPlot();
 
-	((QWorkspace *)parent)->addWindow((QWidget *)pWin);
+	if(p_parent) {
+		((QWorkspace *)p_parent)->addWindow((QWidget *)pWin);
+	}
 
 	connect(this, SIGNAL(newImage(int)), SLOT(onNewImage(int)));
 	QPixmap winIcon = QPixmap(BASE_DIRECTORY "images/pixmaps/stillimage.png");

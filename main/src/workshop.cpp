@@ -4,7 +4,7 @@
 	begin                : ven nov 29 15:53:48 UTC 2002
 	copyright            : (C) 2002 by Olivier Vin & Christophe Seyve
 	email                : olivier.vine@sisell.com
-							christophe.seyve@sisell.com
+							cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -83,6 +83,7 @@
 #include "pluginlistdialog.h"
 
 bool g_has_measures = false;
+#define PIAFSESSION_FILE	".piaf-session"
 
 
 WorkshopApp::WorkshopApp()
@@ -139,7 +140,7 @@ WorkshopApp::WorkshopApp()
 #endif
 
 	// create preview display for images
-        pPImage = new PreviewImage(pWorkspace, tr("Image Preview"));
+	pPImage = new PreviewImage(pWorkspace, tr("Image Preview"));
 	pPImage->display()->show();
 
 	// Load last session
@@ -240,7 +241,7 @@ void WorkshopApp::loadOnStart() {
 
 	// Read configuration directories
 	QFile file;
-	file.setName(QString(home) + "/.piaf-session");
+	file.setName(QString(home) + "/" PIAFSESSION_FILE);
 	if(file.exists()) {
 		if(file.open(QIODevice::ReadOnly)) {
 			char str[512];
@@ -293,6 +294,32 @@ void WorkshopApp::loadOnStart() {
 									pWmov->setPathName(fi.dirPath());
 									pWmov->setFileName(fi.fileName());
 									pWmov->setModified(false);
+
+									itCmd++;
+
+									if(itCmd != lst.end()) {
+										// if there are bookmarks, add them now
+										QString bkmks = *itCmd;
+										if(!bkmks.isNull()) {
+											// PARSE
+											QStringList positions( QStringList::split( ",", bkmks ) );
+											QStringList::Iterator itPos = positions.begin();
+											QList<unsigned long long> bkList;
+											for( ; itPos != positions.end(); itPos++) {
+												QString posStr = *itPos;
+												if(!posStr.isNull()) {
+													bool ok;
+													unsigned long long prevPos = posStr.toLongLong(&ok);
+													if(ok) {
+														fprintf(stderr, "\tread bookmark=%llu\n",
+																prevPos);
+														bkList.append(prevPos);
+													}
+												}
+											}
+											pWmov->setListOfBookmarks(bkList);
+										}
+									}
 									addNewMovie(pWmov);
 								}
 							}
@@ -303,7 +330,7 @@ void WorkshopApp::loadOnStart() {
 			}
 		}
 	} else {
-		fprintf(stderr, "Cannot read file $HOME/.piaf-session \n");
+		fprintf(stderr, "Cannot read file $HOME/" PIAFSESSION_FILE "\n");
 	}
 }
 
@@ -330,7 +357,17 @@ void saveItem(FILE * f, ExplorerItem *item) {
 				break;
 			case VIDEO_ITEM:
 				pWmov = (WorkshopMovie *)itemC->getItemPtr();
-				fprintf(f, "Movie:\t%s/%s\n", pWmov->getPathName().latin1(), pWmov->getFileName().latin1());
+				fprintf(f, "Movie:\t%s/%s", pWmov->getPathName().latin1(), pWmov->getFileName().latin1());
+				if(pWmov->hasBookmarks()) {
+					fprintf(f, "\t");
+					QList<unsigned long long> l_listBookmarks = pWmov->getListOfBookmarks();
+					QList<unsigned long long>::iterator it ;
+					for(it = l_listBookmarks.begin(); it != l_listBookmarks.end(); ++it) {
+						// save number
+						fprintf(f, "%llu,", *it);
+					}
+				}
+				fprintf(f, "\n");
 				break;
 			default:
 				break;
@@ -346,12 +383,14 @@ void WorkshopApp::saveSettings() {
 	if(!saveSettingsImmediatly)
 		return;
 
-
 	char home[128] = "/home";
 	strcpy(home, getenv("HOME"));
-
 	// Write configuration file
-	strcat(home, "/.piaf-session");
+	strcat(home, "/" PIAFSESSION_FILE);
+
+	fprintf(stderr, "WorkshopApp::%s:%d : saving settings in %s\n",
+			__func__, __LINE__, home);
+
 	FILE * f = fopen(home, "w");
 	if(f) {
 		// Search Component item
@@ -684,6 +723,7 @@ void WorkshopApp::createVideoCaptureView(VideoCaptureDoc * va)
 		vcv = new WorkshopVideoCaptureView(va, NULL,basename,Qt::WA_DeleteOnClose);
 	else
 		vcv = new WorkshopVideoCaptureView((VideoCaptureDoc *)NULL, NULL,basename,Qt::WA_DeleteOnClose);
+
 
 	vcv->setWorkspace(pWorkspace);
 
@@ -1039,6 +1079,7 @@ void WorkshopApp::slotOnDoubleClickOnObject(Q3ListViewItem *item)
 					vpt->setDefaultDirectories(g_imageDirName, g_movieDirName);
 					//XXX			vpt->start();
 
+					connect(vpt,SIGNAL(signalSaveSettings()),this,SLOT(saveSettings()));
 					connect(vpt->imageTool(),SIGNAL(ImageSaved(QImage *)), this, SLOT(slotSnapShot(QImage *)));
 					connect(vpt->imageTool(),SIGNAL(VideoSaved(char *)), this, SLOT(slotMovieCapture(char *)));
 
@@ -1456,6 +1497,7 @@ void WorkshopApp::slotSnapShot(QImage * image)
 			snapShotName.toUtf8().data()
 			);
 	}
+
 	pWi = new WorkshopImage(*image, snapShotName, REAL_VALUE);
 	addNewImage(pWi);
 

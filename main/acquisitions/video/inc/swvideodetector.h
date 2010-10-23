@@ -3,7 +3,7 @@
                              -------------------
     begin                : Fri Jun 7 2002
     copyright            : (C) 2002 by Olivier Viné (OLV) & Christophe Seyve (CSE)
-    email                : olivier.vine@sisell.com & christophe.seyve@sisell.com
+    email                : olivier.vine@sisell.com & cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************

@@ -1,9 +1,9 @@
 /***************************************************************************
-	workshoptool.h  -  generic tool for Piaf
+	workshoptool.h  -  generic tool window for Piaf
 							 -------------------
 	begin                : ven nov 29 15:53:48 UTC 2002
-	copyright            : (C) 2002 by Olivier Viné - Christophe SEYVE
-	email                : olivier.vine@sisell.com christophe.seyve@sisell.com
+	copyright            : (C) 2002 by Olivier VinÃ© - Christophe SEYVE
+	email                : olivier.vine@sisell.com / cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -141,7 +141,7 @@ signals:
 	void rmMeasure(int ptrmeas);
 	void newImage(int ptrimage);
 	void rmImage(int ptrimage);
-
+	void signalSaveSettings();
 private:
 	void initToolVars();
 

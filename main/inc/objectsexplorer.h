@@ -4,7 +4,7 @@
     begin                : ven nov 29 15:53:48 UTC 2002
     copyright            : (C) 2002 by Olivier Viné & Christophe Seyve
     email                : olivier.vine@sisell.com
-							christophe.seyve@sisell.com
+							cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************

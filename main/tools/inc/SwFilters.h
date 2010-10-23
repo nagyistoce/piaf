@@ -3,7 +3,7 @@
 							 -------------------
 	begin                : Fri Nov 29 2002
 	copyright            : (C) 2002 by Christophe Seyve - SISELL
-	email                : christophe.seyve@sisell.com
+	email                : cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -49,7 +49,7 @@
 
 	Contains information about available filters, manage executable name, function and parameters list.
 
-	\author Christophe Seyve- SISELL \email mailto:christophe.seyve@sisell.com
+	\author Christophe Seyve- SISELL \email mailto:cseyve@free.fr
 	*/
 
 class SwFilter : public QObject
@@ -137,7 +137,7 @@ signals:
 
 /** \brief Time calculation display for a plugin
 	This class displays a window with processing time mean, min/max.
-	\author Christophe Seyve - SISELL \mailto christophe.seyve@sisell.com
+	\author Christophe Seyve - SISELL \mailto cseyve@free.fr
 */
 class SwTimeWidget : public QWidget
 {
@@ -190,7 +190,7 @@ typedef void (*sighandler_t)(int);
 	\brief Filters list manager.
 
 	Class for managing a collection of filters. It can save/load filter lists, manage filters collection, disable any filter...
-	\author Christophe Seyve - SISELL \mailto christophe.seyve@sisell.com
+	\author Christophe Seyve - SISELL \mailto cseyve@free.fr
 */
 
 class SwFilterManager : public Q3MainWindow

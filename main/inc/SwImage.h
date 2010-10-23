@@ -2,10 +2,10 @@
                 SWimage.h  -  Sisell Workshop measure class
                              -------------------
     begin                : Sun May 5 2002
-    copyright            : (C) 2002 by Olivier Viné (OLV) 
+    copyright            : (C) 2002 by Olivier Vin (OLV) 
                                      & Christophe Seyve (CSE)
     email                : olivier.vine@sisell.com 
-                           & christophe.seyve@sisell.com 
+                           & cseyve@free.fr 
 ***************************************************************************/
 
 /***************************************************************************

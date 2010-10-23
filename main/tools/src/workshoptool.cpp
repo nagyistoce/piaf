@@ -3,7 +3,7 @@
 							 -------------------
 	begin                : ven nov 29 15:53:48 UTC 2002
 	copyright            : (C) 2002 by Olivier Viné - Christophe SEYVE
-	email                : olivier.vine@sisell.com christophe.seyve@sisell.com
+	email                : olivier.vine@sisell.com / cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -26,7 +26,7 @@ WorkshopTool::WorkshopTool (QWidget * p_parent, const char *p_name, Qt::WidgetAt
 
 	m_ID = WorkshopTool_last_id;
 
-	fprintf(stderr, "WorkshopTool::%s:%d : parent=%p\n", __func__, __LINE__, p_parent);
+//	fprintf(stderr, "WorkshopTool::%s:%d : parent=%p\n", __func__, __LINE__, p_parent);
 	// creating the main window
 	pWin = new WorkshopMainWindow (p_parent, p_name, wflags);
 

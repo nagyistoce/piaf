@@ -3,7 +3,7 @@
 							 -------------------
 	begin                : Fri Nov 29 2002
 	copyright            : (C) 2002 by Christophe Seyve - SISELL
-	email                : christophe.seyve@sisell.com
+	email                : cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************

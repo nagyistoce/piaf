@@ -14,6 +14,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+
 #include "workshopimage.h"
 #include <qcolor.h>
 //Added by qt3to4:
@@ -57,23 +58,25 @@ unsigned char GthermicBlue2Red(int p) {
 }
 
 unsigned char BthermicBlue2Red(int p) {
-	if(p>128) return 0;
+	if(p>127) return 0;
 	
-	unsigned char B = (unsigned char)(255-p*2);
+	unsigned char B = (unsigned char)(255 - p*2);
 	return B;
 }
 
+
 void ImageWidget::setColorMode(int mode) {
-	if(mode <= COLORMODE_THERMIC_BLUE2RED )
+	if(mode <= COLORMODE_MAX )
 		m_colorMode = mode;
 	else
 		m_colorMode = COLORMODE_GREY;
+
 	if(dImage) {
 		if(dImage->depth() > 8) return;
 		
 		dImage->setNumColors(256);
 		QColor col;
-fprintf(stderr, "ImageWidget::%s : colorMode = %d\n", __func__, m_colorMode);
+		fprintf(stderr, "ImageWidget::%s : colorMode = %d\n", __func__, m_colorMode);
 		// Change color mode
 		switch(m_colorMode) {
 		default:
@@ -97,6 +100,16 @@ fprintf(stderr, "ImageWidget::%s : colorMode = %d\n", __func__, m_colorMode);
 		case COLORMODE_THERMIC_BLACK2RED: // "Thermic" black to red
 			for(int i=0; i<256; i++) {
 				dImage->setColor(i, qRgb(RthermicBlack2Red(i), GthermicBlack2Red(i), BthermicBlack2Red(i)));
+			}
+			break;
+		case COLORMODE_INDEXED:
+			col.setHsv(0,0,0);
+			dImage->setColor(0, col.rgb());
+
+			int hue = 17;
+			for(int i=1; i<256; i++, hue+=37) {
+				col.setHsv(hue%360, 255, 127);
+				dImage->setColor(i, col.rgb());
 			}
 			break;
 		}
