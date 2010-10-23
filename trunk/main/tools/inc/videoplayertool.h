@@ -59,6 +59,7 @@ typedef struct {
 	QAction * pAction;
 	int index;
 	unsigned long long prevAbsPosition; /*! Absolute position in file */
+	int percent;	/*! Percentage of the movie size */
 } video_bookmark_t;
 
 /** \brief Workshop videos display and processing tool
@@ -114,6 +115,7 @@ private:
 	QPushButton * buttonBookmarks;
 	QMenu * menuBookmarks;
 	QAction * actAddBookmark;
+	QAction * actEditBookmark;
 	void appendBookmark(unsigned long long pos);
 	bool playGrayscale;
 
@@ -167,6 +169,7 @@ private slots:
 
 	// bookmarks
 	void on_menuBookmarks_triggered(QAction *);
+	void slotNewBookmarkList(QList<video_bookmark_t>);
 };
 
 #endif
