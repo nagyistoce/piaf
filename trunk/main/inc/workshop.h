@@ -4,7 +4,7 @@
 	begin                : ven nov 29 15:53:48 UTC 2002
 	copyright            : (C) 2002 by Olivier Viné & Christophe Seyve
 	email                : olivier.vine@sisell.com
-							christophe.seyve@sisell.com
+							cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -134,8 +134,6 @@ protected:
 
 	/** Load configuration on starting */
 	void loadOnStart();
-	/** Save configuration on exit */
-	void saveSettings();
 
 	// Last opened path for each type
 	QString m_lastImageDirName;
@@ -143,6 +141,8 @@ protected:
 	QString m_lastMeasureDirName;
 
 private slots:
+	/** Save configuration on exit */
+	void saveSettings();
 
 	// General slots
 	void slotNewVirtualMeasure(WorkshopMeasure *);
@@ -154,7 +154,7 @@ private slots:
 	// Tools slots
 	void slotSignalGenerator();
 	void slotOnNewVideoAcq();
-	void slotSnapShot(QImage *image);
+	void slotSnapShot(QImage * image);
 	void slotMovieCapture(char *movie);
 
 	// Viewers slots

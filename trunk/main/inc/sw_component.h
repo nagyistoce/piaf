@@ -2,7 +2,7 @@
                           sw_component.h  -  description
                              -------------------
     begin                : Fri May 3 2002
-    copyright            : (C) 2002 by Olivier Viné
+    copyright            : (C) 2002 by Olivier VinÃ©
     email                : olivier.vine@sisell.com
  ***************************************************************************/
 
@@ -26,7 +26,7 @@
 #include "sw_structure.h"
 
 /** Base structure for generic component
-  \author Olivier Viné
+  \author Olivier VinÃ©
   */
 
 class SW_Component : public Q3ListViewItem  {

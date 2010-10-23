@@ -3,7 +3,7 @@
                              -------------------
     begin                : 
     copyright            : (C) 2002 - 2003 Christophe Seyve (CSE)
-    email                : christophe.seyve@sisell.com 
+    email                : cseyve@free.fr 
 ***************************************************************************/
 
 /***************************************************************************
@@ -34,7 +34,7 @@
 	Core class for managing communications between plugins
 	and calling objects (such as SwFilter).
 	
-	\author Christophe SEYVE	\mail christophe.seyve@sisell.com
+	\author Christophe SEYVE	\mail cseyve@free.fr
 */
 class SwPluginCore
 {

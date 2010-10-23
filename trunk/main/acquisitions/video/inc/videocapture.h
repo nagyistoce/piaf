@@ -3,7 +3,7 @@
                              -------------------
     begin                : Wed Nov 13 10:07:22 CET 2002
     copyright            : (C) 2002 by Christophe Seyve
-    email                : christophe.seyve@sisell.com
+    email                : cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -50,7 +50,7 @@ class WorkshopVideoCaptureView;
   from and to files.
 
   \brief VideoCaptureDoc provides a document object for a document-view model.
-  \author Christophe Seyve \mail christophe.seyve@sisell.com
+  \author Christophe Seyve \mail cseyve@free.fr
   \version 0.1.1 CVS
   */
 class VideoCaptureDoc : public QThread

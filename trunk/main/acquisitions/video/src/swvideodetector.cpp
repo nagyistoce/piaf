@@ -3,8 +3,8 @@
 		  generic functions for Sisell Workshop video detectors (motion, presence...)
 							 -------------------
 	begin                : Tue Mar 12 2002
-	copyright            : (C) 2002 by Olivier Viné & Christophe Seyve
-	email                : olivier.vine@sisell.com  & christophe.seyve@sisell.com
+	copyright            : (C) 2002 by Olivier Vin & Christophe Seyve
+	email                : olivier.vine@sisell.com  & cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************

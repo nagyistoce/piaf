@@ -3,7 +3,7 @@
  *
  *  Tue Dec 19 12:55:42 2006
  *  Copyright  2006  Christophe Seyve - SISELL
- *  christophe.seyve@sisell.com
+ *  cseyve@free.fr
  ****************************************************************************/
 
 #include <stdlib.h>

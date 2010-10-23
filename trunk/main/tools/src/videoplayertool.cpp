@@ -3,7 +3,7 @@
 							 -------------------
 	begin                : April 2003
 	copyright            : (C) 2003 by Christophe SEYVE
-	email                : christophe.seyve@sisell.com
+	email                : cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -46,6 +46,7 @@ VideoPlayerTool::VideoPlayerTool(QWidget *p_parent, const char *p_name,
 			__func__, __LINE__, p_parent, pWin);
 	((QWorkspace *)pWorkspace)->addWindow((QWidget *)display());
 	initPlayer();
+	m_pWorkshopMovie = NULL;
 
 	// change icon
 	QPixmap winIcon = QPixmap(BASE_DIRECTORY "images/pixmaps/movie.png");
@@ -88,7 +89,18 @@ void VideoPlayerTool::run() {
 int VideoPlayerTool::setWorkshopMovie(WorkshopMovie * wm)
 {
 	if(!wm) return 0;
-	return setFile((char *)wm->file(), 0);
+
+	m_pWorkshopMovie = wm;
+	// first load file
+	int ret = setFile((char *)wm->getFilePath(), 0);
+
+	QList<unsigned long long> bmklist = m_pWorkshopMovie->getListOfBookmarks();
+	QList<unsigned long long>::iterator it;
+	for(it = bmklist.begin(); it!=bmklist.end(); it++) {
+		appendBookmark( (*it) );
+	}
+
+	return ret;
 }
 
 
@@ -267,6 +279,32 @@ void VideoPlayerTool::initPlayer()
 	connect(playScrollBar, SIGNAL(sliderReleased()), this, SLOT(slotReleaseScrollbar()));
 	connect(playScrollBar, SIGNAL(valueChanged(int)), this, SLOT(slotChangedScrollbar(int)));
 
+	// bookmarks button
+	buttonBookmarks = new QPushButton( playHBox);
+	{
+		QPixmap pixMap;
+		if(pixMap.load("IconBookmark.png"))
+			buttonBookmarks->setPixmap(pixMap);
+		else
+			buttonBookmarks->setText(tr("Bkmk"));
+	}
+	buttonBookmarks->setFlat(true);
+	buttonBookmarks->setToggleButton(true);
+
+	menuBookmarks = new QMenu(playHBox);
+	buttonBookmarks->setPopup(menuBookmarks);
+
+	// Append add button
+	QIcon pixIcon("IconBookmark.png");
+	actAddBookmark = menuBookmarks->addAction(pixIcon, tr("Add"));
+	actAddBookmark->setIconVisibleInMenu(true);
+
+	menuBookmarks->addSeparator();
+	connect(menuBookmarks, SIGNAL(triggered(QAction *)), this, SLOT(on_menuBookmarks_triggered(QAction *)));
+
+
+
+
 	play_period_ms = 40; // 25 fps
 
 	// image
@@ -298,6 +336,67 @@ void VideoPlayerTool::slotResizeTool(QResizeEvent *e)
 	playerVBox->resize(w, h);
 
 	detailsView->display()->resize(w-4, h-36);
+}
+
+void VideoPlayerTool::appendBookmark(unsigned long long pos) {
+	// create bookmark
+	video_bookmark_t new_bookmark;
+	new_bookmark.index = m_listBookmarks.count()+1;
+	new_bookmark.prevAbsPosition = pos;
+	// Add action
+	//QImage thumbImage = Original
+	QIcon pixIcon(BASE_DIRECTORY "images/pixmaps/IconBookmark.png");
+
+	QString str;
+	int percent = (int)round((double)new_bookmark.prevAbsPosition / (double)playFileSize * 100.);
+	fprintf(stderr, "[VidPlay]::%s:%d : append prevPos=%llu / %llu = %d %%\n",
+			__func__, __LINE__, new_bookmark.prevAbsPosition,playFileSize,
+			percent
+			);
+	str.sprintf("%d: %d %%", new_bookmark.index, percent);
+	new_bookmark.pAction = menuBookmarks->addAction(pixIcon, tr("Mark ") + str);
+
+	m_listBookmarks.append(new_bookmark);
+
+}
+
+void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
+	if(!m_fileVA) return;
+
+	if(actAddBookmark == pAction) {
+		fprintf(stderr, "[VidPlay]::%s:%d : create bookmark for : pos=%llu\n",
+				__func__, __LINE__, m_fileVA->getPrevAbsolutePosition());
+		appendBookmark(m_fileVA->getPrevAbsolutePosition());
+
+		if(m_pWorkshopMovie) {
+			QList<unsigned long long> bmklist = m_pWorkshopMovie->getListOfBookmarks();
+			bmklist.append(m_fileVA->getPrevAbsolutePosition());
+			m_pWorkshopMovie->setListOfBookmarks(bmklist);
+
+			emit signalSaveSettings();
+		}
+
+	} else {
+		QList<video_bookmark_t>::iterator i;
+		for (i = m_listBookmarks.begin(); i != m_listBookmarks.end(); ++i) {
+			video_bookmark_t sel_bookmark = *i;
+			if(sel_bookmark.pAction == pAction) {
+				// select an existing bookmark
+				fprintf(stderr, "[VidPlay]::%s:%d : selected bookmark idx=%d => pos=%llu\n",
+						__func__, __LINE__, sel_bookmark.index,
+						sel_bookmark.prevAbsPosition);
+
+				m_fileVA->setAbsolutePosition(sel_bookmark.prevAbsPosition);
+
+				// display
+				slotStepMovie();
+
+				detailsView->setWorkshopImage(detailsImage);
+
+				return;
+			}
+		}
+	}
 }
 
 void VideoPlayerTool::slotReleaseScrollbar() {

@@ -3,7 +3,7 @@
                              -------------------
     begin                : ven nov 29 15:53:48 UTC 2002
     copyright            : (C) 2002 by Christophe SEYVE
-    email                : christophe.seyve@sisell.com
+    email                : cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -41,7 +41,7 @@
 	This handles mainly the path of the file saved on disk.
 	
 	\brief Recorded video component.
-	\author Christophe SEYVE \mail christophe.seyve@sisell.com
+	\author Christophe SEYVE \mail cseyve@free.fr
 */
 class WorkshopMovie: public WorkshopComponent
 {
@@ -54,7 +54,7 @@ public:
 		: WorkshopComponent(label, type)
 	{
 		setComponentClass(CLASS_VIDEO);
-		if(strlen(file)<512)
+		if(strlen(file)<MAX_PATH_LEN)
 			strcpy(FilePath, file);
 		else
 			FilePath[0] = '\0';
@@ -68,8 +68,8 @@ public:
 		FilePath[0] = '\0';
 	}
 	
-	char * file() { return FilePath; };
-	~WorkshopMovie(){}
+	char * getFilePath() { return FilePath; };
+	~WorkshopMovie(){};
 	// overloaded functions
 	// open function
 	//bool open(const QString &filename, const char *format=0);
@@ -78,8 +78,20 @@ public:
 	void close(){ printf("WorkshopMovie close !\n"); }
 	void saveAs();
 	void openFile(const QString);
+
+	// Bookmarks
+	bool hasBookmarks() { return !m_listBookmarks.isEmpty(); };
+	QList<unsigned long long> getListOfBookmarks() { return m_listBookmarks; };
+	void setListOfBookmarks(QList<unsigned long long> list) {
+		m_listBookmarks = list;
+	};
+
 private:
-	char FilePath[512];
+	char FilePath[MAX_PATH_LEN];
+
+	/// list of positions in file
+	QList<unsigned long long> m_listBookmarks;
+
 protected:
     //! Calls itemChanged()
     //virtual void curveChanged() { itemChanged(); }	

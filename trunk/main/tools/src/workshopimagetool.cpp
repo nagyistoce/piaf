@@ -3,7 +3,7 @@
 							 -------------------
 	begin                : Wed Nov 13 10:07:22 CET 2002
 	copyright            : (C) 2002 by Christophe Seyve
-	email                : christophe.seyve@sisell.com
+	email                : cseyve@free.fr
  ***************************************************************************/
 
 #include <unistd.h>
@@ -482,6 +482,12 @@ void WorkshopImageTool::setToolbar()
 	actColorThermicBlue2Red->setIcon(pixIcon);
 	connect(actColorThermicBlue2Red, SIGNAL(activated()), this, SLOT(slotColorThermicBlueToRedMode()));
 
+	pixIcon = QIcon("IconColorGreyIndexed.png" );
+	actColorIndexed = colorMenu->addAction(pixIcon, tr("Indexed"));
+	actColorIndexed->setIconVisibleInMenu(true);
+
+	connect(actColorIndexed, SIGNAL(activated()), this, SLOT(slotColorIndexedMode()));
+
 	// --- export
 	if(ShowSnapbutton) {
 		bExport = new QPushButton(hBox);
@@ -882,11 +888,10 @@ void WorkshopImageTool::slotUpdateView()
 /////////////////////////////////////
 void WorkshopImageTool::slotSaveImage()
 {
-	fprintf(stderr, "WorkshopImageTool::slotSaveImage %lu x %lu x%d !\n",
-			imageSize.width, imageSize.height, 32);
-	savedImage.create(imageSize.width, imageSize.height, 32);
-
-	memcpy( savedImage.bits(), originalImage, imageSize.width*imageSize.height*4 );
+	savedImage = OrigImgRGB;
+	fprintf(stderr, "WorkshopImageTool::%s:%d: %d x %d x%d !\n",
+			__func__, __LINE__,
+			savedImage.width(), savedImage.height(), savedImage.depth());
 
 	emit ImageSaved(&savedImage);
 }
@@ -905,9 +910,11 @@ void WorkshopImageTool::setViewSize()
 #endif
 
 	if(ViewWidget) {
+#ifdef __DEBUG_ZOOMING__
 		fprintf(stderr, "WImgT::%s:%d resize(%ld, %ld)\n",
 				__func__, __LINE__,
 				viewSize.width, viewSize.height);
+#endif
 		ViewWidget->resize(viewSize.width, viewSize.height);
 		vBox->resize( viewSize.width+WIMGT_MARGIN, TOOLBAR_HEIGHT +WIMGT_MARGIN+ viewSize.height);
 	}
@@ -991,7 +998,6 @@ void WorkshopImageTool::slotZoomOutMode(){
 	updateToolbar();
 }
 
-
 void WorkshopImageTool::slotZoomFit(){
 	ZoomScale = 1;
 	xZoomOrigine = 0;
@@ -1068,10 +1074,12 @@ void WorkshopImageTool::slotColorGreyMode() {
 	m_colorMode = COLORMODE_GREY;
 	updateColorMenu();
 }
+
 void WorkshopImageTool::slotColorGreyInvertMode() {
 	m_colorMode = COLORMODE_GREY_INVERTED;
 	updateColorMenu();
 }
+
 void WorkshopImageTool::slotColorThermicBlackToRedMode() {
 	m_colorMode = COLORMODE_THERMIC_BLACK2RED;
 	updateColorMenu();
@@ -1079,6 +1087,11 @@ void WorkshopImageTool::slotColorThermicBlackToRedMode() {
 
 void WorkshopImageTool::slotColorThermicBlueToRedMode() {
 	m_colorMode = COLORMODE_THERMIC_BLUE2RED;
+	updateColorMenu();
+}
+
+void WorkshopImageTool::slotColorIndexedMode() {
+	m_colorMode = COLORMODE_INDEXED;
 	updateColorMenu();
 }
 
@@ -1090,6 +1103,9 @@ void WorkshopImageTool::updateColorMenu() {
 	default:
 	case COLORMODE_GREY:
 		aMenuColor->setPixmap(QPixmap("IconColorGrey.png"));
+		break;
+	case COLORMODE_INDEXED:
+		aMenuColor->setPixmap(QPixmap("IconColorGreyIndexed.png"));
 		break;
 	case COLORMODE_GREY_INVERTED:
 		aMenuColor->setPixmap(QPixmap("IconColorGreyInverted.png"));

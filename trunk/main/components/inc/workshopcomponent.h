@@ -2,7 +2,7 @@
                           workshopcomponent.h  -  description
                              -------------------
     begin                : ven nov 29 15:53:48 UTC 2002
-    copyright            : (C) 2002 by Olivier Viné
+    copyright            : (C) 2002 by Olivier VinÃ©
     email                : olivier.vine@sisell.com
  ***************************************************************************/
 
@@ -35,6 +35,9 @@
 // types of component
 #define REAL_VALUE     0
 #define VIRTUAL_VALUE  1
+
+/// Maximum length of path = UTF-8 * 512 char
+#define MAX_PATH_LEN	1024
 
 /**
 	This class handles components type, date ... 

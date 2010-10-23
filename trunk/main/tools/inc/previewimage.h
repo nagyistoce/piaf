@@ -2,7 +2,7 @@
            previewimage.h  -  image preview tool for Piaf
                              -------------------
     begin                : ven nov 29 15:53:48 UTC 2002
-    copyright            : (C) 2002 by Olivier Viné
+    copyright            : (C) 2002 by Olivier VinÃ©
     email                : olivier.vine@sisell.com
  ***************************************************************************/
 
@@ -94,7 +94,7 @@ class PreviewImage : public WorkshopTool
 	
 public:
 	//! Constructor
-	PreviewImage(QWidget* parent, const char *name, Qt::WidgetAttribute wflags);
+	PreviewImage(QWidget* parent, const char *name);
     //PreviewImage(WorkshopMeasure* pDoc, QWidget* parent, const char *name, int wflags);
  	~PreviewImage(){}
 	

@@ -3,7 +3,7 @@
 /*|		  ---------------------------------														|*/				
 /*|	begin					: Wed July 9 2003																					|*/
 /*|   	copyright				: (C) 2003 by Christophe Seyve																		|*/
-/*|    email					: christophe.seyve@sisell.com																		|*/
+/*|    email					: cseyve@free.fr																		|*/
 /*|	description			: Entete de la classe VideoAcquisition par fichier											|*/
 /*|------------------------------------------------------------------------------------------------------------|*/
 
@@ -41,7 +41,7 @@ extern "C" {
 
 /** Video acquisition high-level class
  * Performs device management and image acquisitions.
- @author Christophe Seyve - Sisell - christophe.seyve@sisell.com
+ @author Christophe Seyve - Sisell - cseyve@free.fr
  @version 0.1.0 \Date
  */
 

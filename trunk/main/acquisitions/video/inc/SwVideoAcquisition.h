@@ -3,7 +3,7 @@
 							 -------------------
 	begin                : Wed Mar 6 2002
 	copyright            : (C) 2002 by Olivier Viné (OLV) & Christophe Seyve (CSE)
-	email                : olivier.vine@sisell.com & christophe.seyve@sisell.com
+	email                : olivier.vine@sisell.com & cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -53,7 +53,7 @@ typedef struct {
 
 /** Performs device management and image acquisitions with simple API.
 	\brief High-level video acquisition class.
- \author Christophe Seyve - Sisell - christophe.seyve@sisell.com
+ \author Christophe Seyve - Sisell - cseyve@free.fr
  \version 0.1.0 \Date
  */
 

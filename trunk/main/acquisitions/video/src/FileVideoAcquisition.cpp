@@ -3,7 +3,7 @@
 							 -------------------
 	begin                : Tue Mar 12 2002
 	copyright            : (C) 2002 by Olivier Viné & Christophe Seyve
-	email                : olivier.vine@sisell.com  & christophe.seyve@sisell.com
+	email                : olivier.vine@sisell.com  & cseyve@free.fr
 	description 		 : class in charge of video acquisition
 							(init, start and stop, get properties, acquire, ...)
  ***************************************************************************/
@@ -501,7 +501,7 @@ void FileVideoAcquisition::rewindToPosMovie(unsigned long long l_position)
 	{
 		GetNextFrame();
 		curpos = url_ftell(URLPB(m_pFormatCtx->pb));
-#if 1
+#if 0
 		fprintf(stderr,"\tFileVA::%s:%d reading frame "
 				"=====> position=%llu (/wanted=%llu)\n",
 				__func__, __LINE__,
