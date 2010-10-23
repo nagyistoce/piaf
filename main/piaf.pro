@@ -59,7 +59,8 @@ SOURCES += src/main.cpp \
     acquisitions/video/src/videocapture.cpp \
     acquisitions/video/src/swvideodetector.cpp \
     tools/src/swtoolmainwindow.cpp \
-    tools/src/OpenCVEncoder.cpp
+    tools/src/OpenCVEncoder.cpp \
+	tools/src/moviebookmarkform.cpp
 
 # Replaced by OpenCVEncoder.cpp
 # tools/src/FFMpegEncoder.cpp  
@@ -124,7 +125,8 @@ HEADERS += inc/workshop.h \
     acquisitions/video/inc/swvideodetector.h \
     tools/inc/swtoolmainwindow.h \
     inc/piaf-common.h \
-    tools/inc/OpenCVEncoder.h
+    tools/inc/OpenCVEncoder.h \
+	tools/inc/moviebookmarkform.h
 
 # Obsolete because of OpenCVEncoder
 # tools/inc/FFMpegEncoder.h \ 
@@ -205,7 +207,8 @@ unix: {
 INCLUDEPATH += .
 
 FORMS += tools/ui/swtoolmainwindow.ui \
-		tools/ui/imagetoavidialog.ui
+		tools/ui/imagetoavidialog.ui \
+		tools/ui/moviebookmarkform.ui
 
 HEADERS += tools/inc/imagetoavidialog.h
 

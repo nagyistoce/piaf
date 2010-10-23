@@ -26,6 +26,8 @@
 #include <QResizeEvent>
 #include <QPixmap>
 
+#include "moviebookmarkform.h"
+
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
@@ -41,7 +43,7 @@ VideoPlayerTool::VideoPlayerTool(QWidget *p_parent, const char *p_name,
 	: WorkshopTool(p_parent, p_name, wflags )//| Qt::WNoAutoErase)
 {
 	pWorkspace = p_parent;
-        VideoFile[0] = '\0';
+	VideoFile[0] = '\0';
 	fprintf(stderr, "VideoPlayerTool::%s:%d : parent=%p, pWin=%p\n",
 			__func__, __LINE__, p_parent, pWin);
 	((QWorkspace *)pWorkspace)->addWindow((QWidget *)display());
@@ -296,13 +298,14 @@ void VideoPlayerTool::initPlayer()
 
 	// Append add button
 	QIcon pixIcon("IconBookmark.png");
-	actAddBookmark = menuBookmarks->addAction(pixIcon, tr("Add"));
+	actAddBookmark = menuBookmarks->addAction(pixIcon, tr("Add bookmark"));
 	actAddBookmark->setIconVisibleInMenu(true);
+
+	QIcon editIcon("IconBookmarkEdit.png");
+	actEditBookmark = menuBookmarks->addAction(editIcon, tr("Edit bookmarks"));
 
 	menuBookmarks->addSeparator();
 	connect(menuBookmarks, SIGNAL(triggered(QAction *)), this, SLOT(on_menuBookmarks_triggered(QAction *)));
-
-
 
 
 	play_period_ms = 40; // 25 fps
@@ -348,12 +351,12 @@ void VideoPlayerTool::appendBookmark(unsigned long long pos) {
 	QIcon pixIcon(BASE_DIRECTORY "images/pixmaps/IconBookmark.png");
 
 	QString str;
-	int percent = (int)round((double)new_bookmark.prevAbsPosition / (double)playFileSize * 100.);
+	new_bookmark.percent = (int)round((double)new_bookmark.prevAbsPosition / (double)playFileSize * 100.);
 	fprintf(stderr, "[VidPlay]::%s:%d : append prevPos=%llu / %llu = %d %%\n",
 			__func__, __LINE__, new_bookmark.prevAbsPosition,playFileSize,
-			percent
+			new_bookmark.percent
 			);
-	str.sprintf("%d: %d %%", new_bookmark.index, percent);
+	str.sprintf("%d: %d %%", new_bookmark.index, new_bookmark.percent);
 	new_bookmark.pAction = menuBookmarks->addAction(pixIcon, tr("Mark ") + str);
 
 	m_listBookmarks.append(new_bookmark);
@@ -375,6 +378,18 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 
 			emit signalSaveSettings();
 		}
+	} else if(actEditBookmark == pAction) {
+		MovieBookmarkForm * editBookmarksForm = new MovieBookmarkForm(NULL);
+		if(pWorkspace) {
+			((QWorkspace *)pWorkspace)->addWindow((QWidget *)editBookmarksForm);
+
+		}
+		editBookmarksForm->setBookmarkList(m_listBookmarks);
+		connect(editBookmarksForm, SIGNAL(signalNewBookmarkList(QList<video_bookmark_t>)),
+				this, SLOT(slotNewBookmarkList(QList<video_bookmark_t>)));
+
+		// Set bookmarks
+		editBookmarksForm->show();
 
 	} else {
 		QList<video_bookmark_t>::iterator i;
@@ -396,6 +411,29 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 				return;
 			}
 		}
+	}
+}
+
+void VideoPlayerTool::slotNewBookmarkList(QList<video_bookmark_t> list) {
+	// clear actions
+	QList<video_bookmark_t>::iterator it;
+	for(it = m_listBookmarks.begin(); it != m_listBookmarks.end(); it++) {
+		// delete action
+		menuBookmarks->removeAction((*it).pAction);
+	}
+	m_listBookmarks.clear();
+
+	QList<unsigned long long> bmklist;
+	for(it = list.begin(); it != list.end(); it++) {
+		appendBookmark((*it).prevAbsPosition);
+		bmklist.append((*it).prevAbsPosition);
+	}
+
+	// Save settings
+	if(m_pWorkshopMovie) {
+		m_pWorkshopMovie->setListOfBookmarks(bmklist);
+
+		emit signalSaveSettings();
 	}
 }
 
