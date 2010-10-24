@@ -192,6 +192,7 @@ void VideoPlayerTool::initPlayer()
 	playerVBox->resize(320, 266);
 
 	playHBox = new Q3HBox(playerVBox);
+	playHBox->setSpacing(1);
 
 	rewindMovie = new QPushButton( playHBox);
 	{
@@ -281,7 +282,10 @@ void VideoPlayerTool::initPlayer()
 	connect(playScrollBar, SIGNAL(sliderReleased()), this, SLOT(slotReleaseScrollbar()));
 	connect(playScrollBar, SIGNAL(valueChanged(int)), this, SLOT(slotChangedScrollbar(int)));
 
-	// bookmarks button
+
+
+
+	// bookmarks button and menu
 	buttonBookmarks = new QPushButton( playHBox);
 	{
 		QPixmap pixMap;
@@ -292,21 +296,25 @@ void VideoPlayerTool::initPlayer()
 	}
 	buttonBookmarks->setFlat(true);
 	buttonBookmarks->setToggleButton(true);
+	buttonBookmarks->setToolTip(tr("Bookmarks"));
 
 	menuBookmarks = new QMenu(playHBox);
 	buttonBookmarks->setPopup(menuBookmarks);
 
-	// Append add button
+	// Append add and edit buttons
 	QIcon pixIcon("IconBookmark.png");
-	actAddBookmark = menuBookmarks->addAction(pixIcon, tr("Add bookmark"));
+	actAddBookmark = menuBookmarks->addAction(pixIcon, tr("Add"));
+	actAddBookmark->setToolTip(tr("Add a bookmark at this position in movie"));
 	actAddBookmark->setIconVisibleInMenu(true);
 
 	QIcon editIcon("IconBookmarkEdit.png");
-	actEditBookmark = menuBookmarks->addAction(editIcon, tr("Edit bookmarks"));
+	actEditBookmark = menuBookmarks->addAction(editIcon, tr("Edit"));
+	actEditBookmark->setIconVisibleInMenu(true);
+	actEditBookmark->setToolTip(tr("Edit bookmarks list"));
 
 	menuBookmarks->addSeparator();
-	connect(menuBookmarks, SIGNAL(triggered(QAction *)), this, SLOT(on_menuBookmarks_triggered(QAction *)));
 
+	connect(menuBookmarks, SIGNAL(triggered(QAction *)), this, SLOT(on_menuBookmarks_triggered(QAction *)));
 
 	play_period_ms = 40; // 25 fps
 
@@ -348,7 +356,21 @@ void VideoPlayerTool::appendBookmark(unsigned long long pos) {
 	new_bookmark.prevAbsPosition = pos;
 	// Add action
 	//QImage thumbImage = Original
+
+	bool icon_visible = false;
 	QIcon pixIcon(BASE_DIRECTORY "images/pixmaps/IconBookmark.png");
+	if(m_fileVA) {
+		if(m_fileVA->getPrevAbsolutePosition() == pos) {
+			// this position is the same than added position, so we can get the current image
+			QImage * pImage = detailsView->imageView()->getQImage();
+			if(pImage) {
+				//
+				QPixmap pixmap = QPixmap::fromImage(pImage->scaledToHeight(22));
+				pixIcon = QIcon(pixmap);
+				icon_visible = true;
+			}
+		}
+	}
 
 	QString str;
 	new_bookmark.percent = (int)round((double)new_bookmark.prevAbsPosition / (double)playFileSize * 100.);
@@ -357,7 +379,9 @@ void VideoPlayerTool::appendBookmark(unsigned long long pos) {
 			new_bookmark.percent
 			);
 	str.sprintf("%d: %d %%", new_bookmark.index, new_bookmark.percent);
+
 	new_bookmark.pAction = menuBookmarks->addAction(pixIcon, tr("Mark ") + str);
+	new_bookmark.pAction->setIconVisibleInMenu(icon_visible);
 
 	m_listBookmarks.append(new_bookmark);
 

@@ -1325,16 +1325,18 @@ void SwFilterManager::applyEditParameters()
 
 	txtcount=0;
 	combocount = 0;
-	for(int i=0; i < func->nb_params; i++)
-	{
-		swGetStringValueFromType(func->param_list[i].type, func->param_list[i].value, par);
-		sprintf(txt,"%s" // old text
-					"%s\t%c\t%s\t", // param : name \t type \t value \t
-					txt,
-					func->param_list[i].name,
-					func->param_list[i].type,
-					par
-					);
+	if(func->param_list) {
+		for(int i=0; i < func->nb_params; i++)
+		{
+			swGetStringValueFromType(func->param_list[i].type, func->param_list[i].value, par);
+			sprintf(txt,"%s" // old text
+						"%s\t%c\t%s\t", // param : name \t type \t value \t
+						txt,
+						func->param_list[i].name,
+						func->param_list[i].type,
+						par
+						);
+		}
 	}
 
 	// send function

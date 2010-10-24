@@ -415,11 +415,12 @@ void FileVideoAcquisition::slotRewindMovie()
 		m_prevPosition = 0;
 		av_seek_frame(m_pFormatCtx, m_videoStream, 0, 0);
 		playFrame = 0;
+		m_prevKeyFramePosition = 0;
+		m_nbFramesSinceKeyFrame = 0;
 	}
 
 	// read first frame
 	long theSize;
-
 	readImageBuffer(&theSize);
 }
 
@@ -493,6 +494,9 @@ void FileVideoAcquisition::rewindToPosMovie(unsigned long long l_position)
 				__func__, __LINE__,
 				dpos);
 	url_fseek(URLPB(m_pFormatCtx->pb), dpos, SEEK_SET);
+
+	m_nbFramesSinceKeyFrame = -1; // tell that we cannot know the last key frame
+	m_prevKeyFramePosition = 0;
 
 	// FIXME : update playFrame
 	playFrame -= JUMP_BUFFERSIZE / DEFAULT_FRAME_SIZE;
@@ -595,7 +599,7 @@ bool FileVideoAcquisition::GetNextFrame()
 	}
 
 loop_exit:
-PRINT_FIXME
+	PRINT_FIXME
 	// Decode the rest of the last frame
 	bytesDecoded = avcodec_decode_video(m_pCodecCtx, m_pFrame, &frameFinished,
 										rawData, bytesRemaining);
@@ -612,7 +616,9 @@ PRINT_FIXME
 
 	return frameFinished!=0;
 }
+
 #else
+
 bool FileVideoAcquisition::GetNextFrame()
 {
 	if(!m_pFormatCtx) {
@@ -651,9 +657,11 @@ bool FileVideoAcquisition::GetNextFrame()
 			counter++;
 		} else {
 			// If it's a video packet from our video stream...
-			if(packet.stream_index == m_videoStream) {
+			if(packet.stream_index == m_videoStream)
+			{
 				// Decode the packet
-				avcodec_decode_video(m_pCodecCtx, m_pFrame, &frameFinished, packet.data, packet.size);
+				avcodec_decode_video(m_pCodecCtx, m_pFrame, &frameFinished,
+									 packet.data, packet.size);
 
 				/*
 				PRINT_FIXME
@@ -661,22 +669,36 @@ bool FileVideoAcquisition::GetNextFrame()
 				if(fpacket) {
 					fwrite(packet.data, 1, packet.size, fpacket);
 					FileClose(fpacket);
-				}*/
+				}
+				*/
 
-				if (frameFinished)
+				if( frameFinished )
 				{
 					// fill recept buffer
 					fill_buffer();
 
 					// FIXME : OLD !!! increaseTimeFileVA();
-
 					// update playFrame
 					playFrame++;
 
+					//
+					if(m_pFrame->key_frame)
+					{
+						m_nbFramesSinceKeyFrame = 0;
+						m_prevKeyFramePosition = m_prevPosition;
+
+					//	fprintf(stderr, "FileVA::%s:%d : key frame = %d : frame=%d\n",
+					//			__func__, __LINE__, m_pFrame->key_frame, playFrame);
+					} else {
+						if(m_nbFramesSinceKeyFrame>=0) {
+							m_nbFramesSinceKeyFrame++;
+						}
+					}
+
 					return true;
-				}
-				else
+				} else {
 					counter++;
+				}
 			}
 
 			av_free_packet(&packet);
@@ -1263,7 +1285,6 @@ int FileVideoAcquisition::readImageRGB32NoAcq(unsigned char* image, long * buffe
                     exit(1);
                 }
             }
-
             sws_scale(img_convert_ctx,
                       m_pFrame->data,
                       m_pFrame->linesize, 0,

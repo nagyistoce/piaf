@@ -231,6 +231,19 @@ QT += qt3support
 CONFIG += uic3
 
 
+###########################################################
+## INSTALLATION
+target.path = /usr/local/piaf/
+
+images.path = /usr/local/piaf/images/
+images.files = pixmaps/
+
+INSTALLS += target images
+
+
+
+###########################################################
+## SUMMARY
 
 message( "Config: ==========================================")
 message( "INCLUDEPATH = $$INCLUDEPATH" )

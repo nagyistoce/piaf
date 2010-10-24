@@ -301,8 +301,7 @@ IplImage * swCreateImageHeader(CvSize size, int depth, int channels) {
 void swReleaseImage(IplImage ** img) {
 	if(!img) return;
 	if(!(*img) ) return;
-
-	#ifdef cv::Exception
+#ifdef cv::Exception
 	try {
 		cvReleaseImage(img);
 	} catch(cv::Exception e) {

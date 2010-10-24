@@ -2058,9 +2058,9 @@ void WorkshopApp::slotEditUndo()
   statusBar()->message(tr("Reverting last action..."));
 
   MultiDocView* m = (MultiDocView*) pWorkspace->activeWindow();
-  if ( m )
+  if ( m ) {
 //   m->undo();
-
+  }
   statusBar()->message(tr("Ready."));
 }
 

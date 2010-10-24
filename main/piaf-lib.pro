@@ -1,3 +1,4 @@
+# Project for Piaf API library
 TEMPLATE = lib
 
 TARGET = SwPluginCore
@@ -6,7 +7,7 @@ SOURCES = tools/src/SwPluginCore.cpp
 INCLUDEPATH += tools/inc/ inc
 DEPENDPATH += tools/inc/ inc/
 
-##INSTALATION
+##INSTALLATION
 target.path = /usr/local/lib/
 
 head.path = /usr/local/include/SwPlugin/

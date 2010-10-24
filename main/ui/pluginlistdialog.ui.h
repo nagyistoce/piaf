@@ -18,23 +18,25 @@
 void PluginListDialog::slotAddPlugin()
 {
 	QStringList files = Q3FileDialog::getOpenFileNames(
-		"",
-		lastPluginDir,
-		this,
-		"open file dialog",
-		tr("Choose one or more plugin(s)")); 
+			"",
+			lastPluginDir,
+			this,
+			"open file dialog",
+			tr("Choose one or more plugin(s)"));
+
 	QStringList list = files;
     QStringList::Iterator it = list.begin();
     while( it != list.end() ) {
 		// Store last plugin dir
 		QFileInfo fi(*it);
-		if(fi.exists())
+		if(fi.exists()) {
 			lastPluginDir = fi.dirPath(TRUE);
-		/*QListViewItem * item = */ new Q3ListViewItem(pluginListView, *it , "");
-		
-        ++it;
-    }
-	
+			/*QListViewItem * item = */
+			new Q3ListViewItem(pluginListView, *it , "");
+
+			++it;
+		}
+	}
 }
 
 
@@ -55,11 +57,11 @@ void PluginListDialog::slotIconPlugin()
 	
 	
 	QString s = Q3FileDialog::getOpenFileName(
-		fInfo.dirPath(TRUE),
-		"",
-		this,
-		"open icon dialog",
-		"Choose an icon" );
+			fInfo.dirPath(TRUE),
+			"",
+			this,
+			"open icon dialog",
+			"Choose an icon" );
 	if(!s.isNull()) {
 		QPixmap pixIcon;
 		if(pixIcon.load(s)) {
@@ -139,16 +141,16 @@ void PluginListDialog::init()
 				QStringList::Iterator itCmd = lst.begin();
 				QString cmd = *itCmd;
 				if(!cmd.isNull()) 
-				if(!cmd.isEmpty()) {
+					if(!cmd.isEmpty()) {
 					itCmd++;
 					QString val = *itCmd;
 					cmd = cmd.stripWhiteSpace();
 
 					Q3ListViewItem * item = new Q3ListViewItem(pluginListView, 
-											cmd, "");
+															   cmd, "");
 					val = val.stripWhiteSpace();
 					fprintf(stderr, "plugins : '%s' : '%s'\n",
-						cmd.latin1(), val.latin1());
+							cmd.latin1(), val.latin1());
 					if(!val.isNull()) {
 						item->setText(1, val);
 						if(pixIcon.load(val)) {

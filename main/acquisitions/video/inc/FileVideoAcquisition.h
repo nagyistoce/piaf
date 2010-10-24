@@ -31,6 +31,10 @@
 
 #include "ccvt.h"
 
+#ifndef MAX_PATH_LEN
+#define MAX_PATH_LEN	1024
+#endif
+
 extern "C" {
 #include <avcodec.h>
 #include <avformat.h>
@@ -144,20 +148,30 @@ public:
 	/** get position of picture n-1
 	 */
 	unsigned long long getPrevAbsolutePosition() { return m_prevPosition; }
+	unsigned long long getPrevKeyFramePosition() {
+		return m_prevKeyFramePosition; };
+	int getNbFramesSinceKeyFrame() {
+		return m_nbFramesSinceKeyFrame;
+	};
 
 	/** Return file size in bytes */
 	unsigned long long getFileSize() { return m_fileSize; }
 
 	/// Not really used, just for Video Device compatibility
 	char * getnorm() { static char norm[]="pal"; return norm;};
+
 	int setNorm(char * norm);
-	/// Set picture brightness, contrast, saturation, color, 
+
+	/// Set picture brightness, contrast, saturation, color,
 	int setpicture(int br, int hue, int col, int cont, int white);
+
 	int getpicture(video_picture * pic);
+
 	/** Gets palette id.
 		@see linux/videodev.h
 		*/
 	int getPalette();
+
 	/** @brief Return the index of current frame, from start */
 	int getPlayFrame() { return playFrame; };
 	
@@ -174,6 +188,7 @@ public:
 	int get_uW();
 	int get_vW();
 	enum PixelFormat get_pixfmt();
+
 	/** @brief Go to absolute position in file (in bytes from start) */
 	void rewindToPosMovie(unsigned long long position);
 	bool GetNextFrame();
@@ -184,30 +199,39 @@ private:
 	void fill_buffer();
 
 private:
-	// Video file name
-	char m_videoFileName[128];
-    // FFMPEG Format Context
+	/// Video file name
+	char m_videoFileName[MAX_PATH_LEN];
+
+	/// FFMPEG Format Context
 	AVFormatContext *m_pFormatCtx;
-    // FFMPEG Codec Context
+
+	/// FFMPEG Codec Context
     AVCodecContext  *m_pCodecCtx;
     AVCodec         *m_pCodec;
 
-	// FFMPEG Frames
+	/// FFMPEG Frames
     AVFrame         *m_pFrame; 
-    AVFrame         *m_pFrameRGB;
-    bool m_isJpeg;
+
+	/// FFMPEG Frames decoded in RGB
+	AVFrame         *m_pFrameRGB;
+
+	bool m_isJpeg;
+
 	// RAW Data buffer
  	unsigned char	*receptBuffer;
 	unsigned char	*m_noPitchBuffer;
 	long m_noPitchBufferSize;
+
 	// Original pixel format image buffer
 	uint8_t         *m_origbuff;
 	// RGB image buffer
 	uint8_t         *m_inbuff;
+
 	// flag indicating that we have initialised the avcodec lib²
 	bool m_bAvcodecIsInitialized;
 	bool myVDIsInitialised;
 	bool myAcqIsInitialised;
+
 	// no of current stream
 	int m_videoStream;
 	AVPacket packet;
@@ -219,7 +243,8 @@ private:
 	
 	time_t timeref_sec;
 	time_t timestep_sec;
-#ifdef WIN32 
+
+#ifdef WIN32
 	// The type suseconds_t shall be a signed integer type capable of storing values at least in the range [-1, 1000000].
 	long timestep_usec;
 	long timeref_usec;
@@ -227,7 +252,9 @@ private:
 	suseconds_t timestep_usec;
 	suseconds_t timeref_usec;
 #endif
+
 	long playFrame;
+
 	unsigned long long m_fileSize;
 
 	/// Usage to be confirmed...
@@ -235,6 +262,8 @@ private:
 
 	// Previous picture position
 	unsigned long long m_prevPosition;
+	unsigned long long m_prevKeyFramePosition;
+	int m_nbFramesSinceKeyFrame;
 };
 
 #endif
