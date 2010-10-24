@@ -2,7 +2,7 @@
 	  workshopimage.h  -  image component for Piaf
 							 -------------------
 	begin                : ven nov 29 15:53:48 UTC 2002
-	copyright            : (C) 2002 by Olivier Viné
+	copyright            : (C) 2002 by Olivier VinÃ©
 	email                : olivier.vine@sisell.com
  ***************************************************************************/
 
@@ -69,13 +69,15 @@ public:
 	~ImageWidget()
 	{
 	}
-
+	QImage * getQImage() { return dImage; };
 	void setRefImage(QImage *pIm)
 	{
 		dImage = pIm;
-		if(dImage)
-			if(dImage->depth()==8)
+		if(dImage) {
+			if(dImage->depth()==8) {
 				setColorMode(m_colorMode);
+			}
+		}
 		update();
 	}
 

@@ -166,6 +166,8 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv, QWidget *p_parent,
 			viewSize.width = imageSize.width / downscale;
 			viewSize.height = imageSize.height / downscale;
 
+			while(viewSize.width % 4) { viewSize.width--; }
+
 			fprintf(stderr, "WImgT::%s:%d : ImgRGB= %d x %d !! "
 					"\tView size : %lu x %lu "
 					"===========> downscale = %d "
@@ -299,6 +301,8 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 
 		if(first) {
 			viewSize.width = imageSize.width;
+			while(viewSize.width % 4) { viewSize.width--; }
+
 			viewSize.height = imageSize.height;
 		}
 		viewPixel = viewSize.width * viewSize.height;
@@ -577,6 +581,8 @@ void WorkshopImageTool::changeViewSize()
 	// realloc
 	if(ZoomScale>0) {
 		viewSize.width  -= (viewSize.width % ZoomScale);
+		while(viewSize.width % 4) { viewSize.width--; }
+
 		viewSize.height -= (viewSize.height % ZoomScale);
 	}
 
