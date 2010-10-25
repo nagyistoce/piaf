@@ -1099,6 +1099,16 @@ void SwFilterManager::slotEdit()
 		fgrid->addWidget(paramsL2, 1, 1);
 
 
+		// PID
+		QLabel *paramsPid = new QLabel(QString(tr("PID:")), wid, 0, 0);
+		fgrid->addWidget(paramsPid, 2, 0);
+
+		QString pidStr;
+		pidStr.setNum(pEditPlugin->filter->childpid);
+		QLabel *paramsPid2 = new QLabel(pidStr, wid, 0, 0);
+		fgrid->addWidget(paramsPid2, 2, 1);
+
+
 		// for each parameter :
 		if(paramsEdit)
 			delete [] paramsEdit;
@@ -1112,13 +1122,13 @@ void SwFilterManager::slotEdit()
 		{
 			// Add param name then param value
 			QLabel *pname = new QLabel(QString(func->param_list[i].name), wid, 0, 0);
-			fgrid->addWidget(pname, 2+i, 0);
+			fgrid->addWidget(pname, 3+i, 0);
 
 			swGetStringValueFromType(func->param_list[i].type, func->param_list[i].value, txt);
 			switch(func->param_list[i].type) {
 			case swStringList: {
 				comboEdit[combocount] = new QComboBox(wid);
-				fgrid->addWidget(comboEdit[combocount], 2+i, 1);
+				fgrid->addWidget(comboEdit[combocount], 3+i, 1);
 				swStringListStruct * s = (swStringListStruct *)func->param_list[i].value;
 				comboEdit[combocount]->setFixedHeight(28);
 				for(int item=0;item<s->nbitems;item++)
@@ -1129,7 +1139,7 @@ void SwFilterManager::slotEdit()
 			default:
 				paramsEdit[txtcount] = new Q3TextEdit(QString(txt), NULL,
 									wid, 0 );
-				fgrid->addWidget(paramsEdit[txtcount], 2+i, 1);
+				fgrid->addWidget(paramsEdit[txtcount], 3+i, 1);
 				paramsEdit[txtcount]->setFixedHeight(28);
 				txtcount++;
 				break;
