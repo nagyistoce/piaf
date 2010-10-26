@@ -58,7 +58,7 @@ class WorkshopMovie;
 typedef struct {
 	QAction * pAction;
 	int index;
-	unsigned long long prevAbsPosition; /*! Absolute position in file */
+	t_movie_pos movie_pos; /*! Position in file */
 	int percent;	/*! Percentage of the movie size */
 } video_bookmark_t;
 
@@ -116,7 +116,7 @@ private:
 	QMenu * menuBookmarks;
 	QAction * actAddBookmark;
 	QAction * actEditBookmark;
-	void appendBookmark(unsigned long long pos);
+	void appendBookmark(t_movie_pos pos);
 	bool playGrayscale;
 
 	Q3HBox * playHBox;

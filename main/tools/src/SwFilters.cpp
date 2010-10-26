@@ -1084,29 +1084,29 @@ void SwFilterManager::slotEdit()
 		Q3GridLayout * fgrid = new Q3GridLayout(wid, 1+func->nb_params, 2, 0, -1, NULL);
 
 		// add function name
-
-		QLabel *funcL = new QLabel(QString(tr("Function:")), wid, 0, 0);
-		fgrid->addWidget(funcL, 0, 0);
-		QLabel *funcL2 = new QLabel(QString(func->name), wid, 0, 0);
-		fgrid->addWidget(funcL2, 0, 1);
-
-		// Parameters
-		QLabel *paramsL = new QLabel(QString(tr("Parameters:")), wid, 0, 0);
-		sprintf(txt, "%d", func->nb_params);
-		fgrid->addWidget(paramsL, 1, 0);
-
-		QLabel *paramsL2 = new QLabel(QString(txt), wid, 0, 0);
-		fgrid->addWidget(paramsL2, 1, 1);
-
-
 		// PID
-		QLabel *paramsPid = new QLabel(QString(tr("PID:")), wid, 0, 0);
-		fgrid->addWidget(paramsPid, 2, 0);
+		QLabel *paramsPid = new QLabel(tr("PID:"), wid, 0, 0);
+		fgrid->addWidget(paramsPid, 0, 0);
 
 		QString pidStr;
 		pidStr.setNum(pEditPlugin->filter->childpid);
 		QLabel *paramsPid2 = new QLabel(pidStr, wid, 0, 0);
-		fgrid->addWidget(paramsPid2, 2, 1);
+		fgrid->addWidget(paramsPid2, 0, 1);
+
+		QLabel *funcL = new QLabel(tr("Function:"), wid, 0, 0);
+		fgrid->addWidget(funcL, 1, 0);
+		QLabel *funcL2 = new QLabel(QString(func->name), wid, 0, 0);
+		fgrid->addWidget(funcL2, 1, 1);
+
+		// Parameters
+		QLabel *paramsL = new QLabel(tr("Parameters:"), wid, 0, 0);
+		sprintf(txt, "%d", func->nb_params);
+		fgrid->addWidget(paramsL, 2, 0);
+
+		QLabel *paramsL2 = new QLabel(QString(txt), wid, 0, 0);
+		fgrid->addWidget(paramsL2, 2, 1);
+
+
 
 
 		// for each parameter :

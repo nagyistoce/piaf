@@ -37,6 +37,15 @@
 #include "sw_types.h"
 #include "workshopcomponent.h"
 
+/** @brief Position in movie */
+typedef struct {
+	unsigned long long prevAbsPosition; /*! Position in file of last frame */
+
+	unsigned long long prevKeyFramePosition; /*! Position in file of last key frame */
+	int nbFramesSinceKeyFrame; /*! Nb of frames since last key frame */
+} t_movie_pos;
+
+
 /**
 	This handles mainly the path of the file saved on disk.
 	
@@ -81,8 +90,8 @@ public:
 
 	// Bookmarks
 	bool hasBookmarks() { return !m_listBookmarks.isEmpty(); };
-	QList<unsigned long long> getListOfBookmarks() { return m_listBookmarks; };
-	void setListOfBookmarks(QList<unsigned long long> list) {
+	QList<t_movie_pos> getListOfBookmarks() { return m_listBookmarks; };
+	void setListOfBookmarks(QList<t_movie_pos> list) {
 		m_listBookmarks = list;
 	};
 
@@ -90,7 +99,7 @@ private:
 	char FilePath[MAX_PATH_LEN];
 
 	/// list of positions in file
-	QList<unsigned long long> m_listBookmarks;
+	QList<t_movie_pos> m_listBookmarks;
 
 protected:
     //! Calls itemChanged()

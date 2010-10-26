@@ -415,8 +415,9 @@ void FileVideoAcquisition::slotRewindMovie()
 		m_prevPosition = 0;
 		av_seek_frame(m_pFormatCtx, m_videoStream, 0, 0);
 		playFrame = 0;
-		m_prevKeyFramePosition = 0;
-		m_nbFramesSinceKeyFrame = 0;
+		m_movie_pos.prevAbsPosition = 0;
+		m_movie_pos.prevKeyFramePosition = 0;
+		m_movie_pos.nbFramesSinceKeyFrame = 0;
 	}
 
 	// read first frame
@@ -495,8 +496,8 @@ void FileVideoAcquisition::rewindToPosMovie(unsigned long long l_position)
 				dpos);
 	url_fseek(URLPB(m_pFormatCtx->pb), dpos, SEEK_SET);
 
-	m_nbFramesSinceKeyFrame = -1; // tell that we cannot know the last key frame
-	m_prevKeyFramePosition = 0;
+	m_movie_pos.nbFramesSinceKeyFrame = -1; // tell that we cannot know the last key frame
+	m_movie_pos.prevKeyFramePosition = 0;
 
 	// FIXME : update playFrame
 	playFrame -= JUMP_BUFFERSIZE / DEFAULT_FRAME_SIZE;
@@ -632,7 +633,8 @@ bool FileVideoAcquisition::GetNextFrame()
 	int ret_val;
 	int old_pos;
 
-	m_prevPosition = url_ftell(URLPB(m_pFormatCtx->pb));
+	m_movie_pos.prevAbsPosition =
+		m_prevPosition = url_ftell(URLPB(m_pFormatCtx->pb));
 	old_pos = m_prevPosition;
 
 	while(counter<25)
@@ -684,15 +686,15 @@ bool FileVideoAcquisition::GetNextFrame()
 					//
 					if(m_pFrame->key_frame)
 					{
-						m_nbFramesSinceKeyFrame = 0;
-						m_prevKeyFramePosition = m_prevPosition;
+						m_movie_pos.nbFramesSinceKeyFrame = 0;
+						m_movie_pos.prevKeyFramePosition = m_prevPosition;
 
 					//	fprintf(stderr, "FileVA::%s:%d : key frame = %d : frame=%d\n",
 					//			__func__, __LINE__, m_pFrame->key_frame, playFrame);
 					} else {
-						if(m_nbFramesSinceKeyFrame>=0) {
-							m_nbFramesSinceKeyFrame++;
-						}
+						if(m_movie_pos.nbFramesSinceKeyFrame>=0) {
+							m_movie_pos.nbFramesSinceKeyFrame++;
+						} // else is < 0 we don't know where we are
 					}
 
 					return true;

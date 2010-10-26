@@ -304,17 +304,30 @@ void WorkshopApp::loadOnStart() {
 											// PARSE
 											QStringList positions( QStringList::split( ",", bkmks ) );
 											QStringList::Iterator itPos = positions.begin();
-											QList<unsigned long long> bkList;
+											QList<t_movie_pos> bkList;
 											for( ; itPos != positions.end(); itPos++) {
 												QString posStr = *itPos;
 												if(!posStr.isNull()) {
-													bool ok;
-													unsigned long long prevPos = posStr.toLongLong(&ok);
-													if(ok) {
-														fprintf(stderr, "\tread bookmark=%llu\n",
-																prevPos);
-														bkList.append(prevPos);
+													char moviepos[32];
+													strcpy(moviepos, posStr.toAscii().data());
+
+													//
+													t_movie_pos pos;
+													// scan string
+													unsigned long long absPos = 0; int nFrames = 1;
+													int retscan = sscanf(moviepos, "%llu+%d", &absPos, &nFrames);
+													if(retscan == 2) {
+														pos.nbFramesSinceKeyFrame = nFrames;
+														pos.prevKeyFramePosition = pos.prevAbsPosition = absPos;
+													} else {
+														// by default, no key frame
+														pos.nbFramesSinceKeyFrame = 1;
+														pos.prevKeyFramePosition = pos.prevAbsPosition = absPos;
 													}
+
+													fprintf(stderr, "\tread bookmark=%llu+%d frames\n",
+															pos.prevKeyFramePosition, pos.nbFramesSinceKeyFrame);
+													bkList.append(pos);
 												}
 											}
 											pWmov->setListOfBookmarks(bkList);
@@ -360,11 +373,12 @@ void saveItem(FILE * f, ExplorerItem *item) {
 				fprintf(f, "Movie:\t%s/%s", pWmov->getPathName().latin1(), pWmov->getFileName().latin1());
 				if(pWmov->hasBookmarks()) {
 					fprintf(f, "\t");
-					QList<unsigned long long> l_listBookmarks = pWmov->getListOfBookmarks();
-					QList<unsigned long long>::iterator it ;
+					QList<t_movie_pos> l_listBookmarks = pWmov->getListOfBookmarks();
+					QList<t_movie_pos>::iterator it ;
 					for(it = l_listBookmarks.begin(); it != l_listBookmarks.end(); ++it) {
 						// save number
-						fprintf(f, "%llu,", *it);
+						t_movie_pos pos = (*it);
+						fprintf(f, "%llu+%d,", pos.prevKeyFramePosition, pos.nbFramesSinceKeyFrame);
 					}
 				}
 				fprintf(f, "\n");
