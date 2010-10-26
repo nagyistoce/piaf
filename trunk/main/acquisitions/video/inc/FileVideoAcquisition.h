@@ -11,6 +11,7 @@
 #define _FILE_VIDEOACQUISITION_
 
 #include "nolinux_videodev.h"
+#include "workshopmovie.h"
 
 
 #ifndef WIN32
@@ -41,6 +42,7 @@ extern "C" {
 }
 
 #define SUPPORTED_VIDEO_CODECS_EXT "*.AVI *.avi *.MPG *.mpg *.MPEG *.mpeg *.vob"
+
 
 
 /** Video acquisition high-level class
@@ -148,11 +150,10 @@ public:
 	/** get position of picture n-1
 	 */
 	unsigned long long getPrevAbsolutePosition() { return m_prevPosition; }
-	unsigned long long getPrevKeyFramePosition() {
-		return m_prevKeyFramePosition; };
-	int getNbFramesSinceKeyFrame() {
-		return m_nbFramesSinceKeyFrame;
-	};
+
+
+	/** @brief Get last movie position */
+	t_movie_pos getMoviePosition() { return m_movie_pos; };
 
 	/** Return file size in bytes */
 	unsigned long long getFileSize() { return m_fileSize; }
@@ -262,8 +263,8 @@ private:
 
 	// Previous picture position
 	unsigned long long m_prevPosition;
-	unsigned long long m_prevKeyFramePosition;
-	int m_nbFramesSinceKeyFrame;
+	/** @brief Last movie position, defined by the position of last key frame and nb of frame since this key frame */
+	t_movie_pos m_movie_pos;
 };
 
 #endif

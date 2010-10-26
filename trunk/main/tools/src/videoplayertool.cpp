@@ -96,8 +96,8 @@ int VideoPlayerTool::setWorkshopMovie(WorkshopMovie * wm)
 	// first load file
 	int ret = setFile((char *)wm->getFilePath(), 0);
 
-	QList<unsigned long long> bmklist = m_pWorkshopMovie->getListOfBookmarks();
-	QList<unsigned long long>::iterator it;
+	QList<t_movie_pos> bmklist = m_pWorkshopMovie->getListOfBookmarks();
+	QList<t_movie_pos>::iterator it;
 	for(it = bmklist.begin(); it!=bmklist.end(); it++) {
 		appendBookmark( (*it) );
 	}
@@ -349,18 +349,19 @@ void VideoPlayerTool::slotResizeTool(QResizeEvent *e)
 	detailsView->display()->resize(w-4, h-36);
 }
 
-void VideoPlayerTool::appendBookmark(unsigned long long pos) {
+void VideoPlayerTool::appendBookmark(t_movie_pos pos) {
 	// create bookmark
 	video_bookmark_t new_bookmark;
 	new_bookmark.index = m_listBookmarks.count()+1;
-	new_bookmark.prevAbsPosition = pos;
+	new_bookmark.movie_pos = pos;
+
 	// Add action
 	//QImage thumbImage = Original
 
 	bool icon_visible = false;
 	QIcon pixIcon(BASE_DIRECTORY "images/pixmaps/IconBookmark.png");
 	if(m_fileVA) {
-		if(m_fileVA->getPrevAbsolutePosition() == pos) {
+		if(m_fileVA->getPrevAbsolutePosition() == pos.prevAbsPosition) {
 			// this position is the same than added position, so we can get the current image
 			QImage * pImage = detailsView->imageView()->getQImage();
 			if(pImage) {
@@ -373,9 +374,10 @@ void VideoPlayerTool::appendBookmark(unsigned long long pos) {
 	}
 
 	QString str;
-	new_bookmark.percent = (int)round((double)new_bookmark.prevAbsPosition / (double)playFileSize * 100.);
+
+	new_bookmark.percent = (int)round((double)new_bookmark.movie_pos.prevAbsPosition / (double)playFileSize * 100.);
 	fprintf(stderr, "[VidPlay]::%s:%d : append prevPos=%llu / %llu = %d %%\n",
-			__func__, __LINE__, new_bookmark.prevAbsPosition,playFileSize,
+			__func__, __LINE__, new_bookmark.movie_pos.prevAbsPosition, playFileSize,
 			new_bookmark.percent
 			);
 	str.sprintf("%d: %d %%", new_bookmark.index, new_bookmark.percent);
@@ -384,7 +386,6 @@ void VideoPlayerTool::appendBookmark(unsigned long long pos) {
 	new_bookmark.pAction->setIconVisibleInMenu(icon_visible);
 
 	m_listBookmarks.append(new_bookmark);
-
 }
 
 void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
@@ -393,11 +394,11 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 	if(actAddBookmark == pAction) {
 		fprintf(stderr, "[VidPlay]::%s:%d : create bookmark for : pos=%llu\n",
 				__func__, __LINE__, m_fileVA->getPrevAbsolutePosition());
-		appendBookmark(m_fileVA->getPrevAbsolutePosition());
+		appendBookmark(m_fileVA->getMoviePosition());
 
 		if(m_pWorkshopMovie) {
-			QList<unsigned long long> bmklist = m_pWorkshopMovie->getListOfBookmarks();
-			bmklist.append(m_fileVA->getPrevAbsolutePosition());
+			QList<t_movie_pos> bmklist = m_pWorkshopMovie->getListOfBookmarks();
+			bmklist.append(m_fileVA->getMoviePosition());
 			m_pWorkshopMovie->setListOfBookmarks(bmklist);
 
 			emit signalSaveSettings();
@@ -423,13 +424,22 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 				// select an existing bookmark
 				fprintf(stderr, "[VidPlay]::%s:%d : selected bookmark idx=%d => pos=%llu\n",
 						__func__, __LINE__, sel_bookmark.index,
-						sel_bookmark.prevAbsPosition);
+						sel_bookmark.movie_pos.prevAbsPosition);
 
-				m_fileVA->setAbsolutePosition(sel_bookmark.prevAbsPosition);
+				if(sel_bookmark.movie_pos.nbFramesSinceKeyFrame <= 1) {
+					m_fileVA->setAbsolutePosition(sel_bookmark.movie_pos.prevAbsPosition);
 
-				// display
-				slotStepMovie();
+					// display
+					slotStepMovie();
+				} // else go some frames before
+				else {
+					m_fileVA->setAbsolutePosition(sel_bookmark.movie_pos.prevKeyFramePosition);
 
+					// display
+					for(int nb = 0; nb<sel_bookmark.movie_pos.nbFramesSinceKeyFrame; nb++) {
+						slotStepMovie();
+					}
+				}
 				detailsView->setWorkshopImage(detailsImage);
 
 				return;
@@ -447,10 +457,10 @@ void VideoPlayerTool::slotNewBookmarkList(QList<video_bookmark_t> list) {
 	}
 	m_listBookmarks.clear();
 
-	QList<unsigned long long> bmklist;
+	QList<t_movie_pos> bmklist;
 	for(it = list.begin(); it != list.end(); it++) {
-		appendBookmark((*it).prevAbsPosition);
-		bmklist.append((*it).prevAbsPosition);
+		appendBookmark((*it).movie_pos);
+		bmklist.append((*it).movie_pos);
 	}
 
 	// Save settings
