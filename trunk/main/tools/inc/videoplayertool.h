@@ -116,9 +116,10 @@ private:
 	QMenu * menuBookmarks;
 	QAction * actAddBookmark;
 	QAction * actEditBookmark;
+	QAction * actPlayToBookmark;
 	void appendBookmark(t_movie_pos pos);
 	bool playGrayscale;
-
+	unsigned long long m_nextBookmarkPos;
 	Q3HBox * playHBox;
 	QLabel * playLabel;
 
@@ -170,6 +171,7 @@ private slots:
 	// bookmarks
 	void on_menuBookmarks_triggered(QAction *);
 	void slotNewBookmarkList(QList<video_bookmark_t>);
+	void slotBookmarkReached();
 };
 
 #endif

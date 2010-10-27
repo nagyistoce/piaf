@@ -325,9 +325,12 @@ void WorkshopApp::loadOnStart() {
 														pos.prevKeyFramePosition = pos.prevAbsPosition = absPos;
 													}
 
-													fprintf(stderr, "\tread bookmark=%llu+%d frames\n",
-															pos.prevKeyFramePosition, pos.nbFramesSinceKeyFrame);
-													bkList.append(pos);
+													if(pos.prevAbsPosition>0 || pos.nbFramesSinceKeyFrame>1 ) // if 0, that's just a rewind
+													{
+														fprintf(stderr, "\tread bookmark=%llu+%d frames\n",
+																pos.prevKeyFramePosition, pos.nbFramesSinceKeyFrame);
+														bkList.append(pos);
+													}
 												}
 											}
 											pWmov->setListOfBookmarks(bkList);
