@@ -488,7 +488,7 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 }
 void VideoPlayerTool::slotBookmarkReached()
 {
-	   if ( m_fileVA->getPrevAbsolutePosition() > m_nextBookmarkPos)
+	   if ( m_fileVA->getPrevAbsolutePosition() >= m_nextBookmarkPos)
 	   {
 			   disconnect(playTimer, SIGNAL(timeout()), this, SLOT(slotBookmarkReached()));
 			   slotPlayPauseMovie();
