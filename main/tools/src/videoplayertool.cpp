@@ -312,6 +312,11 @@ void VideoPlayerTool::initPlayer()
 	actEditBookmark->setIconVisibleInMenu(true);
 	actEditBookmark->setToolTip(tr("Edit bookmarks list"));
 
+	QIcon playIcon("IconBookmarkPlay.png");
+	actPlayToBookmark = menuBookmarks->addAction(playIcon, tr("Play to next bmrk"));
+	actPlayToBookmark->setIconVisibleInMenu(true);
+	actPlayToBookmark->setToolTip(tr("Play video until next bookmark"));
+
 	menuBookmarks->addSeparator();
 
 	connect(menuBookmarks, SIGNAL(triggered(QAction *)), this, SLOT(on_menuBookmarks_triggered(QAction *)));
@@ -403,6 +408,7 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 
 			emit signalSaveSettings();
 		}
+
 	} else if(actEditBookmark == pAction) {
 		MovieBookmarkForm * editBookmarksForm = new MovieBookmarkForm(NULL);
 		if(pWorkspace) {
@@ -416,6 +422,39 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 		// Set bookmarks
 		editBookmarksForm->show();
 
+	} else if (actPlayToBookmark == pAction) {
+
+		if(!m_fileVA) {
+			slotRewindStartMovie();
+		}
+
+		//find the next bookmark
+		unsigned long long curpos = m_fileVA->getPrevAbsolutePosition();
+		m_nextBookmarkPos = curpos;
+		QList<video_bookmark_t>::iterator i;
+		// find the next bookmark
+		for (i = m_listBookmarks.begin(); i != m_listBookmarks.end(); ++i)
+		{
+			if (curpos == m_nextBookmarkPos // first iteration
+				&& i->movie_pos.prevAbsPosition > curpos // bookmark # i is after current position
+				) { // we are at
+				m_nextBookmarkPos =  i->movie_pos.prevAbsPosition;
+
+				fprintf(stderr, "[VidPlayer]::%s:%d : curpos=%llu => next = %llu\n", __func__,__LINE__, curpos, m_nextBookmarkPos);
+				break; //
+			} // else, since the bookmarks aren't ordered, find if there is another one before m_nextBookmarkPos
+			else if (i->movie_pos.prevAbsPosition > curpos // bookmark # i is after current position
+					   && i->movie_pos.prevAbsPosition < m_nextBookmarkPos // and before the curent next bookmark
+					   ) {
+				m_nextBookmarkPos =  i->movie_pos.prevAbsPosition;
+				fprintf(stderr, "[VidPlayer]::%s:%d : curpos=%llu => next = %llu\n", __func__,__LINE__, curpos, m_nextBookmarkPos);
+			}
+		}
+		if (curpos >= m_nextBookmarkPos)
+			return;
+
+		connect(playTimer, SIGNAL(timeout()), this, SLOT(slotBookmarkReached()));
+		slotPlayPauseMovie();
 	} else {
 		QList<video_bookmark_t>::iterator i;
 		for (i = m_listBookmarks.begin(); i != m_listBookmarks.end(); ++i) {
@@ -446,6 +485,14 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 			}
 		}
 	}
+}
+void VideoPlayerTool::slotBookmarkReached()
+{
+	   if ( m_fileVA->getPrevAbsolutePosition() > m_nextBookmarkPos)
+	   {
+			   disconnect(playTimer, SIGNAL(timeout()), this, SLOT(slotBookmarkReached()));
+			   slotPlayPauseMovie();
+	   }
 }
 
 void VideoPlayerTool::slotNewBookmarkList(QList<video_bookmark_t> list) {
