@@ -313,7 +313,7 @@ void VideoPlayerTool::initPlayer()
 	actEditBookmark->setToolTip(tr("Edit bookmarks list"));
 
 	QIcon playIcon("IconBookmarkPlay.png");
-	actPlayToBookmark = menuBookmarks->addAction(playIcon, tr("Play to next bmrk"));
+	actPlayToBookmark = menuBookmarks->addAction(playIcon, tr("Play until bmrk"));
 	actPlayToBookmark->setIconVisibleInMenu(true);
 	actPlayToBookmark->setToolTip(tr("Play video until next bookmark"));
 
@@ -488,11 +488,10 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 }
 void VideoPlayerTool::slotBookmarkReached()
 {
-	   if ( m_fileVA->getPrevAbsolutePosition() >= m_nextBookmarkPos)
-	   {
-			   disconnect(playTimer, SIGNAL(timeout()), this, SLOT(slotBookmarkReached()));
-			   slotPlayPauseMovie();
-	   }
+	if ( m_fileVA->getPrevAbsolutePosition() >= m_nextBookmarkPos)
+	{
+		slotPlayPauseMovie();
+	}
 }
 
 void VideoPlayerTool::slotNewBookmarkList(QList<video_bookmark_t> list) {
@@ -611,13 +610,15 @@ void VideoPlayerTool::slotPlayPauseMovie()
 	QPixmap icon;
 	if(playTimer && m_fileVA) {
 		if(playTimer->isActive()) {
-			playTimer->stop();
+		  disconnect(playTimer, SIGNAL(timeout()), this, SLOT(slotBookmarkReached()));			
+		  playTimer->stop();
 			if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPlay.png"))
 				playMovie->setPixmap(icon);
 		} else {
 			playTimer->start((int)(1000.f / (playSpeed * playFPS)));
 			if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPause.png"))
 				playMovie->setPixmap(icon);
+			
 		}
 	}
 }
