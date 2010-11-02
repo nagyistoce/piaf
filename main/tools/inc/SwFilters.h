@@ -30,9 +30,11 @@
 #include <q3listview.h>
 #include <q3textedit.h>
 #include <qcombobox.h>
+
 //Added by qt3to4:
 #include <QCloseEvent>
 #include <Q3PtrList>
+#include <QLineEdit>
 
 // SisellWorkshop filters defines
 //#include <SwFiltersDefs.h>
@@ -255,7 +257,7 @@ private:
 
 
 	/// current edited plugin
-	Q3TextEdit ** paramsEdit;
+	QLineEdit ** paramsEdit;
 	QComboBox ** comboEdit;
 	int idEditPlugin;
 	int idViewPlugin;

@@ -19,6 +19,7 @@
 
 #include "SwPluginCore.h"
 #include "sw_types.h"
+
 /*
 compiles with :
  gcc -Wall -I/usr/local/sisell/include SwPluginCore.cpp -c
@@ -1118,11 +1119,11 @@ fprintf(stderr, SWPLUGIN_SIDE_PRINT "PLUGIN_SIDE\t");
 		swGetValueFromTypeAndString(parlist->type, arg, parlist->value);
 
 		// debug
-		char txt[64];
+		char txt[2048];// may be a big list of strings
 		swGetStringValueFromType(parlist->type, parlist->value, txt);
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "PLUGIN:\t\tRead parameter # %d : "
 						"type=0x%02x '%s' = '%s' (after processing)\n",
-			i, parlist->type, parlist->name, txt);
+						i, parlist->type, parlist->name, txt);
 	}
 	return 1;
 }
