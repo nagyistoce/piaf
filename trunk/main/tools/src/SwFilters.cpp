@@ -183,6 +183,8 @@ void SwFilterManager::init() {
 	idEditPlugin = 0;
 	idViewPlugin = 0;
 	paramsEdit = NULL;
+	comboEdit = NULL;
+
 	imageTmp = NULL;
 
 //QGridLayout ( QWidget * parent, int nRows = 1, int nCols = 1, int margin = 0, int space = -1, const char * name = 0 )
@@ -240,7 +242,7 @@ void SwFilterManager::init() {
 				if(curF->icon)
 					bIcon.load( curF->icon );
 				else
-					bIcon.load("filter.png");
+					bIcon.load("filterwide.png");
 				subcatItem->setPixmap(0, bIcon);
 			}
 
@@ -1068,11 +1070,10 @@ void SwFilterManager::slotEdit()
 		// ---------- creates window for editing parameters ------------
 		pEditPlugin->mwPluginEdit = (QWidget *)new QWidget(NULL, func->name, 0);
 
-		if(pWorkspace) {
-			pWorkspace->addWindow((QWidget *)pEditPlugin->mwPluginEdit);
-		}
+		QIcon pixIcon("configure.png");
+		pEditPlugin->mwPluginEdit->setWindowIcon(pixIcon);
 
-		char txt[256];
+		char txt[512];
 		sprintf(txt, "%s parameters", func->name);
 		pEditPlugin->mwPluginEdit->setCaption(txt);
 		// names, labels ...
@@ -1112,9 +1113,15 @@ void SwFilterManager::slotEdit()
 		// for each parameter :
 		if(paramsEdit)
 			delete [] paramsEdit;
-		paramsEdit = new Q3TextEdit * [ func->nb_params ]; // for scalars
+		if(comboEdit)
+			delete [] comboEdit;
+
+		paramsEdit = new QLineEdit * [ func->nb_params ]; // for scalars
+		memset(paramsEdit, 0, sizeof(QLineEdit *) * func->nb_params);
 
 		comboEdit = new QComboBox * [ func->nb_params ]; // for lists
+		memset(comboEdit, 0, sizeof(QComboBox *) * func->nb_params);
+
 		int txtcount = 0;
 		int combocount = 0;
 
@@ -1125,20 +1132,24 @@ void SwFilterManager::slotEdit()
 			fgrid->addWidget(pname, 3+i, 0);
 
 			swGetStringValueFromType(func->param_list[i].type, func->param_list[i].value, txt);
+
 			switch(func->param_list[i].type) {
 			case swStringList: {
 				comboEdit[combocount] = new QComboBox(wid);
 				fgrid->addWidget(comboEdit[combocount], 3+i, 1);
+
 				swStringListStruct * s = (swStringListStruct *)func->param_list[i].value;
 				comboEdit[combocount]->setFixedHeight(28);
-				for(int item=0;item<s->nbitems;item++)
+				for(int item=0;item<s->nbitems;item++) {
+					fprintf(stderr, "[SwFilters] %s:%d insert item [%d/%d]='%s'\n",
+							__func__, __LINE__, item, s->nbitems, s->list[item]);
 					comboEdit[combocount]->insertItem( s->list[item], -1);
+				}
 				combocount++;
 				}
 				break;
 			default:
-				paramsEdit[txtcount] = new Q3TextEdit(QString(txt), NULL,
-									wid, 0 );
+				paramsEdit[txtcount] = new QLineEdit( QString(txt), wid);
 				fgrid->addWidget(paramsEdit[txtcount], 3+i, 1);
 				paramsEdit[txtcount]->setFixedHeight(28);
 				txtcount++;
@@ -1164,8 +1175,8 @@ void SwFilterManager::slotEdit()
 		if(pWorkspace) {
 			pWorkspace->addWindow( pEditPlugin->mwPluginEdit );
 		}
-
 		pEditPlugin->mwPluginEdit->show();
+
 	}
 
 }
@@ -1294,7 +1305,7 @@ void SwFilterManager::applyEditParameters()
 	int i;
 	int txtcount=0;
 	int combocount = 0;
-	char par[256];
+	char par[2048]="";// big buffer because may be an accumulation of many strings
 	for(i=0; i < func->nb_params;i++)
 	{
 		switch(func->param_list[i].type) {
@@ -1320,7 +1331,7 @@ void SwFilterManager::applyEditParameters()
 	}
 
 	// send params to plugin
-	char txt[2048];
+	char txt[4096];
 	sprintf(txt, "%d", func->nb_params);
 
 	// ask for parameters values
@@ -1338,7 +1349,9 @@ void SwFilterManager::applyEditParameters()
 	if(func->param_list) {
 		for(int i=0; i < func->nb_params; i++)
 		{
-			swGetStringValueFromType(func->param_list[i].type, func->param_list[i].value, par);
+			swGetStringValueFromType(func->param_list[i].type,
+									 func->param_list[i].value,
+									 par);
 			sprintf(txt,"%s" // old text
 						"%s\t%c\t%s\t", // param : name \t type \t value \t
 						txt,
