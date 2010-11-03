@@ -84,6 +84,7 @@
 
 bool g_has_measures = false;
 #define PIAFSESSION_FILE	".piaf-session"
+#define PIAFRC_FILE	".piafrc"
 
 
 WorkshopApp::WorkshopApp()
@@ -162,13 +163,13 @@ void WorkshopApp::initVars()
 
 
 	char home[128] = "/home";
-	if(getenv("HOME"))
+	if(getenv("HOME")) {
 		strcpy(home, getenv("HOME"));
+	}
 
 	g_movieDirName = QString(home) + tr("/Movies");
 	g_imageDirName = QString(home) + tr("/Images");
 	g_measureDirName = QString(home) + tr("/Measures");
-
 
 	QDir dir;
 	dir.mkdir(g_movieDirName);
@@ -181,8 +182,9 @@ void WorkshopApp::initVars()
 	m_lastImageDirName = g_imageDirName;
 
 	// Read configuration directories
+	QString filename = QString(home) + "/" PIAFRC_FILE;
 	QFile file;
-	file.setName(QString(home) + "/.piafrc");
+	file.setName(filename);
 
 	saveSettingsImmediatly = true;
 
@@ -193,42 +195,56 @@ void WorkshopApp::initVars()
 				// split
 				QStringList lst( QStringList::split( "\t", str ) );
 				QStringList::Iterator itCmd = lst.begin();
-				QString cmd = *itCmd;
-				if(cmd.contains("\n"))
-					cmd.truncate(cmd.length()-1);
+				if(itCmd != lst.end()) {
+					QString cmd = *itCmd;
+					if(cmd.contains("\n"))
+						cmd.truncate(cmd.length()-1);
 
-				if(!cmd.isNull()) {
-					itCmd++;
-					QString val = *itCmd;
-					if(!val.isNull()) {
-						if(val.contains("\n"))
-							val.truncate(val.length()-1);
+					if(!cmd.isNull()) {
+						itCmd++;
 
-						if( cmd.contains("MeasureDir" ))
-							g_measureDirName = val;
-						if( cmd.contains("ImageDir" ))
-							g_imageDirName = val;
-						if( cmd.contains("MovieDir" ))
-							g_movieDirName = val;
+						QString val;
+						if(itCmd != lst.end()) {
+							val = *itCmd;
+							if(!val.isNull()) {
+								if(val.contains("\n"))
+									val.truncate(val.length()-1);
 
-						if( cmd.contains("LastMeasurePath" ))
-							m_lastMeasureDirName = val;
-						if( cmd.contains("LastImagePath" ))
-							m_lastImageDirName = val;
-						if( cmd.contains("LastMoviePath" ))
-							m_lastMovieDirName = val;
+								if( cmd.contains("MeasureDir" ))
+									g_measureDirName = val;
+								if( cmd.contains("ImageDir" ))
+									g_imageDirName = val;
+								if( cmd.contains("MovieDir" ))
+									g_movieDirName = val;
 
-						if( cmd.contains("saveSettings")) {
-							saveSettingsImmediatly = val.contains("true", FALSE);
+								if( cmd.contains("LastMeasurePath" ))
+									m_lastMeasureDirName = val;
+								if( cmd.contains("LastImagePath" ))
+									m_lastImageDirName = val;
+								if( cmd.contains("LastMoviePath" ))
+									m_lastMovieDirName = val;
+								if( cmd.contains("Geometry" )) {
+									char geometry[128];
+									strcpy(geometry, val.toAscii().data());
+									int rectx, recty, rectw, recth;
+									if(sscanf(geometry, "%d,%d+%dx%d", &rectx, &recty, &rectw, &recth)==4) {
+										setGeometry(rectx, recty, rectw, recth);
+									}
+								}
+								if( cmd.contains("saveSettings")) {
+									saveSettingsImmediatly = val.contains("true", FALSE);
+								}
+							}
 						}
 					}
 				}
 			}
 		}
 	} else {
-		fprintf(stderr, "Cannot read file $HOME/.piafrc \n");
+		fprintf(stderr, "[Workshop] %s:%d : Cannot read file $HOME/.piafrc='%s' \n",
+				__func__, __LINE__,
+				filename.toAscii().data());
 	}
-
 }
 
 void WorkshopApp::loadOnStart() {
@@ -401,14 +417,19 @@ void WorkshopApp::saveSettings() {
 		return;
 
 	char home[128] = "/home";
-	strcpy(home, getenv("HOME"));
+	if(getenv("HOME")) {
+		strcpy(home, getenv("HOME"));
+	}
+
 	// Write configuration file
-	strcat(home, "/" PIAFSESSION_FILE);
+	char fsession[1024];
+	strcpy(fsession, home);
+	strcat(fsession, "/" PIAFSESSION_FILE);
 
 	fprintf(stderr, "WorkshopApp::%s:%d : saving settings in %s\n",
-			__func__, __LINE__, home);
+			__func__, __LINE__, fsession);
 
-	FILE * f = fopen(home, "w");
+	FILE * f = fopen(fsession, "w");
 	if(f) {
 		// Search Component item
 		Q3ListViewItemIterator it( pObjectsExplorer->view() );
@@ -420,8 +441,34 @@ void WorkshopApp::saveSettings() {
 		fclose(f);
 
 	} else {
-		fprintf(stderr, "saveSettings : Cannot write file '%s'\n", home);
+		fprintf(stderr, "Workshop::%s:%d: Cannot write session file '%s'\n",
+				__func__, __LINE__, fsession);
 	}
+
+	// ---- save configuration ----
+	strcpy(fsession, home);
+	strcat(fsession, "/" PIAFRC_FILE);
+	f = fopen(fsession, "w");
+	if(f) {
+		// Search main options
+		fprintf(f, "MeasureDir:\t%s\n", g_measureDirName.toUtf8().data() );
+		fprintf(f, "ImageDir:\t%s\n", g_imageDirName.toUtf8().data() );
+		fprintf(f, "MovieDir:\t%s\n", g_movieDirName.toUtf8().data() );
+		fprintf(f, "\n");
+		fprintf(f, "LastMeasurePath:\t%s\n", m_lastMeasureDirName.toUtf8().data() );
+		fprintf(f, "LastImagePath:\t%s\n", m_lastImageDirName.toUtf8().data() );
+		fprintf(f, "LastMoviePath:\t%s\n", m_lastMovieDirName.toUtf8().data() );
+		fprintf(f, "\n");
+		fprintf(f, "Geometry:\t%d,%d+%dx%d\n", rect().x(), rect().y(), rect().width(), rect().height() );
+		fprintf(f, "\n");
+		fprintf(f, "saveSettings:\t%s\n", saveSettingsImmediatly ? "true":"false");
+		fclose(f);
+
+	} else {
+		fprintf(stderr, "Workshop::%s:%d: Cannot write config file '%s'\n",
+				__func__, __LINE__, fsession);
+	}
+
 }
 
 void WorkshopApp::initActions()
