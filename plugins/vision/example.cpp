@@ -105,7 +105,8 @@ swFuncParams erode_params[] = {
 	{"iteration", swS16, (void *)&erode_iterations}
 };
 
-
+void flip_horiz();
+void flip_vert();
 void invert();
 void threshold();
 void erode();
@@ -122,11 +123,13 @@ void low_update();
 swFunctionDescriptor functions[] = {
 	{"Circ. Median", 1, 	median_params, 		swImage, swImage, &median_func, NULL},
 	{"Low update",	1, 		low_update_params, swImage, swImage, &low_update, NULL},
+	{"Flip Vert", 		0, 	NULL, 				swImage, swImage, &flip_vert, NULL},
+	{"Flip Horiz", 		0, 	NULL, 				swImage, swImage, &flip_horiz, NULL},
 	{"Invert", 		0, 	NULL, 				swImage, swImage, &invert, NULL},
 	{"Threshold", 	2, 	threshold_params, 	swImage, swImage, &threshold, NULL},
 	{"Lighten", 	2,	erode_params,  		swImage, swImage, &erode, NULL}
 };
-int nb_functions = 5;
+int nb_functions = 7;
 
 /******************* END OF USER SECTION ********************/
 
@@ -228,6 +231,47 @@ void threshold()
 			imageOut[r] = 0;
 	}
 }
+
+void flip_horiz() {
+	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
+	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
+	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
+	unsigned char * imageOut = (unsigned char *)imOut->buffer;
+
+	int pitch =  imIn->width *  imIn->depth;
+	int depth =  imIn->depth;
+	for(unsigned long r = 0; r < imIn->height; r++)
+	{
+		int pos = r * pitch;
+		for(int c = 0; c<pitch; c++) {
+			for(int d = 0; d<depth; d++) {
+				imageOut[pos+c*depth+d] = imageIn[pos+pitch-(c+1)*depth+d];
+
+			}
+		}
+	}
+}
+
+void flip_vert() {
+	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
+	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
+	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
+	unsigned char * imageOut = (unsigned char *)imOut->buffer;
+
+	int pitch =  imIn->width *  imIn->depth;
+	int depth =  imIn->depth;
+	for(unsigned long r = 0; r < imIn->height; r++)
+	{
+		int pos = r * pitch;
+		int pos2 = (imIn->height-1-r) * pitch;
+		for(int c = 0; c<pitch; c++) {
+			for(int d = 0; d<depth; d++) {
+				imageOut[pos+c*depth+d] = imageIn[pos2+c*depth+d];
+			}
+		}
+	}
+}
+
 
 // function erode
 void erode()
