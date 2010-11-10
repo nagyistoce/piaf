@@ -115,8 +115,37 @@ void findSquare();
 void findTriangle();
 
 short findFace_width = 30;
+char * face_list[] = {
+		"eye_tree_eyeglasses",
+		"eye",
+		"frontalface_alt2",
+		"frontalface_alt_tree",
+		"frontalface_alt",
+		"frontalface_default",
+		"fullbody",
+		"lefteye_2splits",
+		"lowerbody",
+		"mcs_eyepair_big",
+		"mcs_eyepair_small",
+		"mcs_lefteye",
+		"mcs_mouth",
+		"mcs_nose",
+		"mcs_righteye",
+		"mcs_upperbody",
+		"profileface",
+		"righteye_2splits",
+		"upperbody"
+};
+
+swStringListStruct face_profile = {
+	19, // nb elements
+	5, // default element
+	face_list
+	};
+
 swFuncParams findFace_params[] = {
-	{"Face size (%% of height)", swS16, (void *)&findFace_width}
+	{"Face size (%% of height)", swS16, (void *)&findFace_width},
+	{"Profile", swStringList, (void *)&face_profile }
 };
 void findFace();
 
@@ -134,7 +163,7 @@ swFunctionDescriptor functions[] = {
 	{"HoughP", 	3,	houghP_params, swImage, swImage, &HoughP, NULL},
 	{"Squares", 	2,	findSquare_params, swImage, swImage, &findSquare, NULL},
 	{"Triangles", 	2,	findSquare_params, swImage, swImage, &findTriangle, NULL},
-	{"Faces",		1,	findFace_params, swImage, swImage, &findFace, NULL}
+	{"Faces",		2,	findFace_params, swImage, swImage, &findFace, NULL}
 };
 int nb_functions = 5;
 
@@ -344,7 +373,7 @@ void HoughSHT()
 int thresh = 50;
 IplImage* img = 0;
 IplImage* img0 = 0;
-CvPoint pt[4];
+CvPoint points[4];
 
 
 
@@ -497,24 +526,24 @@ void drawSquares( IplImage* img, CvSeq* squares )
     // read 4 sequence elements at a time (all vertices of a square)
     for( i = 0; i < squares->total; i += 4 )
     {
-        CvPoint* rect = pt;
+        CvPoint* rect = points;
         int count = 4;
         
         // read 4 vertices
-        memcpy( pt, reader.ptr, squares->elem_size );
+        memcpy( points, reader.ptr, squares->elem_size );
         CV_NEXT_SEQ_ELEM( squares->elem_size, reader );
-        memcpy( pt + 1, reader.ptr, squares->elem_size );
+        memcpy( points + 1, reader.ptr, squares->elem_size );
         CV_NEXT_SEQ_ELEM( squares->elem_size, reader );
-        memcpy( pt + 2, reader.ptr, squares->elem_size );
+        memcpy( points + 2, reader.ptr, squares->elem_size );
         CV_NEXT_SEQ_ELEM( squares->elem_size, reader );
-        memcpy( pt + 3, reader.ptr, squares->elem_size );
+        memcpy( points + 3, reader.ptr, squares->elem_size );
         CV_NEXT_SEQ_ELEM( squares->elem_size, reader );
         
         // draw the square as a closed polyline 
-		if(img->depth > 8)
+	if(img->depth > 8)
         	cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, 8 );
-		else
-			cvPolyLine( img, &rect, &count, 1, 1, cvScalar(255), 3, 8 );
+	else
+		cvPolyLine( img, &rect, &count, 1, 1, cvScalar(255), 3, 8 );
     }
     
     // show the resultant image
@@ -684,22 +713,22 @@ void drawTriangles( IplImage* img, CvSeq* triangles )
     // read 4 sequence elements at a time (all vertices of a square)
     for( i = 0; i < triangles->total; i += 3 )
     {
-        CvPoint* rect = pt;
+        CvPoint* rect = points;
         int count = 3;
         
         // read 3 vertices
-        memcpy( pt, reader.ptr, triangles->elem_size );
+        memcpy( points, reader.ptr, triangles->elem_size );
         CV_NEXT_SEQ_ELEM( triangles->elem_size, reader );
-        memcpy( pt + 1, reader.ptr, triangles->elem_size );
+        memcpy( points + 1, reader.ptr, triangles->elem_size );
         CV_NEXT_SEQ_ELEM( triangles->elem_size, reader );
-        memcpy( pt + 2, reader.ptr, triangles->elem_size );
+        memcpy( points + 2, reader.ptr, triangles->elem_size );
         CV_NEXT_SEQ_ELEM( triangles->elem_size, reader );
         
         // draw the square as a closed polyline 
-		if(img->depth > 8)
+	if(img->depth > 8)
         	cvPolyLine( img, &rect, &count, 1, 1, CV_RGB(0,255,0), 3, 8 );
-		else
-			cvPolyLine( img, &rect, &count, 1, 1, cvScalar(255), 3, 8 );
+	else
+		cvPolyLine( img, &rect, &count, 1, 1, cvScalar(255), 3, 8 );
     }
     
     // show the resultant image
@@ -736,17 +765,33 @@ void findFace() {
 	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
 	unsigned char * imageOut = (unsigned char *)imOut->buffer;
 
+	static int face_profile_last = -1;
+
 	allocateImages();
 	cvIm1->imageData = (char *)imageIn;
 	cvIm2->imageData = (char *)imageOut;
-#define CASCADE_NAME	"/usr/local/piaf/haarcascade_frontalface_default.xml"
+#define CASCADE_FORMAT	"/usr/local/piaf/haarcascade_%s.xml"
+
+	if(face_profile.curitem != face_profile_last) {
+		//
+		face_profile_last = face_profile.curitem;
+		cvRelease((void **)&cascade);
+		cascade = NULL;
+	}
+
 	if(!cascade) {
-		cascade = (CvHaarClassifierCascade*) cvLoad (CASCADE_NAME, 0, 0, 0);
+		char cascade_name[512];
+		sprintf(cascade_name, CASCADE_FORMAT, face_list[ face_profile.curitem ]);
+		fprintf(stderr, "%s %s:%d : loading file '%s'\n",
+				__FILE__, __func__, __LINE__, cascade_name);
+
+		cascade = (CvHaarClassifierCascade*) cvLoad (cascade_name, 0, 0, 0);
 		if(!cascade) {
 			fprintf(stderr, "%s:%d : Cannot load '%s'\n", __func__, __LINE__,
-					CASCADE_NAME);
+					cascade_name);
 		}
 	}
+
 	if(!storage) {
 		storage = cvCreateMemStorage(0);
 	}

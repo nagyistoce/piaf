@@ -209,30 +209,31 @@ void WorkshopApp::initVars()
 							if(!val.isNull()) {
 								if(val.contains("\n"))
 									val.truncate(val.length()-1);
+								if(val.length()>0) {
+									if( cmd.contains("MeasureDir" ))
+										g_measureDirName = val;
+									if( cmd.contains("ImageDir" ))
+										g_imageDirName = val;
+									if( cmd.contains("MovieDir" ))
+										g_movieDirName = val;
 
-								if( cmd.contains("MeasureDir" ))
-									g_measureDirName = val;
-								if( cmd.contains("ImageDir" ))
-									g_imageDirName = val;
-								if( cmd.contains("MovieDir" ))
-									g_movieDirName = val;
-
-								if( cmd.contains("LastMeasurePath" ))
-									m_lastMeasureDirName = val;
-								if( cmd.contains("LastImagePath" ))
-									m_lastImageDirName = val;
-								if( cmd.contains("LastMoviePath" ))
-									m_lastMovieDirName = val;
-								if( cmd.contains("Geometry" )) {
-									char geometry[128];
-									strcpy(geometry, val.toAscii().data());
-									int rectx, recty, rectw, recth;
-									if(sscanf(geometry, "%d,%d+%dx%d", &rectx, &recty, &rectw, &recth)==4) {
-										setGeometry(rectx, recty, rectw, recth);
+									if( cmd.contains("LastMeasurePath" ))
+										m_lastMeasureDirName = val;
+									if( cmd.contains("LastImagePath" ))
+										m_lastImageDirName = val;
+									if( cmd.contains("LastMoviePath" ))
+										m_lastMovieDirName = val;
+									if( cmd.contains("Geometry" )) {
+										char geometry[128];
+										strcpy(geometry, val.toAscii().data());
+										int rectx, recty, rectw, recth;
+										if(sscanf(geometry, "%d,%d+%dx%d", &rectx, &recty, &rectw, &recth)==4) {
+											setGeometry(rectx, recty, rectw, recth);
+										}
 									}
-								}
-								if( cmd.contains("saveSettings")) {
-									saveSettingsImmediatly = val.contains("true", FALSE);
+									if( cmd.contains("saveSettings")) {
+										saveSettingsImmediatly = val.contains("true", FALSE);
+									}
 								}
 							}
 						}
