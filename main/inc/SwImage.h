@@ -41,9 +41,9 @@ typedef struct _swImageStruct {
   	u8 depth;	/*! Depth of image, e.g. nb of channels (3 for RGB24, ...) */
 
 	u32 buffer_size;	/*! Size of image buffer */
-  	i32 deltaTus;		/*! */
+	i32 deltaTus;		/*! Time from start of source (if available, ie file ou device stream) */
 
-	void * buffer;	/*! Raw image buffer */
+	void * buffer;		/*! Raw image buffer */
 
 
 	u32	metadata_size;

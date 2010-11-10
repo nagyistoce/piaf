@@ -32,6 +32,8 @@ compiles with :
 
 void swPurgePipe(FILE *fR);
 
+//#define __SWPLUGIN_DEBUG__
+
 #ifdef SWPLUGIN_SIDE
 #define SWPLUGIN_SIDE_PRINT		"PIAF-GUI-SIDE\t"
 #else
@@ -334,7 +336,7 @@ int SwPluginCore::loop()
 		buffer[0]='\0';
 		ret = fgets(buffer, BUFFER_SIZE-1, stdin);
 #ifdef __SWPLUGIN_DEBUG__
-			fprintf(stderr, SWPLUGIN_SIDE_PRINT "PLUGIN: (BUFSIZ=%d) Read buffer='%s'\n", BUFSIZ, buffer); fflush(stderr);
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "PLUGIN: (BUFSIZ=%d) Read buffer='%s'\n", BUFSIZ, buffer); fflush(stderr);
 #endif
 		if(ret && buffer[0] != '\0') {
 			buffer[strlen(buffer)] = '\0';
@@ -712,7 +714,7 @@ int swReadFromPipe(unsigned char * buffer, u32 size, FILE * pipe, int timeout_ms
 			usleep(TIMEOUT_STEP);
 		else /*if(!ferror(pipe))*/ {
 #ifdef __SWPLUGIN_DEBUG__
-//				fprintf(stderr, SWPLUGIN_SIDE_PRINT "\tread %lu/%d chars at index=%lu = 0x%02x\n", result, (size_t)(size-index), index, buffer[index]);
+				fprintf(stderr, SWPLUGIN_SIDE_PRINT "\tread %lu/%d chars at index=%lu = 0x%02x\n", result, (size_t)(size-index), index, buffer[index]);
 #endif
 				index += result;
 			}
