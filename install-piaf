@@ -5,6 +5,8 @@ if [ "$(whoami)" == "root" ] ; then
 	mkdir /usr/local/piaf
 	echo 'Copying directory images to /usr/local/piaf...'
 	cp -r main/images /usr/local/piaf
+	echo "You may want to do chmod 777 /usr/local/piaf/images/pixmaps/ to enable user to update the icons, ..."
+	echo
 	echo 'Creating directory /etc/piaf...'
 	mkdir /etc/piaf
 	chmod 777 /etc/piaf
@@ -15,9 +17,9 @@ else
 fi
 echo 
 
-echo "Installing necessary packages..."
-./prepare.sh
+echo
 
 echo "Building piaf & plugins..."
-./build.sh
+./build.sh && echo "done" || echo "Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
+
 

@@ -1,8 +1,9 @@
 # INSTALLATION
 
 - As root : 
-	o Install the required packages for compiling piaf, and create local directory
-./prepare.sh
+	o Install the required packages for building piaf, for Debian/Ubuntu packages
+./prepare_debian.sh
+	o Create local directories and build all 
 ./install-piaf
 
 - As user, build Piaf : 

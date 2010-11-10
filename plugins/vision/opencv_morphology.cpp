@@ -93,12 +93,12 @@ swStringListStruct shape = {
 	0, // default element
 	Shapelist
 	};
-short size = 3;
+short kernel_size = 3;
 
 swFuncParams generic_params[] = {
 	{"iteration", swS16, (void *)&iterations},
 	{"shape", swStringList, (void *)&shape},
-	{"size", swS16, (void *)&size}
+	{"size", swS16, (void *)&kernel_size}
 };
 
 
@@ -120,7 +120,7 @@ void blackhat();
 swFunctionDescriptor functions[] = {
 	{"Erode", 		1,	erode_params,  		swImage, swImage, &erode,	NULL},
 	{"Dilate", 		1,	dilate_params,  	swImage, swImage, &dilate,	NULL},
-	{"Close", 		3,	generic_params,  		swImage, swImage, &close,	NULL},
+	{"Close", 		3,	generic_params,  	swImage, swImage, &close,	NULL},
 	{"Open", 		3,	generic_params,  	swImage, swImage, &open,	NULL},
 	{"Gradient", 	3,	generic_params,  	swImage, swImage, &gradient,	NULL},
 	{"Top hat", 	3,	generic_params,  	swImage, swImage, &tophat,	NULL},
@@ -137,87 +137,63 @@ IplImage * cvIm1 = NULL;
 IplImage * cvIm2 = NULL;
 IplImage * cvTmp = NULL;
 
-void allocateImages()
+/*
+ * Allocate images and make cvIm1=image input and cvIm2=image output
+ */
+void initImages()
 {
 	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
+	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
+	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
+	unsigned char * imageOut = (unsigned char *)imOut->buffer;
 
 	CvSize cvsize;
 	cvsize.width = imIn->width;
 	cvsize.height = imIn->height;
 
 	if(!cvIm1) {
-		cvIm1 = cvCreateImage(cvsize,  IPL_DEPTH_8U, imIn->depth);
+		cvIm1 = cvCreateImageHeader(cvsize,  IPL_DEPTH_8U, imIn->depth);
 	}
+	cvIm1->imageData = (char *)imageIn;
+
 	if(!cvIm2) {
-		cvIm2 = cvCreateImage(cvsize,  IPL_DEPTH_8U, imIn->depth);
+		cvIm2 = cvCreateImageHeader(cvsize,  IPL_DEPTH_8U, imIn->depth);
+	}
+	cvIm2->imageData = (char *)imageOut;
+
+	if(!cvTmp) {
+		cvTmp = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
 	}
 }
 
 // function invert
 void erode()
 {
-	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
-	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
-	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
-	unsigned char * imageOut = (unsigned char *)imOut->buffer;
-	
-	allocateImages();
-	memcpy( cvIm1->imageData, imageIn, imIn->buffer_size);
+	initImages(); // cvIm1 is image input and cvIm2 is output
     	
+	// perform erode
 	cvErode(cvIm1, cvIm2, NULL, erode_iterations);
-	
-	memcpy( imageOut, cvIm2->imageData, imIn->buffer_size);
 }
 
 
 void dilate()
 {
-	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
-	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
-	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
-	unsigned char * imageOut = (unsigned char *)imOut->buffer;
+	initImages(); // cvIm1 is image input and cvIm2 is output
 
-	allocateImages();
-	memcpy( cvIm1->imageData, imageIn, imIn->buffer_size);
-    	
 	cvDilate(cvIm1, cvIm2, NULL, dilate_iterations);
-	
-	memcpy( imageOut, cvIm2->imageData, imIn->buffer_size);
-
-}
-
-
-void initImages()
-{
-	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
-	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
-	CvSize size;
-	size.width = imIn->width;
-	size.height = imIn->height;
-		
-	if(!cvIm1) {
-		cvIm1 = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
-	}
-	if(!cvIm2) {
-		cvIm2 = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
-	}
-	if(!cvTmp) {
-		cvTmp = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
-	}
-	
-	memcpy( cvIm1->imageData, imageIn, imIn->buffer_size);
 }
 
 IplConvKernel *elt = NULL;
+
 void createStructElt()
 {
 	CvElementShape shapes[3] = { CV_SHAPE_RECT, //a rectangular element;
-							CV_SHAPE_CROSS, //a cross-shaped element;
-							CV_SHAPE_ELLIPSE};
-							
+								 CV_SHAPE_CROSS, //a cross-shaped element;
+								 CV_SHAPE_ELLIPSE};
+
 	elt = cvCreateStructuringElementEx (
-		(int)size, (int)size,
-		(int)(size/2), (int)(size/2), 
+		(int)kernel_size, (int)kernel_size,
+		(int)(kernel_size/2), (int)(kernel_size/2),
 		shapes[shape.curitem], NULL);
 }
 
@@ -231,88 +207,81 @@ void open()
     	
 	initImages();
 	createStructElt();
+
 	// perform open
 	cvMorphologyEx (cvIm1, cvIm2, cvTmp, elt,
 		CV_MOP_OPEN,
 		iterations);
 	
-	memcpy( imageOut, cvIm2->imageData, imIn->buffer_size);
 	cvReleaseStructuringElement (&elt);
 }
 
 // CLOSE OPERATION
 void close()
 {
-	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
-	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
-	unsigned char * imageOut = (unsigned char *)imOut->buffer;
-    	
 	initImages();
+
 	createStructElt();
-	// perform open
+
+	// perform close
 	cvMorphologyEx (cvIm1, cvIm2, cvTmp, elt,
 		CV_MOP_CLOSE,
 		iterations);
 	
-	memcpy( imageOut, cvIm2->imageData, imIn->buffer_size);
 	cvReleaseStructuringElement (&elt);
 }
 
 // TOP HAT OPERATION
 void tophat()
 {
-	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
-	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
-	unsigned char * imageOut = (unsigned char *)imOut->buffer;
-    	
 	initImages();
+
 	createStructElt();
-	// perform open
+
+	// perform top hat
 	cvMorphologyEx (cvIm1, cvIm2, cvTmp, elt,
 		CV_MOP_TOPHAT,
 		iterations);
 	
-	memcpy( imageOut, cvIm2->imageData, imIn->buffer_size);
 	cvReleaseStructuringElement(&elt);
 }
 
 // BLACK HAT OPERATION
 void blackhat()
 {
-	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
-	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
-	unsigned char * imageOut = (unsigned char *)imOut->buffer;
-    	
 	initImages();
+
 	createStructElt();
-	// perform open
+
+	// perform black hat
 	cvMorphologyEx (cvIm1, cvIm2, cvTmp, elt,
 		CV_MOP_BLACKHAT,
 		iterations);
 	
-	memcpy( imageOut, cvIm2->imageData, imIn->buffer_size);
 	cvReleaseStructuringElement(&elt);
 }
 
 // gradient OPERATION
 void gradient()
 {
-	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
-	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
-	unsigned char * imageOut = (unsigned char *)imOut->buffer;
-    	
 	initImages();
+
 	createStructElt();
-	// perform open
+
+	// perform gradient
 	cvMorphologyEx (cvIm1, cvIm2, cvTmp, elt,
 		CV_MOP_GRADIENT,
 		iterations);
 	
-	memcpy( imageOut, cvIm2->imageData, imIn->buffer_size);
 	cvReleaseStructuringElement(&elt);
 }
 
 
+
+
+
+
+/********************** DO NOT MODIFY BELOW **********************/
 
 void signalhandler(int sig)
 {
@@ -330,15 +299,15 @@ int main(int argc, char *argv[])
 	for(int i=0; i<NSIG; i++)
 		signal(i, signalhandler);
 	
-	fprintf(stderr, "registerCategory...\n");
+	fprintf(stderr, "[%s] registerCategory...\n", __FILE__);
 	plugin.registerCategory(CATEGORY, SUBCATEGORY);
 	
 	// register functions 
-	fprintf(stderr, "registerFunctions...\n");
+	fprintf(stderr, "[%s] registerFunctions : %d functions...\n", __FILE__, nb_functions);
 	plugin.registerFunctions(functions, nb_functions );
 
 	// process loop
-	fprintf(stderr, "loop...\n");
+	fprintf(stderr, "[%s] starting loop...\n", __FILE__);
 	plugin.loop();
 	
   	return EXIT_SUCCESS;
