@@ -51,6 +51,7 @@ public:
 	: QWidget(parent, name, f)
 	{
 		printer = NULL;
+		dImage = NULL;
 	}
     ~ImageView()
 	{ 
@@ -72,7 +73,9 @@ protected:
         QPixmap pix( cr.size() );
         pix.fill( this, cr.topLeft() );
         QPainter p( &pix);
-		p.drawImage(cr, *dImage); 
+		if(dImage) {
+			p.drawImage(cr, *dImage);
+		}
         p.end();
         bitBlt( this, cr.topLeft(), &pix );
 	}
