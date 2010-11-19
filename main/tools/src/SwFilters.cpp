@@ -47,6 +47,24 @@
 
 #include "videocapture.h"
 
+#define DELETE_FILTER(_pv)	{ \
+				if((_pv)->filter) { \
+					delete (_pv)->filter; \
+				} \
+				if((_pv)->icon) { \
+					delete [] (_pv)->icon; \
+					(_pv)->icon = NULL; \
+				} \
+				if((_pv)->mwPluginEdit) { \
+					delete (_pv)->mwPluginEdit; \
+					(_pv)->mwPluginEdit = NULL; \
+				} \
+				if((_pv)->mwPluginTime) { \
+					delete (_pv)->mwPluginTime; \
+					(_pv)->mwPluginTime = NULL; \
+				} \
+				delete (_pv); \
+			}
 
 #include <QWorkspace>
 
@@ -433,15 +451,9 @@ SwFilterManager::~SwFilterManager()
 					fflush(stderr);
 #endif
 				lastF = pv->filter;
-				if(pv->filter)
-					delete pv->filter;
-				if(pv->icon)
-					delete [] pv->icon;
-				if(pv->mwPluginEdit)
-					delete pv->mwPluginEdit;
-				if(pv->mwPluginTime)
-					delete pv->mwPluginTime;
-				delete pv;
+
+				DELETE_FILTER(pv)
+
 			}
 		}
 
@@ -500,6 +512,7 @@ int SwFilterManager::getFilterCount()
 void SwFilterManager::slotFilterDied(int pid)
 {
 	if(selectedFilterColl->isEmpty()) return;
+	fprintf(stderr, "[SwFilterMng]::%s:%d : dead filter pid=%d...\n", __func__, __LINE__, pid);
 
 	swPluginView * fil = NULL;
 	for(fil = selectedFilterColl->first(); fil; )
@@ -518,6 +531,7 @@ void SwFilterManager::slotFilterDied(int pid)
 		} else
 			fil = selectedFilterColl->next();
 	}
+
 	emit selectedFilterChanged();
 }
 
@@ -533,14 +547,9 @@ int SwFilterManager::removeFilter(int id)
 			reset = true;
 
 		pv->filter->unloadChildProcess();
-		delete pv->filter;
-		delete pv->selItem;
 
 		r = selectedFilterColl->remove((uint)id);
-		if(pv->mwPluginEdit) delete pv->mwPluginEdit;
-		if(pv->mwPluginTime) delete pv->mwPluginTime;
-
-		delete pv;
+		DELETE_FILTER(pv)
 
 		if(reset){
 			if(!selectedFilterColl->isEmpty()) {
@@ -570,16 +579,12 @@ int SwFilterManager::removeFilter(swPluginView * pv)
 			reset = true;
 		if(pv->filter) {
 			pv->filter->unloadChildProcess();
-			delete pv->filter;
+
 		}
-		if(pv->selItem)
-			delete pv->selItem;
-		if(pv->mwPluginEdit) delete pv->mwPluginEdit;
-		if(pv->mwPluginTime) delete pv->mwPluginTime;
 
 		r = selectedFilterColl->remove(pv);
 
-		delete pv;
+		DELETE_FILTER(pv)
 
 		if(reset){
 			if(!selectedFilterColl->isEmpty()) {
@@ -609,8 +614,10 @@ int SwFilterManager::loadFilters()
 	if(!f) {
 
 		char home[512] = "/home";
-		if(getenv("HOME"))
+		if(getenv("HOME")) {
 			strcpy(home, getenv("HOME"));
+		}
+
 		strcat(home, "/.piaf_plugins");
 		f = fopen(home, "r");
 		if(!f) {
@@ -624,6 +631,7 @@ int SwFilterManager::loadFilters()
 			return 0;
 		}
 	}
+
 	// read each filename and load file mesures
 	char line[512];
 
@@ -675,11 +683,11 @@ int SwFilterManager::loadFilters()
 int SwFilterManager::loadFilter(char *filename, char *bIconname)
 {
 	// fork and ask plugin
-	printf("\tloadFilter('%s');...\n", filename);
+	fprintf(stderr, "[SwFilterMng]::%s:%d : Loading filter file '%s'...\n", __func__, __LINE__, filename);
 	FILE * f = fopen(filename, "rb");
 
 	if(!f) {
-		fprintf(stderr, "Filter '%s' does not exist !!\n", filename);
+		fprintf(stderr, "[SwFilterMng]::%s:%d : Filter file '%s' does not exist !!\n", __func__, __LINE__, filename);
 		return 0;
 	}
 	fclose(f);
@@ -698,15 +706,18 @@ int SwFilterManager::loadFilter(char *filename, char *bIconname)
 
 	for(int i=0; i<newFilter->nbfunctions(); i++) {
 		swPluginView * pv = new swPluginView;
-		pv->availItem = NULL;
+		memset(pv, 0, sizeof(swPluginView));
+
 		pv->filter = newFilter;
 		pv->indexFunction = i;
-		pv->selItem = NULL;
 		pv->icon = bIcon;
-		pv->mwPluginEdit = NULL;
-		pv->mwPluginTime = NULL;
+
+		fprintf(stderr, "[SwFilterMng]::%s:%d : append filter (exec='%s')\n", __func__, __LINE__,
+				pv->filter->exec_name
+				);
 		filterColl->append(pv);
 	}
+
 	return 1;
 }
 
@@ -785,11 +796,7 @@ void SwFilterManager::slotAdd()
 		{
 			// then add it to selecttedListView
 			swPluginView * newPV = new swPluginView;
-			newPV->selItem = NULL;
-			newPV->availItem = NULL;
-			newPV->icon = NULL;
-			newPV->mwPluginEdit = NULL;
-			newPV->mwPluginTime = NULL;
+			memset(pv, 0, sizeof(swPluginView));
 
 			newPV->filter = new SwFilter( pv->filter->exec_name, true );// keep it alive
 			connect(newPV->filter, SIGNAL(signalDied(int)), this, SLOT(slotFilterDied(int)));
@@ -1494,8 +1501,10 @@ void SwFilterManager::slotLoad()
 	{
 		char fname[256];
 		strcpy(fname, (char *)fileName.latin1());
-		if(!strstr(fname, FILTERLIST_EXTENSION))
+		if(!strstr(fname, FILTERLIST_EXTENSION)) {
 			strcat(fname, FILTERLIST_EXTENSION);
+		}
+
 		loadFilterList(fname);
 	}
 
@@ -1504,13 +1513,14 @@ void SwFilterManager::slotLoad()
 
 void SwFilterManager::loadFilterList(char * filename)
 {
-	printf("Load filter list into file '%s'\n", filename);
-
+	fprintf(stderr, "[SwFilterMngr]::%s:%d : Loading file '%s'...\n", __func__, __LINE__, filename);
 	// process each image
 
 	FILE * f = fopen(filename, "r");
-	if(!f)
+	if(!f) {
+		fprintf(stderr, "[SwFilterMngr]::%s:%d : cannot load file '%s'\n", __func__, __LINE__, filename);
 		return;
+	}
 
 	//
 	swPluginView * pv;
@@ -1524,15 +1534,20 @@ void SwFilterManager::loadFilterList(char * filename)
 		swPluginView * foundPV = NULL;
 		if(!filterColl->isEmpty())
 		{
-			for(pv =filterColl->first(); pv && !foundPV; pv=filterColl->next())
-				if(strncmp(pv->filter->exec_name, line, strlen((pv->filter->exec_name)))==0) {
-					foundPV = pv;
+			for(pv =filterColl->first(); pv && !foundPV; pv=filterColl->next()) {
+				if(pv->filter) {
+					if(strncmp(pv->filter->exec_name, line, strlen((pv->filter->exec_name)))==0) {
+						foundPV = pv;
+					}
+				} else {
+					fprintf(stderr, "[SwFilterMngr]::%s:%d : no filter for pv=%p\n", __func__, __LINE__, pv);
 				}
+			}
 		}
 
 		int id = -1;
 		if(!foundPV) {
-			fprintf(stderr, "slotLoad: Filter exec '%s' seems not to be available.\n", line);
+			fprintf(stderr, "[SwFilterMngr]::%s:%d : Filter exec '%s' seems not to be unknown.\n", __func__, __LINE__, line);
 		} else {
 			// read function index
 			char * pid = nextTab(line);
@@ -1560,10 +1575,7 @@ void SwFilterManager::loadFilterList(char * filename)
 		if(id>=0 && foundPV)
 		{
 			swPluginView * newPV = new swPluginView;
-			newPV->selItem = NULL;
-			newPV->availItem = NULL;
-			newPV->icon = NULL;
-			newPV->mwPluginEdit = NULL;
+			memset(pv, 0, sizeof(swPluginView));
 
 			newPV->filter = new SwFilter( foundPV->filter->exec_name, true );// keep it alive
 			connect(newPV->filter, SIGNAL(signalDied(int)), this, SLOT(slotFilterDied(int)));
@@ -1616,38 +1628,42 @@ void SwFilterManager::processImage(swImageStruct * image)
 		return;
 	}
 	// process each image
-	swPluginView * pv;
-	swImageStruct *im1 = image, *im2 = imageTmp;
+
 	int step = 0;
 	int ret = 1;
 
 	if(!lockProcess) {
 		lockProcess = true;
+
+		swPluginView * pv;
+		swImageStruct *im1 = image, *im2 = imageTmp;
+
 		ret = 1;
 		int id=0;
 		if(!selectedFilterColl->isEmpty())
 		for(pv = selectedFilterColl->first(); pv && ret && id<=idViewPlugin; pv = selectedFilterColl->next()) {
 			// process
-			if( pv->enabled) {
-#ifdef __SWPLUGIN_DEBUG_
-			fprintf(stderr, "FILTERMANAGER: processing filter %s\n", pv->filter->funcList[pv->indexFunction].name);
+			if( pv->enabled ) {
+#if 1//def __SWPLUGIN_DEBUG_
+				fprintf(stderr, "FILTERMANAGER: processing filter func[%d]=%s\n",
+						pv->indexFunction,
+						pv->filter->funcList[pv->indexFunction].name);
 #endif
-			ret = pv->filter->processFunction(pv->indexFunction, im1, im2, 2000 );
+				ret = pv->filter->processFunction(pv->indexFunction, im1, im2, 2000 );
+				if(ret)
+				{
+					step++;
 
+					// invert buffers
+					swImageStruct *imTmp = im2;
+					im2 = im1;
+					im1 = imTmp;
 
-			if(ret)
-			{
-				step++;
-
-				// invert buffers
-				swImageStruct *imTmp = im2;
-				im2 = im1;
-				im1 = imTmp;
-
-				// time statistics
-				if(pv->mwPluginTime)
-					pv->mwPluginTime->setTimeUS(imTmp->deltaTus);
-			}
+					// time statistics
+					if( pv->mwPluginTime ) {
+						pv->mwPluginTime->setTimeUS( imTmp->deltaTus );
+					}
+				}
 			}
 			id++;
 		}
