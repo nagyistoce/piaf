@@ -488,12 +488,13 @@ void FileVideoAcquisition::rewindToPosMovie(unsigned long long l_position)
 				l_position);
 
 	unsigned long long dpos = 0;
-	if(l_position>JUMP_BUFFERSIZE)
+	if(l_position>JUMP_BUFFERSIZE) {
 		dpos = l_position-JUMP_BUFFERSIZE;
+	}
 
-	fprintf(stderr,"FileVA::%s:%d starting at jump=%llu\n",
+	fprintf(stderr,"FileVA::%s:%d starting at jump=%llu (jump buffer size=%d)\n",
 				__func__, __LINE__,
-				dpos);
+				dpos, JUMP_BUFFERSIZE);
 	url_fseek(URLPB(m_pFormatCtx->pb), dpos, SEEK_SET);
 
 	m_movie_pos.nbFramesSinceKeyFrame = -1; // tell that we cannot know the last key frame

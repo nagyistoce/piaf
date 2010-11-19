@@ -172,7 +172,6 @@ private:
 	Structure for Filter management in GUI : contains SwFilter, icon path,
 	function index, enabled flag, QListViewItems, parameters editor widget
 */
-
 typedef struct _swPluginView {
 	SwFilter * filter;
 	char * icon;
@@ -182,7 +181,7 @@ typedef struct _swPluginView {
 	Q3ListViewItem * selItem;
 	QWidget * mwPluginEdit;
 	SwTimeWidget * mwPluginTime;
-	} swPluginView;
+} swPluginView;
 
 class VideoCaptureDoc;
 
@@ -222,9 +221,11 @@ private:
 	swImageStruct *imageTmp;
 	bool lockProcess;
 
-
+	/// List of all available filters
 	Q3PtrList<swPluginView> *filterColl;
+	/// List of active filters
 	Q3PtrList<swPluginView> *selectedFilterColl;
+
 	VideoCaptureDoc * doc;
 protected slots:
 
