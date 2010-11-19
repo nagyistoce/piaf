@@ -396,6 +396,7 @@ void VideoPlayerTool::appendBookmark(t_movie_pos pos) {
 void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 	if(!m_fileVA) return;
 
+	// Add a bookmark
 	if(actAddBookmark == pAction) {
 		fprintf(stderr, "[VidPlay]::%s:%d : create bookmark for : pos=%llu\n",
 				__func__, __LINE__, m_fileVA->getPrevAbsolutePosition());
@@ -409,7 +410,8 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 			emit signalSaveSettings();
 		}
 
-	} else if(actEditBookmark == pAction) {
+	} else if(actEditBookmark == pAction) {// Edit a bookmark
+
 		MovieBookmarkForm * editBookmarksForm = new MovieBookmarkForm(NULL);
 		if(pWorkspace) {
 			((QWorkspace *)pWorkspace)->addWindow((QWidget *)editBookmarksForm);
@@ -423,7 +425,7 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 		editBookmarksForm->show();
 
 	} else if (actPlayToBookmark == pAction) {
-
+		// Play to next bookmark
 		if(!m_fileVA) {
 			slotRewindStartMovie();
 		}
@@ -450,12 +452,16 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 				fprintf(stderr, "[VidPlayer]::%s:%d : curpos=%llu => next = %llu\n", __func__,__LINE__, curpos, m_nextBookmarkPos);
 			}
 		}
-		if (curpos >= m_nextBookmarkPos)
+
+		if (curpos >= m_nextBookmarkPos) {
 			return;
+		}
 
 		connect(playTimer, SIGNAL(timeout()), this, SLOT(slotBookmarkReached()));
 		slotPlayPauseMovie();
+
 	} else {
+		// Wa activated one bookmark, go to this position
 		QList<video_bookmark_t>::iterator i;
 		for (i = m_listBookmarks.begin(); i != m_listBookmarks.end(); ++i) {
 			video_bookmark_t sel_bookmark = *i;
@@ -470,16 +476,28 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 
 					// display
 					slotStepMovie();
+
 				} // else go some frames before
 				else {
 					m_fileVA->setAbsolutePosition(sel_bookmark.movie_pos.prevKeyFramePosition);
-
+					fprintf(stderr, "[VidPlay]::%s:%d : skip %d frames to reach the bookmark frame\n",
+							__func__, __LINE__, sel_bookmark.movie_pos.nbFramesSinceKeyFrame-1);
 					// display
-					for(int nb = 0; nb<sel_bookmark.movie_pos.nbFramesSinceKeyFrame; nb++) {
-						slotStepMovie();
+					for(int nb = 0; nb<sel_bookmark.movie_pos.nbFramesSinceKeyFrame-1; nb++) {
+						m_fileVA->GetNextFrame();
 					}
+
+					// Display & process last one
+					fprintf(stderr, "[VidPlay]::%s:%d : Display & process last one\n",
+							__func__, __LINE__);
+					slotStepMovie();
+					fprintf(stderr, "[VidPlay]::%s:%d : jump done & processed\n",
+							__func__, __LINE__);
+
 				}
-				detailsView->setWorkshopImage(detailsImage);
+
+
+				//detailsView->setWorkshopImage(detailsImage);
 
 				return;
 			}
@@ -725,16 +743,20 @@ void VideoPlayerTool::slotStepMovie()
 
 		fprintf(stderr, "%s %s:%d : cannot read frame\n", __FILE__, __func__, __LINE__);
 
-		if (playSize <= 0) // stop timer
-			if(playTimer)
-				if(playTimer->isActive())
+		if (playSize <= 0) { // stop timer
+			if(playTimer) {
+				if(playTimer->isActive()) {
 					playTimer->stop();
+				}
+			}
+		}
 
 		playContinuous = false;
 		QPixmap icon;
 
-		if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPlay.png"))
+		if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPlay.png")) {
 			playMovie->setPixmap(icon);
+		}
 	}
 
 
@@ -744,8 +766,9 @@ void VideoPlayerTool::slotStepMovie()
 		playContinuous = false;
 
 		QPixmap icon;
-		if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPlay.png"))
+		if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPlay.png")) {
 			playMovie->setPixmap(icon);
+		}
 	}
 
 	gettimeofday(&tv2, &tz);

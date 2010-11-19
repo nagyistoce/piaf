@@ -429,7 +429,7 @@ void SwFilterManager::init() {
 // destructor.
 SwFilterManager::~SwFilterManager()
 {
-	fprintf(stderr, "XXXXXXXX DELETE SwFilterManager XXXXXXXXXX\n");
+	fprintf(stderr, "SwFilterManager::%s:%d DELETE SwFilterManager\n", __func__, __LINE__);
 
 	// empty selected filter list (to kill child process)
 	swPluginView * pv;
@@ -712,8 +712,10 @@ int SwFilterManager::loadFilter(char *filename, char *bIconname)
 		pv->indexFunction = i;
 		pv->icon = bIcon;
 
-		fprintf(stderr, "[SwFilterMng]::%s:%d : append filter (exec='%s')\n", __func__, __LINE__,
-				pv->filter->exec_name
+		fprintf(stderr, "[SwFilterMng]::%s:%d : append filter (exec='%s') / func [ %d/%d ]='%s'\n", __func__, __LINE__,
+				pv->filter->exec_name,
+				i, pv->filter->nbfunctions(),
+				pv->filter->funcList[i].name
 				);
 		filterColl->append(pv);
 	}
@@ -789,34 +791,38 @@ void SwFilterManager::slotAdd()
 	// adding filter
 	// looking for filer plugin
 	swPluginView * pv;
-	if(!filterColl->isEmpty())
-	for(pv=filterColl->first(); pv; pv=filterColl->next())
-	{
-		if(  filtersListView->isSelected(pv->availItem) )
+	if(!filterColl->isEmpty()) {
+		for(pv=filterColl->first(); pv; pv=filterColl->next())
 		{
-			// then add it to selecttedListView
-			swPluginView * newPV = new swPluginView;
-			memset(pv, 0, sizeof(swPluginView));
+			if(  filtersListView->isSelected(pv->availItem) )
+			{
+				// then add it to selecttedListView
+				swPluginView * newPV = new swPluginView;
+				memset(newPV, 0, sizeof(swPluginView));
 
-			newPV->filter = new SwFilter( pv->filter->exec_name, true );// keep it alive
-			connect(newPV->filter, SIGNAL(signalDied(int)), this, SLOT(slotFilterDied(int)));
+				newPV->filter = new SwFilter( pv->filter->exec_name, true );// keep it alive
+				connect(newPV->filter, SIGNAL(signalDied(int)), this, SLOT(slotFilterDied(int)));
 
-			newPV->indexFunction = pv->indexFunction;
-			newPV->enabled = true;
+				newPV->indexFunction = pv->indexFunction;
+				newPV->enabled = true;
 
-			// add filter to collection
-			addFilter(newPV, -1);
+				// add filter to collection
+				addFilter(newPV, -1);
+
 #ifdef __SWPLUGIN_MANAGER__
-			printf("Add filter '%s' \n", newPV->filter->funcList[newPV->indexFunction].name);
+				fprintf(stderr, "[SwFilterMngr]::%s:%d : Added filter '%s' \n", __func__, __LINE__,
+						newPV->filter->funcList[newPV->indexFunction].name);
 #endif
+			}
 		}
 	}
+
 	idViewPlugin = selectedFilterColl->count()-1;
+
 	updateSelectedView();
 
 	printf("ADD!!!\n");
 	emit selectedFilterChanged();
-
 }
 
 void SwFilterManager::slotDelete()
@@ -1534,7 +1540,7 @@ void SwFilterManager::loadFilterList(char * filename)
 		swPluginView * foundPV = NULL;
 		if(!filterColl->isEmpty())
 		{
-			for(pv =filterColl->first(); pv && !foundPV; pv=filterColl->next()) {
+			for(pv = filterColl->first(); pv && !foundPV; pv=filterColl->next()) {
 				if(pv->filter) {
 					if(strncmp(pv->filter->exec_name, line, strlen((pv->filter->exec_name)))==0) {
 						foundPV = pv;
@@ -1585,8 +1591,10 @@ void SwFilterManager::loadFilterList(char * filename)
 
 			// add filter to collection
 			addFilter(newPV, -1);
+
 #ifdef __SWPLUGIN_DEBUG__
-			printf("Load filter '%s' \n", newPV->filter->funcList[newPV->indexFunction].name);
+			fprintf(stderr, "[SwFilterMng]::%s:%d : Loaded filter '%s' \n", __func__, __LINE__,
+					newPV->filter->funcList[newPV->indexFunction].name);
 #endif
 			// send parameters
 			if(newPV->filter->pipeW) {
@@ -1644,7 +1652,7 @@ void SwFilterManager::processImage(swImageStruct * image)
 		for(pv = selectedFilterColl->first(); pv && ret && id<=idViewPlugin; pv = selectedFilterColl->next()) {
 			// process
 			if( pv->enabled ) {
-#if 1//def __SWPLUGIN_DEBUG_
+#ifdef __SWPLUGIN_DEBUG_
 				fprintf(stderr, "FILTERMANAGER: processing filter func[%d]=%s\n",
 						pv->indexFunction,
 						pv->filter->funcList[pv->indexFunction].name);
@@ -1713,13 +1721,16 @@ SwFilter::SwFilter(char * filename, bool keepAlive)
 	exec_name = new char [ strlen(filename)+2 ];
 	strcpy(exec_name, filename);
 	exec_name[ strlen(filename) ]='\0';
+
+
+
 	// --- reads plugin properties
-
-
 	swAllocateFrame(&frame, 1024);
 
-	if(!loadChildProcess())
+	if(!loadChildProcess()) {
 		return;
+	}
+
 
 	// reads category and subcategory
 	sendRequest(SWFRAME_ASKCATEGORY);
@@ -1888,6 +1899,25 @@ int SwFilter::loadChildProcess()
 {
 	if(!exec_name) return 0;
 
+	// Go to this directory
+	char path[512]="";
+	sprintf(path, exec_name);
+	int pos = strlen(path)-1;
+	bool found = false;
+	do {
+		if(path[pos] == '/' || path[pos] == '\\') {
+			found = true;
+			path[pos] = '\0';
+		} else {
+			pos --;
+		}
+	} while(!found && pos>0);
+
+	fprintf(stderr, "SwFilter::%s:%d : file='%s' => path='%s'\n", __func__, __LINE__,
+			exec_name, path
+			);
+
+
 	// fork and
 	// Commmunication process opening
 	if( pipe( pipeOut ) == -1 || pipe( pipeIn ) == -1)
@@ -1921,6 +1951,7 @@ int SwFilter::loadChildProcess()
 
 			close( pipeOut[0]);
 
+			chdir(path);
 			if(execv(exec_name, NULL) == -1)
 			{
 				fprintf(stderr, "Child execv('%s') error.\n",
