@@ -10,7 +10,7 @@
     <message>
         <location filename="tools/ui/imagetoavidialog.ui" line="14"/>
         <source>Convert images to AVI</source>
-        <translation type="unfinished"></translation>
+        <translation>Conversion d&apos;images vers AVI</translation>
     </message>
     <message>
         <location filename="tools/ui/imagetoavidialog.ui" line="21"/>
@@ -101,40 +101,40 @@
         <location filename="tools/src/imagetoavidialog.cpp" line="38"/>
         <source>MJPEG/AVI (*.avi *.AVI)</source>
         <oldsource>MJPEG/AVI (*.avi *.AVI</oldsource>
-        <translation type="unfinished">MJPEG/AVI (*.avi *.AVI)</translation>
+        <translation>MJPEG/AVI (*.avi *.AVI)</translation>
     </message>
     <message>
-        <location filename="tools/src/imagetoavidialog.cpp" line="122"/>
+        <location filename="tools/src/imagetoavidialog.cpp" line="124"/>
         <source>(could not encode:</source>
         <translation>(impossible d&apos;encoder :</translation>
     </message>
     <message>
-        <location filename="tools/src/imagetoavidialog.cpp" line="141"/>
+        <location filename="tools/src/imagetoavidialog.cpp" line="143"/>
         <source>Error in encoding</source>
         <translation>Erreur d&apos;encodage</translation>
     </message>
     <message>
-        <location filename="tools/src/imagetoavidialog.cpp" line="142"/>
+        <location filename="tools/src/imagetoavidialog.cpp" line="144"/>
         <source>Error while encoding files </source>
         <translation>Erreurs pendant l&apos;encodage de fichiers </translation>
     </message>
     <message>
-        <location filename="tools/src/imagetoavidialog.cpp" line="155"/>
+        <location filename="tools/src/imagetoavidialog.cpp" line="153"/>
         <source>Select a directory containing image files</source>
         <translation>Sélectionner un dossier contenant des images</translation>
     </message>
     <message>
-        <location filename="tools/src/imagetoavidialog.cpp" line="169"/>
+        <location filename="tools/src/imagetoavidialog.cpp" line="173"/>
         <source>Select one or more image files to open</source>
         <translation>Sélectionner un ou plusieurs fichiers images</translation>
     </message>
     <message>
-        <location filename="tools/src/imagetoavidialog.cpp" line="171"/>
+        <location filename="tools/src/imagetoavidialog.cpp" line="175"/>
         <source>Images (*.png *.xpm *.jpg *.jpeg *.bmp *.tif*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="tools/src/imagetoavidialog.cpp" line="202"/>
+        <location filename="tools/src/imagetoavidialog.cpp" line="212"/>
         <source> files</source>
         <translation> fichiers</translation>
     </message>
@@ -265,6 +265,39 @@
     </message>
 </context>
 <context>
+    <name>MovieBookmarkForm</name>
+    <message>
+        <location filename="tools/ui/moviebookmarkform.ui" line="14"/>
+        <source>Bookmarks manager</source>
+        <translation>Gestion de favoris</translation>
+    </message>
+    <message>
+        <location filename="tools/ui/moviebookmarkform.ui" line="39"/>
+        <source>Mark</source>
+        <translation>Favori</translation>
+    </message>
+    <message>
+        <location filename="tools/ui/moviebookmarkform.ui" line="42"/>
+        <source>Index of bookmark</source>
+        <translation>Index du favori</translation>
+    </message>
+    <message>
+        <location filename="tools/ui/moviebookmarkform.ui" line="47"/>
+        <source>Position</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="tools/ui/moviebookmarkform.ui" line="50"/>
+        <source>Position in % of movie</source>
+        <translation>Position en % de la vidéo</translation>
+    </message>
+    <message>
+        <location filename="tools/ui/moviebookmarkform.ui" line="60"/>
+        <source>Delete</source>
+        <translation>Supprimer</translation>
+    </message>
+</context>
+<context>
     <name>ObjectsExplorer</name>
     <message>
         <source>Components</source>
@@ -275,7 +308,7 @@
         <translation type="obsolete">Mesures</translation>
     </message>
     <message>
-        <location filename="src/objectsexplorer.cpp" line="111"/>
+        <location filename="src/objectsexplorer.cpp" line="110"/>
         <source>Images</source>
         <translation></translation>
     </message>
@@ -289,7 +322,7 @@
         <translation type="obsolete">Acquisition de données</translation>
     </message>
     <message>
-        <location filename="src/objectsexplorer.cpp" line="125"/>
+        <location filename="src/objectsexplorer.cpp" line="126"/>
         <source>Video acquisition</source>
         <translation>Acquisition vidéo</translation>
     </message>
@@ -605,134 +638,139 @@
 <context>
     <name>SwFilterManager</name>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="264"/>
+        <location filename="tools/src/SwFilters.cpp" line="284"/>
         <source>Add</source>
         <translation>Ajouter</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="271"/>
+        <location filename="tools/src/SwFilters.cpp" line="292"/>
         <source>Add plugin</source>
         <translation>Ajouter un plugin</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="278"/>
+        <location filename="tools/src/SwFilters.cpp" line="299"/>
         <source>Delete</source>
         <translation>Suppimer</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="283"/>
+        <location filename="tools/src/SwFilters.cpp" line="304"/>
         <source>Remove plugin</source>
         <translation>Supprimer un plugin</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="289"/>
+        <location filename="tools/src/SwFilters.cpp" line="310"/>
         <source>Edit</source>
         <translation>Editer</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="294"/>
+        <location filename="tools/src/SwFilters.cpp" line="315"/>
         <source>Edit plugin&apos;s parameters</source>
         <translation>Editer les paramètres du plugin</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="300"/>
+        <location filename="tools/src/SwFilters.cpp" line="321"/>
         <source>Disable</source>
         <translation>Désactiver</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="305"/>
+        <location filename="tools/src/SwFilters.cpp" line="326"/>
         <source>Disable plugin</source>
         <translation>Désactiver le plugin</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="312"/>
+        <location filename="tools/src/SwFilters.cpp" line="333"/>
         <source>Time</source>
         <translation>Temps</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="316"/>
+        <location filename="tools/src/SwFilters.cpp" line="337"/>
         <source>Processing time measure</source>
         <translation>Temps de calcul</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="324"/>
+        <location filename="tools/src/SwFilters.cpp" line="345"/>
         <source>Up</source>
         <translation>Monter</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="328"/>
-        <location filename="tools/src/SwFilters.cpp" line="338"/>
+        <location filename="tools/src/SwFilters.cpp" line="349"/>
+        <location filename="tools/src/SwFilters.cpp" line="359"/>
         <source>Move up selected plugin</source>
         <translation>Monter le plugin sélectionné</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="334"/>
+        <location filename="tools/src/SwFilters.cpp" line="355"/>
         <source>Down</source>
         <translation>Descendre</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="349"/>
+        <location filename="tools/src/SwFilters.cpp" line="370"/>
         <source>Save list</source>
         <translation>Sauver la liste</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="353"/>
+        <location filename="tools/src/SwFilters.cpp" line="374"/>
         <source>Save plugins list &amp; parameters</source>
         <translation>Sauver la liste des plugins et leurs paramètres</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="359"/>
+        <location filename="tools/src/SwFilters.cpp" line="380"/>
         <source>Load list</source>
         <translation>Charger une liste</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="364"/>
+        <location filename="tools/src/SwFilters.cpp" line="385"/>
         <source>Load a plugins list &amp; parameters</source>
         <translation>Charger une liste de plugins et leurs paramètres</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="396"/>
+        <location filename="tools/src/SwFilters.cpp" line="422"/>
         <source>Filters Selection Window</source>
         <translation>Sélection des filtres</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="502"/>
-        <location filename="tools/src/SwFilters.cpp" line="610"/>
+        <location filename="tools/src/SwFilters.cpp" line="523"/>
+        <location filename="tools/src/SwFilters.cpp" line="625"/>
         <source>Filter Error</source>
         <translation>Erreur de plugin</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="503"/>
+        <location filename="tools/src/SwFilters.cpp" line="524"/>
         <source>Filter process </source>
         <translation>Le processus du plugin </translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="503"/>
+        <location filename="tools/src/SwFilters.cpp" line="524"/>
         <source> died.</source>
         <translation> a terminé brusquement.</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="611"/>
+        <location filename="tools/src/SwFilters.cpp" line="626"/>
         <source>Cannot find filter list, check installation.</source>
         <translation>Impossible de trouver la liste des plugins, vérifier l&apos;installation.</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="755"/>
+        <location filename="tools/src/SwFilters.cpp" line="776"/>
         <source>Original</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="1020"/>
+        <location filename="tools/src/SwFilters.cpp" line="1102"/>
+        <source>PID:</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="tools/src/SwFilters.cpp" line="1110"/>
         <source>Function:</source>
         <translation>Fonction :</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="1026"/>
+        <location filename="tools/src/SwFilters.cpp" line="1116"/>
         <source>Parameters:</source>
         <translation>Paramètres :</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="1072"/>
+        <location filename="tools/src/SwFilters.cpp" line="1174"/>
         <source>Apply</source>
         <translation>Appliquer</translation>
     </message>
@@ -740,22 +778,22 @@
 <context>
     <name>SwTimeWidget</name>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="1101"/>
+        <location filename="tools/src/SwFilters.cpp" line="1203"/>
         <source>Times for </source>
         <translation>Temps pour </translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="1106"/>
+        <location filename="tools/src/SwFilters.cpp" line="1208"/>
         <source>Mean:</source>
         <translation>Moy :</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="1116"/>
+        <location filename="tools/src/SwFilters.cpp" line="1218"/>
         <source>Min :</source>
         <translation>Min :</translation>
     </message>
     <message>
-        <location filename="tools/src/SwFilters.cpp" line="1126"/>
+        <location filename="tools/src/SwFilters.cpp" line="1228"/>
         <source>Max :</source>
         <translation>Max :</translation>
     </message>
@@ -771,50 +809,111 @@
 <context>
     <name>VideoPlayerTool</name>
     <message>
-        <location filename="tools/src/videoplayertool.cpp" line="113"/>
+        <location filename="tools/src/videoplayertool.cpp" line="128"/>
         <source>Error</source>
         <translation>Erreur</translation>
     </message>
     <message>
-        <location filename="tools/src/videoplayertool.cpp" line="114"/>
+        <location filename="tools/src/videoplayertool.cpp" line="129"/>
         <source>File &apos;</source>
         <translation>Fichier &apos;</translation>
     </message>
     <message>
-        <location filename="tools/src/videoplayertool.cpp" line="114"/>
+        <location filename="tools/src/videoplayertool.cpp" line="129"/>
         <source>&apos; not  found.</source>
         <translation>&apos; non trouvé.</translation>
     </message>
     <message>
-        <location filename="tools/src/videoplayertool.cpp" line="171"/>
+        <location filename="tools/src/videoplayertool.cpp" line="186"/>
         <source>Movie:</source>
         <translation>Vidéo :</translation>
     </message>
     <message>
-        <location filename="tools/src/videoplayertool.cpp" line="186"/>
+        <location filename="tools/src/videoplayertool.cpp" line="203"/>
+        <location filename="tools/src/videoplayertool.cpp" line="263"/>
         <source>Rewind</source>
         <translation>Retour</translation>
     </message>
     <message>
-        <location filename="tools/src/videoplayertool.cpp" line="197"/>
+        <location filename="tools/src/videoplayertool.cpp" line="219"/>
         <source>Back</source>
         <translation>Arrière</translation>
     </message>
     <message>
-        <location filename="tools/src/videoplayertool.cpp" line="206"/>
+        <location filename="tools/src/videoplayertool.cpp" line="230"/>
         <source>Play</source>
         <translation>Lecture</translation>
     </message>
     <message>
-        <location filename="tools/src/videoplayertool.cpp" line="215"/>
+        <location filename="tools/src/videoplayertool.cpp" line="241"/>
         <source>Step</source>
         <translation>Avant</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="267"/>
+        <source>Toggle grayscale/color</source>
+        <translation>Basculer gris/couleur</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="295"/>
+        <source>Bkmk</source>
+        <translation>Favori</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="299"/>
+        <source>Bookmarks</source>
+        <translation>Favoris</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="306"/>
+        <source>Add</source>
+        <translation>Ajouter</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="307"/>
+        <source>Add a bookmark at this position in movie</source>
+        <translation>Ajouter un favori à cette position de la vidéo</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="311"/>
+        <source>Edit</source>
+        <translation>Editer</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="313"/>
+        <source>Edit bookmarks list</source>
+        <translation>Editer la liste des favoris</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="316"/>
+        <source>Play until bmrk</source>
+        <translation>Jouer jusqu&apos;au suivant</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="318"/>
+        <source>Play video until next bookmark</source>
+        <translation>Jouer la vidéo jusqu&apos;au favori suivant</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="390"/>
+        <source>Mark </source>
+        <translation>Favori </translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="784"/>
+        <source>Gray</source>
+        <translation>Gris</translation>
+    </message>
+    <message>
+        <location filename="tools/src/videoplayertool.cpp" line="790"/>
+        <source>Color</source>
+        <translation>Couleur</translation>
     </message>
 </context>
 <context>
     <name>WorkshopApp</name>
     <message>
-        <location filename="src/workshop.cpp" line="140"/>
+        <location filename="src/workshop.cpp" line="144"/>
         <source>Image Preview</source>
         <translation>Aperçu d&apos;image</translation>
     </message>
@@ -921,22 +1020,22 @@ Prints out the actual document</source>
 Imprime le document courant</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="395"/>
+        <location filename="src/workshop.cpp" line="515"/>
         <source>Exit</source>
         <translation>Quitter</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="395"/>
+        <location filename="src/workshop.cpp" line="515"/>
         <source>Ctrl+Q</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="396"/>
+        <location filename="src/workshop.cpp" line="516"/>
         <source>Quits the application</source>
         <translation>Quitter l&apos;application</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="397"/>
+        <location filename="src/workshop.cpp" line="517"/>
         <source>Exit
 
 Quits the application</source>
@@ -945,22 +1044,22 @@ Quits the application</source>
 Quitte l&apos;application</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="406"/>
+        <location filename="src/workshop.cpp" line="526"/>
         <source>Signal Generator</source>
         <translation>Générateur de signal</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="406"/>
+        <location filename="src/workshop.cpp" line="526"/>
         <source>Signal &amp;Generator</source>
         <translation>&amp;Générateur de signal</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="407"/>
+        <location filename="src/workshop.cpp" line="527"/>
         <source>Launch the signal generator tool</source>
         <translation>Lancer l&apos;outil de génération de signal</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="408"/>
+        <location filename="src/workshop.cpp" line="528"/>
         <source>Signal Generator
 
 Generate a custom signal.</source>
@@ -969,17 +1068,17 @@ Generate a custom signal.</source>
 Génère un signal customisé.</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="414"/>
+        <location filename="src/workshop.cpp" line="534"/>
         <source>Acquisition</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="414"/>
+        <location filename="src/workshop.cpp" line="534"/>
         <source>Ac&amp;quisition</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="415"/>
+        <location filename="src/workshop.cpp" line="535"/>
         <source>Start a new video acquisition</source>
         <translation>Démarrer une acquisition vidéo</translation>
     </message>
@@ -992,27 +1091,27 @@ Génère un signal customisé.</translation>
 Démarre une nouvelle acquisition vidéo</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="88"/>
+        <location filename="src/workshop.cpp" line="92"/>
         <source>PIAF 2-SVN</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="165"/>
+        <location filename="src/workshop.cpp" line="170"/>
         <source>/Movies</source>
         <translation>/Videos</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="166"/>
+        <location filename="src/workshop.cpp" line="171"/>
         <source>/Images</source>
         <translation>/Images</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="167"/>
+        <location filename="src/workshop.cpp" line="172"/>
         <source>/Measures</source>
         <translation>/Mesures</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="416"/>
+        <location filename="src/workshop.cpp" line="536"/>
         <source>Video device acquisition
 
 .Start a new video acquisition</source>
@@ -1021,22 +1120,22 @@ Démarre une nouvelle acquisition vidéo</translation>
  Démarre une acquisition sur un périphérique vidéo</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="421"/>
+        <location filename="src/workshop.cpp" line="541"/>
         <source>Snapshot</source>
         <translation>Capture</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="421"/>
+        <location filename="src/workshop.cpp" line="541"/>
         <source>S&amp;napshot</source>
         <translation>&amp;Capture</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="422"/>
+        <location filename="src/workshop.cpp" line="542"/>
         <source>Create an image from a video snapshot</source>
         <translation>Créer une image depuis une capture dans la vidéo</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="423"/>
+        <location filename="src/workshop.cpp" line="543"/>
         <source>Video snapshot
 
 .Create an image from a video snapshot</source>
@@ -1045,22 +1144,22 @@ Démarre une nouvelle acquisition vidéo</translation>
 Crée une image capturée dans la vidéo</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="429"/>
+        <location filename="src/workshop.cpp" line="549"/>
         <source>Cut</source>
         <translation>Couper</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="429"/>
+        <location filename="src/workshop.cpp" line="549"/>
         <source>Ctrl+X</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="430"/>
+        <location filename="src/workshop.cpp" line="550"/>
         <source>Cuts the selected section and puts it to the clipboard</source>
         <translation>Couper la section sélectionnée et la mettre dans le presse-papier</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="431"/>
+        <location filename="src/workshop.cpp" line="551"/>
         <source>Cut
 
 Cuts the selected section and puts it to the clipboard</source>
@@ -1069,22 +1168,22 @@ Cuts the selected section and puts it to the clipboard</source>
 Coupe la section sélectionnée et la mettre dans le presse-papier</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="434"/>
+        <location filename="src/workshop.cpp" line="554"/>
         <source>Copy</source>
         <translation>Copier</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="434"/>
+        <location filename="src/workshop.cpp" line="554"/>
         <source>Ctrl+C</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="435"/>
+        <location filename="src/workshop.cpp" line="555"/>
         <source>Copies the selected section to the clipboard</source>
         <translation>Copie la sélection dans le presse-papier</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="436"/>
+        <location filename="src/workshop.cpp" line="556"/>
         <source>Copy
 
 Copies the selected section to the clipboard</source>
@@ -1093,22 +1192,22 @@ Copies the selected section to the clipboard</source>
 Copie la sélection dans le presse-papier</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="439"/>
+        <location filename="src/workshop.cpp" line="559"/>
         <source>Undo</source>
         <translation>Annuler</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="439"/>
+        <location filename="src/workshop.cpp" line="559"/>
         <source>Ctrl+Z</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="440"/>
+        <location filename="src/workshop.cpp" line="560"/>
         <source>Reverts the last editing action</source>
         <translation>Revenir à la dernière action d&apos;édition</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="441"/>
+        <location filename="src/workshop.cpp" line="561"/>
         <source>Undo
 
 Reverts the last editing action</source>
@@ -1117,22 +1216,22 @@ Reverts the last editing action</source>
 Revient en arrière d&apos;une action</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="444"/>
+        <location filename="src/workshop.cpp" line="564"/>
         <source>Paste</source>
         <translation>Coller</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="444"/>
+        <location filename="src/workshop.cpp" line="564"/>
         <source>Ctrl+V</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="445"/>
+        <location filename="src/workshop.cpp" line="565"/>
         <source>Pastes the clipboard contents to actual position</source>
         <translation>Coller le contenu du presse-papier à la position actuelle</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="446"/>
+        <location filename="src/workshop.cpp" line="566"/>
         <source>Paste
 
 Pastes the clipboard contents to actual position</source>
@@ -1141,22 +1240,22 @@ Pastes the clipboard contents to actual position</source>
 Colle le contenu du presse-papier à la position actuelle</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="450"/>
+        <location filename="src/workshop.cpp" line="570"/>
         <source>Toolbar</source>
         <translation>Barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="450"/>
+        <location filename="src/workshop.cpp" line="570"/>
         <source>Tool&amp;bar</source>
         <translation>&amp;Barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="451"/>
+        <location filename="src/workshop.cpp" line="571"/>
         <source>Enables/disables the toolbar</source>
         <translation>Afficher/masquer la barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="453"/>
+        <location filename="src/workshop.cpp" line="573"/>
         <source>Toolbar
 
 Enables/disables the toolbar</source>
@@ -1165,22 +1264,22 @@ Enables/disables the toolbar</source>
 Affiche/masque la barre d&apos;outils</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="456"/>
+        <location filename="src/workshop.cpp" line="576"/>
         <source>Statusbar</source>
         <translation>Barre d&apos;état</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="456"/>
+        <location filename="src/workshop.cpp" line="576"/>
         <source>&amp;Statusbar</source>
         <translation>Barre d&apos;é&amp;tat</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="458"/>
+        <location filename="src/workshop.cpp" line="578"/>
         <source>Enables/disables the statusbar</source>
         <translation>Afficher/masquer la barre d&apos;état</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="459"/>
+        <location filename="src/workshop.cpp" line="579"/>
         <source>Statusbar
 
 Enables/disables the statusbar</source>
@@ -1189,22 +1288,22 @@ Enables/disables the statusbar</source>
 Afficher/masquer la barre d&apos;état</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="462"/>
+        <location filename="src/workshop.cpp" line="582"/>
         <source>Cascade</source>
         <translation>Cascade</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="462"/>
+        <location filename="src/workshop.cpp" line="582"/>
         <source>&amp;Cascade</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="463"/>
+        <location filename="src/workshop.cpp" line="583"/>
         <source>Cascades all windows</source>
         <translation>Cascader toutes les fenêtres</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="464"/>
+        <location filename="src/workshop.cpp" line="584"/>
         <source>Cascade
 
 Cascades all windows</source>
@@ -1213,22 +1312,22 @@ Cascades all windows</source>
 Cascade toutes les fenêtres</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="467"/>
+        <location filename="src/workshop.cpp" line="587"/>
         <source>Tile</source>
         <translation>Tuile</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="467"/>
+        <location filename="src/workshop.cpp" line="587"/>
         <source>&amp;Tile</source>
         <translation>&amp;Tuile</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="468"/>
+        <location filename="src/workshop.cpp" line="588"/>
         <source>Tiles all windows</source>
         <translation>Disposer en tuiles toutes les fenêtres</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="469"/>
+        <location filename="src/workshop.cpp" line="589"/>
         <source>Tile
 
 Tiles all windows</source>
@@ -1237,22 +1336,22 @@ Tiles all windows</source>
 Disposer en tuiles toutes les fenêtres</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="476"/>
+        <location filename="src/workshop.cpp" line="596"/>
         <source>About</source>
         <translation>A propos</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="476"/>
+        <location filename="src/workshop.cpp" line="596"/>
         <source>&amp;About...</source>
         <translation>&amp;A propos...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="477"/>
+        <location filename="src/workshop.cpp" line="597"/>
         <source>About the application</source>
         <translation>A propos de Piaf</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="478"/>
+        <location filename="src/workshop.cpp" line="598"/>
         <source>About
 
 About the application</source>
@@ -1261,459 +1360,463 @@ About the application</source>
 A propos de l&apos;application Piaf</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="483"/>
+        <location filename="src/workshop.cpp" line="603"/>
         <source>Convert img to AVI</source>
         <translation>Convertir des img en AVI</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="484"/>
+        <location filename="src/workshop.cpp" line="604"/>
         <source>Convert image files to AVI movie</source>
         <translation>Convertir des fichiers images en vidéo AVI</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="485"/>
+        <location filename="src/workshop.cpp" line="605"/>
         <source>Convert dialog
 Convert a list of image files into a MJPEG AVI movie file.</source>
         <oldsource>Convert dialog
 Convert a list of image ifles into a MJPEG AVI movie file.</oldsource>
-        <translation type="unfinished">Outil de conversion
+        <translation>Outil de conversion
 Convertir une liste de fichiers images en une vidéo AVI.</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="493"/>
+        <location filename="src/workshop.cpp" line="613"/>
         <source>Configuration</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="493"/>
+        <location filename="src/workshop.cpp" line="613"/>
         <source>&amp;Configuration</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="494"/>
+        <location filename="src/workshop.cpp" line="614"/>
         <source>Launch the configuration dialog</source>
         <translation>Lancer la fenêtre de configuration</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="495"/>
+        <location filename="src/workshop.cpp" line="615"/>
         <source>Configuration dialog
 Defines working directories and options.</source>
         <translation>Configuration
 Définition des dossiers de travail et options.</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="499"/>
+        <location filename="src/workshop.cpp" line="619"/>
         <source>Plugins</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="499"/>
+        <location filename="src/workshop.cpp" line="619"/>
         <source>&amp;Plugins</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="500"/>
+        <location filename="src/workshop.cpp" line="620"/>
         <source>Launch the plugin list dialog</source>
         <translation>Lancer la fenêtre des plugins</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="501"/>
+        <location filename="src/workshop.cpp" line="621"/>
         <source>Plugin list dialog
 Edition of plugin list.</source>
         <translation>Liste des plugins
 Edition de la liste des plugins.</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="557"/>
-        <location filename="src/workshop.cpp" line="1129"/>
+        <location filename="src/workshop.cpp" line="677"/>
+        <location filename="src/workshop.cpp" line="1251"/>
         <source>Images</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="559"/>
-        <location filename="src/workshop.cpp" line="1120"/>
+        <location filename="src/workshop.cpp" line="679"/>
+        <location filename="src/workshop.cpp" line="1242"/>
         <source>Measures</source>
         <translation>Mesures</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="561"/>
+        <location filename="src/workshop.cpp" line="681"/>
         <source>Videos</source>
         <translation>Vidéos</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="579"/>
+        <location filename="src/workshop.cpp" line="699"/>
         <source>What&apos;s &amp;This</source>
-        <translation>Aide contextuelle</translation>
+        <translation>Aide con&amp;textuelle</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="582"/>
+        <location filename="src/workshop.cpp" line="702"/>
         <source>&amp;File</source>
         <translation>&amp;Fichier</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="583"/>
+        <location filename="src/workshop.cpp" line="703"/>
         <source>&amp;Edit</source>
         <translation>&amp;Editer</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="584"/>
+        <location filename="src/workshop.cpp" line="704"/>
         <source>&amp;View</source>
         <translation>&amp;Affichage</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="585"/>
+        <location filename="src/workshop.cpp" line="705"/>
         <source>&amp;Tools</source>
         <translation>&amp;Outils</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="586"/>
+        <location filename="src/workshop.cpp" line="706"/>
         <source>&amp;Window</source>
         <translation>&amp;Fenêtre</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="587"/>
+        <location filename="src/workshop.cpp" line="707"/>
         <source>&amp;Help</source>
         <translation>&amp;Aide</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="610"/>
-        <location filename="src/workshop.cpp" line="1601"/>
-        <location filename="src/workshop.cpp" line="1625"/>
-        <location filename="src/workshop.cpp" line="1647"/>
-        <location filename="src/workshop.cpp" line="1657"/>
-        <location filename="src/workshop.cpp" line="1791"/>
-        <location filename="src/workshop.cpp" line="1840"/>
-        <location filename="src/workshop.cpp" line="1900"/>
-        <location filename="src/workshop.cpp" line="1950"/>
-        <location filename="src/workshop.cpp" line="1957"/>
-        <location filename="src/workshop.cpp" line="1982"/>
-        <location filename="src/workshop.cpp" line="1993"/>
-        <location filename="src/workshop.cpp" line="2004"/>
-        <location filename="src/workshop.cpp" line="2015"/>
-        <location filename="src/workshop.cpp" line="2026"/>
-        <location filename="src/workshop.cpp" line="2061"/>
+        <location filename="src/workshop.cpp" line="730"/>
+        <location filename="src/workshop.cpp" line="1737"/>
+        <location filename="src/workshop.cpp" line="1761"/>
+        <location filename="src/workshop.cpp" line="1783"/>
+        <location filename="src/workshop.cpp" line="1793"/>
+        <location filename="src/workshop.cpp" line="1927"/>
+        <location filename="src/workshop.cpp" line="1976"/>
+        <location filename="src/workshop.cpp" line="2036"/>
+        <location filename="src/workshop.cpp" line="2086"/>
+        <location filename="src/workshop.cpp" line="2093"/>
+        <location filename="src/workshop.cpp" line="2118"/>
+        <location filename="src/workshop.cpp" line="2129"/>
+        <location filename="src/workshop.cpp" line="2140"/>
+        <location filename="src/workshop.cpp" line="2151"/>
+        <location filename="src/workshop.cpp" line="2162"/>
+        <location filename="src/workshop.cpp" line="2197"/>
         <source>Ready.</source>
         <translation>Prêt.</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="829"/>
+        <location filename="src/workshop.cpp" line="950"/>
         <source>Quit...</source>
         <translation>Quitter...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="830"/>
+        <location filename="src/workshop.cpp" line="951"/>
         <source>Do your really want to quit?</source>
         <translation>Voulez-vous vraiment quitter l&apos;application ?</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1123"/>
-        <location filename="src/workshop.cpp" line="1132"/>
-        <location filename="src/workshop.cpp" line="1141"/>
+        <location filename="src/workshop.cpp" line="1245"/>
+        <location filename="src/workshop.cpp" line="1254"/>
+        <location filename="src/workshop.cpp" line="1263"/>
         <source>&amp;Clear</source>
         <translation>&amp;Effacer</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1124"/>
-        <location filename="src/workshop.cpp" line="1133"/>
-        <location filename="src/workshop.cpp" line="1142"/>
+        <location filename="src/workshop.cpp" line="1246"/>
+        <location filename="src/workshop.cpp" line="1255"/>
+        <location filename="src/workshop.cpp" line="1264"/>
         <source>&amp;Open</source>
         <translation>&amp;Ouvrir</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1138"/>
+        <location filename="src/workshop.cpp" line="1260"/>
         <source>Movies</source>
         <translation>Vidéos</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1166"/>
+        <location filename="src/workshop.cpp" line="1288"/>
         <source>Measure</source>
         <translation>Mesures</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1169"/>
-        <location filename="src/workshop.cpp" line="1181"/>
-        <location filename="src/workshop.cpp" line="1190"/>
+        <location filename="src/workshop.cpp" line="1291"/>
+        <location filename="src/workshop.cpp" line="1303"/>
+        <location filename="src/workshop.cpp" line="1312"/>
         <source>&amp;Close</source>
         <translation>&amp;Fermer</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1170"/>
-        <location filename="src/workshop.cpp" line="1182"/>
-        <location filename="src/workshop.cpp" line="1191"/>
+        <location filename="src/workshop.cpp" line="1292"/>
+        <location filename="src/workshop.cpp" line="1304"/>
+        <location filename="src/workshop.cpp" line="1313"/>
         <source>&amp;Save</source>
-        <translation>Enregistrer</translation>
+        <translation>&amp;Sauver</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1171"/>
-        <location filename="src/workshop.cpp" line="1183"/>
-        <location filename="src/workshop.cpp" line="1192"/>
+        <location filename="src/workshop.cpp" line="1293"/>
+        <location filename="src/workshop.cpp" line="1305"/>
+        <location filename="src/workshop.cpp" line="1314"/>
         <source>Save &amp;As</source>
-        <translation>Enregistrer sous</translation>
+        <translation>&amp;Sauver sous</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1178"/>
+        <location filename="src/workshop.cpp" line="1300"/>
         <source>image</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1187"/>
+        <location filename="src/workshop.cpp" line="1309"/>
         <source>Movie</source>
         <translation>Vidéo</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1358"/>
-        <location filename="src/workshop.cpp" line="1399"/>
-        <location filename="src/workshop.cpp" line="1587"/>
-        <location filename="src/workshop.cpp" line="1611"/>
-        <location filename="src/workshop.cpp" line="1636"/>
-        <location filename="src/workshop.cpp" line="1664"/>
-        <location filename="src/workshop.cpp" line="1695"/>
-        <location filename="src/workshop.cpp" line="1807"/>
-        <location filename="src/workshop.cpp" line="1855"/>
-        <location filename="src/workshop.cpp" line="1912"/>
+        <location filename="src/workshop.cpp" line="1480"/>
+        <location filename="src/workshop.cpp" line="1521"/>
+        <location filename="src/workshop.cpp" line="1723"/>
+        <location filename="src/workshop.cpp" line="1747"/>
+        <location filename="src/workshop.cpp" line="1772"/>
+        <location filename="src/workshop.cpp" line="1800"/>
+        <location filename="src/workshop.cpp" line="1831"/>
+        <location filename="src/workshop.cpp" line="1943"/>
+        <location filename="src/workshop.cpp" line="1991"/>
+        <location filename="src/workshop.cpp" line="2048"/>
         <source>Error : no item selected in Explorer !</source>
         <translation>Erreur : aucun élément sélectionné dans l&apos;explorateur !</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1414"/>
+        <location filename="src/workshop.cpp" line="1536"/>
         <source>Snapshot!</source>
         <translation>Capture !</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1434"/>
         <source>Snapshot added.</source>
-        <translation>Capture ajoutée.</translation>
+        <translation type="obsolete">Capture ajoutée.</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1441"/>
+        <location filename="src/workshop.cpp" line="1578"/>
         <source>Video Captured.</source>
         <translation>Vidéo capturée.</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1463"/>
+        <location filename="src/workshop.cpp" line="1600"/>
         <source>Movie added.</source>
         <translation>Vidéo ajoutée.</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1494"/>
+        <location filename="src/workshop.cpp" line="1631"/>
         <source>Creating New Video Acquisition....</source>
         <translation>Création d&apos;une nouvelle acquisition vidéo...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1539"/>
+        <location filename="src/workshop.cpp" line="1675"/>
         <source>(SwVideoAcquisition) : Video device init failed</source>
         <translation>Erreur d&apos;initialisation du périphérique vidéo</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1542"/>
+        <location filename="src/workshop.cpp" line="1678"/>
         <source>(SwVideoAcquisition) : Video device Init OK</source>
         <translation>Initialisation du périphérique vidéo OK</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1548"/>
+        <location filename="src/workshop.cpp" line="1684"/>
         <source>Error: canot initialize acquisition !</source>
         <translation>Erreur d&apos;initialisation du périphérique vidéo !</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1555"/>
+        <location filename="src/workshop.cpp" line="1691"/>
         <source>Initialization OK</source>
         <translation>Initialisation OK</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1562"/>
+        <location filename="src/workshop.cpp" line="1698"/>
         <source>Initialization FAILURE !</source>
         <translation>Erreur d&apos;initialisation !</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1582"/>
+        <location filename="src/workshop.cpp" line="1718"/>
         <source>Creating new Plot 2D...</source>
         <translation>Création d&apos;une mesure 2D...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1599"/>
-        <location filename="src/workshop.cpp" line="1623"/>
+        <location filename="src/workshop.cpp" line="1735"/>
+        <location filename="src/workshop.cpp" line="1759"/>
         <source>Error : you must select a measure in Explorer !</source>
         <translation>Erreur : aucun élément sélectionné dans l&apos;explorateur !</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1606"/>
+        <location filename="src/workshop.cpp" line="1742"/>
         <source>Creating new Video Capture Tool window...</source>
         <translation>Création d&apos;une fenêtre de capture vidéo...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1631"/>
-        <source>Creating new Image view window...</source>
+        <location filename="src/workshop.cpp" line="1571"/>
+        <source>Snapshot added: </source>
+        <translation>Capture ajoutée : </translation>
+    </message>
+    <message>
+        <location filename="src/workshop.cpp" line="1767"/>
+        <source>Creating image view window...</source>
         <translation>Création d&apos;une fenêtre de visualisation d&apos;image...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1645"/>
+        <location filename="src/workshop.cpp" line="1781"/>
         <source>Error : you must select a image in Explorer !</source>
         <translation>Erreur : aucun élément sélectionné dans l&apos;explorateur !</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1655"/>
+        <location filename="src/workshop.cpp" line="1791"/>
         <source>Creating new file...</source>
         <translation>Création d&apos;un fichier...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1705"/>
+        <location filename="src/workshop.cpp" line="1841"/>
         <source>Opening measure file...</source>
         <translation>Ouverture d&apos;une mesure...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1726"/>
+        <location filename="src/workshop.cpp" line="1862"/>
         <source>Opening image file...</source>
         <translation>Ouverture d&apos;une image...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1730"/>
+        <location filename="src/workshop.cpp" line="1866"/>
         <source>Select one or more image files to open</source>
         <translation>Sélectionner un ou plusieurs fichier images</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1732"/>
+        <location filename="src/workshop.cpp" line="1868"/>
         <source>Images (*.png *.xpm *.jpg *.jpeg *.bmp *.tif*)</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1759"/>
+        <location filename="src/workshop.cpp" line="1895"/>
         <source>Opening movie file...</source>
         <translation>Ouvrir un fichier vidéo...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1762"/>
+        <location filename="src/workshop.cpp" line="1898"/>
         <source>Select one or more movie files to open</source>
         <translation>Sélectionner un ou plusieurs fichiers vidéo</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1764"/>
+        <location filename="src/workshop.cpp" line="1900"/>
         <source>Movies (*.mpg *.avi *.wmv *.mov)</source>
         <translation>Vidéos (*.mp* *.avi *.wmv *.mov)</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1789"/>
+        <location filename="src/workshop.cpp" line="1925"/>
         <source>Nothing to Open...</source>
         <translation>Rien à ouvrir...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1818"/>
+        <location filename="src/workshop.cpp" line="1954"/>
         <source>Saving a measure...</source>
         <translation>Enregistrer une mesure...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1822"/>
-        <location filename="src/workshop.cpp" line="1870"/>
+        <location filename="src/workshop.cpp" line="1958"/>
+        <location filename="src/workshop.cpp" line="2006"/>
         <source>Error while trying to save a measure...</source>
         <translation>Erreur d&apos;enregistrement de la mesure...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1830"/>
+        <location filename="src/workshop.cpp" line="1966"/>
         <source>Saving an image...</source>
         <translation>Enregistrer une image...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1834"/>
-        <location filename="src/workshop.cpp" line="1884"/>
+        <location filename="src/workshop.cpp" line="1970"/>
+        <location filename="src/workshop.cpp" line="2020"/>
         <source>Error while trying to save an image...</source>
         <translation>Erreur d&apos;enregistrement de l&apos;image...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1866"/>
+        <location filename="src/workshop.cpp" line="2002"/>
         <source>Saving a measure under new file name...</source>
         <translation>Enregistrer une mesure sous un nouveau nom...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1878"/>
+        <location filename="src/workshop.cpp" line="2014"/>
         <source>Saving an image under new file name...</source>
         <translation>Enregistrer une image sous un nouveau nom...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1890"/>
+        <location filename="src/workshop.cpp" line="2026"/>
         <source>Saving a movie under new file name...</source>
         <translation>Enregistrer une vidéo sous un nouveau nom...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1896"/>
+        <location filename="src/workshop.cpp" line="2032"/>
         <source>Error while trying to save a movie...</source>
         <translation>Erreur d&apos;enregistrement d&apos;une vidéo...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1905"/>
+        <location filename="src/workshop.cpp" line="2041"/>
         <source>Closing file...</source>
         <translation>Fermeture du fichier...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1928"/>
+        <location filename="src/workshop.cpp" line="2064"/>
         <source>remove measure !</source>
         <translation>Mesure supprimée !</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1932"/>
+        <location filename="src/workshop.cpp" line="2068"/>
         <source>remove image !</source>
         <translation>Image supprimée !</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1937"/>
+        <location filename="src/workshop.cpp" line="2073"/>
         <source>remove video !</source>
         <translation>Vidéo supprimée !</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1955"/>
+        <location filename="src/workshop.cpp" line="2091"/>
         <source>Printing...</source>
         <translation>Impression en cours...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1963"/>
+        <location filename="src/workshop.cpp" line="2099"/>
         <source>Exiting application...</source>
         <translation>Fermeture de l&apos;application...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1987"/>
+        <location filename="src/workshop.cpp" line="2123"/>
         <source>Reverting last action...</source>
         <translation>Annuler la dernière action...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="1998"/>
+        <location filename="src/workshop.cpp" line="2134"/>
         <source>Cutting selection...</source>
         <translation>Couper la sélection...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="2009"/>
+        <location filename="src/workshop.cpp" line="2145"/>
         <source>Copying selection to clipboard...</source>
         <translation>Copier la sélection sur le presse-papier...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="2020"/>
+        <location filename="src/workshop.cpp" line="2156"/>
         <source>Inserting clipboard contents...</source>
         <translation>Coller le contenu du presse-papier...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="2033"/>
+        <location filename="src/workshop.cpp" line="2169"/>
         <source>Toggle toolbar...</source>
         <translation>Afficher/masquer la barre d&apos;outils...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="2048"/>
+        <location filename="src/workshop.cpp" line="2184"/>
         <source>Toggle statusbar...</source>
         <translation>Afficher/masquer la barre d&apos;état...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="2065"/>
+        <location filename="src/workshop.cpp" line="2201"/>
         <source>Launching conversion dialog...</source>
         <translation>Lancement de l&apos;outil de conversion...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="2091"/>
+        <location filename="src/workshop.cpp" line="2227"/>
         <source>Launching configuration dialog...</source>
         <translation>Lancer la fenêtre de configuration...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="2099"/>
+        <location filename="src/workshop.cpp" line="2235"/>
         <source>Launching plugin list dialog...</source>
         <translation>Lancer la fenêtre de gestion des plugins...</translation>
     </message>
     <message>
-        <location filename="src/workshop.cpp" line="2109"/>
+        <location filename="src/workshop.cpp" line="2246"/>
         <source>About...</source>
         <translation>A propos...</translation>
     </message>
@@ -1746,98 +1849,103 @@ Edition de la liste des plugins.</translation>
 <context>
     <name>WorkshopImageTool</name>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="387"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="409"/>
         <source>View menu</source>
         <translation>Menu d&apos;affichage</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="390"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="413"/>
         <source>View zoom/move menu</source>
         <translation>Menu d&apos;affichage : zoom, déplacement</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="399"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="422"/>
         <source>Zoom in</source>
         <translation>Zoom +</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="414"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="437"/>
         <source>Zoom out</source>
         <translation>Zoom -</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="420"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="443"/>
         <source>Move</source>
         <translation>Déplacer</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="430"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="455"/>
         <source>Color</source>
         <translation>Couleur</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="439"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="465"/>
         <source>Grey</source>
         <translation>Niveaux de gris</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="447"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="473"/>
         <source>Grey inverted</source>
         <translation>Inversion</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="407"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="430"/>
         <source>Zoom 1:1</source>
         <translation>Echelle 1:1</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="453"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="479"/>
         <source>Thermic Black-&gt;Red</source>
         <translation>Thermique noir-&gt;rouge</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="458"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="484"/>
         <source>Thermic Blue-&gt;Red</source>
         <translation>Thermique bleu-&gt;rouge</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="469"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="490"/>
+        <source>Indexed</source>
+        <translation>Indexée</translation>
+    </message>
+    <message>
+        <location filename="tools/src/workshopimagetool.cpp" line="503"/>
         <source>Snapshot</source>
         <translation>Capture</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="473"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="508"/>
         <source>Save snapshot in explorer (Images)</source>
         <translation>Capturer une image vers l&apos;explorateur</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="482"/>
-        <location filename="tools/src/workshopimagetool.cpp" line="1149"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="519"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="1205"/>
         <source>Record</source>
         <translation>Enregistrer</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="486"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="524"/>
         <source>Record plugins output as movie (Movies)</source>
         <translation>Enregistrer la sortie des plugins en tant que vidéo</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="494"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="534"/>
         <source>Filters</source>
         <translation>Plugins</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="500"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="541"/>
         <source>Open filters dialog (plugins)</source>
         <translation>Ouvrir la fenêtre des plugins</translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="571"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="614"/>
         <source>Filters:</source>
         <translation>Plugins : </translation>
     </message>
     <message>
-        <location filename="tools/src/workshopimagetool.cpp" line="1159"/>
+        <location filename="tools/src/workshopimagetool.cpp" line="1215"/>
         <source>Recording</source>
         <translation>Enreg</translation>
     </message>
