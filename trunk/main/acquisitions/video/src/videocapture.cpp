@@ -180,14 +180,18 @@ bool VideoCaptureDoc::newDocument(int dev)
 	connect(pImageTimer, SIGNAL(timeout()), this, SLOT(loadImage()));
 //	pImageTimer->start(1000 / Framerate);
 
-	modified=false;
+	modified = false;
+
 	return true;
 }
-void VideoCaptureDoc::run() {
+
+void VideoCaptureDoc::run()
+{
 	if(!myVAcq) return;
 
 	m_run = m_running = true;
-	while(m_run) {
+	while(m_run)
+	{
 		// grab images
 //		fprintf(stderr, "VideoCaptureDoc::%s:%d : (threaded) load image size : %ld x %ld \n",
 //				__func__, __LINE__,
