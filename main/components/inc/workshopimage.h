@@ -87,10 +87,17 @@ public:
 		ZoomScale = scale;
 	};
 
-	void   paintEvent( QPaintEvent * );
+	void  paintEvent( QPaintEvent * );
 
 	/** @brief Change color display mode for 8bit images */
 	void setColorMode(int mode);
+
+	/** @brief Set overlay rect */
+	void setOverlayRect(QRect overlayRect, QColor col) {
+
+		m_overlayRect = overlayRect;
+		m_overlayColor = col;
+	}
 signals:
 
 
@@ -135,6 +142,9 @@ private:
 	int yOrigine;
 	int ZoomScale;
 	int m_colorMode;
+
+	QRect m_overlayRect;
+	QColor m_overlayColor;
 };
 
 /**

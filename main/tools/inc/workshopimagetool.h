@@ -96,6 +96,9 @@ class WorkshopImageTool : public WorkshopTool
 	/// sets the base image
 	void setWorkshopImage(WorkshopImage * iv);
 
+	/** @brief Set overlay rect */
+	void setOverlayRect(QRect overlayRect, QColor col);
+
 	ImageWidget * imageView() { return ViewWidget; };
 
 	/** Set default directories for images and movies */
@@ -225,6 +228,14 @@ private:
 	void slotColorThermicBlueToRedMode();
 	void slotColorIndexedMode();
 
+	// mask slots
+	void slotMaskTools(int id);
+	void slotSelMask();
+	void slotAddMask();
+	void slotClearMask();
+	void slotDelSelectedMask();
+	void slotMenuMask();
+
 	/// process again image with filters
 	void slotUpdateImage();
 	/// update image view, eg with zooming
@@ -255,6 +266,25 @@ private:
 
 	unsigned char ToolMode;
 	QRect * getMaskFromPos(int x, int y);
+
+	// MASK MANAGEMENT
+	/// mask for image
+	unsigned char * mask;
+	// Area selection buttons
+	Q3HButtonGroup * toolGroup;
+	QPushButton * aMenuMask;
+	QMenu * maskMenu;
+
+	QAction * actSelMask;
+	QAction * actAddMask;
+	QAction * actDelSelectedMask;
+	QAction * actAllMask;
+	QRect * selectedMask;
+
+private:
+	bool showMask;
+
+
 
 private:
 

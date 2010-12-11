@@ -118,6 +118,8 @@ void ImageWidget::setColorMode(int mode) {
 }
 
 
+
+
 void ImageWidget::paintEvent( QPaintEvent * e)
 {
 //fprintf(stderr, "ImageWidget::paintEvent\n");
@@ -137,6 +139,13 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 		p.drawImage(0,0, dImage->copy(cr)); 
 	else 
 		p.drawImage(0,0, *dImage); 
+
+
+	if(m_overlayRect.width()>0) {
+		p.setPen(m_overlayColor);
+		p.drawRect(m_overlayRect.x()-cr.x(), m_overlayRect.y()-cr.y(),
+				   m_overlayRect.width(), m_overlayRect.height());
+	}
 
     p.end();
     bitBlt( this, cr.topLeft(), &pix );

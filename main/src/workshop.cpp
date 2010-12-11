@@ -53,7 +53,10 @@
 #include "previewimage.h"
 // Piaf Workshop Acquisitions
 #include "videocapture.h"
-#include "SwVideoAcquisition.h"
+#include "opencvvideoacquisition.h"
+#ifdef HAS_FREENECT
+#include "freenectvideoacquisition.h"
+#endif
 #include "workshopvideocapture.h"
 
 // SISELL Workshop Tools...
@@ -789,11 +792,10 @@ void WorkshopApp::createVideoCaptureView(VideoCaptureDoc * va)
 	else
 		vcv = new WorkshopVideoCaptureView((VideoCaptureDoc *)NULL, NULL,basename,Qt::WA_DeleteOnClose);
 
-
 	vcv->setWorkspace(pWorkspace);
 
-	connect(vcv,SIGNAL(ImageSaved(QImage *)),this,SLOT(slotSnapShot(QImage *)));
-	connect(vcv,SIGNAL(VideoSaved(char *)),this,SLOT(slotMovieCapture(char *)));
+	connect(vcv, SIGNAL(ImageSaved(QImage *)), this, SLOT(slotSnapShot(QImage *)));
+	connect(vcv, SIGNAL(VideoSaved(char *)), this, SLOT(slotMovieCapture(char *)));
 
 	// install event filter on close event
 	vcv->display()->installEventFilter(this);
@@ -1630,6 +1632,45 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 	statusBar()->message(tr("Creating New Video Acquisition...."));
 
+	// check if there are Kinects connected
+#ifdef HAS_FREENECT
+	FreenectVideoAcquisition * freenectDevice = new FreenectVideoAcquisition(0);
+	if(freenectDevice->isDeviceReady()) {
+		// append to Piaf
+		statusBar()->message(tr("(VideoAcquisition) : Freenect device Init OK"));
+
+		strcat(txt, "Kinect");
+
+		// acquisition init
+		if(freenectDevice->startAcquisition()<0)
+		{
+			statusBar()->message(tr("Error: cannot initialize acquisition !"));
+			return;
+		}
+		else
+		{
+			if(freenectDevice->isAcquisitionRunning())
+			{
+				statusBar()->message(tr("Initialization OK"));
+
+				VideoCaptureDoc * pVCD = new VideoCaptureDoc(freenectDevice);
+
+				pObjectsExplorer->addVideoAcquisition(pVCD, txt);
+			}
+			else {
+				statusBar()->showMessage(tr("Initialization FAILURE !"));
+			}
+		}
+
+	}
+	else {
+		delete freenectDevice;
+	}
+
+#endif // HAS_FREENECT
+
+
+
 	// list all video devices from /proc/video/dev/video*
 	bool found;
 	int dev=0, failed =0;
@@ -1666,27 +1707,27 @@ void WorkshopApp::slotOnNewVideoAcq()
 			sprintf(txt, "%d - %s", dev, ptname);
 		}
 
+		//SwVideoAcquisition *myVAcq = new SwVideoAcquisition(dev);
+		OpenCVVideoAcquisition *myVAcq = new OpenCVVideoAcquisition(dev);
 
-		SwVideoAcquisition *myVAcq = new SwVideoAcquisition(dev);
-
-		if(!myVAcq->VDIsInitialised())
+		if(!myVAcq->isDeviceReady())
 		{
 			failed++;
-			statusBar()->message(tr("(SwVideoAcquisition) : Video device init failed"));
+			statusBar()->message(tr("(VideoAcquisition) : Video device init failed"));
 		}
 		else {
-			statusBar()->message(tr("(SwVideoAcquisition) : Video device Init OK"));
+			statusBar()->message(tr("(VideoAcquisition) : Video device Init OK"));
 			found = true;
 
 			// acquisition init
-			if(myVAcq->VAInitialise(true)<0)
+			if(myVAcq->startAcquisition()<0)
 			{
 				statusBar()->message(tr("Error: canot initialize acquisition !"));
 				return;
 			}
 			else
 			{
-				if(myVAcq->AcqIsInitialised())
+				if(myVAcq->isAcquisitionRunning())
 				{
 					statusBar()->message(tr("Initialization OK"));
 
@@ -1694,12 +1735,14 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 					pObjectsExplorer->addVideoAcquisition(pVCD, txt);
 				}
-				else
-					statusBar()->message(tr("Initialization FAILURE !"));
+				else {
+					statusBar()->showMessage(tr("Initialization FAILURE !"));
+				}
 			}
 		}
 
 		dev++;
+
 	} while(found || dev<5);
 
 }
@@ -2242,9 +2285,11 @@ void WorkshopApp::slotHelpAbout()
 {
 	QString comment;
 	comment.sprintf("Piaf\n"
+					"\n"
+					"See http://piaf.googlecode.com/"
 					"Version %d\n(c) 2002-2010 by SISELL", VERSION);
-	QMessageBox::about(this,tr("About..."),
-					 tr(comment));
+	QMessageBox::about(this, tr("About Piaf..."),
+					   tr(comment));
 }
 
 void WorkshopApp::slotStatusHelpMsg(const QString &text)

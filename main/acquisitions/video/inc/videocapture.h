@@ -31,10 +31,14 @@
 
 #include <Q3PtrList>
 #include <QTimer>
+
 #include <QThread>
+#include <QWaitCondition>
+#include <QMutex>
+
 
 // application specific includes
-#include "SwVideoAcquisition.h"
+#include "virtualdeviceacquisition.h"
 
 // forward declaration of the MultiVideo classes
 class WorkshopVideoCaptureView;
@@ -62,8 +66,8 @@ class VideoCaptureDoc : public QThread
 public:
     /** Constructor for the fileclass of the application */
     VideoCaptureDoc();
-    /** Constructor with existing SwVideoAcquisition */
-    VideoCaptureDoc(SwVideoAcquisition * vAcq);
+	/** Constructor with existing OpenCVVideoAcquisition */
+	VideoCaptureDoc(VirtualDeviceAcquisition * vAcq);
     /** Destructor for the fileclass of the application */
     ~VideoCaptureDoc();
 
@@ -71,30 +75,35 @@ public:
     virtual void run();
 
     //bool canCloseFrame(WorkshopVideoCaptureView* pFrame);
-    /** sets the modified flag for the document after a modifying action on the view connected to the document.*/
+	/** @brief sets the modified flag for the document after a modifying action on the view connected to the document.*/
     void setModified(bool _m=true){ modified=_m; };
-    /** returns if the document is modified or not. Use this to determine if your document needs saving by the user on closing.*/
+	/** @brief returns if the document is modified or not. Use this to determine if your document needs saving by the user on closing.*/
     bool isModified(){ return modified; };
-    /** deletes the document's contents */
+	/** @brief deletes the document's contents */
     void deleteContents();
-    /** initializes the document generally */
+	/** @brief initializes the document generally */
     bool newDocument(int dev);
-    /** closes the acutal document */
+	/** @brief closes the current document */
     void closeDocument();
-    /** loads the document by filename and format and emits the updateViews() signal */
+	/** @brief loads the document by filename and format and emits the updateViews() signal */
     bool openDocument(const QString &filename, const char *format=0);
-    /** saves the document under filename and format.*/	
+	/** @brief saves the document under filename and format.*/
     bool saveDocument(const QString &filename, const char *format=0);
-    /** sets the path to the file connected with the document */
+	/** @brief sets the path to the file connected with the document */
     void setPathName(const QString &name);
-    /** returns the pathname of the current document file*/
+	/** @brief returns the pathname of the current document file*/
     const QString& pathName() const;
 
-    /** sets the filename of the document */
+	/** @brief sets the filename of the document */
     void setTitle(const QString &title);
-    /** returns the title of the document */
+	/** @brief returns the title of the document */
     const QString& title() const;
     
+	/** @brief Wait from one image in grabber (threaded)
+		@return true if one image has been grabbed before timeout
+	*/
+	int waitForImage();
+
 private:
     /** the modified flag of the current document */
     bool modified;
@@ -133,7 +142,7 @@ public:
     /** returns current image buffer in RGB32 format */
     unsigned char *getCurrentImageRGB();
     /** reads image size */
-    tBoxSize getImageSize();
+	CvSize getImageSize();
 
     // -> PICTURE QUALITY/PARAMETERS
     /// set picture acquisition parameters (brightness, contrast, hue, whiteness...)
@@ -149,8 +158,8 @@ public:
 
 
 private:
-    /// acquisition module
-    SwVideoAcquisition *myVAcq;
+	/// Generic acquisition module
+	VirtualDeviceAcquisition *myVAcq;
     /// Run command (control flag)
     bool m_run;
     /// Run status
@@ -158,11 +167,14 @@ private:
 
     QTimer *pImageTimer;
 
+	QMutex mMutex;
+	QWaitCondition mWaitCondition;
+
 public slots:
     int loadImage();
 private:
     /// image size
-    tBoxSize imageSize;
+	CvSize imageSize;
     int allocateImages();
 
     bool acqReady;
@@ -170,7 +182,6 @@ private:
 
 signals:
     void documentChanged();
-
 };
 
 #endif

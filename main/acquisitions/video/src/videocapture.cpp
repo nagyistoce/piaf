@@ -28,6 +28,7 @@
 #include "swvideodetector.h"
 #include "videocapture.h"
 
+#include "opencvvideoacquisition.h"
 
 
 // default and only constructor.
@@ -42,7 +43,7 @@ VideoCaptureDoc::VideoCaptureDoc()
 
 
 // default and only constructor.
-VideoCaptureDoc::VideoCaptureDoc(SwVideoAcquisition * vAcq)
+VideoCaptureDoc::VideoCaptureDoc(VirtualDeviceAcquisition * vAcq)
 {
 	imageRGB = NULL;
 	mask = NULL;
@@ -58,8 +59,10 @@ VideoCaptureDoc::VideoCaptureDoc(SwVideoAcquisition * vAcq)
 
 	/* For devices without select() we use a timer. */
 	int Framerate = 25;  // default value
-	pImageTimer = new QTimer(this);
-	connect(pImageTimer, SIGNAL(timeout()), this, SLOT(loadImage()));
+	pImageTimer = NULL;
+
+//	pImageTimer = new QTimer(this);
+//	connect(pImageTimer, SIGNAL(timeout()), this, SLOT(loadImage()));
 	//pImageTimer->start(1000 / Framerate);
 
 	modified=false;
@@ -144,26 +147,31 @@ bool VideoCaptureDoc::newDocument(int dev)
 
 	size.width  = DEFAULT_WIDTH;
 	size.height = DEFAULT_HEIGHT;
+
 	char txt[128];
 	sprintf(txt, "/dev/video%d", dev);
 
-	printf("----- CREATE NEW WINDOW FOR DEVICE '%s' -----\n", txt);
-	myVAcq = new SwVideoAcquisition(dev, size);
+	fprintf(stderr, "[VideoCapture]::%s:%d ----- CREATE NEW WINDOW FOR DEVICE '%s' -----\n",
+			__func__, __LINE__, txt);
+	myVAcq = new OpenCVVideoAcquisition(dev);
 
-	if(!myVAcq->VDIsInitialised())
+	if(!myVAcq->isDeviceReady())
 	{
-		printf("(SwVideoAcquisition) : Video device init failed\n");
+		printf("(OpenCVVideoAcquisition) : Video device init failed\n");
 		return false;
 	}
-	else
-		printf("(SwVideoAcquisition) : Video device Init OK \n");
-	 // init de l'acquisition
-	if(myVAcq->VAInitialise(true)<0) {
-		printf("Error: canot initialize acquisition !\n");
+	else {
+		printf("(OpenCVVideoAcquisition) : Video device Init OK \n");
+	}
+
+	// start acquisition
+	if(myVAcq->startAcquisition() < 0) {
+		fprintf(stderr, "[VidCapture]::%s:%d : Error: canot initialize acquisition !\n", __func__, __LINE__);
 		return false;
 	}
-	else
-		printf("Initialization : %d\n",  myVAcq->AcqIsInitialised());
+	else {
+		printf("Initialization : %d\n",  myVAcq->isAcquisitionRunning());
+	}
 
 	// alloc image size
 	allocateImages();
@@ -208,7 +216,7 @@ int VideoCaptureDoc::allocateImages()
 	imageSize = myVAcq->getImageSize();
 	currentPixel = (int)( imageSize.width * imageSize.height);
 
-	fprintf(stderr, "VideoCaptureDoc::%s:%d : Image size : %ld x %ld \n",
+	fprintf(stderr, "VideoCaptureDoc::%s:%d : Image size : %d x %d x 4\n",
 			__func__, __LINE__,
 			imageSize.width, imageSize.height);
 
@@ -216,7 +224,7 @@ int VideoCaptureDoc::allocateImages()
 	if( !(imageRGB ))
 	{
 		printf("RGB image memory allocation failed\n");
-		myVAcq->VAcloseVD();
+		myVAcq->stopAcquisition();
 		return 0;
 	}
 	// Clear buffer for security
@@ -228,12 +236,11 @@ int VideoCaptureDoc::allocateImages()
 		printf("Mask image memory allocation failed\n");
 		return 0;
 	}
+
 	// Clear buffer for security
 	memset(mask, 0, currentPixel * sizeof(unsigned char));
 
-
 	return 1;
-
 }
 
 void VideoCaptureDoc::setDetectionMask(char * /*maskfile*/)
@@ -243,34 +250,58 @@ void VideoCaptureDoc::setDetectionMask(char * /*maskfile*/)
 
 int VideoCaptureDoc::setpicture(int br, int hue, int col, int cont, int white)
 {
-	return myVAcq->setpicture(br, hue, col, cont, white);
+	if(!myVAcq) return -1;
+
+//	return myVAcq->setpicture(br, hue, col, cont, white);
+	t_video_properties props = myVAcq->updateVideoProperties();
+	props.brightness = br;
+	props.hue = hue;
+	props.saturation = col;
+	props.contrast = cont;
+	props.hue = hue;
+
+	return myVAcq->setVideoProperties(props);
 }
 int VideoCaptureDoc::getpicture(video_picture * pic)
 {
-	return myVAcq->getpicture(pic);
+	// FIXME
+	return -1;
+	//return myVAcq->getpicture(pic);
 }
 int VideoCaptureDoc::getcapability(video_capability * vc)
 {
-	return myVAcq->getcapability(vc);
+	// FIXME
+	return -1;
+
+	//return myVAcq->getcapability(vc);
 }
+
 int VideoCaptureDoc::changeAcqParams(tBoxSize newSize, int ch)
 {
-	int ret = myVAcq->changeAcqParams(newSize, ch);
-	if(ret)
-	{
-		if(imageRGB) delete [] imageRGB;
-		if(mask) delete [] mask;
+	t_video_properties props = myVAcq->updateVideoProperties();
+	props.frame_width = newSize.width;
+	props.frame_height = newSize.height;
+	props.mode = ch;
+	return myVAcq->setVideoProperties(props);
 
-		allocateImages();
-		return 1;
-	}
-	return 0;
+//	int ret = myVAcq->changeAcqParams(newSize, ch);
+//	if(ret)
+//	{
+//		if(imageRGB) delete [] imageRGB;
+//		if(mask) delete [] mask;
+
+//		allocateImages();
+//		return 1;
+//	}
+//	return 0;
 }
 
 //thomas.
 int VideoCaptureDoc::setChannel(int ch)
 {
-	return myVAcq->setChannel(ch);
+	t_video_properties props = myVAcq->updateVideoProperties();
+	props.mode = ch; // FIXME
+	return myVAcq->setVideoProperties(props);
 }
 
 
@@ -318,15 +349,39 @@ void VideoCaptureDoc::deleteContents()
 }
 
 
-int VideoCaptureDoc::loadImage()
+int VideoCaptureDoc::waitForImage()
 {
-	if((myVAcq->readImageRGB32( imageRGB, NULL, true))<0) {
-		fprintf(stderr, "VideoCapture::%s:%d : Acquisition problem : readImageRGB32() failed\n",
-				__func__, __LINE__);
+	bool ret = mWaitCondition.wait(&mMutex,
+								  200 // ms
+								  );
+	if(ret) {
+		IplImage * rgb32 = myVAcq->readImageRGB32();
+		if(rgb32)
+		{
+			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRGB32() ok\n",
+					__func__, __LINE__);
+			cvSaveImage("/dev/shm/rgb32.png", rgb32);
+			memcpy(imageRGB, rgb32->imageData, rgb32->widthStep * rgb32->height);
+		}
+		else
+		{
+			fprintf(stderr, "VideoCapture::%s:%d : Acquisition problem : readImageRGB32() failed\n",
+					__func__, __LINE__);
+			return -1;
+		}
+
 		return 0;
 	}
 
-	emit documentChanged();
+	return -1;
+}
+
+int VideoCaptureDoc::loadImage()
+{
+	myVAcq->grab(); // FIXME
+
+	// unlock wait condition to unlock every WorkshopVideoCaptureThread
+	mWaitCondition.wakeAll();
 
 	return 1;
 }
@@ -336,7 +391,7 @@ unsigned char * VideoCaptureDoc::getCurrentImageRGB()
 	return imageRGB;
 }
 
-tBoxSize VideoCaptureDoc::getImageSize()
+CvSize VideoCaptureDoc::getImageSize()
 {
 	return imageSize;
 }

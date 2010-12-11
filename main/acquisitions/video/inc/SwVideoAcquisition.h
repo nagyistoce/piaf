@@ -17,7 +17,8 @@
 
 #ifndef _SW_VIDEOACQUISITION_
 #define _SW_VIDEOACQUISITION_
-#include <sys/mman.h>
+
+#include "virtualdeviceacquisition.h"
 
 //use highgui instead of V4L2 : #include "V4L2Device.h"
 
@@ -25,35 +26,15 @@
 #include "sw_types.h"
 
 #include "nolinux_videodev.h"
+
 #include <cv.h>
 #include <cvaux.h>
 #include <highgui.h>
 
-/** @brief Video input properties */
-typedef struct {
-	double pos_msec;		/*! */
-	double pos_frames;		/*! */
-	double pos_avi_ratio;	/*! */
-	double frame_width;		/*! Frame width */
-	double frame_height;	/*! Frame height */
-	double fps;				/*! Frame rate */
-	double fourcc_dble;		/*! */
-	char fourcc[5];			/*! */
-	double frame_count;	/*! Frame count */
-	double format;		/*! */
-	double mode;		/*! */
-	double brightness;		/*! Brightness */
-	double contrast;		/*! Contrast */
-	double saturation;		/*! Saturation */
-	double hue;			/*! Hue */
-	double gain;			/*! Gain */
-	double convert_rgb;		/*! ?? */
-} t_video_properties;
-
 
 /** Performs device management and image acquisitions with simple API.
 	\brief High-level video acquisition class.
- \author Christophe Seyve - Sisell - cseyve@free.fr
+ \author Christophe Seyve - cseyve@free.fr
  \version 0.1.0 \Date
  */
 

@@ -83,6 +83,7 @@ public:
 	int openDevice(const char * aDevice, tBoxSize newSize);
 	/// Gets definitive image size. You should do that to verify that your selected image size is supported by device.
 	tBoxSize getImageSize();
+
 	/// change acquisition size
 	int changeAcqParams(tBoxSize newSize, int channel);
 	

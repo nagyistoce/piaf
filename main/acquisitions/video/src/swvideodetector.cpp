@@ -20,7 +20,7 @@
 
 #include "swvideodetector.h"
 
-void SavePPMFile(char *filename, bool colored, tBoxSize size, unsigned char *buffer)
+void SavePPMFile(char *filename, bool colored, CvSize size, unsigned char *buffer)
 {
     FILE * f = fopen(filename, "wb");
     if(!f) {
@@ -37,11 +37,11 @@ void SavePPMFile(char *filename, bool colored, tBoxSize size, unsigned char *buf
 }
 
 
-tBoxSize LoadPPMHeader(char *name)
+CvSize LoadPPMHeader(char *name)
 {
 	FILE * f;
 	unsigned long size = 0;
-	tBoxSize rSize;
+	CvSize rSize;
 
 	if(!(f = fopen(name, "rb"))) {
 			fprintf(stderr, "Cannot open file '%s'\n", name);
@@ -68,10 +68,12 @@ tBoxSize LoadPPMHeader(char *name)
 	} while( line[0] == '#'); // comment line
 
 	int width, height=0;
-	sscanf(line, "%d%d", &width, &height);
 
-	rSize.width = width;
-	rSize.height = height;
+	if(sscanf(line, "%d%d", &width, &height) == 2) {
+		rSize.width = width;
+		rSize.height = height;
+	}
+
 	return rSize;
 }
 

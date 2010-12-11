@@ -1,5 +1,56 @@
-#!/bin/bash
-export LD_LIBRARY_PATH=/home/cseyve/Vision/Sources/ffmpeg-0.4.8/libavcodec:/home/cseyve/Vision/Sources/ffmpeg-0.4.8/libavformat:$LD_LIBRARY_PATH
-
-valgrind --error-limit=no --trace-children=yes --log-file=/dev/shm/piaf ./piaf
-
+==10743== Memcheck, a memory error detector
+==10743== Copyright (C) 2002-2010, and GNU GPL'd, by Julian Seward et al.
+==10743== Using Valgrind-3.6.0.SVN-Debian and LibVEX; rerun with -h for copyright info
+==10743== Command: ./piaf
+==10743== 
+==10743== Syscall param rt_sigaction(act->sa_mask) points to uninitialised byte(s)
+==10743==    at 0x51ED547: __libc_sigaction (sigaction.c:96)
+==10743==    by 0x51ED612: sigaction (sigaction.c:44)
+==10743==    by 0x805A02E: main (main.cpp:80)
+==10743==  Address 0xbe9b01c4 is on thread 1's stack
+==10743== 
+==10743== Syscall param rt_sigaction(act->sa_mask) points to uninitialised byte(s)
+==10743==    at 0x51ED547: __libc_sigaction (sigaction.c:96)
+==10743==    by 0x51ED612: sigaction (sigaction.c:44)
+==10743==    by 0x805A06C: main (main.cpp:83)
+==10743==  Address 0xbe9b01c4 is on thread 1's stack
+==10743== 
+==10743== Syscall param rt_sigaction(act->sa_mask) points to uninitialised byte(s)
+==10743==    at 0x51ED547: __libc_sigaction (sigaction.c:96)
+==10743==    by 0x51ED612: sigaction (sigaction.c:44)
+==10743==    by 0x805A0AA: main (main.cpp:86)
+==10743==  Address 0xbe9b01c4 is on thread 1's stack
+==10743== 
+Translation file='piaf_English.qm'
+QWidget::insertAction: Attempt to insert null action
+==10743== Invalid free() / delete / delete[]
+==10743==    at 0x4023B6A: free (vg_replace_malloc.c:366)
+==10743==    by 0x6454E43: free_mem (in /lib/i686/cmov/libc-2.11.2.so)
+==10743==    by 0x6454909: __libc_freeres (in /lib/i686/cmov/libc-2.11.2.so)
+==10743==    by 0x401F4D3: _vgnU_freeres (vg_preloaded.c:62)
+==10743==    by 0xBE9AF60B: ???
+==10743==    by 0x68E8CD1: decompress_onepass (jdcoefct.c:167)
+==10743==    by 0x68EBBDD: process_data_simple_main (jdmainct.c:354)
+==10743==    by 0x68E7CE0: jpeg_read_scanlines (jdapistd.c:173)
+==10743==    by 0x7FDBEF5: read_jpeg_image(QIODevice*, QImage*, QSize, QRect, QRect, int) (qjpeghandler.cpp:883)
+==10743==    by 0x7FDC7C8: QJpegHandler::read(QImage*) (qjpeghandler.cpp:1202)
+==10743==    by 0x5725B1B: QImageReader::read(QImage*) (qimagereader.cpp:1129)
+==10743==    by 0x57260C6: QImageReader::read() (qimagereader.cpp:1079)
+==10743==  Address 0x68509b0 is not stack'd, malloc'd or (recently) free'd
+==10743== 
+==10743== 
+==10743== HEAP SUMMARY:
+==10743==     in use at exit: 52,472,142 bytes in 17,747 blocks
+==10743==   total heap usage: 56,010 allocs, 38,265 frees, 56,165,994 bytes allocated
+==10743== 
+==10743== LEAK SUMMARY:
+==10743==    definitely lost: 2,856 bytes in 11 blocks
+==10743==    indirectly lost: 10,040 bytes in 501 blocks
+==10743==      possibly lost: 10,880,495 bytes in 6,792 blocks
+==10743==    still reachable: 41,578,751 bytes in 10,443 blocks
+==10743==         suppressed: 0 bytes in 0 blocks
+==10743== Rerun with --leak-check=full to see details of leaked memory
+==10743== 
+==10743== For counts of detected and suppressed errors, rerun with: -v
+==10743== Use --track-origins=yes to see where uninitialised values come from
+==10743== ERROR SUMMARY: 5 errors from 4 contexts (suppressed: 298 from 14)
