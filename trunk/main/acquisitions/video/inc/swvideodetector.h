@@ -91,11 +91,11 @@ typedef struct _Img {
 #endif
 
 /// Gets size from PNM file (PPM/PGM)
-tBoxSize LoadPPMHeader(char *name);
+CvSize LoadPPMHeader(char *name);
 /// Loads a PNM image from file to memory (must be allocated !). Please use LoadPPMHeader before.
 int LoadPPMFile(char *name, unsigned char * Image, int maxsize);
 /// Saves a PNM file from a memory buffer (Grayscaled or RGB24 coded)
-void SavePPMFile(char *filename, bool colored, tBoxSize size, unsigned char *buffer);
+void SavePPMFile(char *filename, bool colored, CvSize size, unsigned char *buffer);
 
 
 #define MARKER_COLOR 255

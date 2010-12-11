@@ -53,18 +53,20 @@ SOURCES += src/main.cpp \
     tools/src/workshopimagetool.cpp \
     tools/src/videoplayertool.cpp \
     acquisitions/video/src/v4lutils.c \
-    acquisitions/video/src/VirtualDevice.cpp \
-    acquisitions/video/src/SwVideoAcquisition.cpp \
-    acquisitions/video/src/FileVideoAcquisition.cpp \
+	acquisitions/video/src/FileVideoAcquisition.cpp \
     acquisitions/video/src/videocapture.cpp \
     acquisitions/video/src/swvideodetector.cpp \
     tools/src/swtoolmainwindow.cpp \
     tools/src/OpenCVEncoder.cpp \
-	tools/src/moviebookmarkform.cpp
+	tools/src/moviebookmarkform.cpp \
+    acquisitions/video/src/virtualdeviceacquisition.cpp \
+	acquisitions/video/src/opencvvideoacquisition.cpp
 
 # Replaced by OpenCVEncoder.cpp
 # tools/src/FFMpegEncoder.cpp  
 #    tools/src/SwMpegEncoder.cpp \
+#    acquisitions/video/src/SwVideoAcquisition.cpp \
+#    acquisitions/video/src/VirtualDevice.cpp \
 
 
 # Difficulty to port Qwt3 to Qt4
@@ -126,7 +128,18 @@ HEADERS += inc/workshop.h \
     tools/inc/swtoolmainwindow.h \
     inc/piaf-common.h \
     tools/inc/OpenCVEncoder.h \
-	tools/inc/moviebookmarkform.h
+	tools/inc/moviebookmarkform.h \
+    acquisitions/video/inc/virtualdeviceacquisition.h \
+    acquisitions/video/inc/opencvvideoacquisition.h \
+
+exists(/usr/local/include/libfreenect/libfreenect.h) {
+	message("The system known Freenect ;)")
+	DEFINES += HAS_FREENECT
+	INCLUDEPATH += /usr/local/include/libfreenect
+	LIBS += -L/usr/local/lib -lfreenect
+	HEADERS +=  acquisitions/video/inc/freenectvideoacquisition.h
+	SOURCES +=  acquisitions/video/src/freenectvideoacquisition.cpp
+}
 
 # Obsolete because of OpenCVEncoder
 # tools/inc/FFMpegEncoder.h \ 

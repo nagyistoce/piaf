@@ -62,6 +62,8 @@ typedef struct {
 	int percent;	/*! Percentage of the movie size */
 } video_bookmark_t;
 
+class MovieBookmarkForm;
+
 /** \brief Workshop videos display and processing tool
 
 	Enables to display (zoom/move) image, navigate (VCR style), and advanced 
@@ -152,6 +154,7 @@ private:
 	
 	// Bookmarks
 	QList<video_bookmark_t> m_listBookmarks;
+	MovieBookmarkForm * m_editBookmarksForm;
 
 private slots:
 	// movie player

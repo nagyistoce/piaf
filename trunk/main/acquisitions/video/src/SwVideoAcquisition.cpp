@@ -83,7 +83,7 @@ int SwVideoAcquisition::openDevice(int idx_device, tBoxSize newSize)
 
 	//m_capture = new V4L2Device();
 	// open any type of device and index of desired device
-	#ifdef cv::Exception
+#ifdef cv::Exception
 	try {
 		m_capture = cvCreateCameraCapture(CV_CAP_ANY + idx_device );
 	} catch (cv::Exception e) {
@@ -255,8 +255,8 @@ int SwVideoAcquisition::VAcloseVD()
 
 	cvReleaseCapture( &m_capture );
 	m_capture = NULL;
+
 	return 0;
-	//return (m_capture->VDclose());
 }
 
 int SwVideoAcquisition::VAInitialise( bool )//startCapture)

@@ -120,7 +120,7 @@ private:
 	VideoCaptureDoc *pVideoAcq;
 	bool fDisplayVideo;
 	QTimer *pImageTimer;
-	tBoxSize videoSize;
+	CvSize videoSize;
 		
 private:
 	void initTool();

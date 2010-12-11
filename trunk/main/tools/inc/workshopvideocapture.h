@@ -44,6 +44,9 @@
 #include <QMouseEvent>
 #include <QWorkspace>
 
+#include <QThread>
+
+
 #include "videocapture.h"
 #include "OpenCVEncoder.h"
 #include "SwFilters.h"
@@ -52,9 +55,28 @@
 #include "workshopmeasure.h"
 #include "workshoptool.h"
 
-
 class VideoCaptureDoc;
+class WorkshopImage;
+class WorkshopImageTool;
 
+/** \brief Thread just to wait for grabbing from video doc */
+class WorkshopVideoCaptureThread : public QThread
+{
+	Q_OBJECT
+public:
+	WorkshopVideoCaptureThread(VideoCaptureDoc* pDoc);
+	~WorkshopVideoCaptureThread();
+
+	void run();
+
+private:
+	VideoCaptureDoc* m_pDoc;
+	bool m_run;
+	bool m_running;
+
+signals:
+	void documentChanged();
+};
 
 
 /**
@@ -68,7 +90,7 @@ class VideoCaptureDoc;
  */
 class WorkshopVideoCaptureView : public WorkshopTool
 {
-    Q_OBJECT
+	Q_OBJECT
 
 public:
 	/** Constructor for the view
@@ -79,7 +101,7 @@ public:
 	/** Constructor for the view
 		* @param va existing SwVideoAcquisition input
 		* or connect an already existing document to a new MDI child widget.*/
-    WorkshopVideoCaptureView(SwVideoAcquisition * va, QWidget *parent, const char* name, Qt::WidgetAttribute  wflags);
+	WorkshopVideoCaptureView(VirtualDeviceAcquisition * va, QWidget *parent, const char* name, Qt::WidgetAttribute  wflags);
 	/** Destructor for the main view */
 	~WorkshopVideoCaptureView();
     /** returns a pointer to the document connected to the view*/
@@ -98,76 +120,35 @@ protected:
 	// -------------------- VIDEO SPECIFIC SECTION ---------------------
 public:
 	tBoxSize getImageSize();
-    virtual void paintEvent(QPaintEvent *);
 private:
     void init();
-    unsigned char * originalImage;
-    void setViewSize();
+
     void setToolbar();
-    void changeViewSize();
     void refreshDisplay();
 
 private :
-		QWidget *dpw;
-	QWidget *dsw;
 	QWorkspace * pWorkspace;
-	bool m_isLocked;
+	bool m_isLocked; // display refresh is locked
 	// inspired vu workshopplot2d
 	void initTool();
 
-	unsigned char typeOfView;
-	tBoxSize viewSize;
-	tBoxSize imageSize;
-
-	int viewPixel;
-	int imagePixel;
-
-	/// Ready-to-use QImage object for RGB image
-	QImage ImgRGB;
-	QImage savedImage;
-
-	unsigned char * mask;
+	WorkshopVideoCaptureThread * m_pWorkshopVideoCaptureThread;
 
 	Q3VBox *vBox;
 	Q3HBox *hBox;
-	ImageWidget * drawWidget;
 	QPushButton * DeviceButton;
 
 	// Device menu
-	Q3PopupMenu * deviceMenu;
+	QMenu * deviceMenu;
 	QPushButton * bDevice;
 	QAction * actDevEdit;
 	QAction * actDevParams;
 
-	// Area selection buttons
-	Q3HButtonGroup * toolGroup;
-	QPushButton * aMenuMask;
-	Q3PopupMenu * maskMenu;
-
-	QAction * actSelMask;
-	QAction * actAddMask;
-	QAction * actDelSelectedMask;
-	QAction * actAllMask;
-	QRect * selectedMask;
-
-	// View selection buttons
-	QPushButton * aMenuView;
-	Q3PopupMenu * viewMenu;
-
-	// actions for view mode selection
-	QAction * actZoomInView;
-	QAction * actZoomFitView;
-	QAction * actZoomOutView;
-	QAction * actMoveView;
 	void updateToolbar();
 
 	// play/pause and record buttons
 	QPushButton * bPlayPause;
 	bool freeze;
-	QPushButton * bRecord;
-
-	// export button
-	QPushButton * bExport;
 
 	// image parameters
 	int contrast;
@@ -176,30 +157,19 @@ private :
 	int white;
 	int color;
 
-	int ZoomScale;
-	int xZoomOrigine; // always in original image coordinates !!!
-	int yZoomOrigine;
-	int xZoomCenter;
-	int yZoomCenter;
-	int moveDx;
-	int moveDy;
-	void CalculateZoomWindow();
-	void WindowView2Absolute(int Vx, int Vy, int * Ax, int * Ay);
-	void Absolute2View(int Ax, int Ay, int * Vx, int * Vy);
-
 	Q3ToolBar * toolBar;
-
 	QMenuBar * menuBar;
 
+	// Display current image
+	WorkshopImage * detailsImage;
+	WorkshopImageTool * detailsView;
 
-
+	QWidget * deviceSettingsWidget;
+	QWidget * deviceParamsWidget;
+	bool playGrayscale;
   protected slots:
 	void slotDocumentChanged();
-
-	///////////////////////
-	void slotSaveImage();
-	//////////////////////
-
+	void slotResizeTool(QResizeEvent *e);
 	// device slots
 	void slotDeviceParams();
 	void slotDeviceSize();
@@ -208,85 +178,13 @@ private :
 	void slotSetHue(int h);
 	void slotSetBrightness(int br);
 	void slotSetWhite(int w);
+
 	// change size
 	void slotSetSize( const QString & str );
 	void slotSetChannel( const QString &str);
 
-	// detection mask slots
-	void slotMenuMask();
-	void slotSelMask();
-	void slotClearMask();
-	void slotAddMask();
-	void slotDelSelectedMask();
-	void slotMaskTools(int id);
-
-	// view slots
-	void slotMenuView();
-	void slotZoomInMode();
-	void slotZoomFit();
-	void slotZoomOutMode();
-	void slotMoveMode();
-
 	// play/pause
 	void slotPlayPause();
-	// record
-	void slotRecord();
-
-	void mousePressEvent( QMouseEvent *e);
-	void mouseReleaseEvent( QMouseEvent *e);
-	void mouseMoveEvent( QMouseEvent *e);
-	void resizeEvent ( QResizeEvent * e);
-
-private:
-	void onLButtonDown(Qt::ButtonState nFlags, const QPoint point);
-	void onLButtonUp(Qt::ButtonState nFlags, const QPoint point);
-	void onRButtonDown(Qt::ButtonState nFlags, const QPoint point);
-	void onRButtonUp(Qt::ButtonState nFlags, const QPoint point);
-	// drawing rectangle function
-	void onMouseMove(Qt::ButtonState nFlags, const QPoint point);
-	bool selectPressed;
-	bool showMask;
-	int myStartX;
-	int myStartY;
-	int myStopX;
-	int myStopY;
-
-	unsigned char ToolMode;
-	QRect * getMaskFromPos(int x, int y);
-
-private:
-	QPushButton * filtersButton;
-	//	SwFilterManager * filtersList;
-
-	// ---- FILTER MANAGEMENT SECTION ----
-public:
-	int loadFilterManager();
-
-
-private:
-	SwFilterManager * filterManager;
-
-
-  protected slots:
-	void slotFilters();
-
-// ---- VIDEO ENCODER SECTION -----
-
-private:
-	OpenCVEncoder * mpegEncoder;
-	bool record;
-	int recordNum;
-	/** start a new record */
-	void startRecording();
-	/** stop current record */
-	void stopRecording();
-	/** returns true if recording */
-	bool isRecording();
-	char movieFile[512];
-
-signals:
-	void ImageSaved(QImage *);
-	void VideoSaved(char *);
 };
 
 #endif

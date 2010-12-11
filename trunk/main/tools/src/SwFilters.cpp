@@ -707,7 +707,7 @@ int SwFilterManager::loadFilter(char *filename, char *bIconname)
 	for(int i=0; i<newFilter->nbfunctions(); i++) {
 		swPluginView * pv = new swPluginView;
 		memset(pv, 0, sizeof(swPluginView));
-
+		pv->availItem = NULL;
 		pv->filter = newFilter;
 		pv->indexFunction = i;
 		pv->icon = bIcon;
@@ -717,6 +717,7 @@ int SwFilterManager::loadFilter(char *filename, char *bIconname)
 				i, pv->filter->nbfunctions(),
 				pv->filter->funcList[i].name
 				);
+
 		filterColl->append(pv);
 	}
 
@@ -1302,12 +1303,18 @@ void SwFilterManager::slotTime() {
 	}
 
 	swFunctionDescriptor * func = &(pEditPlugin->filter->funcList[pEditPlugin->indexFunction]);
-	pEditPlugin->mwPluginTime = new SwTimeWidget(pWorkspace, func->name, 0);
+	if(!func) {
+		fprintf(stderr, "[SwFiltersMngr]::%s:%d : func is null !\n", __func__, __LINE__);
+	} else {
+		fprintf(stderr, "[SwFiltersMngr]::%s:%d : create time for func '%s'\n", __func__, __LINE__, func->name);
+		pEditPlugin->mwPluginTime = new SwTimeWidget(pWorkspace, func->name, 0);
 
-	if(pWorkspace) {
-		pWorkspace->addWindow((QWidget *)pEditPlugin->mwPluginTime);
+		if(pWorkspace) {
+			pWorkspace->addWindow((QWidget *)pEditPlugin->mwPluginTime);
+		}
+		pEditPlugin->mwPluginTime->show();
 	}
-	pEditPlugin->mwPluginTime->show();
+
 }
 
 void SwFilterManager::applyEditParameters()

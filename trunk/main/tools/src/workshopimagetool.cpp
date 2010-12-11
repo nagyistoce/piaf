@@ -492,7 +492,53 @@ void WorkshopImageTool::setToolbar()
 
 	connect(actColorIndexed, SIGNAL(activated()), this, SLOT(slotColorIndexedMode()));
 
-	// --- export
+
+
+
+	// --- MASK / REGION OF INTEREST
+
+	// ------------- MASK SECTION
+	aMenuMask = new QPushButton(hBox);
+	{
+		QPixmap pixMap;
+		if(pixMap.load("IconSelAreaMenu.xpm"))
+			aMenuMask->setPixmap(pixMap);
+		else
+			aMenuMask->setText(tr("Mask"));
+	}
+	aMenuMask->setFlat(true);
+	aMenuMask->setToggleButton(true);
+
+
+	maskMenu = new QMenu(hBox);
+	aMenuMask->setPopup(maskMenu);
+
+	// buttons
+//	actXXX->setShortcut(QKeySequence(("Ctrl+G")));
+
+	pixIcon = QPixmap("IconSelArea.xpm");
+	actSelMask = maskMenu->addAction(pixIcon, tr("Select area"));
+	actSelMask->setIconVisibleInMenu(true);
+	connect(actSelMask, SIGNAL(activated()), this, SLOT(slotSelMask()));
+
+	pixIcon = QPixmap("IconAddArea.xpm");
+	actAddMask = maskMenu->addAction(pixIcon, tr("Add area"));
+	actAddMask->setIconVisibleInMenu(true);
+	connect(actAddMask, SIGNAL(activated()), this, SLOT(slotAddMask()));
+
+	pixIcon = QPixmap("IconDelArea.xpm");
+	actDelSelectedMask = maskMenu->addAction(pixIcon, tr("Del selected area"));
+	actDelSelectedMask->setIconVisibleInMenu(true);
+	connect(actDelSelectedMask, SIGNAL(activated()), this, SLOT(slotDelSelectedMask()));
+
+	pixIcon = QPixmap("IconAllArea.xpm");
+	actAllMask = maskMenu->addAction(pixIcon, tr("Clear mask"));
+	actAllMask->setIconVisibleInMenu(true);
+	connect(actAllMask, SIGNAL(activated()), this, SLOT(slotClearMask()));
+
+
+
+	// --- SNAPSHOT/ EXPORT BUTTON
 	if(ShowSnapbutton) {
 		bExport = new QPushButton(hBox);
 		{
@@ -607,7 +653,7 @@ void WorkshopImageTool::changeViewSize()
 int WorkshopImageTool::loadFilterManager()
 {
 	if(!filterManager)
-	{//modif!!
+	{
 		filterManager = new SwFilterManager( NULL , "filterManager",0);
 
 		filterManager->setWorkspace(pWorkspace);
@@ -625,8 +671,6 @@ int WorkshopImageTool::loadFilterManager()
 
 void WorkshopImageTool::slotFilters()
 {
-	printf("XXXXXXXXXXXXXXXXXXXX slotFilters XXXXXXXXXXXXXXXXXXXXX\n");
-
 	loadFilterManager();
 }
 
@@ -934,56 +978,46 @@ void WorkshopImageTool::setViewSize()
 /* -------------------------   SLOTS   -------------------------
 */
 
+void WorkshopImageTool::setOverlayRect(QRect overlayRect, QColor col)
+{
+	int Vx, Vy, w, h;
+	Absolute2View(overlayRect.x(), overlayRect.y(), &Vx, &Vy);
+	if( ZoomScale > 0)
+	{
+		w = ZoomScale * overlayRect.width();
+		h = ZoomScale * overlayRect.height();
+	} else {
+		int scale = 2 - ZoomScale;
+		w = overlayRect.width() / scale;
+		h = overlayRect.height() / scale;
+	}
+
+	ViewWidget->setOverlayRect(QRect(Vx, Vy, w, h), col);
+}
+
 void WorkshopImageTool::paintEvent(QPaintEvent * )
 {
-
-	/*QPainter p(drawWidget);
-
-	p.drawImage(0     , 0      , ImgRGB);
-	if(ToolMode == MODE_MASK_ADD_RECT && selectPressed) {
-		p.setPen(QColor(0,0,255));
-		int Vx, Vy, w, h;
-		Absolute2View(myStartX, myStartY, &Vx, &Vy);
-		if( ZoomScale > 0)
-		{
-			w = ZoomScale * (myStopX-myStartX);
-			h = ZoomScale * (myStopY-myStartY);
-		} else {
-			int scale = 2 - ZoomScale;
-			w = (myStopX-myStartX) / scale;
-			h = (myStopY-myStartY) / scale;
-		}
-		p.drawRect(Vx, Vy,
-				w,
-				h);
+	if(ToolMode == MODE_ADD_RECT && selectPressed) {
+		setOverlayRect(QRect(myStartX, myStartY, (myStopX-myStartX), (myStopY-myStartY)),
+								   QColor(0,0,255));
 	}
-	if(ToolMode == MODE_MASK_SELECT && selectedMask)
+
+	if(ToolMode == MODE_SELECT && selectedMask)
 	{
-		p.setPen(QColor(0,255,0));
-		int Vx, Vy, w, h;
-		Absolute2View(selectedMask->x(), selectedMask->y(), &Vx, &Vy);
-		if( ZoomScale > 0)
-		{
-			w = ZoomScale * selectedMask->width();
-			h = ZoomScale * selectedMask->height();
-		} else {
-			int scale = 2 - ZoomScale;
-			w = selectedMask->width() / scale;
-			h = selectedMask->height() / scale;
-		}
-		p.drawRect(Vx, Vy,
-				w,
-				h);
+		setOverlayRect(QRect(selectedMask->x(), selectedMask->y(),
+										 selectedMask->width(), selectedMask->height()),
+								   QColor(0,255,0));
 	}
-*/
 }
 
 
 
 
-/* View modes
-*************************************************************************
-*/
+/**************************************************************************
+
+	View modes
+
+*************************************************************************/
 void WorkshopImageTool::slotZoomInMode(){
 	chdir(BASE_DIRECTORY "images/pixmaps");
 
@@ -1003,6 +1037,7 @@ void WorkshopImageTool::slotZoomOutMode(){
 
 	updateToolbar();
 }
+
 
 void WorkshopImageTool::slotZoomFit(){
 	ZoomScale = 1;
@@ -1124,7 +1159,121 @@ void WorkshopImageTool::updateColorMenu() {
 		break;
 	}
 }
+/*****************************************************************
 
+  IMAGE MASK
+
+  *****************************************************************/
+
+/* Mask  areas butotn group callback
+*************************************************************************
+*/
+void WorkshopImageTool::slotMaskTools(int id)
+{
+
+	switch(id)
+	{
+	default:
+	case 0 :  // select
+//		deviceMenu->exec( bDevice->mapToGlobal(QPoint(0,0)), 0);
+
+		aMenuView->setDown(false);
+		aMenuMask->setDown(false);
+		break;
+	case 1: // add
+		slotMenuMask();
+		aMenuView->setDown(false);
+//		bDevice->setDown(false);
+		break;
+	case 2 : // Zoom in
+		slotMenuView();
+		aMenuMask->setDown(false);
+//		bDevice->setDown(false);
+		break;
+	}
+}
+/*
+void WorkshopImageTool::updateToolbar() {
+	switch(ToolMode) {
+	case MODE_ZOOM_IN:
+		aMenuView->setPixmap(QPixmap("IconZoomInView.png"));
+		break;
+	case MODE_ZOOM_OUT:
+		aMenuView->setPixmap(QPixmap("IconZoomOutView.png"));
+		break;
+	case MODE_MOVE:
+		aMenuView->setPixmap(QPixmap("IconMoveView.png"));
+		break;
+	case MODE_SELECT:
+		aMenuMask->setPixmap(QPixmap("IconSelAreaMenu.xpm"));
+		break;
+	case MODE_ADD_RECT:
+		aMenuMask->setPixmap(QPixmap("IconAddAreaMenu.xpm"));
+		break;
+	default:
+		break;
+	}
+	switch(ToolMode) {
+	case MODE_MOVE:
+	case MODE_ZOOM_OUT:
+	case MODE_ZOOM_IN:
+		aMenuView->setDown(true);
+		aMenuMask->setDown(false);
+		bDevice->setDown(false);
+		break;
+	case MODE_SELECT:
+	case MODE_ADD_RECT:
+		aMenuView->setDown(false);
+		aMenuMask->setDown(true);
+		bDevice->setDown(false);
+		break;
+	default:
+		aMenuView->setDown(false);
+		aMenuMask->setDown(false);
+		bDevice->setDown(false);
+
+		break;
+	}
+}
+*/
+
+/* Mask modes
+*************************************************************************
+*/
+void WorkshopImageTool::slotSelMask(){
+	 ToolMode = MODE_SELECT;
+
+	QCursor zoomCursor;
+	ViewWidget->setCursor(Qt::PointingHandCursor );
+
+	updateToolbar();
+}
+void WorkshopImageTool::slotAddMask(){
+	 ToolMode = MODE_ADD_RECT;
+	QCursor zoomCursor = QCursor( QBitmap(IMAGEDIR "CursorAddArea.bmp", 0),
+		QBitmap(IMAGEDIR "CursorAddAreaMask.bmp", 0));
+	ViewWidget->setCursor(zoomCursor);
+	updateToolbar();
+}
+void WorkshopImageTool::slotClearMask(){
+
+	showMask = false;
+	//doc->clearMask();
+	// FIXME
+}
+
+void WorkshopImageTool::slotDelSelectedMask(){
+	if(ToolMode == MODE_SELECT)
+		if(selectedMask) {
+			printf("Delete area.\n");
+//FIXME			doc->removeMask(selectedMask);
+			selectedMask = NULL;
+		}
+}
+void WorkshopImageTool::slotMenuMask()
+{
+	maskMenu->exec( aMenuMask->mapToGlobal(QPoint(0,0)), 0);
+}
 
 
 /***************************************************************
@@ -1394,6 +1543,10 @@ void WorkshopImageTool::CalculateZoomWindow()
 		   ZoomScale, xZoomOrigine, yZoomOrigine);
 #endif
 }
+void WorkshopImageTool::refreshDisplay()
+{
+	ViewWidget->update();
+}
 
 void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 {
@@ -1426,10 +1579,26 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 		selectPressed = true;
 		//		printf("Move view : start at (%d,%d)\n", myStartX, myStartY);
 		break;
+	case MODE_SELECT: {
+		int selX, selY;
+		WindowView2Absolute(point.x(), point.y(), &selX, &selY);
+
+//FIXME		selectedMask = doc->getMaskFromPos(selX, selY);
+		refreshDisplay();
+
+		}
+		break;
+	case MODE_ADD_RECT:
+		WindowView2Absolute(point.x(), point.y(), &myStartX, &myStartY);
+		myStopX = myStartX; // for drawing first rectangle
+		myStopY = myStartY;
+		selectPressed = true;
+		refreshDisplay();
+		break;
+
 	}
 
 	slotUpdateView();
-
 }
 
 
@@ -1466,17 +1635,14 @@ void WorkshopImageTool::Absolute2View(int Ax, int Ay, int * Vx, int * Vy)
 	}
 }
 
-void WorkshopImageTool::onLButtonUp(Qt::ButtonState , const QPoint )
+void WorkshopImageTool::onLButtonUp(Qt::ButtonState , const QPoint point)
 {
-	/*
 	switch(ToolMode)
 	{
-	case MODE_MASK_ADD: {
+	case MODE_ADD_RECT: {
 
 		WindowView2Absolute(point.x(), point.y(), &myStopX, &myStopY);
-#ifdef __DEBUG_ZOOMING__
-		printf("Select area : stop at (%d,%d)\n", myStopX, myStopY);
-#endif
+
 		selectPressed = false;
 
 		// set detection mask to detection object and to view object
@@ -1499,13 +1665,14 @@ void WorkshopImageTool::onLButtonUp(Qt::ButtonState , const QPoint )
 
 		int w = myStopX - myStartX;
 		int h = myStopY - myStartY;
-		doc->addMask(myStartX, myStartY, w, h);
+//		doc->addMask(myStartX, myStartY, w, h);
 		}
 		break;
 	default:
 		selectPressed = false;
 		break;
-	}*/
+	}
+
 }
 
 void WorkshopImageTool::onRButtonDown(Qt::ButtonState , const QPoint )

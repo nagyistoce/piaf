@@ -31,6 +31,49 @@
 #define CPP_DELETE_DOUBLE_ARRAY(buf,nb) {for(int i=0;i<(nb);i++) if(buf[i]) delete [] buf[i]; \
 		if((buf)) delete [] (buf); (buf)=NULL;}
 
+#ifdef WORKSHOP_CPP
+#define PIAF_EXTERN
+#define PIAF_ZERO		=0
+#else
+#define PIAF_EXTERN		extern
+#define PIAF_ZERO
+#endif
+
+//
+#define SWLOG_TRACE		-2
+#define SWLOG_DEBUG		-1
+#define SWLOG_INFO		0
+#define SWLOG_WARNING	1
+#define SWLOG_ERROR		2
+#define SWLOG_CRITICAL	3
+
+// DEBUG MESSAGE
+
+// NTFS/FAT is not protected against multiple write, so we use a mutex to lock printf
+PIAF_EXTERN int g_debug_piaf	PIAF_ZERO;
+
+const char swlog_msgtab[6][12] = {
+		"none   ",
+		"ERROR  ",
+		"WARNING",
+		"INFO   ",
+		"DEBUG  ",
+		"TRACE  "
+};
+
+#define SWLOG_MSG(a) ((a)>=SWLOG_TRACE&&(a)<=TMLOG_CRITICAL?tmlog_msgtab[(a)+2]:"UNKNOWN")
+
+#define PIAF_MSG(a,...)       { \
+			if( (a)>=g_debug_piaf ) { \
+					struct timeval l_nowtv; gettimeofday (&l_nowtv, NULL); \
+					fprintf(stderr,"%03d.%03d %s [Piaf] %s:%d : ", \
+							(int)(l_nowtv.tv_sec%1000), (int)(l_nowtv.tv_usec/1000), \
+							SWLOG_MSG((a)), __func__,__LINE__); \
+					fprintf(stderr,__VA_ARGS__); \
+					fprintf(stderr,"\n"); \
+			} \
+		}
+
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif

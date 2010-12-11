@@ -63,6 +63,9 @@ VideoPlayerTool::~VideoPlayerTool()
 		delete m_fileVA;
 	if(detailsView)
 		delete detailsView;
+	if(m_editBookmarksForm)
+		delete m_editBookmarksForm;
+
 	fprintf(stderr, "%s::%s:%d : deleted.", __FILE__, __func__, __LINE__);
 }
 
@@ -110,6 +113,7 @@ int VideoPlayerTool::setFile(char * file, int period = 0)
 {
 	if(m_fileVA) {
 		delete m_fileVA;
+		m_fileVA = NULL;
 	}
 
 	fprintf(stderr, "[VideoPlayerT]::%s:%d : Set movie file '%s'\n",
@@ -177,7 +181,7 @@ void VideoPlayerTool::initPlayer()
 			"'\n", __func__, __LINE__);
 
 	m_fileVA = NULL;
-
+	m_editBookmarksForm = NULL;
 	playTimer = NULL;
 	playSpeed = 1.f;
 	playContinuous = false;
@@ -334,8 +338,7 @@ void VideoPlayerTool::initPlayer()
 										 "FullsizeImageViewer", Qt::WA_DeleteOnClose //WDestructiveClose
 										 );
 
-
-	// This won't force the iomage to be on workspace because it already has a parent
+	// This won't force the image to be on workspace because it already has a parent
 	detailsView->setWorkspace((QWorkspace *)pWorkspace);
 	detailsView->display()->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 	detailsView->display()->update();
@@ -343,6 +346,7 @@ void VideoPlayerTool::initPlayer()
 	connect(pWin, SIGNAL(signalResizeEvent(QResizeEvent *)), this, SLOT(slotResizeTool(QResizeEvent *)));
 	pWin->resize(380,320);
 }
+
 
 void VideoPlayerTool::slotResizeTool(QResizeEvent *e)
 {
@@ -412,17 +416,17 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 
 	} else if(actEditBookmark == pAction) {// Edit a bookmark
 
-		MovieBookmarkForm * editBookmarksForm = new MovieBookmarkForm(NULL);
+		m_editBookmarksForm = new MovieBookmarkForm(NULL);
 		if(pWorkspace) {
-			((QWorkspace *)pWorkspace)->addWindow((QWidget *)editBookmarksForm);
+			((QWorkspace *)pWorkspace)->addWindow((QWidget *)m_editBookmarksForm);
 
 		}
-		editBookmarksForm->setBookmarkList(m_listBookmarks);
-		connect(editBookmarksForm, SIGNAL(signalNewBookmarkList(QList<video_bookmark_t>)),
+		m_editBookmarksForm->setBookmarkList(m_listBookmarks);
+		connect(m_editBookmarksForm, SIGNAL(signalNewBookmarkList(QList<video_bookmark_t>)),
 				this, SLOT(slotNewBookmarkList(QList<video_bookmark_t>)));
 
 		// Set bookmarks
-		editBookmarksForm->show();
+		m_editBookmarksForm->show();
 
 	} else if (actPlayToBookmark == pAction) {
 		// Play to next bookmark
