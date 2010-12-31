@@ -303,7 +303,7 @@ IplImage * swCreateImageHeader(CvSize size, int depth, int channels) {
 void swReleaseImage(IplImage ** img) {
 	if(!img) return;
 	if(!(*img) ) return;
-#ifdef cv::Exception
+#if defined(OPENCV2)
 	try {
 		cvReleaseImage(img);
 	} catch(cv::Exception e) {
@@ -319,9 +319,9 @@ void swReleaseImage(IplImage ** img) {
 void swReleaseImageHeader(IplImage ** img) {
 	if(!img) return;
 	if(!(*img) ) return;
-	#ifdef cv::Exception
+#ifdef OPENCV2
 	try {
-		cvReleaseImageHeader(img);
+		swReleaseImageHeader(img);
 	} catch(cv::Exception e) {
 		fprintf(stderr, "[swvideodetector] %s:%d : error in openCV cvReleaseImage ", __func__, __LINE__);
 	}

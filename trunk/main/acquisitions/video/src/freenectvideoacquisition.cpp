@@ -47,14 +47,17 @@ FreenectVideoAcquisition::FreenectVideoAcquisition(int idx_device)
 	m_imageSize = cvSize(0,0);
 
 	// Initialize device
-	if (freenect_init(&m_freenect_ctx, 0)) {
+	if (freenect_init(&m_freenect_ctx, NULL)) {
 		printf("Error: Cannot get context\n");
 		return ;
 	}
 
-	if (freenect_open_device(m_freenect_ctx, &m_freenect_dev, 0)) {
-		printf("Error: Cannot get device\n");
-
+	if (freenect_open_device(m_freenect_ctx,
+							 &m_freenect_dev,
+							 idx_device))
+	{
+		fprintf(stderr, "Freenect::%s:%d : Error: Cannot get device\n", __func__, __LINE__);
+		m_freenect_dev = NULL;
 		return ;
 	}
 
@@ -64,6 +67,7 @@ FreenectVideoAcquisition::FreenectVideoAcquisition(int idx_device)
 FreenectVideoAcquisition::~FreenectVideoAcquisition()
 {
 	stopAcquisition();
+
 	swReleaseImage(&m_depthRawImage16U);
 	swReleaseImage(&m_depthImage32F);
 	swReleaseImage(&m_cameraIRImage8U);
@@ -71,6 +75,7 @@ FreenectVideoAcquisition::~FreenectVideoAcquisition()
 	swReleaseImage(&m_bgr24Image);
 	swReleaseImage(&m_bgr32Image);
 	swReleaseImage(&m_grayImage);
+
 }
 
 /* Use sequential mode
@@ -138,8 +143,8 @@ int FreenectVideoAcquisition::setRawDepthBuffer(void * depthbuf, uint32_t timest
 		u16 * depth16U = (u16 *)depthbuf;
 		for(int r = 0; r<m_imageSize.height; ++r)
 		{
-			memcpy(m_depthRawImage16U->imageData + r*m_depthRawImage16U->widthStep,
-				   depthbuf + r * m_imageSize.width,
+			memcpy(m_depthRawImage16U->imageData + r * m_depthRawImage16U->widthStep,
+				   depth16U + r * m_imageSize.width,
 				   m_imageSize.width * sizeof(u16));
 		}
 	}
@@ -236,7 +241,10 @@ void * freenect_threadfunc(void *arg)
 /** \brief Start acquisition */
 int FreenectVideoAcquisition::startAcquisition()
 {
-	if(!m_freenect_dev) return -1;
+	if(!m_freenect_dev) {
+		fprintf(stderr, "Freenect::%s:%d : no device : return -1\n", __func__, __LINE__);
+		return -1;
+	}
 
 	freenect_set_depth_format(m_freenect_dev, FREENECT_DEPTH_11BIT);
 	freenect_start_depth(m_freenect_dev);
@@ -368,7 +376,9 @@ int FreenectVideoAcquisition::stopAcquisition()
 
 	return 0;
 }
-static float g_depth_LUT[2047] = {-1.f };
+
+static float g_depth_LUT[FREENECT_RAW_MAX] = {-1.f };
+static u8 g_depth_grayLUT[FREENECT_RAW_MAX] = {255 };
 
 void init_depth_LUT() {
 	if(g_depth_LUT[0]>=0) return;
@@ -376,11 +386,29 @@ void init_depth_LUT() {
 	   http://openkinect.org/w/index.php?title=Imaging_Information&oldid=613
 	distance = 0.1236 * tan(rawDisparity / 2842.5 + 1.1863)
 	   */
-	for(int raw = 0; raw<2047; raw++) {
+	// Raw in meter (float)
+	for(int raw = 0; raw<FREENECT_RAW_MAX; raw++) {
 		g_depth_LUT[raw] = (float)( 0.1236 * tan((double)raw/2842.5 + 1.1863) );
 	}
 
-	g_depth_LUT[2047]=-1.f;
+	g_depth_LUT[FREENECT_RAW_UNKNOWN]=-1.f;
+
+	/* LUT for 8bit info on depth :
+	*/
+
+	for(int raw = 0; raw<FREENECT_RAW_MAX; raw++) {
+		int val = (int)round( 255. *
+							  (1. - (g_depth_grayLUT[raw] - FREENECT_DEPTH2CM_RANGE_MIN)
+								 / (FREENECT_DEPTH2CM_RANGE_MAX - FREENECT_DEPTH2CM_RANGE_MIN) )
+							  );
+		if(val > 255) val = 255;
+		else if(val < 1) val = 1;// keep 0 for unknown
+
+		g_depth_grayLUT[raw] = (u8)val;
+	}
+
+	g_depth_grayLUT[FREENECT_RAW_UNKNOWN] = 0;
+
 }
 
 /** \brief Grabs one image and convert to RGB32 coding format
@@ -399,7 +427,6 @@ IplImage * FreenectVideoAcquisition::readImageRGB32()
 	}
 
 	int mode = (int)round(m_video_properties.mode);
-#define FREENECT_MODE_DEPTH_2CM	0
 	switch(mode)
 	{
 	default:
@@ -418,17 +445,18 @@ IplImage * FreenectVideoAcquisition::readImageRGB32()
 		}
 
 		// convert to gray
-		if(getDepthImage32F()) {
+		if(m_depthRawImage16U) {
 
-			for(int r=0; r<m_depthImage32F->height; r++)
+			for(int r=0; r<m_depthRawImage16U->height; r++)
 			{
-				float * linedepth = (float *)(m_depthImage32F->imageData + r*m_depthImage32F->widthStep);
-				u8 * line8u = (u8 *)(m_grayImage->imageData + r*m_grayImage->widthStep);
+				u16 * linedepth = IPLLINE_16U(m_depthRawImage16U, r);
+				u8 * line8u = IPLLINE_8U(m_grayImage, r);
 				for(int c = 0; c<m_grayImage->width; c++)
 				{
-					line8u[c] = (u8)roundf(linedepth[c]*100.f/2.f);
+					line8u[c] = g_depth_grayLUT[ linedepth[c] ];
 				}
 			}
+
 			cvCvtColor(m_grayImage, m_bgr32Image, CV_GRAY2BGRA);
 		}
 		break;
@@ -498,6 +526,39 @@ t_video_properties FreenectVideoAcquisition::getVideoProperties()
 /** @brief Update and return video properties */
 t_video_properties FreenectVideoAcquisition::updateVideoProperties()
 {
+	if(!m_freenect_dev) {
+		memset(&m_video_properties, 0, sizeof(t_video_properties));
+		return m_video_properties;
+	}
+
+//	m_video_properties. = cvGetCaptureProperty(m_capture, );
+	m_video_properties.pos_msec = m_depth_timestamp;
+	m_video_properties.pos_frames =	m_got_depth;
+	m_video_properties.pos_avi_ratio =	-1.;
+	m_video_properties.frame_width =	m_imageSize.width;
+	m_video_properties.frame_height =	m_imageSize.height;
+	m_video_properties.fps =			30.;
+//	m_video_properties.fourcc_dble =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FOURCC );/*4-character code of codec */
+//		char   fourcc[5] =	cvGetCaptureProperty(m_capture, FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
+//		char   norm[8] =		cvGetCaptureProperty(m_capture, Norm: pal, ntsc, secam */
+	m_video_properties.frame_count =	m_got_depth;
+	//m_video_properties.format =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_FORMAT );/*The format of the Mat objects returned by retrieve() */
+	m_video_properties.mode =	m_image_mode; /*A backend-specific value indicating the current capture mode */
+//	m_video_properties.brightness =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_BRIGHTNESS );/*Brightness of the image (only for cameras) */
+//	m_video_properties.contrast =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONTRAST );/*Contrast of the image (only for cameras) */
+//	m_video_properties.saturation =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_SATURATION );/*Saturation of the image (only for cameras) */
+//	m_video_properties.hue =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_HUE );/*Hue of the image (only for cameras) */
+//	m_video_properties.gain =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_GAIN );/*Gain of the image (only for cameras) */
+//	m_video_properties.exposure =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_EXPOSURE );/*Exposure (only for cameras) */
+//	m_video_properties.convert_rgb =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONVERT_RGB );/*Boolean flags indicating whether images should be converted to RGB */
+//	m_video_properties.white_balance = cvGetCaptureProperty(m_capture, CV_CAP_PROP_WHITE_BALANCE );/*Currently unsupported */
+
+		/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
+		– Property identifier. Can be one of the following:*/
+	m_video_properties.min_width = m_imageSize.width;
+	m_video_properties.min_height = m_imageSize.height;
+	m_video_properties.max_width = m_imageSize.width;
+	m_video_properties.max_height = m_imageSize.height;
 	return m_video_properties;
 }
 
@@ -505,6 +566,24 @@ t_video_properties FreenectVideoAcquisition::updateVideoProperties()
 /** @brief Set video properties (not updated) */
 int FreenectVideoAcquisition::setVideoProperties(t_video_properties props)
 {
+	// Read mode
+	int mode = (int)round(props.mode);
+	if(m_image_mode != mode)
+	{
+		switch(mode)
+		{
+		default:
+			break;
+		case FREENECT_MODE_DEPTH_2CM:
+			break;
+		case FREENECT_MODE_DEPTH_M:
+			break;
+		case FREENECT_MODE_3D:
+			break;
+
+		}
+		m_image_mode = mode;
+	}
 
 	return 0;
 }

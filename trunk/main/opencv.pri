@@ -15,8 +15,10 @@ LIBS_EXT = dylib
 
 linux-g++: LIBS_EXT = so
 unix: {
+	##################### OPENCV <= 2.1 #####################
 	# Test if OpenCV library is present
 	exists( /usr/local/include/opencv/cv.hpp ) {
+		DEFINES += OPENCV_21 OPENCV2
 		#message("OpenCV found in /usr/local/include.")
 		INCLUDEPATH += /usr/local/include/opencv
 
@@ -28,6 +30,7 @@ unix: {
 	} else {
 		exists( /usr/include/opencv/cv.hpp )
 		{
+			DEFINES += OPENCV_21 OPENCV2
 			#message("OpenCV found in /usr/include.")
 			CVINSTPATH = /usr
 			CVINCPATH = /usr/include/opencv
@@ -37,7 +40,36 @@ unix: {
 			LIBSDIR = /usr/lib
 		} else {
 			message ( "OpenCV NOT FOUND => IT WILL NOT COMPILE" )
-			DEFINES += WITHOUT_OPENCV
+		}
+	}
+
+	##################### OPENCV >= 2.2 #####################
+	# Test if OpenCV library is present
+	exists( /usr/local/include/opencv2/opencv.hpp ) {
+		message("OpenCV >= 2.2 found in /usr/local/include/opencv2/")
+		DEFINES += OPENCV_22 OPENCV2
+		INCLUDEPATH += /usr/local/include/opencv2
+
+		CVINSTPATH = /usr/local
+		CVINCPATH = /usr/local/include/opencv2
+
+		LIBS += -L/usr/local/lib
+		LIBSDIR = /usr/local/lib
+	} else {
+		exists( /usr/include/opencv2/opencv.hpp )
+		{
+			DEFINES += OPENCV_22 OPENCV2
+
+			#message("OpenCV found in /usr/include.")
+			CVINSTPATH = /usr
+			CVINCPATH = /usr/include/opencv2
+			INCLUDEPATH += /usr/include/opencv2
+
+			LIBS += -L/usr/lib
+			LIBSDIR = /usr/lib
+		} else {
+			message ( "OpenCV NOT FOUND => IT WILL NOT COMPILE" )
+			DEFINES += WITHOUT_OPENCV22
 		}
 	}
 
@@ -56,7 +88,21 @@ unix: {
 	#message ( Testing CV lib = '$$CV_LIB' )
 	exists( $$CV_LIB ) {
 		#message( " => Linking with -lcv ('$$CV_LIB' exists)")
-		LIBS += -lcv
+		LIBS += -lcv -lcvaux -lhighgui
+	} else {
+		CV_LIB = $$LIBSDIR/libopencv.$$LIBS_EXT
+		exists($$CV_LIB ) {
+
+			#message( " => Linking with -lopencv ('$$CV_LIB' does not exist)")
+			LIBS += -lopencv -lcvaux -lhighgui
+		}
+	}
+
+	CV22_LIB = $$LIBSDIR/libopencv_core.$$LIBS_EXT
+	message ( Testing CV lib = '$$CV22_LIB )
+	exists( $$CV22_LIB ) {
+		#message( " => Linking with -lcv ('$$CV_LIB' exists)")
+		LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui
 	} else {
 		CV_LIB = $$LIBSDIR/libopencv.$$LIBS_EXT
 		exists($$CV_LIB ) {
@@ -67,9 +113,6 @@ unix: {
 	}
 }
 
-
-# Piaf use CVAux to capture images
-unix: LIBS += -lcvaux -lhighgui
 
 
 

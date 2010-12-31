@@ -18,9 +18,7 @@
 #ifndef OPENCVENCODER_H
 #define OPENCVENCODER_H
 
-#include <cv.h>
-#include <cvaux.h>
-#include <highgui.h>
+#include "swvideodetector.h"
 
 
 /** @brief New encoder class using OpenCV HighGUI */

@@ -26,10 +26,8 @@
 #include "sw_types.h"
 
 #include "nolinux_videodev.h"
-
-#include <cv.h>
-#include <cvaux.h>
-#include <highgui.h>
+#include "virtualdeviceacquisition.h"
+// TODO : port this class with virtual device inheritance
 
 
 /** Performs device management and image acquisitions with simple API.

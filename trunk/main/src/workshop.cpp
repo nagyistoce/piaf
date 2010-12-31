@@ -1634,8 +1634,11 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 	// check if there are Kinects connected
 #ifdef HAS_FREENECT
+	statusBar()->message(tr("Creating New Video Acquisition...") + tr("try Kinect"));
 	FreenectVideoAcquisition * freenectDevice = new FreenectVideoAcquisition(0);
-	if(freenectDevice->isDeviceReady()) {
+
+	if(freenectDevice->isDeviceReady())
+	{
 		// append to Piaf
 		statusBar()->message(tr("(VideoAcquisition) : Freenect device Init OK"));
 
@@ -1669,6 +1672,7 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 #endif // HAS_FREENECT
 
+	statusBar()->message(tr("Creating New Video Acquisition...") + tr("try OpenCV"));
 
 
 	// list all video devices from /proc/video/dev/video*
@@ -1707,11 +1711,17 @@ void WorkshopApp::slotOnNewVideoAcq()
 			sprintf(txt, "%d - %s", dev, ptname);
 		}
 
+
+		fprintf(stderr, "Workshop::%s:%d : create OpenCV acquisition dev '%s'\n",
+				__func__, __LINE__, txt);
+
 		//SwVideoAcquisition *myVAcq = new SwVideoAcquisition(dev);
 		OpenCVVideoAcquisition *myVAcq = new OpenCVVideoAcquisition(dev);
 
 		if(!myVAcq->isDeviceReady())
 		{
+			fprintf(stderr, "Workshop::%s:%d : OpenCV acquisition dev '%s' not ready\n",
+					__func__, __LINE__, txt);
 			failed++;
 			statusBar()->message(tr("(VideoAcquisition) : Video device init failed"));
 		}
@@ -1719,16 +1729,25 @@ void WorkshopApp::slotOnNewVideoAcq()
 			statusBar()->message(tr("(VideoAcquisition) : Video device Init OK"));
 			found = true;
 
+			fprintf(stderr, "Workshop::%s:%d : starting acquisition on dev '%s' ...\n",
+					__func__, __LINE__, txt);
 			// acquisition init
 			if(myVAcq->startAcquisition()<0)
 			{
+				fprintf(stderr, "Workshop::%s:%d : could not start acquisition on dev '%s'.\n",
+						__func__, __LINE__, txt);
+
 				statusBar()->message(tr("Error: canot initialize acquisition !"));
 				return;
 			}
 			else
 			{
+				fprintf(stderr, "Workshop::%s:%d : acquisition started on dev '%s' ...\n",
+						__func__, __LINE__, txt);
 				if(myVAcq->isAcquisitionRunning())
 				{
+					fprintf(stderr, "Workshop::%s:%d : acquisition running on dev '%s' ...\n",
+							__func__, __LINE__, txt);
 					statusBar()->message(tr("Initialization OK"));
 
 					VideoCaptureDoc * pVCD = new VideoCaptureDoc(myVAcq);

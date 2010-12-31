@@ -20,6 +20,47 @@
 #include "libfreenect.h"
 
 #include "virtualdeviceacquisition.h"
+
+
+// IMAGE MODES
+/** @brief Mode for 8bit image of depth with 1 value = 2 cm (1 channel x IPL_DEPTH_8U)
+For close distance = 0.6m, the pixels are white (255) and at 5.6 m, they are black.
+Unknown distance is black too.
+*/
+#define FREENECT_MODE_DEPTH_2CM		0
+
+#define FREENECT_DEPTH2CM_RANGE_MIN	0.6
+#define FREENECT_DEPTH2CM_RANGE_MAX	7
+
+/** @brief Mode for float (32F) image of depth in meter (1 channel x IPL_DEPTH_32F)
+The range is 0.6m to infinite. -1.f means the depth is unknown.
+For practical use, do not use depth >7m
+*/
+#define FREENECT_MODE_DEPTH_M		1
+
+/** \brief Mode for float (32F) image of 3D x,y,z position in meter (3 channels x IPL_DEPTH_32F)
+x,y,z is in the camera reference. X on image columns, Y on rows, and Z is depth
+x,y : position in 3D in meter
+z: depth in meter. The range is 0.6m to infinite. -1.f means the depth is unknown.
+For practical use, do not use depth >7m
+*/
+#define FREENECT_MODE_3D			2
+
+/** \brief Mode for false colors (depth as RGB)
+black when unknown
+in HSV, H=0 (Red for 0.6m),
+Blue for
+*/
+#define FREENECT_MODE_DEPTH_COLORS	3
+
+/** @brief Max value of raw depth image (11 bits) */
+#define FREENECT_RAW_MAX	2048
+
+/** @brief Value for unknown depth in raw depth image (11 bits) */
+#define FREENECT_RAW_UNKNOWN 2047
+
+
+
 #include <QThread>
 #include <QMutex>
 #include <QWaitCondition>
@@ -120,6 +161,7 @@ private:
 	/// Video properties from OpenCV capture API
 	t_video_properties m_video_properties ;
 
+
 	// FREENECT STRUCTURES
 
 	/** @brief Requested video format when change is requested
@@ -142,6 +184,9 @@ private:
 	int m_freenect_led;
 	int m_got_rgb;
 	int m_got_depth;
+
+	/** \brief Output image mode */
+	int m_image_mode;
 
 	uint32_t m_rgb_timestamp;
 	uint32_t m_depth_timestamp;

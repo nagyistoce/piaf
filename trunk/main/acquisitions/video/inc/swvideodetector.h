@@ -25,56 +25,20 @@
 #include "video_asm.h"
 
 #ifndef __WITHOUT_OPENCV__
-#include "cv.h"
-#include "cv.hpp"
+
+#ifndef OPENCV_22
+#include <cv.h>
+#include <cvaux.h>
+#include <highgui.h>
+#else
+#include <opencv.hpp>
+#include <legacy/compat.hpp>
+#endif
+
 #else
 #include "cversatz.h"
 #endif
 #include "sw_types.h"
-
-
-// Définitions utilisées pour la gestion des modes
-// Modes de fonctionnement
-#define MODE_STOP									0
-#define MODE_INITIALISATION					1
-#define MODE_CALIBRATION						2
-#define MODE_DETECTION							3
-#define MODE_RECORD									4
-#define MODE_FAILURE									255
-// Etats
-#define ARRET_OK											0
-#define INIT_IN_PROGRESS								1
-#define INIT_SUCCEED										2
-#define INIT_FAILED										3
-#define CALIBRATION_INIT							4
-#define CALIBRATION_IN_PROGRESS			5
-#define CALIBRATION_FIN_OK					6
-#define CALIBRATION_FAILED					7
-#define DETECTION_IN_PROGRESS					8
-#define DYNAMIC_CALIBRATION		9
-// Alarms
-#define NO_ALARM										0
-#define CMD_INVALID						1
-#define IMAGE_SIZE_INVALID	2
-#define LOW_LUMINOSITY						3
-
-#define DEFAULT_LEVEL_CALIB					40  // à confirmer
-#define DEFAULT_CALIBRATION_TIME 			2   // seconds
-#define DEFAULT_LEVEL_MIN					20
-
-// Failures
-#define NO_FAILURE							0
-#define MEMORY_ALLOCATION				1
-
-
-/// alarm struct for processing status
-struct t_cre
-{
-	int mode;
-	int etat;
-	int alarme;
-	int panne;
-};
 
 /// For image storage
 typedef struct _Img {
@@ -99,6 +63,14 @@ void SavePPMFile(char *filename, bool colored, CvSize size, unsigned char *buffe
 
 
 #define MARKER_COLOR 255
+
+#define IPLLINE_8U(_img, _r)	(u8 *)((_img)->imageData + (_r)*(_img)->widthStep)
+#define IPLLINE_16U(_img, _r)	(u16 *)((_img)->imageData + (_r)*(_img)->widthStep)
+#define IPLLINE_16S(_img, _r)	(i16 *)((_img)->imageData + (_r)*(_img)->widthStep)
+#define IPLLINE_32U(_img, _r)	(u32 *)((_img)->imageData + (_r)*(_img)->widthStep)
+#define IPLLINE_32S(_img, _r)	(i32 *)((_img)->imageData + (_r)*(_img)->widthStep)
+#define IPLLINE_32F(_img, _r)	(float *)((_img)->imageData + (_r)*(_img)->widthStep)
+
 
 /** @brief Print image properties */
 void swPrintProperties(IplImage * img);
