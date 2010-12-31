@@ -264,14 +264,24 @@ int VideoCaptureDoc::setpicture(int br, int hue, int col, int cont, int white)
 }
 int VideoCaptureDoc::getpicture(video_picture * pic)
 {
+	t_video_properties props = myVAcq->updateVideoProperties();
+	pic->brightness = props.brightness * 16384;
+	pic->hue = props.hue * 16384;
+	pic->colour = props.saturation * 16384;
+	pic->contrast = props.contrast * 16384;
 	// FIXME
-	return -1;
+	return 0;
 	//return myVAcq->getpicture(pic);
 }
 int VideoCaptureDoc::getcapability(video_capability * vc)
 {
-	// FIXME
-	return -1;
+	t_video_properties props = myVAcq->updateVideoProperties();
+	vc->maxwidth = props.max_width;
+	vc->minwidth = props.min_width;
+	vc->maxheight = props.max_height;
+	vc->minheight = props.min_height;
+
+	return 0;
 
 	//return myVAcq->getcapability(vc);
 }

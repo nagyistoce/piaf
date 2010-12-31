@@ -132,7 +132,7 @@ int OpenCVEncoder::encodeFrameY(unsigned char * Yframe) {
 		imgHeader = cvCreateImageHeader(cvSize(m_width, m_height), IPL_DEPTH_8U, 1);
 	}
 	imgHeader->imageData = (char *)Yframe;
-#ifdef cv::Exception
+#ifdef OPENCV2
 	try
 	{
 //		fprintf(stderr, "OpenCVEnc::%s:%d convert to RGB24 "
@@ -181,7 +181,7 @@ int OpenCVEncoder::encodeFrameRGB32(unsigned char *RGB32frame) {
 			m_width, m_height, m_fps);
 
 	*/
-#ifdef cv::Exception
+#ifdef OPENCV2
 	try {
 		convertFromRGB32(RGB32frame, imgRgb24);
 

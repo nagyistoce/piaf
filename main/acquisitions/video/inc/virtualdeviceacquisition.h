@@ -24,9 +24,7 @@
 #include "sw_types.h"
 
 #include "nolinux_videodev.h"
-#include <cv.h>
-#include <cvaux.h>
-#include <highgui.h>
+#include "swvideodetector.h"
 
 #include <QThread>
 
@@ -61,8 +59,14 @@ typedef struct {
 
 	/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
 	– Property identifier. Can be one of the following:*/
+	double min_width;
+	double min_height;
+	double max_width;
+	double max_height;
+
 } t_video_properties;
 
+void printVideoProperties(t_video_properties * props);
 
 typedef struct {
 	int id;
