@@ -26,8 +26,14 @@
 #include <unistd.h>
 
 // OpenCV
+#ifndef OPENCV_22
 #include <cv.h>
-#include <cv.hpp>
+#include <cvaux.h>
+#include <highgui.h>
+#else
+#include <opencv.hpp>
+#include <legacy/compat.hpp>
+#endif
 
 
 // include componenet header
@@ -162,7 +168,7 @@ void initImages()
 	cvIm2->imageData = (char *)imageOut;
 
 	if(!cvTmp) {
-		cvTmp = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
+		cvTmp = cvCreateImage(cvsize,  IPL_DEPTH_8U, imIn->depth);
 	}
 }
 
