@@ -45,6 +45,42 @@ OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 	fprintf(stderr, "OpenCVAcq::%s:%d : create device # %d =W capture=%p\n",
 			__func__, __LINE__,
 			idx_device, m_capture);
+	if(m_capture) {
+		// try to use a big image size
+		const int acq_widths[] = { 1920, 1600, 1280, 1024, 800, 720, 640, 360, 320, 160, 0 };
+		const int acq_heights[]= { 1080, 1200, 720, 768, 600, 576, 480, 288, 240, 120, 0 };
+
+		for(int acq_idx = 0; acq_widths[acq_idx]>0; acq_idx++ )
+		{
+			int retwidth = cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_WIDTH ,acq_widths[acq_idx]);
+			int retheight = cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_HEIGHT ,acq_heights[acq_idx]);
+
+			// check if size is ok
+			double cur_width = cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_WIDTH);
+			double cur_height = cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_HEIGHT);
+
+			//
+			fprintf(stderr, "OpenCVCap::%s:%d : setprop (%dx%d) returned %d,%d => cur size=%gx%g\n",
+					__func__, __LINE__,
+					acq_widths[acq_idx], acq_heights[acq_idx],
+					retwidth, retheight,
+					cur_width, cur_height
+					);
+
+			if((int)round(cur_width) == acq_widths[acq_idx]
+				&& (int)round(cur_height) == acq_heights[acq_idx]
+				&& m_video_properties.max_width<1)
+			{
+				m_video_properties.max_width = acq_widths[acq_idx];
+				m_video_properties.max_height = acq_heights[acq_idx];
+			}
+		}
+
+
+		// finally use max width/height
+		cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_WIDTH ,m_video_properties.max_width);
+		cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_HEIGHT ,m_video_properties.max_height);
+	}
 
 }
 
@@ -259,10 +295,6 @@ t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
 
 		/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
 		– Property identifier. Can be one of the following:*/
-	m_video_properties.min_width = 160;
-	m_video_properties.min_height = 120;
-	m_video_properties.max_width = 800;
-	m_video_properties.max_height = 600;
 
 	fprintf(stderr, "OpenCVVideoAcquisition::%s:%d : props=\n", __func__, __LINE__);
 	printVideoProperties(&m_video_properties);

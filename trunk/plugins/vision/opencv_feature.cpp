@@ -26,10 +26,14 @@
 #include <unistd.h>
 
 // OpenCV
+#ifndef OPENCV_22
 #include <cv.h>
-#include <cv.hpp>
-#include <highgui.h>
 #include <cvaux.h>
+#include <highgui.h>
+#else
+#include <opencv.hpp>
+#include <legacy/compat.hpp>
+#endif
 
 #include <math.h>
 #ifdef _CH_
@@ -37,7 +41,6 @@
 #endif
 
 #ifndef _EiC
-#include "cv.h"
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -827,7 +830,6 @@ void findFace() {
 			cvCircle (cvIm2, center, radius, CV_RGB(0,255,0), 3, 8, 0 );
 		}
 	}
-
 
 }
 

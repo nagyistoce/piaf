@@ -26,9 +26,14 @@
 #include "SwPluginCore.h"
 
  // OpenCV
+#ifndef OPENCV_22
 #include <cv.h>
-#include <cv.hpp>
+#include <cvaux.h>
 #include <highgui.h>
+#else
+#include <opencv.hpp>
+#include <legacy/compat.hpp>
+#endif
 
 #include <math.h>
 

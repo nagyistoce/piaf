@@ -178,7 +178,7 @@ private:
     int allocateImages();
 
     bool acqReady;
-    unsigned char *imageRGB;
+	IplImage * imageRGBA;
 
 signals:
     void documentChanged();

@@ -34,7 +34,7 @@
 // default and only constructor.
 VideoCaptureDoc::VideoCaptureDoc()
 {
-	imageRGB = NULL;
+	imageRGBA = NULL;
 	currentPixel = 0;
 	myVAcq=NULL;
 	pImageTimer = NULL;
@@ -45,7 +45,7 @@ VideoCaptureDoc::VideoCaptureDoc()
 // default and only constructor.
 VideoCaptureDoc::VideoCaptureDoc(VirtualDeviceAcquisition * vAcq)
 {
-	imageRGB = NULL;
+	imageRGBA = NULL;
 	mask = NULL;
 	currentPixel = 0;
 	myVAcq=vAcq;
@@ -85,9 +85,8 @@ VideoCaptureDoc::~VideoCaptureDoc()
 
 
 	// RGB32 image
-	if(imageRGB)
-		delete [] imageRGB;
-	imageRGB = NULL;
+	swReleaseImage(&imageRGBA);
+
 	// stop acquisition
 	if(myVAcq)
 		delete myVAcq;
@@ -136,11 +135,8 @@ bool VideoCaptureDoc::newDocument(int dev)
 		delete myVAcq;
 		myVAcq = NULL;
 	}
-	if(imageRGB)
-	{
-		delete imageRGB;
-		imageRGB = NULL;
-	}
+	swReleaseImage(&imageRGBA);
+
 	tBoxSize size;
 #define DEFAULT_WIDTH 320
 #define DEFAULT_HEIGHT 240
@@ -220,16 +216,15 @@ int VideoCaptureDoc::allocateImages()
 			__func__, __LINE__,
 			imageSize.width, imageSize.height);
 
-	imageRGB = new unsigned char[currentPixel*4];
-	if( !(imageRGB ))
+	imageRGBA = swCreateImage(imageSize, IPL_DEPTH_8U, 4);
+	if( !(imageRGBA ))
 	{
 		printf("RGB image memory allocation failed\n");
 		myVAcq->stopAcquisition();
 		return 0;
 	}
-	// Clear buffer for security
-	memset(imageRGB , 0, currentPixel * 4 * sizeof(unsigned char));
 
+	// Clear buffer for security
 	mask = new unsigned char [currentPixel];
 	if( !(mask ))
 	{
@@ -262,6 +257,7 @@ int VideoCaptureDoc::setpicture(int br, int hue, int col, int cont, int white)
 
 	return myVAcq->setVideoProperties(props);
 }
+
 int VideoCaptureDoc::getpicture(video_picture * pic)
 {
 	t_video_properties props = myVAcq->updateVideoProperties();
@@ -292,18 +288,8 @@ int VideoCaptureDoc::changeAcqParams(tBoxSize newSize, int ch)
 	props.frame_width = newSize.width;
 	props.frame_height = newSize.height;
 	props.mode = ch;
+
 	return myVAcq->setVideoProperties(props);
-
-//	int ret = myVAcq->changeAcqParams(newSize, ch);
-//	if(ret)
-//	{
-//		if(imageRGB) delete [] imageRGB;
-//		if(mask) delete [] mask;
-
-//		allocateImages();
-//		return 1;
-//	}
-//	return 0;
 }
 
 //thomas.
@@ -365,13 +351,62 @@ int VideoCaptureDoc::waitForImage()
 								  200 // ms
 								  );
 	if(ret) {
-		IplImage * rgb32 = myVAcq->readImageRGB32();
-		if(rgb32)
+		IplImage * imageIn = myVAcq->readImageRGB32();
+		if(imageIn)
 		{
-			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRGB32() ok\n",
-					__func__, __LINE__);
-			cvSaveImage("/dev/shm/rgb32.png", rgb32);
-			memcpy(imageRGB, rgb32->imageData, rgb32->widthStep * rgb32->height);
+			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRGB32() ok "
+					": %dx%dx%dx%d\n",
+					__func__, __LINE__,
+					imageIn->width, imageIn->height, imageIn->nChannels, imageIn->depth);
+			//cvSaveImage("/dev/shm/rgb32.png", rgb32);
+
+			// convert
+			switch(imageIn->nChannels)
+			{
+			case 1:
+				switch(imageRGBA->nChannels)
+				{
+				case 1:
+					cvCopy(imageIn, imageRGBA);
+					break;
+				case 4:
+					cvCvtColor(imageIn, imageRGBA, CV_GRAY2BGRA);
+					break;
+				}
+
+				break;
+			case 3:
+				switch(imageRGBA->nChannels)
+				{
+				case 1:
+					cvCvtColor(imageIn, imageRGBA, CV_RGB2GRAY);
+					break;
+				case 3:
+					cvCopy(imageIn, imageRGBA);
+					break;
+				case 4:
+					cvCvtColor(imageIn, imageRGBA, CV_RGB2BGRA);
+					break;
+				}
+
+				break;
+			case 4:
+				switch(imageRGBA->nChannels)
+				{
+				case 1:
+					cvCvtColor(imageIn, imageRGBA, CV_RGBA2GRAY);
+					break;
+				case 3:
+					cvCvtColor(imageIn, imageRGBA, CV_RGBA2RGB);
+					break;
+				case 4:
+					cvCopy(imageIn, imageRGBA);
+					break;
+				}
+
+				break;
+			}
+
 		}
 		else
 		{
@@ -398,7 +433,8 @@ int VideoCaptureDoc::loadImage()
 
 unsigned char * VideoCaptureDoc::getCurrentImageRGB()
 {
-	return imageRGB;
+	if(!imageRGBA) { return NULL; }
+	return (unsigned char *)imageRGBA->imageData;
 }
 
 CvSize VideoCaptureDoc::getImageSize()
