@@ -45,7 +45,7 @@ unix: {
 
 	##################### OPENCV >= 2.2 #####################
 	# Test if OpenCV library is present
-	exists( /usr/local/include/opencv2/opencv.hpp ) {
+	exists( /usr/local/include/opencv2/core/core.hpp ) {
 		message("OpenCV >= 2.2 found in /usr/local/include/opencv2/")
 		DEFINES += OPENCV_22 OPENCV2
 		INCLUDEPATH += /usr/local/include/opencv2
@@ -56,8 +56,9 @@ unix: {
 		LIBS += -L/usr/local/lib
 		LIBSDIR = /usr/local/lib
 	} else {
-		exists( /usr/include/opencv2/opencv.hpp )
-		{
+		exists( /usr/include/opencv2/core/core.hpp ) {
+	                message("OpenCV >= 2.2 found in /usr/include/opencv2/")
+
 			DEFINES += OPENCV_22 OPENCV2
 
 			#message("OpenCV found in /usr/include.")
