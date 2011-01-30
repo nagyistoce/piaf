@@ -22,6 +22,7 @@
 #include "nolinux_videodev.h"
 #include "virtualdeviceacquisition.h"
 
+#include <QMutex>
 
 /** \brief OpenCV based video acquisition device
   Support V4L2, GigEVision
@@ -88,7 +89,7 @@ public:
 
 private:
 
-	/// Index of device for CpenCV
+	/// Index of device for OpenCV
 	int m_idx_device;
 
 	/// Use OpenCV because it's better for other kinds of devices (IEEE1394, ...)
@@ -109,7 +110,8 @@ private:
 	/// Video properties from OpenCV capture API
 	t_video_properties m_video_properties ;
 
-
+	/// Mutex for preventing from changing acquisition params during grabging
+	QMutex mGrabMutex;
 };
 
 #endif // OPENCVVIDEOACQUISITION_H

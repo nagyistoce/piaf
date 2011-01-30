@@ -303,6 +303,7 @@ IplImage * swCreateImageHeader(CvSize size, int depth, int channels) {
 void swReleaseImage(IplImage ** img) {
 	if(!img) return;
 	if(!(*img) ) return;
+
 #if defined(OPENCV2)
 	try {
 		cvReleaseImage(img);
@@ -365,6 +366,57 @@ IplImage * swAddBorder4x(IplImage * originalImage) {
 }
 
 
+/* Convert an image into another */
+int swConvert(IplImage *imageIn, IplImage * imageRGBA)
+{
 
 
+	// convert
+	switch(imageIn->nChannels)
+	{
+	case 1:
+		switch(imageRGBA->nChannels)
+		{
+		case 1:
+			cvCopy(imageIn, imageRGBA);
+			break;
+		case 4:
+			cvCvtColor(imageIn, imageRGBA, CV_GRAY2BGRA);
+			break;
+		}
 
+		break;
+	case 3:
+		switch(imageRGBA->nChannels)
+		{
+		case 1:
+			cvCvtColor(imageIn, imageRGBA, CV_RGB2GRAY);
+			break;
+		case 3:
+			cvCopy(imageIn, imageRGBA);
+			break;
+		case 4:
+			cvCvtColor(imageIn, imageRGBA, CV_RGB2BGRA);
+			break;
+		}
+
+		break;
+	case 4:
+		switch(imageRGBA->nChannels)
+		{
+		case 1:
+			cvCvtColor(imageIn, imageRGBA, CV_RGBA2GRAY);
+			break;
+		case 3:
+			cvCvtColor(imageIn, imageRGBA, CV_RGBA2RGB);
+			break;
+		case 4:
+			cvCopy(imageIn, imageRGBA);
+			break;
+		}
+
+		break;
+	}
+
+	return 0;
+}

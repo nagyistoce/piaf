@@ -9,5 +9,11 @@
         <file>images/16x16/dialog-error.png</file>
         <file>images/22x22/view-gray.png</file>
         <file>images/22x22/view-color.png</file>
+        <file>images/16x16/application-exit.png</file>
+        <file>images/16x16/layer-visible-off.png</file>
+        <file>images/16x16/layer-visible-on.png</file>
+        <file>images/16x16/system-shutdown.png</file>
+        <file>images/16x16/trash-empty.png</file>
+        <file>images/22x22/color-picker.png</file>
     </qresource>
 </RCC>
