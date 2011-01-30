@@ -307,7 +307,9 @@ void WorkshopVideoCaptureView::refreshDisplay()
 		{
 			detailsImage->create(theSize.width, theSize.height, (playGrayscale?8:32));
 		}
-		fprintf(stderr, "VidCaptView::%s:%d : detailsImage=%dx%dx%d / input=%dx%d / playGray=%c\n",
+
+		fprintf(stderr, "VidCaptView::%s:%d : detailsImage=%dx%dx%d "
+				"/ input=%dx%d / playGray=%c\n",
 				__func__, __LINE__,
 				detailsImage->width(), detailsImage->height(), detailsImage->depth(),
 				theSize.width, theSize.height,

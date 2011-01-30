@@ -20,6 +20,7 @@
 #include <q3mainwindow.h>
 #include <q3grid.h>
 #include <qtooltip.h>
+
 //Added by qt3to4:
 #include <QPixmap>
 #include <QResizeEvent>
@@ -66,10 +67,11 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv,
 
 	setToolbar();
 
-	if(ImgRGB.depth()==8)
+	if(ImgRGB.depth()==8) {
 		aMenuColor->show();
-	else
+	} else {
 		aMenuColor->hide();
+	}
 
 	ViewWidget->setRefImage(&ImgRGB);
 
@@ -492,7 +494,11 @@ void WorkshopImageTool::setToolbar()
 
 	connect(actColorIndexed, SIGNAL(activated()), this, SLOT(slotColorIndexedMode()));
 
-
+	// --- Color/grayscale pickers
+	pixIcon = QIcon(":/images/22x22/color-picker.png" );
+	QPushButton * colorPickerButton = new QPushButton(pixIcon, "", hBox);
+	colorPickerButton->setFlat(true);
+	connect(colorPickerButton, SIGNAL(clicked()), this, SLOT(slotColorPickerMode()));
 
 
 	// --- MASK / REGION OF INTEREST
@@ -1136,6 +1142,20 @@ void WorkshopImageTool::slotColorIndexedMode() {
 	updateColorMenu();
 }
 
+void WorkshopImageTool::slotColorPickerMode()
+{
+	fprintf(stderr, "WImgTool::%s:%d : load cursor\n", __func__, __LINE__);
+
+	chdir(BASE_DIRECTORY "images/pixmaps");
+	ToolMode = MODE_PICKER;
+	QCursor zoomCursor = QCursor( QBitmap( "CursorPicker.bmp", 0),
+								  QBitmap( "CursorPickerMask.bmp", 0),
+								  1, 20);
+	ViewWidget->setCursor(zoomCursor);
+
+	updateToolbar();
+}
+
 void WorkshopImageTool::updateColorMenu() {
 	ViewWidget->setColorMode(m_colorMode);
 
@@ -1554,6 +1574,27 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 	{
 	default:
 		break;
+	case MODE_PICKER: {
+		int pickx, picky;
+		WindowView2Absolute(point.x(), point.y(), &pickx, &picky);
+		// Pick color in ImgRGB
+
+		QRgb pickRGB = ImgRGB.pixel(point);
+		emit signalColorPicker(QPoint(pickx, picky), pickRGB);
+
+		QString colorStr;
+		colorStr.sprintf("RGB=%d,%d,%d gray=%d",
+						 qRed(pickRGB), qGreen(pickRGB), qBlue(pickRGB),
+						 qGray(pickRGB));
+		QToolTip::showText(
+				pWorkspace->mapToGlobal(point
+				+ pWorkspace->mapToParent(QPoint(0,0)) )
+				,
+				//	  ViewWidget->rect().width(), ViewWidget->rect().height()),
+				colorStr,
+				ViewWidget
+				);
+		}break;
 		/// Zoom in, so calculate zoom origine and width
 	case MODE_ZOOM_IN:
 		WindowView2Absolute(point.x(), point.y(), &xZoomCenter, &yZoomCenter);
@@ -1687,6 +1728,9 @@ void WorkshopImageTool::onRButtonUp(Qt::ButtonState , const QPoint )
 void WorkshopImageTool::onMouseMove(Qt::ButtonState nFlags, const QPoint point)
 {
 	if ( nFlags & Qt::LeftButton ) {
+		if(ToolMode == MODE_PICKER) {
+			onLButtonDown(Qt::NoButton, point);
+		}
 
 		if(ToolMode == MODE_MOVE && selectPressed) {
 			moveDx -= (point.x() - myStopX);

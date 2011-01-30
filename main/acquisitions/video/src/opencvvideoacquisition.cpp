@@ -22,6 +22,7 @@ OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 	m_capture = NULL;
 	m_iplImage = m_grayImage = NULL;
 	m_idx_device = idx_device;
+
 	memset(&m_video_properties, 0, sizeof(t_video_properties));
 	m_imageSize = cvSize(0,0);
 
@@ -29,7 +30,7 @@ OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 			__func__, __LINE__, idx_device);
 
 	// open any type of device and index of desired device
-//#ifdef cv::Exception
+#ifdef OPENCV2
 	try {
 		m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
 	} catch (cv::Exception e) {
@@ -39,9 +40,9 @@ OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 
 		return;
 	}
-//#else
-//	m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
-//#endif
+#else
+	m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
+#endif
 	fprintf(stderr, "OpenCVAcq::%s:%d : create device # %d =W capture=%p\n",
 			__func__, __LINE__,
 			idx_device, m_capture);
@@ -88,9 +89,6 @@ OpenCVVideoAcquisition::~OpenCVVideoAcquisition()
 {
 	stopAcquisition();
 
-	if(m_iplImage) cvReleaseImage(&m_iplImage );
-	if(m_grayImage) cvReleaseImage(&m_grayImage);
-	m_iplImage = m_grayImage = NULL;
 }
 
 /** \brief Use sequential mode
@@ -106,7 +104,7 @@ int OpenCVVideoAcquisition::startAcquisition()
 {
 	m_imageSize.width = m_imageSize.height = 0;
 
-	fprintf(stderr, "[VAcq]::%s:%d : capture=m_capture=%p\n", __func__, __LINE__,
+	fprintf(stderr, "[VAcq]::%s:%d : m_capture=%p\n", __func__, __LINE__,
 			m_capture);
 	if(m_capture) {
 		fprintf(stderr, "[VidAcq] : VDopen SUCCESS : OPEN DEVICE  [%d]\n",
@@ -121,7 +119,7 @@ int OpenCVVideoAcquisition::startAcquisition()
 	}
 
 
-	fprintf(stderr, "[VidAcq] : VDopen : capture first frame to see if it's posisble\n"); fflush(stderr);
+	fprintf(stderr, "[VidAcq] : VDopen : capture first frame to see if it's possible\n"); fflush(stderr);
 	int ret = grab();
 	if(ret >= 0) {
 		fprintf(stderr, "[VidAcq] : VDIsInitialised...\n"); fflush(stderr);
@@ -136,25 +134,46 @@ int OpenCVVideoAcquisition::startAcquisition()
 	return 0;
 }
 
-int OpenCVVideoAcquisition::grab() {
+int OpenCVVideoAcquisition::grab()
+{
+	if(!m_capture)
+	{
+		return -1;
+	}
+
+	// Lock grab mutex
+	mGrabMutex.lock();
+
 	// Grab image
 	if( !cvGrabFrame( m_capture ) ) {
 		fprintf(stderr, "[VA ] %s:%d : capture=%p FAILED\n", __func__, __LINE__,
 				m_capture);
 
+		mGrabMutex.unlock();
 		return -1;
 	} else {
 		IplImage * frame = cvRetrieveFrame( m_capture );
 		if(frame) {
-			m_imageSize.width = frame->width;
-			m_imageSize.height = frame->height;
-		} else {
+			if(m_imageSize.width != frame->width
+			   || m_imageSize.height != frame->height)
+			{
+				m_imageSize.width = frame->width;
+				m_imageSize.height = frame->height;
 
-			fprintf(stderr, "[VA ] %s:%d : capture=%p cvRetrieveFrame FAILED\n",
+				fprintf(stderr, "[OpenCVVA]::%s:%d : capture=%p size changed => %dx%d\n",
+						__func__, __LINE__,
+						m_capture,
+						m_imageSize.width, m_imageSize.height);
+			}
+		} else {
+			fprintf(stderr, "[OpenCVVA]::%s:%d : capture=%p cvRetrieveFrame FAILED\n",
 					__func__, __LINE__,
 					m_capture);
 		}
 	}
+
+	// unock grab mutex
+	mGrabMutex.unlock();
 
 	return 0;
 }
@@ -172,6 +191,11 @@ int OpenCVVideoAcquisition::stopAcquisition()
 		cvReleaseCapture( &m_capture );
 		m_capture = NULL;
 	}
+
+	swReleaseImage(&m_iplImage );
+	swReleaseImage(&m_grayImage);
+
+	m_iplImage = m_grayImage = NULL;
 
 	m_captureIsInitialised = 0;
 
@@ -217,14 +241,15 @@ IplImage * OpenCVVideoAcquisition::readImageRGB32()
 
 	if(frame)
 	{
-		if(frame->nChannels == m_iplImage->nChannels)
+		if(frame->width != m_iplImage->width
+		   || frame->height != m_iplImage->height)
 		{
-			cvCopy(frame, m_iplImage);
+			swReleaseImage(&m_iplImage);
+			m_iplImage = swCreateImage(cvGetSize(frame), IPL_DEPTH_8U,
+									  frame->nChannels == 1 ? 1 : 4 );
 		}
-		else
-		{
-			cvConvert(frame, m_iplImage);
-		}
+
+		swConvert(frame, m_iplImage);
 	}
 
 	return m_iplImage;
@@ -302,38 +327,93 @@ t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
 	return m_video_properties;
 }
 
-#define SETCAPTUREPROP(_val,_prop) cvSetCaptureProperty(m_capture,(_prop),(_val))
+#define SETCAPTUREPROP(_prop,_prop_id)		if(props._prop !=m_video_properties._prop) \
+		{ \
+			cvSetCaptureProperty(m_capture,(_prop_id),props._prop); \
+		}
 
 /** @brief Set video properties (not updated) */
 int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 {
 	if(!m_capture) {
-		return -1;  }
+		fprintf(stderr, "OpenCVVidAcq::%s:%d : device not opened "
+				"=> cannot change video properties:", __func__, __LINE__);
+
+		return -1;
+	}
 
 	fprintf(stderr, "OpenCVVidAcq::%s:%d : change video properties:", __func__, __LINE__);
 	printVideoProperties(&props);
 
+
+	// lock grab mutex
+	mGrabMutex.lock();
+
 	//	m_video_properties. = cvGetCaptureProperty(m_capture, );
-	SETCAPTUREPROP(	props.pos_msec , CV_CAP_PROP_POS_MSEC );/*Film current position in milliseconds or video capture timestamp */
-	SETCAPTUREPROP(	props.pos_frames , CV_CAP_PROP_POS_FRAMES );/*0-based index of the frame to be decoded/captured next */
-	SETCAPTUREPROP(	props.pos_avi_ratio , CV_CAP_PROP_POS_AVI_RATIO );/*Relative position of the video file (0 - start of the film, 1 - end of the film) */
-	SETCAPTUREPROP(	props.frame_width , CV_CAP_PROP_FRAME_WIDTH );/*Width of the frames in the video stream */
-	SETCAPTUREPROP(	props.frame_height , CV_CAP_PROP_FRAME_HEIGHT );/*Height of the frames in the video stream */
-	SETCAPTUREPROP(	props.fps , CV_CAP_PROP_FPS );/*Frame rate */
-	SETCAPTUREPROP(	props.fourcc_dble , CV_CAP_PROP_FOURCC );/*4-character code of codec */
+	SETCAPTUREPROP(pos_msec , CV_CAP_PROP_POS_MSEC );/*Film current position in milliseconds or video capture timestamp */
+	SETCAPTUREPROP(	pos_frames , CV_CAP_PROP_POS_FRAMES );/*0-based index of the frame to be decoded/captured next */
+	SETCAPTUREPROP(	pos_avi_ratio , CV_CAP_PROP_POS_AVI_RATIO );/*Relative position of the video file (0 - start of the film, 1 - end of the film) */
+
+	if(props.frame_width != m_video_properties.frame_width
+	   || props.frame_height != m_video_properties.frame_height) {
+		fprintf(stderr, "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE  [%d] => Stop acquisition...\n",
+				__func__, __LINE__, m_idx_device
+				); fflush(stderr);
+
+
+		//stopAcquisition();
+		cvReleaseCapture(&m_capture);
+
+		fprintf(stderr, "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE [%d] => recreate capture...\n",
+				__func__, __LINE__, m_idx_device
+				); fflush(stderr);
+
+		try {
+			m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
+		} catch (cv::Exception e) {
+			fprintf(stderr, "[VidAcq] : VDopen ERROR : CAUGHT EXCEPTION WHILE OPENING DEVICE  [%d]\n",
+					m_idx_device
+					); fflush(stderr);
+
+			return -1;
+		}
+
+		fprintf(stderr, "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE  [%d] : "
+				"=> capture=%p / change properties to %gx%g\n",
+				__func__, __LINE__, m_idx_device,
+				m_capture,
+				props.frame_width, props.frame_height
+				); fflush(stderr);
+		SETCAPTUREPROP(	frame_width , CV_CAP_PROP_FRAME_WIDTH );/*Width of the frames in the video stream */
+		SETCAPTUREPROP(	frame_height , CV_CAP_PROP_FRAME_HEIGHT );/*Height of the frames in the video stream */
+
+		// unlock grab mutex
+//		mGrabMutex.unlock();
+
+//		fprintf(stderr, "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE [%d] => restart acquisition\n",
+//				__func__, __LINE__, m_idx_device
+//				); fflush(stderr);
+//		startAcquisition();
+	}
+
+	SETCAPTUREPROP(	fps , CV_CAP_PROP_FPS );/*Frame rate */
+	SETCAPTUREPROP(	fourcc_dble , CV_CAP_PROP_FOURCC );/*4-character code of codec */
 	//		char   fourcc[5] =	cvGetCaptureProperty(m_capture, FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
 	//		char   norm[8] =		cvGetCaptureProperty(m_capture, Norm: pal, ntsc, secam */
-	SETCAPTUREPROP(	props.frame_count , CV_CAP_PROP_FRAME_COUNT );/*Number of frames in the video file */
-	SETCAPTUREPROP(	props.format , CV_CAP_PROP_FORMAT );/*The format of the Mat objects returned by retrieve() */
-	SETCAPTUREPROP(	props.mode , CV_CAP_PROP_MODE );/*A backend-specific value indicating the current capture mode */
-	SETCAPTUREPROP(	props.brightness , CV_CAP_PROP_BRIGHTNESS );/*Brightness of the image (only for cameras) */
-	SETCAPTUREPROP(	props.contrast , CV_CAP_PROP_CONTRAST );/*Contrast of the image (only for cameras) */
-	SETCAPTUREPROP(	props.saturation , CV_CAP_PROP_SATURATION );/*Saturation of the image (only for cameras) */
-	SETCAPTUREPROP(	props.hue , CV_CAP_PROP_HUE );/*Hue of the image (only for cameras) */
-	SETCAPTUREPROP(	props.gain , CV_CAP_PROP_GAIN );/*Gain of the image (only for cameras) */
-	SETCAPTUREPROP(	props.exposure , CV_CAP_PROP_EXPOSURE );/*Exposure (only for cameras) */
-	SETCAPTUREPROP(	props.convert_rgb , CV_CAP_PROP_CONVERT_RGB );/*Boolean flags indicating whether images should be converted to RGB */
-	SETCAPTUREPROP(	props.white_balance , CV_CAP_PROP_WHITE_BALANCE );/*Currently unsupported */
+	SETCAPTUREPROP(	frame_count , CV_CAP_PROP_FRAME_COUNT );/*Number of frames in the video file */
+	SETCAPTUREPROP(	format , CV_CAP_PROP_FORMAT );/*The format of the Mat objects returned by retrieve() */
+	SETCAPTUREPROP(	mode , CV_CAP_PROP_MODE );/*A backend-specific value indicating the current capture mode */
+	SETCAPTUREPROP(	brightness , CV_CAP_PROP_BRIGHTNESS );/*Brightness of the image (only for cameras) */
+	SETCAPTUREPROP(	contrast , CV_CAP_PROP_CONTRAST );/*Contrast of the image (only for cameras) */
+	SETCAPTUREPROP(	saturation , CV_CAP_PROP_SATURATION );/*Saturation of the image (only for cameras) */
+	SETCAPTUREPROP(	hue , CV_CAP_PROP_HUE );/*Hue of the image (only for cameras) */
+	SETCAPTUREPROP(	gain , CV_CAP_PROP_GAIN );/*Gain of the image (only for cameras) */
+	SETCAPTUREPROP(	exposure , CV_CAP_PROP_EXPOSURE );/*Exposure (only for cameras) */
+	SETCAPTUREPROP(	convert_rgb , CV_CAP_PROP_CONVERT_RGB );/*Boolean flags indicating whether images should be converted to RGB */
+	SETCAPTUREPROP(	white_balance , CV_CAP_PROP_WHITE_BALANCE );/*Currently unsupported */
+
+	// unlock grab mutex
+	mGrabMutex.unlock();
 
 	updateVideoProperties();
 	return 0;

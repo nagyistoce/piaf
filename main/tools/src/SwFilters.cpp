@@ -738,8 +738,8 @@ void SwFilterManager::updateSelectedView()
 	chdir(BASE_DIRECTORY "images/pixmaps");
 
 	// add the other items
-	QPixmap eye("eye.xpm");
-	QPixmap eye_grey("eye_grey.xpm");
+	QPixmap eye(":images/16x16/layer-visible-on.png");
+	QPixmap eye_grey(":images/16x16/layer-visible-off.png");
 
 	QPixmap check("check.png");
 	QPixmap uncheck("uncheck.png");

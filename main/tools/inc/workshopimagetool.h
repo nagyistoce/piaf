@@ -221,6 +221,9 @@ private:
 	void slotZoomOutMode();
 	void slotMoveMode();
 
+	// color picker
+	void slotColorPickerMode();
+
 	// Color mode slotc
 	void slotColorGreyMode();
 	void slotColorGreyInvertMode();
@@ -312,6 +315,8 @@ signals:
 	void ImageSaved(QImage *);
 	void VideoSaved(char *);
 
+	/// A pixel has been picked
+	void signalColorPicker(QPoint, QRgb);
 };
 
 #endif

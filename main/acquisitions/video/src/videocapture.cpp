@@ -357,61 +357,34 @@ int VideoCaptureDoc::waitForImage()
 			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRGB32() ok "
 					": %dx%dx%dx%d\n",
 					__func__, __LINE__,
-					imageIn->width, imageIn->height, imageIn->nChannels, imageIn->depth);
-			//cvSaveImage("/dev/shm/rgb32.png", rgb32);
+					imageIn->width, imageIn->height,
+					imageIn->nChannels, imageIn->depth);
 
-			// convert
-			switch(imageIn->nChannels)
+			if(imageIn->width>0 && imageIn->height>0)
 			{
-			case 1:
-				switch(imageRGBA->nChannels)
+				if(imageIn->width != imageRGBA->width
+				   || imageIn->height != imageRGBA->height)
 				{
-				case 1:
-					cvCopy(imageIn, imageRGBA);
-					break;
-				case 4:
-					cvCvtColor(imageIn, imageRGBA, CV_GRAY2BGRA);
-					break;
+					swReleaseImage(&imageRGBA);
+					imageRGBA = swCreateImage(cvGetSize(imageIn), IPL_DEPTH_8U,
+											  imageIn->nChannels == 1 ? 1 : 4 );
 				}
 
-				break;
-			case 3:
-				switch(imageRGBA->nChannels)
-				{
-				case 1:
-					cvCvtColor(imageIn, imageRGBA, CV_RGB2GRAY);
-					break;
-				case 3:
-					cvCopy(imageIn, imageRGBA);
-					break;
-				case 4:
-					cvCvtColor(imageIn, imageRGBA, CV_RGB2BGRA);
-					break;
-				}
-
-				break;
-			case 4:
-				switch(imageRGBA->nChannels)
-				{
-				case 1:
-					cvCvtColor(imageIn, imageRGBA, CV_RGBA2GRAY);
-					break;
-				case 3:
-					cvCvtColor(imageIn, imageRGBA, CV_RGBA2RGB);
-					break;
-				case 4:
-					cvCopy(imageIn, imageRGBA);
-					break;
-				}
-
-				break;
+				swConvert(imageIn, imageRGBA);
 			}
-
+			else
+			{
+				fprintf(stderr, "VideoCapture::%s:%d : Acquisition problem : readImageRGB32() failed (SIZE PB)\n",
+						__func__, __LINE__);
+				usleep(500000);
+				return -1;
+			}
 		}
 		else
 		{
 			fprintf(stderr, "VideoCapture::%s:%d : Acquisition problem : readImageRGB32() failed\n",
 					__func__, __LINE__);
+			usleep(500000);
 			return -1;
 		}
 
@@ -434,6 +407,7 @@ int VideoCaptureDoc::loadImage()
 unsigned char * VideoCaptureDoc::getCurrentImageRGB()
 {
 	if(!imageRGBA) { return NULL; }
+
 	return (unsigned char *)imageRGBA->imageData;
 }
 

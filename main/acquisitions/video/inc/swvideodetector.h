@@ -88,4 +88,7 @@ void swReleaseImage(IplImage ** img);
 /** @brief Release an image header and clear pointer */
 void swReleaseImageHeader(IplImage ** img);
 
+/** @brief Convert an image into another */
+int swConvert(IplImage *imageIn, IplImage * imageOut);
+
 #endif
