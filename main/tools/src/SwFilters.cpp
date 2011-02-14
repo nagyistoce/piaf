@@ -1847,7 +1847,7 @@ int SwFilter::forceCloseConnection() {
 //		fclose(pipeW);
 	pipeW = NULL;
 
-        fprintf(stderr, "SwFilter::forceCloseConnection : closing read pipe to child %d...\n",childpid );
+	fprintf(stderr, "SwFilter::forceCloseConnection : closing read pipe to child %d...\n",childpid );
 	fflush(stderr);
 	//if(pipeR)
 	//	fclose(pipeR);

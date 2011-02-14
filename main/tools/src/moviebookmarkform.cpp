@@ -75,3 +75,11 @@ void MovieBookmarkForm::on_delButton_clicked()
 
 	emit signalNewBookmarkList(m_listBookmarks);
 }
+
+void MovieBookmarkForm::on_exportButton_clicked()
+{
+	// \todo : launch export window
+
+	emit signalExportSequence(m_listBookmarks);
+
+}

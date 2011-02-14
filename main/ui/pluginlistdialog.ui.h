@@ -14,6 +14,7 @@
 //Added by qt3to4:
 #include <QPixmap>
 #include <stdlib.h>
+#include <errno.h>
 
 void PluginListDialog::slotAddPlugin()
 {
@@ -21,7 +22,7 @@ void PluginListDialog::slotAddPlugin()
 			"",
 			lastPluginDir,
 			this,
-			"open file dialog",
+			tr("Add plugin dialog"),
 			tr("Choose one or more plugin(s)"));
 
 	QStringList list = files;
@@ -60,8 +61,8 @@ void PluginListDialog::slotIconPlugin()
 			fInfo.dirPath(TRUE),
 			"",
 			this,
-			"open icon dialog",
-			"Choose an icon" );
+			tr("open icon dialog"),
+			tr("Choose an icon" ));
 	if(!s.isNull()) {
 		QPixmap pixIcon;
 		if(pixIcon.load(s)) {
@@ -73,11 +74,8 @@ void PluginListDialog::slotIconPlugin()
 
 
 void PluginListDialog::slotSelectPlugin( Q3ListViewItem * item )
-{
-	if(!item) return;
-	
+{	
 	selected = item;
-
 }
 
 
@@ -106,7 +104,10 @@ void PluginListDialog::accept()
 		fclose(f);
 	}
 	else {
-		fprintf(stderr, "Plugin list : Cannot open file '%s' for writing !\n", home);
+		int errnum = errno;
+		fprintf(stderr, "[%s] %s:%d : Plugin list : Cannot open file '%s' for writing ! err=%d='%s'\n",
+				__FILE__, __func__, __LINE__,
+				home, errnum, strerror(errnum));
 	}
 	
     close();
