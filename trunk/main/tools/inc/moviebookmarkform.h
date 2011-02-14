@@ -25,8 +25,9 @@ private:
 	QList<video_bookmark_t> m_listBookmarks;
 signals:
 	void signalNewBookmarkList(QList<video_bookmark_t>);
-
+	void signalExportSequence(QList<video_bookmark_t>);
 private slots:
+	void on_exportButton_clicked();
 	void on_delButton_clicked();
 };
 

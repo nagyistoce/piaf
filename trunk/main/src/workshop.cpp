@@ -2306,47 +2306,47 @@ void WorkshopApp::slotHelpAbout()
 	comment.sprintf("Piaf\n"
 					"\n"
 					"See http://piaf.googlecode.com/"
-					"Version %d\n(c) 2002-2010 by SISELL", VERSION);
+					"Version %d\n(c) 2002-2010 by Piaf team", VERSION);
 	QMessageBox::about(this, tr("About Piaf..."),
-					   tr(comment));
+					   comment );
 }
 
 void WorkshopApp::slotStatusHelpMsg(const QString &text)
 {
-  ///////////////////////////////////////////////////////////////////
-  // change status message of whole statusbar temporary (text, msec)
-  statusBar()->message(text, 2000);
+	///////////////////////////////////////////////////////////////////
+	// change status message of whole statusbar temporary (text, msec)
+	statusBar()->message(text, 2000);
 }
 
 void WorkshopApp::windowMenuAboutToShow()
 {
-  pWindowMenu->clear();
+	pWindowMenu->clear();
 	windowCascade->addTo(pWindowMenu);
 	windowTile->addTo(pWindowMenu);
 
-  if ( pWorkspace->windowList().isEmpty() )
-  {
-	windowAction->setEnabled(false);
-  }
-  else
-  {
-	windowAction->setEnabled(true);
-  }
+	if ( pWorkspace->windowList().isEmpty() )
+	{
+		windowAction->setEnabled(false);
+	}
+	else
+	{
+		windowAction->setEnabled(true);
+	}
 
-  pWindowMenu->insertSeparator();
+	pWindowMenu->insertSeparator();
 
-  QWidgetList windows = pWorkspace->windowList();
-  for ( int i = 0; i < int(windows.count()); ++i )
-  {
-	int id = pWindowMenu->insertItem(QString("&%1 ").arg(i+1)+windows.at(i)->caption(), this, SLOT( windowMenuActivated( int ) ) );
-	pWindowMenu->setItemParameter( id, i );
-	pWindowMenu->setItemChecked( id, pWorkspace->activeWindow() == windows.at(i) );
-  }
+	QWidgetList windows = pWorkspace->windowList();
+	for ( int i = 0; i < int(windows.count()); ++i )
+	{
+		int id = pWindowMenu->insertItem(QString("&%1 ").arg(i+1)+windows.at(i)->caption(), this, SLOT( windowMenuActivated( int ) ) );
+		pWindowMenu->setItemParameter( id, i );
+		pWindowMenu->setItemChecked( id, pWorkspace->activeWindow() == windows.at(i) );
+	}
 }
 
 void WorkshopApp::windowMenuActivated( int id )
 {
-  QWidget* w = pWorkspace->windowList().at( id );
-  if ( w )
-	w->setFocus();
+	QWidget* w = pWorkspace->windowList().at( id );
+	if ( w )
+		w->setFocus();
 }

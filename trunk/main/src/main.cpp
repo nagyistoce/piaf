@@ -2,7 +2,7 @@
 						  main.cpp  -  description
 							 -------------------
 	begin                : ven nov 29 15:53:48 UTC 2002
-	copyright            : (C) 2002 by Olivier Viné
+	copyright            : (C) 2002 by Olivier VinÃ©
 	email                : olivier.vine@sisell.com
  ***************************************************************************/
 
