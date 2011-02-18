@@ -1,9 +1,9 @@
 /***************************************************************************
-	opencv_morphology.cpp  -  description
+	opencv_color.cpp  -  Color spaces conversion for Piaf
 							 -------------------
-	begin                : Tue Dec  11 15:52:21 CEST 2002
-	copyright            : (C) 2002 by Christophe Seyve
-	email                : christophe.seyve@sisell.com
+	begin                : Tue Dec  11 15:52:21 CEST 2010
+	copyright            : (C) 2010 by Christophe Seyve
+	email                : cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -37,10 +37,8 @@
 #include "SwPluginCore.h"
 
 /* compile with :
-gcc -Wall -I/usr/local/sisell/include SwPluginCore.cpp -c
-gcc -Wall -I/usr/local/sisell/include opencv_morphology.cpp -c
-gcc opencv_morphology.o SwPluginCore.o -o opencv_morphology -lopencv
-# needs SwPluginCore.o
+./build_all.sh
+# needs libSwPluginCore (qmake piaf-lib.pro && sudo make install)
 */
 
 
@@ -224,9 +222,16 @@ void HSV()
 		// use selected plane
 		cvCopy(planes1[HSVplane.curitem], cvImGray);
 	}
+
 	fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
 
 	finishImages();
+
+	if(HSVplane.curitem == 0 /* Hue */)
+	{
+		//
+
+	}
 	fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
 
 }

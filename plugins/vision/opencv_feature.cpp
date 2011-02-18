@@ -50,12 +50,7 @@
 // include componenet header
 #include "SwPluginCore.h"
 
-/* compile with :
-gcc -Wall -I/usr/local/sisell/include SwPluginCore.cpp -c
-gcc -Wall -I/usr/local/sisell/include opencv_morphology.cpp -c
-gcc opencv_morphology.o SwPluginCore.o -o opencv_morphology -lopencv
-# needs SwPluginCore.o
-*/
+/* compile with : ./build_all.sh */
 
 
 /********************** GLOBAL SECTION ************************
@@ -119,13 +114,13 @@ void findTriangle();
 
 short findFace_width = 30;
 char * face_list[] = {
-		"eye_tree_eyeglasses",
-		"eye",
+		"frontalface_default",
 		"frontalface_alt2",
 		"frontalface_alt_tree",
 		"frontalface_alt",
-		"frontalface_default",
 		"fullbody",
+		"eye_tree_eyeglasses",
+		"eye",
 		"lefteye_2splits",
 		"lowerbody",
 		"mcs_eyepair_big",
@@ -142,12 +137,12 @@ char * face_list[] = {
 
 swStringListStruct face_profile = {
 	19, // nb elements
-	5, // default element
+	0, // default element
 	face_list
 	};
 
 swFuncParams findFace_params[] = {
-	{"Face size (%% of height)", swS16, (void *)&findFace_width},
+	{"Face size (% of height)", swS16, (void *)&findFace_width},
 	{"Profile", swStringList, (void *)&face_profile }
 };
 void findFace();
