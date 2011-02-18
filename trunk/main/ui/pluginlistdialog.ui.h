@@ -43,6 +43,8 @@ void PluginListDialog::slotAddPlugin()
 
 void PluginListDialog::slotDelPlugin()
 {
+
+	// Delete all selected items
 	if(!selected) return;
     
 	pluginListView->removeItem(selected);
@@ -54,9 +56,8 @@ void PluginListDialog::slotDelPlugin()
 void PluginListDialog::slotIconPlugin()
 {
 	if(!selected) return;
-	QFileInfo fInfo(selected->text(0));
-	
-	
+
+	QFileInfo fInfo(selected->text(0));	
 	QString s = Q3FileDialog::getOpenFileName(
 			fInfo.dirPath(TRUE),
 			"",

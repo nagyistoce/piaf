@@ -83,7 +83,8 @@
 
 // Piaf Dialogs
 #include "piafconfigurationdialog.h"
-#include "pluginlistdialog.h"
+//#include "pluginlistdialog.h"
+#include "plugineditdialog.h"
 
 bool g_has_measures = false;
 #define PIAFSESSION_FILE	".piaf-session"
@@ -2296,7 +2297,8 @@ void WorkshopApp::slotConfigurator() {
 void WorkshopApp::slotPluginDialog() {
 	statusBar()->message(tr("Launching plugin list dialog..."));
 
-	PluginListDialog * pluginDialog = new PluginListDialog(NULL);
+	//PluginListDialog * pluginDialog = new PluginListDialog(NULL);
+	PluginEditDialog * pluginDialog = new PluginEditDialog(NULL);
 	pluginDialog->show();
 }
 
