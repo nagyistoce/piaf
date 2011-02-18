@@ -93,7 +93,10 @@ class WorkshopImageTool : public WorkshopTool
 		pWin->setCaption(m_title);
 	};
 
-	/// sets the base image
+	/** @brief Change the zoom factor */
+	void setZoom(int zoomscale, int xcenter, int ycenter);
+
+	/** @brief sets the base image */
 	void setWorkshopImage(WorkshopImage * iv);
 
 	/** @brief Set overlay rect */
@@ -114,7 +117,7 @@ protected:
 // -------------------- VIDEO SPECIFIC SECTION ---------------------
 public:
 	tBoxSize getImageSize();
-	virtual void paintEvent(QPaintEvent *);
+	//virtual void paintEvent(QPaintEvent *);
 	int loadFilterManager();
 
 private:

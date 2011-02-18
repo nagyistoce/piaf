@@ -60,7 +60,8 @@ SOURCES += src/main.cpp \
     tools/src/OpenCVEncoder.cpp \
 	tools/src/moviebookmarkform.cpp \
     acquisitions/video/src/virtualdeviceacquisition.cpp \
-	acquisitions/video/src/opencvvideoacquisition.cpp
+	acquisitions/video/src/opencvvideoacquisition.cpp \
+    src/plugineditdialog.cpp
 
 # Replaced by OpenCVEncoder.cpp
 # tools/src/FFMpegEncoder.cpp  
@@ -131,6 +132,7 @@ HEADERS += inc/workshop.h \
 	tools/inc/moviebookmarkform.h \
     acquisitions/video/inc/virtualdeviceacquisition.h \
     acquisitions/video/inc/opencvvideoacquisition.h \
+    inc/plugineditdialog.h
 
 exists(/usr/local/include/libfreenect/libfreenect.h) {
 	message("The system known Freenect ;)")
@@ -221,7 +223,8 @@ INCLUDEPATH += .
 
 FORMS += tools/ui/swtoolmainwindow.ui \
 		tools/ui/imagetoavidialog.ui \
-		tools/ui/moviebookmarkform.ui
+		tools/ui/moviebookmarkform.ui \
+    ui/plugineditdialog.ui
 
 HEADERS += tools/inc/imagetoavidialog.h
 
@@ -230,11 +233,11 @@ SOURCES += tools/src/imagetoavidialog.cpp
 
 
 # The following line was changed from FORMS to FORMS3 by qt3to4
-FORMS3 = ui/randsignalform.ui \
-    ui/marker_dialog.ui \
-    ui/curve_properties.ui
-FORMS3 = ui/piafconfigurationdialog.ui \
-    ui/pluginlistdialog.ui
+#FORMS3 = ui/randsignalform.ui \
+#    ui/marker_dialog.ui \
+#    ui/curve_properties.ui
+FORMS3 = ui/piafconfigurationdialog.ui
+#    ui/pluginlistdialog.ui
 TEMPLATE = app
 
 # The following line was inserted by qt3to4

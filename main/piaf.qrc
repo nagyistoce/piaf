@@ -15,5 +15,9 @@
         <file>images/16x16/system-shutdown.png</file>
         <file>images/16x16/trash-empty.png</file>
         <file>images/22x22/color-picker.png</file>
+        <file>images/22x22/list-add.png</file>
+        <file>images/22x22/list-remove.png</file>
+        <file>images/pixmaps/filter.png</file>
+        <file>images/22x22/document-save.png</file>
     </qresource>
 </RCC>

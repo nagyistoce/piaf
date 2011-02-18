@@ -344,7 +344,7 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 	if(filterManager || record) {
 		slotUpdateImage();
 	} else {
-		paintEvent(NULL);
+//		paintEvent(NULL);
 	}
 
 }
@@ -933,11 +933,29 @@ void WorkshopImageTool::slotUpdateView()
 #endif
 	if(!ViewWidget) { return; }
 
+	if(ToolMode == MODE_ADD_RECT && selectPressed) {
+		fprintf(stderr, "WImgTool::%s:%d : adding rect : start=%d,%d stop=%d,%d\n",
+				__func__, __LINE__,
+				myStartX, myStartY,
+				myStopX, myStopY);
+
+		setOverlayRect(QRect(myStartX, myStartY, (myStopX-myStartX), (myStopY-myStartY)),
+					   QColor(0,0,255));
+	}
+
+	if(ToolMode == MODE_SELECT && selectedMask)
+	{
+		setOverlayRect(QRect(selectedMask->x(), selectedMask->y(),
+							 selectedMask->width(), selectedMask->height()),
+					   QColor(0,255,0));
+	}
+
+
 	ViewWidget->setZoomParams(xZoomOrigine, yZoomOrigine, ZoomScale);
 	ViewWidget->update();
-#ifdef DEBUG_ZOOMING
+//#ifdef DEBUG_ZOOMING
 	fprintf(stderr, "\tslotUpdateView : done with ViewWidget->update();\n");
-#endif
+//#endif
 }
 
 
@@ -1001,22 +1019,6 @@ void WorkshopImageTool::setOverlayRect(QRect overlayRect, QColor col)
 	ViewWidget->setOverlayRect(QRect(Vx, Vy, w, h), col);
 }
 
-void WorkshopImageTool::paintEvent(QPaintEvent * )
-{
-	if(ToolMode == MODE_ADD_RECT && selectPressed) {
-		setOverlayRect(QRect(myStartX, myStartY, (myStopX-myStartX), (myStopY-myStartY)),
-								   QColor(0,0,255));
-	}
-
-	if(ToolMode == MODE_SELECT && selectedMask)
-	{
-		setOverlayRect(QRect(selectedMask->x(), selectedMask->y(),
-										 selectedMask->width(), selectedMask->height()),
-								   QColor(0,255,0));
-	}
-}
-
-
 
 
 /**************************************************************************
@@ -1032,6 +1034,21 @@ void WorkshopImageTool::slotZoomInMode(){
 								  QBitmap( "CursorZoomInMask.bmp", 0));
 	ViewWidget->setCursor(zoomCursor);
 	updateToolbar();
+}
+
+/* Change the zoom factor */
+void WorkshopImageTool::setZoom(int zoomscale, int xcenter, int ycenter)
+{
+	if(xcenter<0 || ycenter < 0)
+	{
+		xcenter = 0;
+		ycenter = 0;
+	}
+	xZoomCenter = xcenter;
+	xZoomCenter = ycenter;
+	ZoomScale = zoomscale;
+	CalculateZoomWindow();
+	slotUpdateView();
 }
 
 void WorkshopImageTool::slotZoomOutMode(){
@@ -1706,7 +1723,13 @@ void WorkshopImageTool::onLButtonUp(Qt::ButtonState , const QPoint point)
 
 		int w = myStopX - myStartX;
 		int h = myStopY - myStartY;
-//		doc->addMask(myStartX, myStartY, w, h);
+
+		fprintf(stderr, "WImgTool::%s:%d : added rect = %d,%d+%dx%d\n",
+				__func__, __LINE__,
+				myStartX, myStartY, w, h);
+
+//FIXME		m_pWorkshopImage->addMask(myStartX, myStartY, w, h);
+
 		}
 		break;
 	default:
@@ -1727,7 +1750,8 @@ void WorkshopImageTool::onRButtonUp(Qt::ButtonState , const QPoint )
 
 void WorkshopImageTool::onMouseMove(Qt::ButtonState nFlags, const QPoint point)
 {
-	if ( nFlags & Qt::LeftButton ) {
+	if( ( nFlags & Qt::LeftButton ) )
+	{
 		if(ToolMode == MODE_PICKER) {
 			onLButtonDown(Qt::NoButton, point);
 		}
@@ -1748,11 +1772,15 @@ void WorkshopImageTool::onMouseMove(Qt::ButtonState nFlags, const QPoint point)
 			}
 			CalculateZoomWindow();
 		}
+
 		if(ToolMode == MODE_ADD_RECT && selectPressed)
 		{
 			WindowView2Absolute(point.x(), point.y(),
 								&myStopX, &myStopY);
+			fprintf(stderr, "WImgTool::%s:%d : adding rect : stop=%d,%d\n",
+					__func__, __LINE__, myStopX, myStopY);
 		}
+
 		slotUpdateView();
 	}
 }

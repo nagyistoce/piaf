@@ -156,7 +156,9 @@ int VideoPlayerTool::setFile(char * file, int period = 0)
 
 	strcpy(VideoFile, file);
 
-	fprintf(stderr, "[VideoPlayerT]::setFile('%s') @ fps=%g\n", VideoFile, playFPS);
+	fprintf(stderr, "[VideoPlayerT]::setFile('%s') %d x %d @ fps=%g\n", VideoFile,
+			m_fileVA->getImageSize().width, m_fileVA->getImageSize().height,
+			playFPS);
 
 	slotRewindMovie();
 
@@ -168,6 +170,7 @@ int VideoPlayerTool::setFile(char * file, int period = 0)
 		}
 
 		pWin->resize(acqSize.width/img_scale+4, acqSize.height/img_scale + 72);
+		imageTool()->setZoom(  1 - img_scale, acqSize.width/2, acqSize.height/2);
 	}
 
 	pWin->show();
