@@ -657,12 +657,12 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 			funcList[indexFunction].procedure);  fflush(stderr);
 #endif
 
-	// Process function
+	// Process function and measure its processing time
 	struct timeval tv1, tv2;
-	struct timezone tz;
-	gettimeofday(&tv1, &tz);
+	gettimeofday(&tv1, NULL);
 	pfunction();
-	gettimeofday(&tv2, &tz);
+	gettimeofday(&tv2, NULL);
+
 	swImageStruct * imout = (swImageStruct *)data_out;
 	imout->deltaTus = 1000000*(tv2.tv_sec - tv1.tv_sec)
 		+ (tv2.tv_usec - tv1.tv_usec);
