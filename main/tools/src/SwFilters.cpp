@@ -751,27 +751,27 @@ void SwFilterManager::updateSelectedView()
 		idEditPlugin = count;
 
 	int i = selectedFilterColl->count()-1;
-	if(!selectedFilterColl->isEmpty())
-	for(curF = selectedFilterColl->last(); curF; curF = selectedFilterColl->prev()) {
-		curF->selItem = new Q3ListViewItem(selectedListView,
-				curF->filter->funcList[curF->indexFunction].name, "" );
-		if(curF->enabled)
-			curF->selItem->setPixmap(1, check);
-		else
-			curF->selItem->setPixmap(1, uncheck);
+	if(!selectedFilterColl->isEmpty()) {
+		for(curF = selectedFilterColl->last(); curF; curF = selectedFilterColl->prev()) {
+			curF->selItem = new Q3ListViewItem(selectedListView,
+					curF->filter->funcList[curF->indexFunction].name, "" );
+			if(curF->enabled)
+				curF->selItem->setPixmap(1, check);
+			else
+				curF->selItem->setPixmap(1, uncheck);
 
-		if(i == idViewPlugin) {
-			curF->selItem->setPixmap(2, eye);
+			if(i == idViewPlugin) {
+				curF->selItem->setPixmap(2, eye);
+			}
+			else
+				if(i<idViewPlugin)
+					curF->selItem->setPixmap(2, eye_grey);
+
+			if(i == idEditPlugin)
+				selectedListView->setSelected(curF->selItem, true);
+			i--;
 		}
-		else
-			if(i<idViewPlugin)
-				curF->selItem->setPixmap(2, eye_grey);
-
-		if(i == idEditPlugin)
-			selectedListView->setSelected(curF->selItem, true);
-		i--;
 	}
-
 
 	// create an item to visualize original item
 	originalItem = new Q3ListViewItem( selectedListView, tr("Original") );
@@ -1575,10 +1575,11 @@ void SwFilterManager::loadFilterList(char * filename)
 					id = -1;
 				}
 			}
-			else
-				fprintf(stderr, "slotLoad: Cannot read function index for filter from exec '%s'\n",
-					foundPV->filter->exec_name);
-
+			else {
+				fprintf(stderr, "[SwFilters]::%s:%d: Cannot read function index for filter from exec '%s'\n",
+						__func__, __LINE__,
+						foundPV->filter->exec_name);
+			}
 		}
 
 		// read parameters
@@ -1588,13 +1589,18 @@ void SwFilterManager::loadFilterList(char * filename)
 		if(id>=0 && foundPV)
 		{
 			swPluginView * newPV = new swPluginView;
-			memset(pv, 0, sizeof(swPluginView));
+			memset(newPV, 0, sizeof(swPluginView));
 
 			newPV->filter = new SwFilter( foundPV->filter->exec_name, true );// keep it alive
 			connect(newPV->filter, SIGNAL(signalDied(int)), this, SLOT(slotFilterDied(int)));
 
 			newPV->indexFunction = id;
 			newPV->enabled = true;
+
+			// No widget at start
+			newPV->mwPluginEdit = NULL;
+			newPV->mwPluginTime = NULL;
+			newPV->selItem = NULL;
 
 			// add filter to collection
 			addFilter(newPV, -1);
@@ -1603,12 +1609,14 @@ void SwFilterManager::loadFilterList(char * filename)
 			fprintf(stderr, "[SwFilterMng]::%s:%d : Loaded filter '%s' \n", __func__, __LINE__,
 					newPV->filter->funcList[newPV->indexFunction].name);
 #endif
+
 			// send parameters
 			if(newPV->filter->pipeW) {
 				fprintf(newPV->filter->pipeW, "%s", line);
 			}
 		}
 	}
+
 	updateSelectedView();
 }
 
@@ -1655,38 +1663,45 @@ void SwFilterManager::processImage(swImageStruct * image)
 
 		ret = 1;
 		int id=0;
+
 		if(!selectedFilterColl->isEmpty())
-		for(pv = selectedFilterColl->first(); pv && ret && id<=idViewPlugin; pv = selectedFilterColl->next()) {
-			// process
-			if( pv->enabled ) {
+		{
+			for(pv = selectedFilterColl->first(); pv && ret && id<=idViewPlugin; pv = selectedFilterColl->next()) {
+				// process
+				if( pv->enabled ) {
 #ifdef __SWPLUGIN_DEBUG_
-				fprintf(stderr, "FILTERMANAGER: processing filter func[%d]=%s\n",
-						pv->indexFunction,
-						pv->filter->funcList[pv->indexFunction].name);
+					fprintf(stderr, "FILTERMANAGER: processing filter func[%d]=%s\n",
+							pv->indexFunction,
+							pv->filter->funcList[pv->indexFunction].name);
 #endif
-				ret = pv->filter->processFunction(pv->indexFunction, im1, im2, 2000 );
-				if(ret)
-				{
-					step++;
+					ret = pv->filter->processFunction(pv->indexFunction, im1, im2, 2000 );
+					if(ret)
+					{
+						step++;
 
-					// invert buffers
-					swImageStruct *imTmp = im2;
-					im2 = im1;
-					im1 = imTmp;
+						// invert buffers
+						swImageStruct *imTmp = im2;
+						im2 = im1;
+						im1 = imTmp;
 
-					// time statistics
-					if( pv->mwPluginTime ) {
-						pv->mwPluginTime->setTimeUS( imTmp->deltaTus );
+						// time statistics
+						if( pv->mwPluginTime ) {
+							pv->mwPluginTime->setTimeUS( imTmp->deltaTus );
+						}
 					}
 				}
 			}
+
 			id++;
 		}
+
 		lockProcess = false;
 
 		// even or odd ??
 		if(ret && (step % 2) == 1) // odd, must invert
+		{
 			memcpy(image->buffer, imageTmp->buffer, image->buffer_size);
+		}
 	}
 
 }
@@ -2104,15 +2119,17 @@ int SwFilter::processFunction(int indexFunction, void * data_in, void * data_out
 
 		comLock = true; // lock
 		int ret = 0;
-		if(pipeW)
+		if(pipeW) {
 			ret = swSendImage(indexFunction, &frame, swImage, data_in, pipeW);
+		}
 
 		// read image from pipeR
 		if(ret) {
-			if(pipeR)
+			if(pipeR) {
 				ret = swReceiveImage(data_out, pipeR, timeout_ms);
-			else
+			} else {
 				ret = 0;
+			}
 		}
 
 		comLock = false;
