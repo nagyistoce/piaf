@@ -156,7 +156,7 @@ int VideoPlayerTool::setFile(char * file, int period = 0)
 
 	strcpy(VideoFile, file);
 
-	fprintf(stderr, "[VideoPlayerT]::setFile('%s') %d x %d @ fps=%g\n", VideoFile,
+	fprintf(stderr, "[VideoPlayerT]::setFile('%s') %lu x %lu @ fps=%g\n", VideoFile,
 			m_fileVA->getImageSize().width, m_fileVA->getImageSize().height,
 			playFPS);
 

@@ -131,7 +131,7 @@ public:
 		\param contAcq perform or not continuous acquisition (e.g. launch another acquisition)
 		@return 0 if error
 		*/
-	int readImageRGB32(unsigned char* image, long * buffersize, bool contAcq);
+	int readImageRGB32(unsigned char* image, long * buffersize, bool contAcq = false);
 	
 	// SlotRewindMovie...
 	void slotRewindMovie();

@@ -997,8 +997,31 @@ int FileVideoAcquisition::readImageRGB32(unsigned char * image,
 				  m_pFrame->linesize, 0,
 				  m_pCodecCtx->height,
 				  pict.data, pict.linesize);
-		memcpy(image, m_inbuff,
-			   avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height));
+		if(0) {
+			memcpy(image, m_inbuff,
+				   avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height));
+			IplImage * testImage = cvCreateImageHeader(cvSize(m_pCodecCtx->width, m_pCodecCtx->height), 8, 4);
+			testImage->imageData = (char *)m_inbuff;
+			cvSaveImage("/dev/shm/FVA.jpg", testImage);
+			cvReleaseImageHeader(&testImage);
+		}
+		else {
+			int pitch = avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height)/m_pCodecCtx->height;
+			u32 * output = (u32 *)image;
+			u32 * input = (u32 *)m_pFrameRGB->data[0];
+			for(int r = 0; r<m_pCodecCtx->height; r++)
+			{
+				int pos = r * pitch / 4;
+				if((r%2) == 0) {
+					memcpy(output+pos, input+pos, pitch);
+				} else {
+					for(int c = 0; c<m_pCodecCtx->width; c+=2) {
+						output[pos+c] = input[pos+c+1];
+						output[pos+c+1] = input[pos+c];
+					}
+				}
+			}
+		}
 	}
 #endif
 	return 0;

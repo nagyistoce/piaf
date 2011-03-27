@@ -85,6 +85,8 @@
 #include "piafconfigurationdialog.h"
 //#include "pluginlistdialog.h"
 #include "plugineditdialog.h"
+#include "batchfiltersmainwindow.h"
+
 
 bool g_has_measures = false;
 #define PIAFSESSION_FILE	".piaf-session"
@@ -174,6 +176,7 @@ void WorkshopApp::initVars()
 	g_movieDirName = QString(home) + tr("/Movies");
 	g_imageDirName = QString(home) + tr("/Images");
 	g_measureDirName = QString(home) + tr("/Measures");
+	g_pluginDirName = "/usr/local/piaf/plugins/";
 
 	QDir dir;
 	dir.mkdir(g_movieDirName);
@@ -612,6 +615,15 @@ void WorkshopApp::initActions()
 		convertAction->setIcon(pixIcon);}
 	connect(convertAction, SIGNAL(activated()), this, SLOT(slotConvertor()));
 
+	// Batch processor
+	batchAction = new QAction(tr("Batch processor"), tr(""), this, "batch");
+	batchAction->setStatusTip(tr("Process a list of files with plugins"));
+	batchAction->setWhatsThis(tr("Batch processor\n"
+								   "Process a list of image or movie files with plugins"));
+	if(pixIcon.load(BASE_DIRECTORY "images/pixmaps/movie16.png" )) {
+		batchAction->setIcon(pixIcon);}
+	connect(batchAction, SIGNAL(activated()), this, SLOT(slotBatch()));
+
 
 	// Configuration action
 	configAction = new QAction(tr("Configuration"), tr("&Configuration"), this, "config");
@@ -688,6 +700,8 @@ void WorkshopApp::initMenuBar()
 	configAction->addTo(pToolsMenu);
 	convertAction->addTo(pVideosTools);
 	pluginAction->addTo(pToolsMenu);
+	pToolsMenu->insertSeparator();
+	batchAction->addTo(pToolsMenu);
 
 	///////////////////////////////////////////////////////////////////
 	// menuBar entry windowMenu
@@ -2283,6 +2297,13 @@ void WorkshopApp::on_pconvertDialog_signalNewMovie(QString moviePath) {
 		pWmov->setModified(false);
 		addNewMovie(pWmov);
 	}
+}
+
+/* launch the batch processor */
+void WorkshopApp::slotBatch()
+{
+	BatchFiltersMainWindow * batchProc = new BatchFiltersMainWindow();
+	batchProc->show();
 }
 
 

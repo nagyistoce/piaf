@@ -19,5 +19,11 @@
         <file>images/22x22/list-remove.png</file>
         <file>images/pixmaps/filter.png</file>
         <file>images/22x22/document-save.png</file>
+        <file>images/22x22/media-record.png</file>
+        <file>images/22x22/system-run.png</file>
+        <file>images/32x32/media-playback-start.png</file>
+        <file>images/32x32/media-playback-pause.png</file>
+        <file>images/16x16/system-run.png</file>
+        <file>images/22x22/edit-undo.png</file>
     </qresource>
 </RCC>

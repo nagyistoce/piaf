@@ -64,24 +64,7 @@ class WorkshopVideoCaptureView;
 // Base components definition
 // --------------------------
 #define NB_COMPONENTS  3
-// Labels
-#define COMP_IMAGE_LABEL    "Images"
-#define COMP_VIDEO_LABEL    "Videos"
-#define COMP_MEASURE_LABEL  "Measures"
-
-#define IMAGEDIR "images/pixmaps/"
-
-
-#ifdef WORKSHOP_CPP
-#define WKP_EXTERN
-#else
-#define WKP_EXTERN extern
-#endif
-// Path for saving files (snapshots, ...)
-WKP_EXTERN QString g_imageDirName;
-WKP_EXTERN QString g_measureDirName;
-WKP_EXTERN QString g_movieDirName;
-
+#include "piaf-settings.h"
 
 /**
   This Class is the base class for your application. It sets up the main
@@ -195,6 +178,10 @@ private slots:
 
 	/** @brief launch the conversion from image files to MJPEG movie */
 	void slotConvertor();
+
+	/** @brief launch the batch processor */
+	void slotBatch();
+
 	/** launch the configuration dialog */
 	void slotConfigurator();
 	/** launch the plugin list editor */
@@ -313,6 +300,7 @@ private slots:
 	QAction *viewStatusBar;
 
 	QAction *convertAction;
+	QAction *batchAction;
 	QAction *configAction;
 	QAction *pluginAction;
 

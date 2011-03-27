@@ -202,7 +202,7 @@ public:
 	/** Constructor */
 	SwFilterManager(VideoCaptureDoc * vdoc, QWidget* parent, const char *name, Qt::WFlags  wflags);
 	/** Constructor */
-	SwFilterManager(QWidget* parent, const char *name, Qt::WFlags wflags);
+	SwFilterManager(QWidget* parent = NULL, const char *name=NULL, Qt::WFlags wflags = 0);
 
 	/** Destructor */
 	~SwFilterManager();
@@ -210,17 +210,30 @@ public:
 	/** @brief Set the pointer to MDI workspace */
 	void setWorkspace(QWorkspace * wsp);
 
-	/** process an image and store result into input structure
-		\param image input image in swImageStruct structure
+	/** @brief process an image and store result into input structure
+		@param image input image in swImageStruct structure
 	*/
 	void processImage(swImageStruct * image);
-	/** Show filters manager window */
+	/** @brief Show filters manager window */
 	void showWindow();
 
+	/** @brief Load a plugin sequence : { plugin>function>parameters => ... }
+
+		@returns <0 if error, 0 if success
+	*/
+	int loadFilterList(char * filename);
+	/** \brief Save a plugin sequence : { plugin>function>parameters => ... } */
+	void saveFilterList(char * filename);
+
+	/** @brief Get last file sequence loaded */
+	char * getPluginSequenceFile() { return mPluginSequenceFile; }
+	/** @brief show warning on plugin crash */
+	void enableWarning(bool on) { mNoWarning = !on; }
 private:
 	swImageStruct *imageTmp;
 	bool lockProcess;
 
+	bool mNoWarning; ///< Don't show warning on plugin crash
 	/// List of all available filters
 	Q3PtrList<swPluginView> *filterColl;
 	/// List of active filters
@@ -256,6 +269,8 @@ private:
 	QPushButton * bSave;
 	QPushButton * bLoad;
 
+	/// Last file sequence loaded
+	char mPluginSequenceFile[1024];
 
 	/// current edited plugin
 	QLineEdit ** paramsEdit;
@@ -286,11 +301,12 @@ private:
 	/// remove filter by pointer
 	int removeFilter(swPluginView * filter);
 
-	void loadFilterList(char * filename);
-	void saveFilterList(char * filename);
 
 	void updateSelectedView();
 
+public slots:
+	/// Delete all selected plugins (unload all plugin processus)
+	void slotDeleteAll();
 
 protected slots:
 	void slotAdd();
