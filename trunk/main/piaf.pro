@@ -33,6 +33,7 @@ INCLUDEPATH += tools/inc/
 INCLUDEPATH += acquisitions/inc/
 INCLUDEPATH += acquisitions/video/inc/
 INCLUDEPATH += components/inc/
+INCLUDEPATH += tools/inc/
 
 
 SOURCES += src/main.cpp \
@@ -61,7 +62,8 @@ SOURCES += src/main.cpp \
 	tools/src/moviebookmarkform.cpp \
     acquisitions/video/src/virtualdeviceacquisition.cpp \
 	acquisitions/video/src/opencvvideoacquisition.cpp \
-    src/plugineditdialog.cpp
+    src/plugineditdialog.cpp \
+    tools/src/batchfiltersmainwindow.cpp
 
 # Replaced by OpenCVEncoder.cpp
 # tools/src/FFMpegEncoder.cpp  
@@ -132,7 +134,9 @@ HEADERS += inc/workshop.h \
 	tools/inc/moviebookmarkform.h \
     acquisitions/video/inc/virtualdeviceacquisition.h \
     acquisitions/video/inc/opencvvideoacquisition.h \
-    inc/plugineditdialog.h
+    inc/plugineditdialog.h \
+    tools/inc/batchfiltersmainwindow.h \
+    inc/piaf-settings.h
 
 exists(/usr/local/include/libfreenect/libfreenect.h) {
 	message("The system known Freenect ;)")
@@ -224,7 +228,8 @@ INCLUDEPATH += .
 FORMS += tools/ui/swtoolmainwindow.ui \
 		tools/ui/imagetoavidialog.ui \
 		tools/ui/moviebookmarkform.ui \
-    ui/plugineditdialog.ui
+    ui/plugineditdialog.ui \
+    tools/ui/batchfiltersmainwindow.ui
 
 HEADERS += tools/inc/imagetoavidialog.h
 

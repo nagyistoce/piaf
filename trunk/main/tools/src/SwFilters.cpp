@@ -196,7 +196,10 @@ void SwFilterManager::init() {
 #define BUFFER_SIZE 4096
 	swAllocateFrame(&frame, BUFFER_SIZE);
 
+	strcpy(mPluginSequenceFile, "(none)");
+
 	lockProcess = false;
+	mNoWarning = false;
 
 	idEditPlugin = 0;
 	idViewPlugin = 0;
@@ -476,6 +479,8 @@ SwFilterManager::~SwFilterManager()
 */
 int SwFilterManager::addFilter(swPluginView * newFilter, int id)
 {
+	strcpy(mPluginSequenceFile, "(custom)");
+
 	if(id==-1)
 	{
 		selectedFilterColl->append(newFilter);
@@ -512,19 +517,23 @@ int SwFilterManager::getFilterCount()
 void SwFilterManager::slotFilterDied(int pid)
 {
 	if(selectedFilterColl->isEmpty()) return;
-	fprintf(stderr, "[SwFilterMng]::%s:%d : dead filter pid=%d...\n", __func__, __LINE__, pid);
+
+	fprintf(stderr, "[SwFilterMng]::%s:%d : dead filter pid=%d...\n",
+			__func__, __LINE__, pid);
 
 	swPluginView * fil = NULL;
 	for(fil = selectedFilterColl->first(); fil; )
 	{
 		if(fil->filter->getChildPid() == pid)
 		{
-			QMessageBox::critical(NULL,
-				tr("Filter Error"),
-				tr("Filter process ") + fil->selItem->text(0).latin1() + tr(" died."),
-				QMessageBox::Abort,
-				QMessageBox::NoButton,
-				QMessageBox::NoButton);
+			if(!mNoWarning ) {
+				QMessageBox::critical(NULL,
+					tr("Filter Error"),
+					tr("Filter process ") + fil->selItem->text(0).latin1() + tr(" died."),
+					QMessageBox::Abort,
+					QMessageBox::NoButton,
+					QMessageBox::NoButton);
+			}
 			removeFilter(fil);
 
 			fil = selectedFilterColl->current();
@@ -834,13 +843,42 @@ void SwFilterManager::slotDelete()
 	while(found) {
 		found = false;
 		if(!selectedFilterColl->isEmpty())
-		for(pv=selectedFilterColl->first(); pv; pv=selectedFilterColl->next())
 		{
-			if(  selectedListView->isSelected(pv->selItem) )
+			for(pv=selectedFilterColl->first(); pv; pv=selectedFilterColl->next())
 			{
-				// then add it to selectedListView
+				if(  selectedListView->isSelected(pv->selItem) )
+				{
+					// then add it to selectedListView
 #ifdef __SWPLUGIN_MANAGER__
-				printf("Delete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
+					fprintf(stderr, "Delete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
+#endif
+					// wait for process flag to go down
+					while(lockProcess)
+						usleep(100000);
+					removeFilter(pv);
+					found = true;
+
+				}
+			}
+		}
+	}
+	updateSelectedView();
+	printf("DELETE!!!\n");
+	emit selectedFilterChanged();
+}
+
+void SwFilterManager::slotDeleteAll()
+{
+	bool found = true;
+	while(found) {
+		found = false;
+		if(!selectedFilterColl->isEmpty())
+		{
+			swPluginView * pv;
+			for(pv = selectedFilterColl->first(); pv; pv=selectedFilterColl->next())
+			{
+#ifdef __SWPLUGIN_MANAGER__
+				fprintf(stderr, "Delete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
 #endif
 				// wait for process flag to go down
 				while(lockProcess)
@@ -852,11 +890,8 @@ void SwFilterManager::slotDelete()
 		}
 	}
 	updateSelectedView();
-	printf("DELETE!!!\n");
-	emit selectedFilterChanged();
+
 }
-
-
 /*
 	move ONE (the first) item up for one step
 	*/
@@ -1508,7 +1543,7 @@ void SwFilterManager::slotLoad()
 {
 	printf("SwFilterManager::slotLoad()...\n");
 	QString fileName = Q3FileDialog::getOpenFileName(0,
-		"Filter list (*.flist)",
+		tr("Filter sequence (*.flist)"),
 		this );
 	if (!fileName.isEmpty())
 	{
@@ -1524,7 +1559,7 @@ void SwFilterManager::slotLoad()
 	bLoad->setDown(false);
 }
 
-void SwFilterManager::loadFilterList(char * filename)
+int SwFilterManager::loadFilterList(char * filename)
 {
 	fprintf(stderr, "[SwFilterMngr]::%s:%d : Loading file '%s'...\n", __func__, __LINE__, filename);
 	// process each image
@@ -1532,7 +1567,11 @@ void SwFilterManager::loadFilterList(char * filename)
 	FILE * f = fopen(filename, "r");
 	if(!f) {
 		fprintf(stderr, "[SwFilterMngr]::%s:%d : cannot load file '%s'\n", __func__, __LINE__, filename);
-		return;
+		return -1;
+	}
+
+	if(mPluginSequenceFile != filename) {
+		strcpy(mPluginSequenceFile, filename);
 	}
 
 	//
@@ -1618,6 +1657,8 @@ void SwFilterManager::loadFilterList(char * filename)
 	}
 
 	updateSelectedView();
+
+	return 0;
 }
 
 
@@ -1642,6 +1683,7 @@ void SwFilterManager::processImage(swImageStruct * image)
 	{
 		imageTmp = new swImageStruct;
 		memcpy(imageTmp, image, sizeof(swImageStruct));
+
 		// allocate buffer
 		imageTmp->buffer = new unsigned char * [ imageTmp->buffer_size];
 		memset(imageTmp->buffer, 0, sizeof(unsigned char)*imageTmp->buffer_size);
@@ -2045,8 +2087,10 @@ int SwFilter::unloadChildProcess()
 	fprintf(stderr, "unloadChildProcess : Sending quit message to child '%s'\n", exec_name);
 	fflush(stderr);
 //#endif
-	if(pipeR)
+	if(pipeR) {
 		fclose(pipeR);
+	}
+
 	sendRequest(SWFRAME_QUIT);
 //	if(pipeW)
 //		fclose(pipeW);
