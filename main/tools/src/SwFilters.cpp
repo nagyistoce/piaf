@@ -85,24 +85,26 @@ int SwSignalHandler::registerChild(int pid, SwFilter * filter) {
 int SwSignalHandler::killChild() {
 
 	sigFilter * sigF = NULL;
-	if(filterList.isEmpty())
+	if(filterList.isEmpty()) {
+		fprintf(stderr, "SwSignalHandler::%s:% : nothing in list => return 0 !\n", __func__, __LINE__);
 		return 0;
-
+	}
 	while(waitpid(-1, NULL, WNOHANG) >0) {
-		fprintf(stderr, "waitpid !\n");
+		fprintf(stderr, "SwSignalHandler::%s:% : waitpid>0 !\n", __func__, __LINE__);
 	}
 	for(sigF = filterList.first(); sigF; sigF = filterList.next()) {
-		fprintf(stderr, "Testing child '%s' pid=%d...\n",
-			sigF->pFilter->exec_name, sigF->pid);
+		fprintf(stderr, "SwSignalHandler::%s:%d: Testing child '%s' pid=%d...\n",
+				__func__, __LINE__,
+				sigF->pFilter->exec_name, sigF->pid);
 
-		if( kill(sigF->pid, SIGUSR1)<0) {
+		if( kill(sigF->pid, SIGUSR1)<0)
+		{
 			int err = errno;
 			if(err == ESRCH) {
 				fprintf(stderr, "!! !! !! !! KILLING CHILD %d ('%s') !! !! !! !!\n",
 					sigF->pid, sigF->pFilter->exec_name);
 				fflush(stderr);
 				int status = 0;
-
 
 				fprintf(stderr, "\tExited with WIFEXITED %d\n", WIFEXITED(status) );
 				fprintf(stderr, "\tExited with WEXITSTATUS %d\n", WEXITSTATUS(status) );
@@ -119,6 +121,8 @@ int SwSignalHandler::killChild() {
 			return 1;
 		}
 	}
+
+	fprintf(stderr, "SwSignalHandler::%s:% : filter not found in list => return 0 !\n", __func__, __LINE__);
 
 	return 0;
 }
