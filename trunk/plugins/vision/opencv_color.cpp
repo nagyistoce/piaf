@@ -36,11 +36,6 @@
 // include componenet header
 #include "SwPluginCore.h"
 
-/* compile with :
-./build_all.sh
-# needs libSwPluginCore (qmake piaf-lib.pro && sudo make install)
-*/
-
 
 /********************** GLOBAL SECTION ************************
 DO NOT MODIFY THIS SECTION
@@ -69,8 +64,11 @@ swStringListStruct HSVplane = {
 	0, // default element
 	HSVlist
 	};
+uchar HSVthreshold = 127;
+
 swFuncParams HSV_params[] = {
-	{"plane", swStringList, (void *)&HSVplane}
+	{"plane", swStringList, (void *)&HSVplane},
+	{"threshold", swU8, (void *)&HSVthreshold}
 };
 void HSV();
 
@@ -109,7 +107,7 @@ void YCrCb();
 	void * : procedure
 	*/
 swFunctionDescriptor functions[] = {
-	{"HSV", 		1,	HSV_params,  	swImage, swImage, &HSV, NULL},
+	{"HSV", 		2,	HSV_params,  	swImage, swImage, &HSV, NULL},
 	{"HSL",			1,	HSL_params,  	swImage, swImage, &HSL, NULL},
 	{"YCrCb",		1,	YCrCb_params,	swImage, swImage, &YCrCb, NULL}
 };
@@ -210,8 +208,8 @@ void HSV()
 {
 	fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
 	allocateImages();
-	fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
 
+	fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
 	if(cvIm1->nChannels >= 3)
 	{
 		cvCvtColor(cvImRGB, cvImHSV, CV_BGR2HSV);
@@ -234,6 +232,14 @@ void HSV()
 	}
 	fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
 
+
+	static int iteration = 0;
+	iteration++;
+	if(iteration == 5)
+	{
+		fprintf(stderr, "registerFunctions...\n");
+		plugin.registerFunctions(functions, nb_functions );
+	}
 }
 void HSL()
 {
