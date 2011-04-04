@@ -25,7 +25,7 @@
 // include component header
 #include "SwPluginCore.h"
 
- // OpenCV
+// OpenCV
 #ifndef OPENCV_22
 #include <cv.h>
 #include <cvaux.h>
@@ -40,9 +40,9 @@
 /********************** GLOBAL SECTION ************************
 DO NOT MODIFY THIS SECTION
 plugin.data_in  : input data. You should cast this pointer to read the
-			data with the correct type
+   data with the correct type
 plugin.data_out : output data. You should cast this pointer to write the
-			data with the correct type
+   data with the correct type
 ***************************************************************/
 SwPluginCore plugin;
 
@@ -79,19 +79,19 @@ void view_histo();
 void view_histo_log();
 
 
- /* swFunctionDescriptor :
-	char * : function name
-	int : number of parameters
-	swFuncParams : function parameters
-	swType : input type
-	swType : output type
-	void * : procedure
-	*/
+/* swFunctionDescriptor :
+ char * : function name
+ int : number of parameters
+ swFuncParams : function parameters
+ swType : input type
+ swType : output type
+ void * : procedure
+ */
 swFunctionDescriptor functions[] = {
 	{"View hist",		1,	view_histo_params, swImage, swImage, &view_histo, NULL},
-	{"View log hist",	1, view_histo_params, swImage, swImage, &view_histo_log, NULL},
+	{"View log hist",	1, 	view_histo_params, swImage, swImage, &view_histo_log, NULL},
 	{"Stretch hist",	0,	NULL, swImage, swImage, &stretch_histo, NULL},
-	{"Log Stretch hist", 0,	NULL, swImage, swImage, &logstretch_histo, NULL}
+	{"Log Stretch hist", 	0,	NULL, swImage, swImage, &logstretch_histo, NULL}
 };
 int nb_functions = 4;
 
@@ -100,37 +100,46 @@ int nb_functions = 4;
 /*************** PLUGIN FUNCTIONS IMPLEMENTATION *****************/
 IplImage * cvIm1 = NULL;
 IplImage * cvIm2 = NULL;
-IplImage * planes1[4];
-IplImage * planes2[4];
+IplImage * planes1[4] = {NULL, NULL, NULL, NULL};
+IplImage * planes2[4] = {NULL, NULL, NULL, NULL};
 
 
 
 void allocateImages()
 {
 	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
+	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
 
 	CvSize size;
 	size.width = imIn->width;
 	size.height = imIn->height;
 
 	if(!cvIm1) {
-		cvIm1 = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
+		cvIm1 = cvCreateImageHeader(size,  IPL_DEPTH_8U, imIn->depth);
 		if(imIn->depth > 1) {
 			for(int i=0;i<imIn->depth; i++)
 				planes1[i] = cvCreateImage(size,  IPL_DEPTH_8U, 1);
 			for(int i=imIn->depth; i<4;i++)
 				planes1[i] = NULL;
+		} else {
+			planes1[0] = cvIm1;
 		}
 	}
 	if(!cvIm2) {
-		cvIm2 = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
+		cvIm2 = cvCreateImageHeader(size,  IPL_DEPTH_8U, imIn->depth);
 		if(imIn->depth > 1) {
 			for(int i=0;i<imIn->depth; i++)
 				planes2[i] = cvCreateImage(size,  IPL_DEPTH_8U, 1);
 			for(int i=imIn->depth; i<4;i++)
 				planes2[i] = NULL;
 		}
+		else {
+			planes2[0] = cvIm2;
+		}
 	}
+
+	cvIm1->imageData = (char *)imIn->buffer;
+	cvIm2->imageData = (char *)imOut->buffer;
 }
 
 
@@ -143,7 +152,10 @@ void draw_histo(bool mode_log) {
 	unsigned char * imageOut = (unsigned char *)imOut->buffer;
 
 	allocateImages();
-	memcpy( cvIm1->imageData, imageIn, imIn->buffer_size);
+
+	static int draw_histo_count = 0;
+	draw_histo_count++;
+	if(draw_histo_count<=1) { return; }
 
 	// decompose planes
 	// decompose planes
@@ -151,9 +163,7 @@ void draw_histo(bool mode_log) {
 		cvCvtPixToPlane(cvIm1, planes1[0], planes1[1], planes1[2], planes1[3]);
 		cvCvtPixToPlane(cvIm1, planes2[0], planes2[1], planes2[2], planes2[3]);
 	}
-	else {
-		memcpy(cvIm2->imageData, imageIn, imIn->buffer_size);
-	}
+	cvCopy(cvIm1, cvIm2);
 
 	CvHistogram * cvHistTab[4];
 	float max_value = 0;
@@ -176,7 +186,7 @@ void draw_histo(bool mode_log) {
 	}
 
 
-//	float factor = (float)imIn->height/log(max_value);
+	//	float factor = (float)imIn->height/log(max_value);
 #define HISTO_HEIGHT	200
 	int histoheight = (imIn->height * height_scale);
 	//int histoheight = (imIn->height>HISTO_HEIGHT ? HISTO_HEIGHT : imIn->height);
@@ -221,7 +231,7 @@ void draw_histo(bool mode_log) {
 		{
 			float bin_val = cvQueryHistValue_1D( cvHist, pix );
 			
-		
+
 			int c;
 			if(imIn->width >= 256) {
 				c = coffset + pix;
@@ -232,9 +242,9 @@ void draw_histo(bool mode_log) {
 			if(bin_val > 0) {
 				// compute c
 				int rhist = ( mode_log ?
-							  imIn->height-1 - (int)cvRound( log(bin_val) * factor) :
-							  imIn->height-1 - (int)cvRound( bin_val * factor )
-							  );
+								 imIn->height-1 - (int)cvRound( log(bin_val) * factor) :
+								 imIn->height-1 - (int)cvRound( bin_val * factor )
+								 );
 
 				u8 * plane1line, * plane2line;
 				
@@ -300,26 +310,15 @@ void stretch_histo()
 	size.width = imIn->width;
 	size.height = imIn->height;
 
-	if(!cvIm1) {
-		cvIm1 = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
-		if(imIn->depth > 1) 
-		for(int i=0;i<imIn->depth; i++)
-			planes1[i] = cvCreateImage(size,  IPL_DEPTH_8U, 1);
-	}
-	if(!cvIm2) {
-		cvIm2 = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
-		if(imIn->depth > 1)
-		for(int i=0;i<imIn->depth; i++)
-			planes2[i] = cvCreateImage(size,  IPL_DEPTH_8U, 1);
-	}
-
-	memcpy( cvIm1->imageData, imageIn, imIn->buffer_size);
+	allocateImages();
+	cvCopy(cvIm1, cvIm2);
 
 	// decompose planes
 	if(imIn->depth > 1) {
 		cvCvtPixToPlane(cvIm1, planes1[0], planes1[1], planes1[2], planes1[3]);
 		cvCvtPixToPlane(cvIm1, planes2[0], planes2[1], planes2[2], planes2[3]);
 	}
+
 	for(int p = 0; p<imIn->depth; p++)
 	{
 		// calculate histogram
@@ -328,11 +327,11 @@ void stretch_histo()
 		CvHistogram * cvHist = cvCreateHist(1, dims, CV_HIST_ARRAY, NULL, 1 );
 		if(imIn->depth > 1) 
 			cvCalcHist( &planes1[p], cvHist,
-                 0, NULL );
+					   0, NULL );
 		else
 			cvCalcHist( &cvIm1, cvHist,
-                 0, NULL );
-//		cvGetHistValue_1D( cvHist, idx0 );
+					   0, NULL );
+		//		cvGetHistValue_1D( cvHist, idx0 );
 
 
 		float max_value = 0;
@@ -394,26 +393,15 @@ void logstretch_histo()
 	size.width = imIn->width;
 	size.height = imIn->height;
 
-	if(!cvIm1) {
-		cvIm1 = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
-		if(imIn->depth > 1)
-			for(int i=0;i<imIn->depth; i++)
-				planes1[i] = cvCreateImage(size,  IPL_DEPTH_8U, 1);
-	}
-	if(!cvIm2) {
-		cvIm2 = cvCreateImage(size,  IPL_DEPTH_8U, imIn->depth);
-		if(imIn->depth > 1)
-			for(int i=0;i<imIn->depth; i++)
-				planes2[i] = cvCreateImage(size,  IPL_DEPTH_8U, 1);
-	}
-
-	memcpy( cvIm1->imageData, imageIn, imIn->buffer_size);
+	allocateImages();
+	cvCopy(cvIm1, cvIm2);
 
 	// decompose planes
 	if(imIn->depth > 1) {
 		cvCvtPixToPlane(cvIm1, planes1[0], planes1[1], planes1[2], planes1[3]);
 		cvCvtPixToPlane(cvIm1, planes2[0], planes2[1], planes2[2], planes2[3]);
 	}
+
 	for(int p = 0; p<imIn->depth; p++)
 	{
 		// calculate histogram
@@ -422,11 +410,11 @@ void logstretch_histo()
 		CvHistogram * cvHist = cvCreateHist(1, dims, CV_HIST_ARRAY, NULL, 1 );
 		if(imIn->depth > 1)
 			cvCalcHist( &planes1[p], cvHist,
-                 0, NULL );
+					   0, NULL );
 		else
 			cvCalcHist( &cvIm1, cvHist,
-                 0, NULL );
-//		cvGetHistValue_1D( cvHist, idx0 );
+					   0, NULL );
+		//		cvGetHistValue_1D( cvHist, idx0 );
 
 
 		float max_value = 0;
@@ -503,5 +491,5 @@ int main(int argc, char *argv[])
 	fprintf(stderr, "loop...\n");
 	plugin.loop();
 	
-  return 1;
+	return 1;
 }

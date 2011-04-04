@@ -215,9 +215,9 @@ void open()
 	createStructElt();
 
 	// perform open
-	cvMorphologyEx (cvIm1, cvIm2, cvTmp, elt,
-		CV_MOP_OPEN,
-		iterations);
+	cvMorphologyEx(cvIm1, cvIm2, cvTmp, elt,
+					CV_MOP_OPEN,
+					iterations);
 	
 	cvReleaseStructuringElement (&elt);
 }
