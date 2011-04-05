@@ -153,11 +153,7 @@ void draw_histo(bool mode_log) {
 
 	allocateImages();
 
-	static int draw_histo_count = 0;
-	draw_histo_count++;
-	if(draw_histo_count<=1) { return; }
 
-	// decompose planes
 	// decompose planes
 	if(imIn->depth > 1) {
 		cvCvtPixToPlane(cvIm1, planes1[0], planes1[1], planes1[2], planes1[3]);
