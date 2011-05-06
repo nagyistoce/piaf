@@ -98,6 +98,7 @@ unix: {
 				LIBS += -lcxcore
 			}
 
+
 			CV_LIB = $$LIBSDIR/libopencv.$$LIBS_EXT
 			exists($$CV_LIB ) {
 
