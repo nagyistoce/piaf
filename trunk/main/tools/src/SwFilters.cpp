@@ -689,6 +689,8 @@ int SwFilterManager::loadFilters()
 		}
 		line[0] = '#';
 	}
+
+	fclose(f);
 	return 1;
 
 }
@@ -1513,11 +1515,21 @@ void SwFilterManager::saveFilterList(char * filename)
 	swPluginView * pv;
 
 	FILE * f = fopen(filename, "w");
+	if(!f)
+	{
+		int errnum = errno;
+		fprintf(stderr, "SwFilters::%s:%d : error while opening file '%s' : %d='%s'\n",
+				__func__,__LINE__,
+				filename, errnum, strerror(errnum)
+				);
+		return;
+	}
 
 	for(pv = selectedFilterColl->first(); pv; pv = selectedFilterColl->next()) {
 		// process
 #ifdef __SWPLUGIN_DEBUG__
-		fprintf(stderr, "FILTERMANAGER: saving filter %s\n", pv->filter->funcList[pv->indexFunction].name);
+		fprintf(stderr, "FILTERMANAGER: saving filter %s\n",
+				pv->filter->funcList[pv->indexFunction].name);
 #endif
 		fprintf(f, "%s\t%d\n",
 				pv->filter->exec_name,
@@ -1659,6 +1671,9 @@ int SwFilterManager::loadFilterList(char * filename)
 			}
 		}
 	}
+
+
+	fclose(f);
 
 	updateSelectedView();
 
@@ -1987,7 +2002,7 @@ int SwFilter::loadChildProcess()
 
 
 	// fork and
-	// Commmunication process opening
+	// Commmunication processing
 	if( pipe( pipeOut ) == -1 || pipe( pipeIn ) == -1)
 	{
 		perror("Error in pipe()");

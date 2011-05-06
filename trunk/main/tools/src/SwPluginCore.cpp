@@ -1316,8 +1316,9 @@ FILE * swFopen(char * file, char *mode)
 		if(name[strlen(name) - 1] == '/')
 			name[strlen(name) - 1] = '\0';
 		sprintf(name, "%s/.sworkshop/%s", name, file);
-		if( (f = fopen(name, mode)))
+		if( (f = fopen(name, mode))) {
 			return f;
+		}
 	}
 
 	f = fopen(file, mode);

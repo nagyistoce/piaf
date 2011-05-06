@@ -89,14 +89,16 @@ void PluginEditDialog::on_addButton_clicked()
 	QStringList files = QFileDialog::getOpenFileNames(NULL,
 													  tr("Choose one or more plugin(s) to add"),
 													  lastPluginDir,
-													  tr("*"));
+													  tr("All (*)"));
 
 	QStringList list = files;
 	QStringList::Iterator it = list.begin();
-	while( it != list.end() ) {
+	while( it != list.end() )
+	{
 		// Store last plugin dir
 		QFileInfo fi(*it);
-		if(fi.exists() && fi.isExecutable()) {
+		if(fi.exists() && fi.isExecutable())
+		{
 			lastPluginDir = fi.dirPath(TRUE);
 
 			// check if it is not already listed
@@ -107,6 +109,7 @@ void PluginEditDialog::on_addButton_clicked()
 				new QListWidgetItem(*it, ui->pluginListWidget);
 			}
 		}
+
 		++it;
 	}
 

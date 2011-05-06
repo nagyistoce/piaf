@@ -247,6 +247,7 @@ void WorkshopApp::initVars()
 					}
 				}
 			}
+			file.close();
 		}
 	} else {
 		fprintf(stderr, "[Workshop] %s:%d : Cannot read file $HOME/.piafrc='%s' \n",
@@ -369,6 +370,7 @@ void WorkshopApp::loadOnStart() {
 				}
 			}
 		}
+		file.close();
 	} else {
 		fprintf(stderr, "Cannot read file $HOME/" PIAFSESSION_FILE "\n");
 	}
