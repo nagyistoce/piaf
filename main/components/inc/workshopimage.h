@@ -66,9 +66,12 @@ public:
 		xOrigine = yOrigine = ZoomScale = 1;
 		m_colorMode = 0;
 	}
+
 	~ImageWidget()
 	{
+
 	}
+
 	QImage * getQImage() { return dImage; };
 	void setRefImage(QImage *pIm)
 	{
