@@ -1651,46 +1651,55 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 	// check if there are Kinects connected
 #ifdef HAS_FREENECT
-	statusBar()->message(tr("Creating New Video Acquisition...") + tr("try Kinect"));
-	FreenectVideoAcquisition * freenectDevice = new FreenectVideoAcquisition(0);
+	int freenect_idx = 0;
+	bool freenect_found;
+	do {
+		freenect_found = false;
 
-	if(freenectDevice->isDeviceReady())
-	{
-		// append to Piaf
-		statusBar()->message(tr("(VideoAcquisition) : Freenect device Init OK"));
+		statusBar()->message(tr("Creating New Video Acquisition...") + tr("try Kinect"));
+		FreenectVideoAcquisition * freenectDevice = new FreenectVideoAcquisition(0);
 
-		strcat(txt, "Kinect");
-
-		// acquisition init
-		if(freenectDevice->startAcquisition()<0)
+		if(freenectDevice->isDeviceReady())
 		{
-			statusBar()->message(tr("Error: cannot initialize acquisition !"));
-			return;
-		}
-		else
-		{
-			if(freenectDevice->isAcquisitionRunning())
+			freenect_found = true;
+
+			// append to Piaf
+			statusBar()->message(tr("(VideoAcquisition) : Freenect device Init OK"));
+
+			sprintf(txt, "Kinect[%d]", freenect_idx);
+
+			// acquisition init
+			if(freenectDevice->startAcquisition()<0)
 			{
-				statusBar()->message(tr("Initialization OK"));
-
-				VideoCaptureDoc * pVCD = new VideoCaptureDoc(freenectDevice);
-
-				pObjectsExplorer->addVideoAcquisition(pVCD, txt);
+				statusBar()->message(tr("Error: cannot initialize acquisition !"));
+				freenect_found = false;
 			}
-			else {
-				statusBar()->showMessage(tr("Initialization FAILURE !"));
+			else
+			{
+				freenect_idx++;
+
+				if(freenectDevice->isAcquisitionRunning())
+				{
+					statusBar()->message(tr("Initialization OK"));
+
+					VideoCaptureDoc * pVCD = new VideoCaptureDoc(freenectDevice);
+
+					// add into explorer
+					pObjectsExplorer->addVideoAcquisition(pVCD, txt);
+				}
+				else {
+					statusBar()->showMessage(tr("Initialization FAILURE !"));
+				}
 			}
+
+		} else {
+			delete freenectDevice;
 		}
-
-	}
-	else {
-		delete freenectDevice;
-	}
+	} while(freenect_found);
 
 #endif // HAS_FREENECT
 
 	statusBar()->message(tr("Creating New Video Acquisition...") + tr("try OpenCV"));
-
 
 	// list all video devices from /proc/video/dev/video*
 	bool found;
@@ -1698,6 +1707,7 @@ void WorkshopApp::slotOnNewVideoAcq()
 	do {
 		found = false;
 
+#ifdef _LINUX // for Linux, use the V4L /sys or /proc virtual file system
 		sprintf(txt, "/sys/class/video4linux/video%d/name", dev);
 		bool kern2_6 = true;
 		FILE * fv = fopen(txt, "r");
@@ -1722,12 +1732,11 @@ void WorkshopApp::slotOnNewVideoAcq()
 			} else {
 				ptname = name;
 			}
-
 		} else {
 			sprintf(name, "Device # %d", dev);
 			sprintf(txt, "%d - %s", dev, ptname);
 		}
-
+#endif // Linux
 
 		fprintf(stderr, "Workshop::%s:%d : create OpenCV acquisition dev '%s'\n",
 				__func__, __LINE__, txt);
@@ -1780,6 +1789,10 @@ void WorkshopApp::slotOnNewVideoAcq()
 		dev++;
 
 	} while(found || dev<5);
+
+
+	// FIXME : add Axis IP cameras
+
 
 }
 
