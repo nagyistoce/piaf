@@ -418,9 +418,9 @@ void WorkshopImageTool::setToolbar()
 	aMenuView->setPopup(viewMenu);
 
 	// view selection mode menu
-	pixIcon = QIcon("IconZoomInView.png" );
 
 	// zoom +
+	pixIcon = QIcon("IconZoomInView.png" );
 	actZoomInView = viewMenu->addAction(QIcon("IconZoomInView.png" ), tr("Zoom in"));
 	actZoomInView->setShortcut(QKeySequence(("Ctrl++")));
 	actZoomInView->setIconVisibleInMenu(true);
@@ -428,12 +428,7 @@ void WorkshopImageTool::setToolbar()
 	//viewMenu->connectItem( 0, actZoomInView, SLOT(activated()) );
 
 
-	pixIcon = QIcon("IconZoomFitView.png" );
-	actZoomFitView = viewMenu->addAction(pixIcon, tr("Zoom 1:1"));
-	actZoomFitView->setShortcut(QKeySequence(("Ctrl+1")));
-	actZoomFitView->setIconVisibleInMenu(true);
 
-	connect(actZoomFitView, SIGNAL(activated()), this, SLOT(slotZoomFit()));
 
 	pixIcon = QIcon("IconZoomOutView.png" );
 	actZoomOutView = viewMenu->addAction(pixIcon, tr("Zoom out"));
@@ -446,6 +441,32 @@ void WorkshopImageTool::setToolbar()
 	actMoveView->setIconVisibleInMenu(true);
 	actMoveView->setShortcut(QKeySequence(("Ctrl+M")));
 	connect(actMoveView, SIGNAL(activated()), this, SLOT(slotMoveMode()));
+
+	// insert actions with immediate zooming
+	viewMenu->addSeparator();
+	// zoom +
+	pixIcon = QIcon("IconZoomInView.png" );
+	QAction * actZoomInOnce = viewMenu->addAction(QIcon("IconZoomInView.png" ), tr("Zoom in"));
+	actZoomInOnce->setShortcut(QKeySequence(("+")));
+	actZoomInOnce->setIconVisibleInMenu(true);
+	connect(actZoomInOnce, SIGNAL(activated()), this, SLOT(slotZoomInOnce()));
+
+	pixIcon = QIcon("IconZoomFitView.png" );
+	actZoomFitView = viewMenu->addAction(pixIcon, tr("Zoom 1:1"));
+	actZoomFitView->setShortcut(QKeySequence(("1")));
+	actZoomFitView->setIconVisibleInMenu(true);
+	connect(actZoomFitView, SIGNAL(activated()), this, SLOT(slotZoomFit()));
+
+	pixIcon = QIcon("IconZoomOutView.png" );
+	QAction * actZoomOutOnce = viewMenu->addAction(pixIcon, tr("Zoom out once"));
+	actZoomOutOnce->setShortcut(QKeySequence(("-")));
+	actZoomOutOnce->setIconVisibleInMenu(true);
+	connect(actZoomOutOnce, SIGNAL(activated()), this, SLOT(slotZoomOutOnce()));
+
+
+
+
+
 
 	// --- Color mode menu for grayscaled images ---
 	aMenuColor = new QPushButton(hBox);
@@ -723,6 +744,20 @@ void WorkshopImageTool::slotUpdateView()
 	fprintf(stderr, "WorkshopImageTool::slotUpdateView()\n");
 #endif
 
+#if 1
+	float realScale = ZoomScale;
+	if(ZoomScale < 1)
+	{
+		realScale = 1.f / (2.f - ZoomScale);
+	}
+
+	ImgRGB = OrigImgRGB.copy(xZoomOrigine, yZoomOrigine,
+							 viewSize.width / realScale,
+							 viewSize.height / realScale
+							 ).scaled(viewSize.width, viewSize.height);
+
+#else // old version with zooming coded form scratch
+
 	if(ImgRGB.depth() == 32) {
 		u32 * imgRgb = (u32 *)OrigImgRGB.bits();
 		// Display image (after zooming ...)
@@ -928,6 +963,8 @@ void WorkshopImageTool::slotUpdateView()
 			}
 		}
 	} // end grayscaled
+
+#endif // Old version of zooming
 #ifdef DEBUG_ZOOMING
 	fprintf(stderr, "slotUpdateView : ViewWidget->update();\n");
 #endif
@@ -1069,7 +1106,28 @@ void WorkshopImageTool::slotZoomFit(){
 	xZoomCenter = (int)viewSize.width / 2;
 	yZoomCenter = (int)viewSize.height / 2;
 	CalculateZoomWindow();
-	memset(ImgRGB.bits(), 0, ImgRGB.width()*ImgRGB.height()*(ImgRGB.depth()/8));
+	ImgRGB.fill(0);
+	slotUpdateView();
+}
+
+void WorkshopImageTool::slotZoomInOnce(){
+	ZoomScale++;
+//	xZoomOrigine = 0;
+//	yZoomOrigine = 0;
+//	xZoomCenter = (int)imageSize.width / 2;
+//	yZoomCenter = (int)imageSize.height / 2;
+	CalculateZoomWindow();
+	ImgRGB.fill(0);
+	slotUpdateView();
+}
+void WorkshopImageTool::slotZoomOutOnce(){
+	ZoomScale--;
+//	xZoomOrigine = 0;
+//	yZoomOrigine = 0;
+//	xZoomCenter = (int)imageSize.width / 2;
+//	yZoomCenter = (int)imageSize.height / 2;
+	CalculateZoomWindow();
+	ImgRGB.fill(0);
 	slotUpdateView();
 }
 
