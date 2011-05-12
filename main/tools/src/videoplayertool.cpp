@@ -715,11 +715,13 @@ void VideoPlayerTool::slotStepMovie()
 		if(!m_fileVA)
 			return;
 	}
+
 	if(playFileSize <= 0) {
 		fprintf(stderr, "[VideoPlayerT]:%s:%d : ERROR: file size=%llu\n", __func__, __LINE__,
 					playFileSize);
 		return;
 	}
+
 	// Get step time
 	struct timeval tv1, tv2;
 	struct timezone tz;
@@ -818,6 +820,7 @@ void VideoPlayerTool::display_frame()
 		buffersize = theSize.width*theSize.height;
 		m_fileVA->readImageYNoAcq(detailsImage->bits(), &buffersize);
 	}
+
 	detailsView->setWorkshopImage(detailsImage);
 
 

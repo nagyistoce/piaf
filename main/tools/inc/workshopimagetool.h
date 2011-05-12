@@ -50,15 +50,14 @@
 #include "previewimage.h"
 #include "SwFilters.h"
 
-#if 0
+#if _USE_FFMPEG_ENCODER
 #define MovieEncoder FFMpegEncoder
 #include "FFMpegEncoder.h"
 #else
-//#define MovieEncoder SwMpegEncoder
-//#include "SwMpegEncoder.h"
 #define MovieEncoder OpenCVEncoder
 #include "OpenCVEncoder.h"
 #endif
+
 
 /** \brief Workshop image display and processing tool
 
@@ -142,6 +141,7 @@ private:
 
 	QWidget * pParent;
 	QWorkspace * pWorkspace;
+
 	bool ShowSnapbutton;
 	bool ShowRecbutton;
 	QPushButton * bRecord;
@@ -220,8 +220,10 @@ private:
 	// view slots
 	void slotMenuView();
 	void slotZoomInMode();
-	void slotZoomFit();
 	void slotZoomOutMode();
+	void slotZoomInOnce();
+	void slotZoomOutOnce();
+	void slotZoomFit();
 	void slotMoveMode();
 
 	// color picker
