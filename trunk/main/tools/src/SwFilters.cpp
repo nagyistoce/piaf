@@ -527,7 +527,7 @@ void SwFilterManager::slotFilterDied(int pid)
 			__func__, __LINE__, pid);
 
 	swPluginView * fil = NULL;
-	for(fil = selectedFilterColl->first(); fil; )
+	for(fil = selectedFilterColl->first(); fil != NULL; )
 	{
 		if(fil->filter->getChildPid() == pid)
 		{
@@ -591,14 +591,19 @@ int SwFilterManager::removeFilter(swPluginView * pv)
 		int id = r;
 		if(id==idEditPlugin || id==idViewPlugin || id==(int)selectedFilterColl->count()-1)
 			reset = true;
+
 		if(pv->filter) {
 			pv->filter->unloadChildProcess();
-
 		}
 
+		fprintf(stderr, "%s:%d : removing...\n", __func__, __LINE__);
 		r = selectedFilterColl->remove(pv);
+		fprintf(stderr, "%s:%d : removing...\n", __func__, __LINE__);
+		selectedListView->removeItem(pv->selItem);
+		fprintf(stderr, "%s:%d : removing...\n", __func__, __LINE__);
 
-		DELETE_FILTER(pv)
+		DELETE_FILTER(pv);
+		fprintf(stderr, "%s:%d : removed...\n", __func__, __LINE__);
 
 		if(reset){
 			if(!selectedFilterColl->isEmpty()) {

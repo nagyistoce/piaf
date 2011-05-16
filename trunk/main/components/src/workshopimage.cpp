@@ -114,6 +114,7 @@ void ImageWidget::setColorMode(int mode) {
 			break;
 		}
 	}
+
 	update();
 }
 

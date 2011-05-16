@@ -284,7 +284,7 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 
 	ProcImgRGB = OrigImgRGB;
 
-	// IF SIZE CHANGED, LET'S CALCULATE ANOLTHER VIEW SIZE
+	// IF SIZE CHANGED, LET'S CALCULATE ANOTHER VIEW SIZE
 	if(	oldSize.width != imageSize.width
 		|| oldSize.height != imageSize.height
 		|| true
@@ -317,8 +317,9 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 			viewSize.width, viewSize.height
 			);
 #endif
+
 	if(!first ) {
-		if(		viewSize.width != oldviewSize.width
+		if(	viewSize.width != oldviewSize.width
 				|| 	viewSize.height != oldviewSize.height) {
 			ViewWidget->resize(viewSize.width, viewSize.height);
 			ViewWidget->updateGeometry();
@@ -745,6 +746,11 @@ void WorkshopImageTool::slotUpdateView()
 							 viewSize.width / realScale,
 							 viewSize.height / realScale
 							 ).scaled(viewSize.width, viewSize.height);
+
+	// update fake colors
+	if(ViewWidget) {
+		ViewWidget->setColorMode(m_colorMode);
+	}
 
 #else // old version with zooming coded form scratch
 
