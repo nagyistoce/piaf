@@ -1,12 +1,24 @@
 # INSTALLATION
 
-- As root : 
-	o Install the required packages for building piaf, for Debian/Ubuntu packages
-./prepare_debian.sh
-	o Create local directories and build all 
-./install-piaf
+You need to build binaries first (GUI, libs and plugins), then to install it on you system.
+- First, as user, build Piaf lib, GUI and all vision plugins:
+user$ ./build.sh
 
-- As user, build Piaf : 
-./build.sh
+	If build fails, you need to install the required packages for building piaf.
+	A script if provided for Debian/Ubuntu packages, run as root:
+root# ./prepare_debian.sh
+
+- Then, as root : create local directories and install all built
+root# ./install.sh
+
+# LATER COMPILATION :
+- if you patched Piaf lib or GUI:
+	- for testing: run build.sh as user to update GUI binary and libs
+	- for installing or build+install: just run the ./install.sh
+- if you modified the plugins' source code: as user, run the build script to build plugins :
+user$ ./build.sh
+
+OR: go to the plugin directory plugins/vision/ and run ./build_all.sh
+user$ ./build_all.sh
 
 

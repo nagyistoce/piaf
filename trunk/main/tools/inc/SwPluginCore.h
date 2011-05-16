@@ -102,7 +102,7 @@ private:
 	
 	// 
 	swFunctionDescriptor * funcList;
-	int NbFunctions; 
+	int NbFunctions;
 
 	
 	// For any function, returns
@@ -110,6 +110,7 @@ private:
 
 };
 
+// Internal functions
 
 int swAllocateFrame(swFrame *current, int size);
 int swAddHeaderToFrame(swFrame * current);

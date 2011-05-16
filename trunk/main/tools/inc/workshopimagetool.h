@@ -157,10 +157,12 @@ private:
 	int viewPixel;
 	int imagePixel;
 
-	QImage OrigImgRGB;
+	QImage OrigImgRGB;	///< Original image (without processing)
+	QImage ProcImgRGB;	///< Processed image (after processing)
+
+
 	/// Ready-to-use QImage object for RGB image
 	QImage ImgRGB;
-	unsigned char * originalImage;
 
 	Q3VBox *vBox;
 	Q3HBox *hBox;

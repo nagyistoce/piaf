@@ -227,8 +227,6 @@ void WorkshopImageTool::init()
 	m_colorMode = COLORMODE_GREY;
 
 	aMenuColor = NULL;
-
-	originalImage = NULL;
 	ViewWidget=NULL;
 	selectPressed = false;
 	ToolMode = 0;
@@ -265,13 +263,11 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 	bool first = false;
 	if( oldSize.width != imageSize.width
 		|| oldSize.height != imageSize.height
-		|| !originalImage
 		|| OrigImgRGB.depth()!=ImgRGB.depth()
 		) {
-		if(originalImage)
-			delete [] originalImage;
-		else
+		if(ProcImgRGB.isNull()) {
 			first = true;
+		}
 
 		if(aMenuColor) {
 			if(OrigImgRGB.depth()==8)
@@ -280,16 +276,13 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 				aMenuColor->hide();
 		}
 
-
-		originalImage = new unsigned char [ imageSize.width * imageSize.height
-											* ( OrigImgRGB.depth() / 8)];
+		ProcImgRGB = OrigImgRGB;
 		if(OrigImgRGB.depth()!=ImgRGB.depth()) { // updae ImgRGB
 			changeViewSize();
 		}
 	}
 
-	memcpy(originalImage, OrigImgRGB.bits(),
-		   OrigImgRGB.width()*OrigImgRGB.height()*(OrigImgRGB.depth()/8) );
+	ProcImgRGB = OrigImgRGB;
 
 	// IF SIZE CHANGED, LET'S CALCULATE ANOLTHER VIEW SIZE
 	if(	oldSize.width != imageSize.width
@@ -364,17 +357,13 @@ void WorkshopImageTool::initTool()
 WorkshopImageTool::~WorkshopImageTool()
 {
 //	fprintf(stderr, "WorkshopImageTool::~WorkshopImageTool()...\n");
-	if(originalImage)
-		delete [] originalImage;
-	//if(OrigImgRGB)
-	//	delete OrigImgRGB;
-	//if(ImgRGB)
-	//	delete ImgRGB;
-	if(filterManager)
+	if(filterManager) {
 		delete filterManager;
+	}
 	// video encoder
-	if(mpegEncoder)
+	if(mpegEncoder) {
 		delete mpegEncoder;
+	}
 //	fprintf(stderr, "%s::%s:%d : deleted.", __FILE__, __func__, __LINE__);
 
 }
@@ -703,8 +692,9 @@ void WorkshopImageTool::slotFilters()
 
 void WorkshopImageTool::slotUpdateImage()
 {
-	memcpy(originalImage, OrigImgRGB.bits(),
-		   OrigImgRGB.width()*OrigImgRGB.height()*(OrigImgRGB.depth()/8) );
+	ProcImgRGB = OrigImgRGB;
+//	memcpy(originalImage, OrigImgRGB.bits(),
+//		   OrigImgRGB.width()*OrigImgRGB.height()*(OrigImgRGB.depth()/8) );
 
 	/******************* FILTER PROCESSING *********************/
 	if(filterManager) {
@@ -715,7 +705,7 @@ void WorkshopImageTool::slotUpdateImage()
 		image.depth = ImgRGB.depth() / 8;
 		image.buffer_size = image.width * image.height * image.depth;
 
-		image.buffer = originalImage; // Buffer
+		image.buffer = ProcImgRGB.bits(); // Buffer
 
 		filterManager->processImage(&image);
 	}
@@ -728,7 +718,7 @@ void WorkshopImageTool::slotUpdateImage()
 */
 	// record video on demand
 	if(record && mpegEncoder) {
-		unsigned char * p32 = originalImage;
+		unsigned char * p32 = ProcImgRGB.bits();
 
 		if(mpegEncoder->encodeFrameRGB32( p32 ) == 0) {
 			fprintf(stderr, "WImgTool::%s:%d : Error while encoding !\n", __func__, __LINE__);
@@ -751,7 +741,7 @@ void WorkshopImageTool::slotUpdateView()
 		realScale = 1.f / (2.f - ZoomScale);
 	}
 
-	ImgRGB = OrigImgRGB.copy(xZoomOrigine, yZoomOrigine,
+	ImgRGB = ProcImgRGB.copy(xZoomOrigine, yZoomOrigine,
 							 viewSize.width / realScale,
 							 viewSize.height / realScale
 							 ).scaled(viewSize.width, viewSize.height);

@@ -5,7 +5,6 @@ message( Building $(SRCNAME))
 
 TEMPLATE        =       app
 CONFIG          =       warn_on release thread
-LANGUAGE        =       C++
 TARGET          =       $$(SRCNAME)
 OBJECTS_DIR 	= 	.obj
 
