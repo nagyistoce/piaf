@@ -86,11 +86,11 @@ int SwSignalHandler::killChild() {
 
 	sigFilter * sigF = NULL;
 	if(filterList.isEmpty()) {
-		fprintf(stderr, "SwSignalHandler::%s:% : nothing in list => return 0 !\n", __func__, __LINE__);
+		fprintf(stderr, "SwSignalHandler::%s:%d : nothing in list => return 0 !\n", __func__, __LINE__);
 		return 0;
 	}
 	while(waitpid(-1, NULL, WNOHANG) >0) {
-		fprintf(stderr, "SwSignalHandler::%s:% : waitpid>0 !\n", __func__, __LINE__);
+		fprintf(stderr, "SwSignalHandler::%s:%d : waitpid>0 !\n", __func__, __LINE__);
 	}
 	for(sigF = filterList.first(); sigF; sigF = filterList.next()) {
 		fprintf(stderr, "SwSignalHandler::%s:%d: Testing child '%s' pid=%d...\n",
@@ -122,7 +122,8 @@ int SwSignalHandler::killChild() {
 		}
 	}
 
-	fprintf(stderr, "SwSignalHandler::%s:% : filter not found in list => return 0 !\n", __func__, __LINE__);
+	fprintf(stderr, "SwSignalHandler::%s:%d : filter not found in list => return 0 !\n",
+			__func__, __LINE__);
 
 	return 0;
 }

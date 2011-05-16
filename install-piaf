@@ -12,7 +12,7 @@ if [ "$(whoami)" == "root" ] ; then
 	chmod 777 /etc/piaf
 	echo 'Done.'
 else 
-	echo "FAILED : You must run install-piaf as root."
+	echo "FAILED : You must run install-piaf as root to create local install directories."
 	exit 0
 fi
 echo 

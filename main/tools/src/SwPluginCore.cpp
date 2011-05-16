@@ -21,8 +21,7 @@
 #include "sw_types.h"
 
 /*
-compiles with :
- gcc -Wall -I/usr/local/sisell/include SwPluginCore.cpp -c
+compiles with : qmake piaf-lib.pro && make
  */
 #include <unistd.h>
 #include <fcntl.h>
@@ -32,6 +31,7 @@ compiles with :
 
 void swPurgePipe(FILE *fR);
 
+/// Debug options for communication protocol
 //#define __SWPLUGIN_DEBUG__
 
 #ifdef SWPLUGIN_SIDE
@@ -39,6 +39,10 @@ void swPurgePipe(FILE *fR);
 #else
 #define SWPLUGIN_SIDE_PRINT		"PLUGIN-SIDE\t"
 #endif // 		SWPLUGIN_SIDE
+
+/// Size of frame buffer for communication with plugin
+#define SWPLUGINCORE_BUFFER_SIZE 4096
+
 
 // Default constructor
 SwPluginCore::SwPluginCore()
@@ -53,11 +57,10 @@ SwPluginCore::SwPluginCore()
 	size_in = size_out = 0;
 
 	category = subcategory = name = NULL;
-#define BUFFER_SIZE 4096
-	swAllocateFrame(&frame, BUFFER_SIZE);
+	swAllocateFrame(&frame, SWPLUGINCORE_BUFFER_SIZE);
 
-	buffer = new char [BUFFER_SIZE];
-
+	buffer = new char [SWPLUGINCORE_BUFFER_SIZE];
+	memset(buffer, 0, SWPLUGINCORE_BUFFER_SIZE*sizeof(char)); // for valgrind uninitialized test
 
 
 }
@@ -68,6 +71,7 @@ SwPluginCore::~SwPluginCore()
 {
 	if(buffer) {
 		delete [] buffer;
+		buffer = NULL;
 	}
 
 	if(funcList) {
@@ -82,10 +86,11 @@ SwPluginCore::~SwPluginCore()
 						delete funcList[i].param_list[j].value;
 */				}
 				delete [] funcList[i].param_list;
+				funcList[i].param_list = NULL;
 			}
 		}
 		delete [] funcList;
-
+		funcList = NULL;
 		NbFunctions = 0;
 	}
 
@@ -334,7 +339,7 @@ int SwPluginCore::loop()
 	while(!quit)
 	{
 		buffer[0]='\0';
-		ret = fgets(buffer, BUFFER_SIZE-1, stdin);
+		ret = fgets(buffer, SWPLUGINCORE_BUFFER_SIZE-1, stdin);
 #ifdef __SWPLUGIN_DEBUG__
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "PLUGIN: (BUFSIZ=%d) Read buffer='%s'\n", BUFSIZ, buffer); fflush(stderr);
 #endif
@@ -896,13 +901,13 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms)
 		swPurgePipe(fR);
 		return 0;
 	}
-	// Restore pointers
+
+	// Restore pointers to local values
 	imOut->buffer = buffer;
 	imOut->metadata = metadata;
 
 	// debug
 #ifdef __SWPLUGIN_DEBUG__
-
 	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: received image %dx%d = buffer_size=%ld bytes metadata=%ld\n", __func__, __LINE__,
 			(int)imOut->width, (int)imOut->height,
 			(long)imOut->buffer_size, (long)imOut->metadata_size);
@@ -914,19 +919,44 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms)
 		return 0;
 	}
 
-	if(!imOut->metadata && imOut->metadata_size > 0) {
+	// Read metadata
+	if(!imOut->metadata && imOut->metadata_size > 0)
+	{
+		imOut->metadata = new unsigned char [imOut->metadata_size];
+		memset(imOut->metadata, 0, sizeof(unsigned char) * imOut->metadata_size);
 
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: alloc metadata ["
+				"metadata_size=%ld bytes] => metadata=%p\n",
+				__func__, __LINE__,
+				(long)imOut->metadata_size, imOut->metadata);
 	}
 
-	// Read metadata from pipe
+	// Then read metadata
+	if(imOut->metadata && imOut->metadata_size > 0) {
+		// Read metadata from pipe
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: read metadata"
+				"metadata_size=%ld bytes in metadata=%p\n",
+				__func__, __LINE__, (long)imOut->metadata_size, imOut->metadata);
+		if(! swReadFromPipe((unsigned char *)imOut->metadata, (u32)imOut->metadata_size,
+							fR, timeout_ms)) {
+
+			fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: ERROR while reading metadata"
+					"metadata_size=%ld bytes in metadata=%p\n",
+					__func__, __LINE__,
+					imOut->metadata, (long)imOut->metadata_size);
+			return 0;
+		}
+	}
+
 
 
 #ifdef __SWPLUGIN_DEBUG__
 	char file[64];
-	if(fR == stdin)
+	if(fR == stdin) {
 		sprintf(file, "receiveimage_stdout.ppm");
-	else
+	} else {
 		sprintf(file, "receiveimage_parent.ppm");
+	}
 	debugWriteImage(file, (swImageStruct *)data_out);
 #endif
 
