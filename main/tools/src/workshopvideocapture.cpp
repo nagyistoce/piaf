@@ -204,7 +204,7 @@ void WorkshopVideoCaptureView::setToolbar()
 	connect(actDevEdit, SIGNAL(activated()), this, SLOT(slotDeviceSize()));
 	deviceMenu->connectItem( 0, actDevEdit, SLOT(activated()) );
 
-	pixIcon = QPixmap("IconDeviceParams.xpm");
+	pixIcon = QPixmap("IconDeviceParams.png");
 	actDevParams = new QAction(pixIcon, tr("Image settings"), QString(""), this, "device");
 	actDevParams->addTo(deviceMenu);
 	connect(actDevParams, SIGNAL(activated()), this, SLOT(slotDeviceParams()));
