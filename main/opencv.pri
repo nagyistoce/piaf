@@ -107,8 +107,22 @@ unix: {
 			}
 		}
 	}
-}
 
+	# Subdirs for OpenCV 2.2
+	COREHPP = $$CVINCPATH/core/core.hpp
+	message ("Testing $$COREHPP")
+	exists( $$COREHPP ) {
+		message("OpenCV >= 2.2 found in $$COREHPP")
+		INCLUDEPATH += $$CVINCPATH/core
+		INCLUDEPATH += $$CVINCPATH/imgproc
+		INCLUDEPATH += $$CVINCPATH/legacy
+		INCLUDEPATH += $$CVINCPATH/calib3d
+		INCLUDEPATH += $$CVINCPATH/contrib
+		INCLUDEPATH += $$CVINCPATH/ml
+		INCLUDEPATH += $$CVINCPATH/highgui
+
+	}
+}
 
 win32: {
 	message("Win32 specific paths : OpenCV must be installed in C:\Program Files\OpenCV")

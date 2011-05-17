@@ -1248,8 +1248,11 @@ void SwFilterManager::slotEdit()
 SwTimeWidget::SwTimeWidget(QWidget* parent, const char *name, Qt::WindowFlags wflags)
 	: QWidget(parent, name, wflags) {
 
-	setCaption(tr("Times for ") + name);
+	setCaption(name);
 	setFixedSize(180,70);
+
+	QIcon pixIcon("chronometer.png");
+	setWindowIcon(pixIcon);
 
 	Q3GridLayout * grid = new Q3GridLayout(this, 3, 3, 0, -1, NULL);
 	int row=0;
