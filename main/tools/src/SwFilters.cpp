@@ -243,7 +243,7 @@ void SwFilterManager::init() {
 	Q3ListViewItem *catItem = NULL, *subcatItem = NULL;
 	QPixmap bIcon;
 	QPixmap lena;
-	lena = QPixmap("lena.xpm");
+	lena = QPixmap("lena.png");
 	filtersListView->setRootIsDecorated( TRUE );
 
 	if(!filterColl->isEmpty()) {
