@@ -21,6 +21,29 @@ But maybe you want to install manually or on another kind of package manager.
 
 Easiest way is to use the packages from your distribution. You can download latest version here : http://qt.nokia.com
 
+Check that Qt4's _qmake_ is the one by default. It need to be Qt4's:
+{{{
+$ qmake -v
+QMake version 2.01a
+Using Qt version 4.6.3 in /usr/lib
+}}}
+
+If not, you can edit the build scripts or, easier way, change the qmake link :
+{{{
+$ sudo update-alternatives --config qmake
+[sudo] password for tof: 
+There are 2 choices for the alternative qmake (providing /usr/bin/qmake).
+
+  Selection    Path                Priority   Status
+------------------------------------------------------------
+* 0            /usr/bin/qmake-qt3   45        auto mode
+  1            /usr/bin/qmake-qt3   45        manual mode
+  2            /usr/bin/qmake-qt4   40        manual mode
+
+Press enter to keep the current choice[*], or type selection number: 2
+update-alternatives: using /usr/bin/qmake-qt4 to provide /usr/bin/qmake (qmake) in manual mode.
+}}}
+
 === OpenCV ===
 
 You need _libcv_, _libcvaux_ and _libhighgui_. You have got 2 solutions:
@@ -46,4 +69,3 @@ You need to compile first the library in order to use plugins. Without plugins, 
 == First: Plugin's library ==
 
 Go to main/ and compile using `piaf-lib.pro`
-
