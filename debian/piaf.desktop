@@ -1,0 +1,11 @@
+ktop Entry]
+Encoding=UTF-8
+Version=1.0
+Type=Application
+Terminal=false
+Icon[en_US]=/usr/local/piaf/images/pixmaps/piaf.png
+Exec=/usr/bin/piaf
+Name[en_US]=Piaf
+Name=Piaf
+Icon=/usr/local/piaf/images/pixmaps/piaf.png
+
