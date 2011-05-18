@@ -162,7 +162,7 @@ void underexposure() {
 	if(!underexposure_init) {
 		underexposure_init = 1;
 		for(int i=0; i<=256; i++) {
-			GammaCorrection[i] = (unsigned char)roundf(((float)i/255.f)*140.f);
+			GammaCorrection[i] = (unsigned char)roundf(((float)(i*i)/255.f));
 		}
 	}
 	int width = imIn->width;
