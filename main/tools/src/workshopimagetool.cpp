@@ -31,6 +31,7 @@
 #include <QMenu>
 
 #include "workshopimagetool.h"
+
 // application specific includes
 #include <QWorkspace>
 
@@ -986,9 +987,9 @@ void WorkshopImageTool::slotUpdateView()
 
 	ViewWidget->setZoomParams(xZoomOrigine, yZoomOrigine, ZoomScale);
 	ViewWidget->update();
-//#ifdef DEBUG_ZOOMING
+#ifdef DEBUG_ZOOMING
 	fprintf(stderr, "\tslotUpdateView : done with ViewWidget->update();\n");
-//#endif
+#endif
 }
 
 
