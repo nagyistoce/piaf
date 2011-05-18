@@ -1,0 +1,18 @@
+Source: piaf
+Section: graphics
+Priority: extra
+Maintainer: Christophe Seyve <cseyve@free.fr>
+Build-Depends: debhelper (>= 7), libpng-dev, libtiff-dev, libcv-dev, libcvaux-dev, libhighgui-dev, libqt4-dev
+Standards-Version: 3.7.3
+Homepage: http://code.google.com/p/piaf/
+
+Package: piaf
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: computer vision prototyping environment, designed to fasten development of computer vision apps 
+ The aim of Piaf is to provide computer vision developers the basic tools
+ to let them concentrate on image processing only. Piaf provides the GUI 
+ for display, tools for reading still images, movies or live cameras (V4L1/2).
+ The developers can develop simple plugins as applications communicating with Piaf
+ through a protocol
+ 

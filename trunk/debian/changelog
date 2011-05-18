@@ -1,0 +1,7 @@
+piaf (1.svn20110517-1) unstable; urgency=low
+
+  * First Debian package release
+  * Fix GUI display of images and added metadata transfer between plugins
+
+ -- Christophe Seyve <cseyve@free.fr>  Tue, 17 May 2011 07:35:00 +0200
+
