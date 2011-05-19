@@ -260,10 +260,12 @@ int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 	fprintf(stderr,"FileVA::%s:%d\tSize is %d x %d @ %d fps\n", __func__, __LINE__,
 		m_pCodecCtx->width, m_pCodecCtx->height, (int)lfps);
 
-	m_period = 40; // 40 ms at 25 fps
-	if(lfps != 0)
-		m_period = (int)roundf(1000.f / (float)lfps);
-
+	m_period_ms = 40; // 40 ms at 25 fps
+	m_fps = 25;
+	if(lfps != 0) {
+		m_period_ms = (int)roundf(1000.f / (float)lfps);
+		m_fps = lfps;
+	}
 
 	// Assign appropriate parts of buffer to image planes in pFrame
 	// rq. OLV : cette configuration doit remplacer les appels à calcBufferSize, display_frame, etc.

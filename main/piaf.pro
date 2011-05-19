@@ -41,8 +41,8 @@ SOURCES += src/main.cpp \
     src/sw_component.cpp \
     src/sw_library.cpp \
     src/workshop.cpp \
-    src/workshoplist.cpp \
-    components/src/workshopcomponent.cpp \
+	src/workshoplist.cpp \
+	components/src/workshopcomponent.cpp \
     components/src/workshopmeasure.cpp \
     components/src/workshopimage.cpp \
     components/src/workshopmovie.cpp \
@@ -63,7 +63,8 @@ SOURCES += src/main.cpp \
     acquisitions/video/src/virtualdeviceacquisition.cpp \
 	acquisitions/video/src/opencvvideoacquisition.cpp \
     src/plugineditdialog.cpp \
-    tools/src/batchfiltersmainwindow.cpp
+    tools/src/batchfiltersmainwindow.cpp \
+    src/imagewidget.cpp
 
 # Replaced by OpenCVEncoder.cpp
 # tools/src/FFMpegEncoder.cpp  
@@ -109,8 +110,9 @@ HEADERS += inc/workshop.h \
     inc/sw_types.h \
     inc/workshoplist.h \
     inc/SwTypes.h \
-    inc/SwImage.h \
-    components/inc/workshopcomponent.h \
+	inc/SwImage.h \
+	inc/piaf-common.h \
+	components/inc/workshopcomponent.h \
     components/inc/workshopmeasure.h \
     components/inc/workshopimage.h \
     components/inc/workshopmovie.h \
@@ -122,21 +124,21 @@ HEADERS += inc/workshop.h \
     tools/inc/workshopimagetool.h \
     tools/inc/qlistboxmarker.h \
     tools/inc/videoplayertool.h \
-    acquisitions/video/inc/v4lutils.h \
+	tools/inc/OpenCVEncoder.h \
+	tools/inc/moviebookmarkform.h \
+	acquisitions/video/inc/v4lutils.h \
     acquisitions/video/inc/ccvt.h \
     acquisitions/video/inc/SwVideoAcquisition.h \
     acquisitions/video/inc/FileVideoAcquisition.h \
     acquisitions/video/inc/videocapture.h \
     acquisitions/video/inc/swvideodetector.h \
     tools/inc/swtoolmainwindow.h \
-    inc/piaf-common.h \
-    tools/inc/OpenCVEncoder.h \
-	tools/inc/moviebookmarkform.h \
-    acquisitions/video/inc/virtualdeviceacquisition.h \
+	acquisitions/video/inc/virtualdeviceacquisition.h \
     acquisitions/video/inc/opencvvideoacquisition.h \
     inc/plugineditdialog.h \
     tools/inc/batchfiltersmainwindow.h \
-    inc/piaf-settings.h
+    inc/piaf-settings.h \
+    inc/imagewidget.h
 
 exists(/usr/local/include/libfreenect/libfreenect.h) {
 	message("The system known Freenect ;)")

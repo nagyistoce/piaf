@@ -4,6 +4,8 @@
 	begin                : ven nov 29 15:53:48 UTC 2002
 	copyright            : (C) 2002 by Olivier Viné
 	email                : olivier.vine@sisell.com
+	copyright            : (C) 2002-2011 by Christophe Seyve
+	email                : cseyve@free.fr
  ***************************************************************************/
 
 /***************************************************************************
@@ -37,118 +39,12 @@
 #include <QPaintEvent>
 #include <QMouseEvent>
 
-// Color modes (palette for 8bit colors)
-#define COLORMODE_GREY 					0
-#define COLORMODE_GREY_INVERTED			1
-#define COLORMODE_THERMIC_BLACK2RED 	2
-#define COLORMODE_THERMIC_BLUE2RED		3
-#define COLORMODE_INDEXED				4
+#include "imagewidget.h"
 
-#define COLORMODE_MAX	COLORMODE_INDEXED
 
 // Sisell Workshop include files
 #include "sw_types.h"
 #include "workshopcomponent.h"
-
-/** \brief Image display widget
-
-Image display widget, modified for Piaf display use.
-
-*/
-class ImageWidget : public QWidget
-{
-	Q_OBJECT
-public:
-	ImageWidget(QWidget *parent=0, const char *name=0, Qt::WFlags f=0)
-		: QWidget(parent, name, f)
-	{
-		dImage=NULL;
-		xOrigine = yOrigine = ZoomScale = 1;
-		m_colorMode = 0;
-	}
-
-	~ImageWidget()
-	{
-
-	}
-
-	QImage * getQImage() { return dImage; };
-	void setRefImage(QImage *pIm)
-	{
-		dImage = pIm;
-		if(dImage) {
-			if(dImage->depth()==8) {
-				setColorMode(m_colorMode);
-			}
-		}
-		update();
-	}
-
-	void setZoomParams(int xO, int yO, int scale) {
-		xOrigine = xO;
-		yOrigine = yO;
-		ZoomScale = scale;
-	};
-
-	void  paintEvent( QPaintEvent * );
-
-	/** @brief Change color display mode for 8bit images */
-	void setColorMode(int mode);
-
-	/** @brief Set overlay rect */
-	void setOverlayRect(QRect overlayRect, QColor col) {
-
-		m_overlayRect = overlayRect;
-		m_overlayColor = col;
-	}
-signals:
-
-
-	/*!
-	  A signal which is emitted when the mouse is pressed in the
-	  plotting area.
-	  \param e Mouse event object, event coordinates referring
-			   to the plotting area
-	 */
-	void mousePressed( QMouseEvent *e);
-
-	/*!
-	  A signal which is emitted when a mouse button has been
-	  released in the plotting area.
-	  \param e Mouse event object, event coordinates referring
-			   to the plotting area
-	 */
-	void mouseReleased(QMouseEvent *e);
-
-	/*!
-	  A signal which is emitted when the mouse is moved in the
-	  plotting area.
-	  \param e Mouse event object, event coordinates referring
-			   to the plotting area
-	 */
-	void mouseMoved( QMouseEvent *e);
-
-protected:
-	virtual void mousePressEvent(QMouseEvent *e) {
-		emit mousePressed(e);
-	};
-	virtual void mouseReleaseEvent(QMouseEvent *e){
-		emit mouseReleased(e);
-	};
-	virtual void mouseMoveEvent(QMouseEvent *e){
-		emit mouseMoved(e);
-	};
-
-private:
-	QImage		*dImage;
-	int xOrigine;
-	int yOrigine;
-	int ZoomScale;
-	int m_colorMode;
-
-	QRect m_overlayRect;
-	QColor m_overlayColor;
-};
 
 /**
 	\brief Image component for Piaf

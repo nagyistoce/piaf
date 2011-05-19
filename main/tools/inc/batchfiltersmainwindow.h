@@ -37,6 +37,7 @@ namespace Ui {
 
 typedef enum { UNPROCESSED, PROCESSING, PROCESSED, ERROR } enum_proc_state;
 
+
 /** \brief File item for batch processing
 
   */
@@ -50,10 +51,11 @@ typedef struct {
 } t_batch_item;
 
 typedef struct {
-	bool use_grey;
-	bool reload_at_change;
-	bool record_output;
-	bool view_image;
+	bool use_grey;						///< use grayscale input image
+	bool reload_at_change;				///< reload plugin when file changes (usefull when all files aren't the same size)
+	bool record_output;					///< record output
+	bool view_image;					///< periodically display image when processing
+	QString sequence_name;				///< name of sequence file
 } t_batch_options;
 
 /** \brief Threaded batch processing
@@ -128,6 +130,8 @@ private:
 	QString mLastDirName; ///< Last opened directory with images
 	QString mLastPluginsDirName; ///< Last opened directory with plugin sequence
 	QList<t_batch_item *> mFileList;
+
+	QImage mLoadImage; ///< Loaded image form list
 
 	/// Filter processing manager
 	SwFilterManager mFilterManager;
