@@ -202,3 +202,37 @@ int OpenCVEncoder::encodeFrameRGB32(unsigned char *RGB32frame) {
 #endif
 	return 1;
 }
+
+
+// Encode directly RGB24 frame
+int OpenCVEncoder::encodeFrameRGB24(unsigned char *RGB24frame) {
+	if(!writer) return 0;
+
+	if(!imgHeader) {
+		imgHeader = cvCreateImageHeader(cvSize(m_width, m_height), IPL_DEPTH_8U, 3);
+	}
+
+	// FIXME : convert to RGB24 and it's fine !!'
+	imgHeader->imageData = (char *)RGB24frame;
+#ifdef OPENCV2
+	try {
+		cvCopy(imgHeader, imgRgb24);
+
+		cvWriteFrame(writer, imgRgb24);
+	}
+	catch(cv::Exception e)
+	{
+		fprintf(stderr, "OpenCVEnc::%s:%d caught exception while encoding "
+				"with size %dx%d @ %d fps\n",
+				__func__, __LINE__,
+				m_width, m_height, m_fps);
+		return 0;
+	}
+#else
+	cvCopy(imgHeader, imgRgb24);
+
+	cvWriteFrame(writer, imgRgb24);
+#endif
+	return 1;
+}
+

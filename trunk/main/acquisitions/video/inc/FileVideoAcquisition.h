@@ -111,8 +111,12 @@ public:
 		*/
 	int readImageRaw(unsigned char * rawimage, unsigned char * compimage, long * compsize, bool contAcq);
 	
-	/** Return acquisition period, computed from frame rate */
-	long getPeriod() { return m_period; };
+	/** @brief Return acquisition frame rate in frame per second */
+	float getFrameRate() { return m_fps; }
+	/** Return acquisition period in milliseconds,
+
+		computed from frame rate */
+	long getPeriod() { return m_period_ms; }
 	
 	/** Returns address of last acquisition buffer and launch no new acquisition */
 	unsigned char * getImageRawNoAcq();
@@ -237,8 +241,9 @@ private:
 	// no of current stream
 	int m_videoStream;
 	AVPacket packet;
-	long m_period;
-	
+	long m_period_ms;	///< File period in ms
+	float m_fps; ///< Framerate in frame per second
+
 	// reference time & step
 	struct tm FileVA_Tm;
 	struct timeval FileVA_Tv;

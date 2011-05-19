@@ -23,13 +23,15 @@
 #include <QMessageBox>
 #include "FileVideoAcquisition.h"
 #include "piaf-settings.h"
+#include "OpenCVEncoder.h"
 
 BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
 		QMainWindow(parent),
-	ui(new Ui::BatchFiltersMainWindow)
+		ui(new Ui::BatchFiltersMainWindow)
 {
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(this);
+
 	// dont' show warning on plugin crash
 	mFilterManager.enableWarning(false);
 	mFilterManager.hide();
@@ -48,12 +50,15 @@ BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
 	//	mBatchThread.start(QThread::HighestPriority);
 
 	mLastPluginsDirName = g_pluginDirName;
+	mLastDirName = g_imageDirName;
 }
+
 
 BatchFiltersMainWindow::~BatchFiltersMainWindow()
 {
     delete ui;
 }
+
 
 void BatchFiltersMainWindow::changeEvent(QEvent *e)
 {
@@ -83,6 +88,7 @@ void BatchFiltersMainWindow::on_loadButton_clicked()
 		} else {
 			ui->controlGroupBox->setEnabled(true);
 			ui->sequenceLabel->setText(fi.baseName());
+			mBatchOptions.sequence_name = fi.baseName();
 		}
 	}
 }
@@ -178,6 +184,15 @@ void BatchFiltersMainWindow::on_viewButton_toggled(bool checked)
 void BatchFiltersMainWindow::on_greyButton_toggled(bool checked)
 {
 	mBatchOptions.use_grey = checked;
+	if(checked)
+	{
+		ui->greyButton->setText(tr("Grey"));
+	}
+	else
+	{
+		ui->greyButton->setText(tr("Color"));
+	}
+
 	mBatchThread.setOptions(mBatchOptions);
 }
 
@@ -216,13 +231,16 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem* tre
 		t_batch_item * item = (*it);
 		if(item->treeItem == treeItem)
 		{
-			QImage loadImage(item->absoluteFilePath);
-			if(!loadImage.isNull())
+			if(mLoadImage.load(item->absoluteFilePath))
 			{
-				QPixmap pixmap;
-				pixmap = pixmap.fromImage(loadImage.scaled(ui->imageLabel->size(),
-														   Qt::KeepAspectRatio));
-				ui->imageLabel->setPixmap(pixmap);
+//				QPixmap pixmap;
+//				pixmap = pixmap.fromImage(loadImage.scaled(ui->imageLabel->size(),
+//														   Qt::KeepAspectRatio));
+				ui->imageLabel->setRefImage(&mLoadImage);
+			}
+			else
+			{
+				ui->imageLabel->setRefImage(NULL);
 			}
 		}
 	}
@@ -281,6 +299,7 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 //					imgRGBdisplay->imageData[i] = 255;
 //				}
 //			}
+
 			// Copy into QImage
 			QImage qImage( (uchar*)imgRGBdisplay->imageData,
 						   imgRGBdisplay->width, imgRGBdisplay->height, imgRGBdisplay->widthStep,
@@ -288,10 +307,8 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 							QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
 							)
 						  );
-			QPixmap pixmap;
-			pixmap = pixmap.fromImage(qImage.scaled(ui->imageLabel->size(),
-													Qt::KeepAspectRatio));
-			ui->imageLabel->setPixmap(pixmap);
+			mLoadImage = qImage;
+			ui->imageLabel->update();
 		}
 	}
 
@@ -369,6 +386,11 @@ void BatchFiltersThread::run()
 		}
 		else
 		{
+			// Output encoder
+			OpenCVEncoder * encoder = NULL;
+			CvSize oldSize = cvSize(0,0);
+			int oldChannels = -1;
+
 			// Process file
 			QList<t_batch_item *>::iterator it;
 			for(it = mpFileList->begin(); it != mpFileList->end(); ++it) {
@@ -376,13 +398,6 @@ void BatchFiltersThread::run()
 				if(item->processing_state == UNPROCESSED)
 				{
 					item->processing_state = PROCESSING;
-					if(!mBatchOptions.reload_at_change)
-					{
-						// unload previously loaded filters
-						mpFilterManager->slotDeleteAll();
-						// reload same file
-						mpFilterManager->loadFilterList(mpFilterManager->getPluginSequenceFile());
-					}
 
 					fprintf(stderr, "BatchThread::%s:%d : processing '%s'...\n",
 							__func__, __LINE__,
@@ -401,6 +416,27 @@ void BatchFiltersThread::run()
 
 					if(loadedImage)
 					{
+						if(mBatchOptions.reload_at_change
+						   || oldSize.width != loadedImage->width
+						   || oldSize.height != loadedImage->height
+						   || oldChannels != loadedImage->nChannels
+						   )
+						{
+							fprintf(stderr, "BatchThread::%s:%d : reload_at_change=%c "
+									"or size changed (%dx%dx%d => %dx%dx%d) "
+									"=> reload filter sequence\n",
+									__func__, __LINE__,
+									mBatchOptions.reload_at_change ? 'T':'F',
+									oldSize.width, oldSize.height, oldChannels,
+									loadedImage->width, loadedImage->height, loadedImage->nChannels
+									);
+							if(encoder) { delete encoder; encoder = NULL; }
+							// unload previously loaded filters
+							mpFilterManager->slotDeleteAll();
+							// reload same file
+							mpFilterManager->loadFilterList(mpFilterManager->getPluginSequenceFile());
+						}
+
 						swImageStruct image;
 						memset(&image, 0, sizeof(swImageStruct));
 						image.width = loadedImage->widthStep / loadedImage->nChannels;// beware of pitch
@@ -417,7 +453,7 @@ void BatchFiltersThread::run()
 						if(mBatchOptions.record_output) {
 							QFileInfo fi(item->absoluteFilePath);
 							QString outFile = item->absoluteFilePath
-											  + "-out." + fi.extension();
+											  + "-" + mBatchOptions.sequence_name + "." + fi.extension();
 							cvSaveImage( outFile.toUtf8().data(), loadedImage);
 						}
 
@@ -492,10 +528,33 @@ void BatchFiltersThread::run()
 
 									// Check if we need to record
 									if(mBatchOptions.record_output) {
-//										QFileInfo fi(item->absoluteFilePath);
-//										QString outFile = item->absoluteFilePath
-//														  + "-out." + fi.extension();
-//										cvSaveImage( outFile.toUtf8().data(), loadedImage);
+										if(!encoder) {
+											QFileInfo fi(item->absoluteFilePath);
+											QString outputFile = item->absoluteFilePath
+															  + "-" + mBatchOptions.sequence_name + ".avi";
+											encoder = new OpenCVEncoder(loadedImage->width,
+																		loadedImage->height,
+																		(int)roundf(fva->getFrameRate()));
+											encoder->startEncoder(outputFile.toUtf8().data());
+										}
+
+										if(encoder) {
+											switch(loadedImage->nChannels)
+											{
+											default:
+												break;
+											case 3:
+												encoder->encodeFrameRGB24((uchar *)loadedImage->imageData);
+												break;
+											case 4:
+												encoder->encodeFrameRGB32((uchar *)loadedImage->imageData);
+												break;
+											case 1:
+												encoder->encodeFrameY((uchar *)loadedImage->imageData);
+												break;
+											}
+
+										}
 									}
 
 									// Check if we need to copy an image for display
@@ -508,7 +567,8 @@ void BatchFiltersThread::run()
 										}
 										else {
 											//fprintf(stderr, "disp=%dx%dx%d", mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
-											cvCopy(loadedImage, mDisplayImage); }
+											cvCopy(loadedImage, mDisplayImage);
+										}
 									}
 
 								}
@@ -532,6 +592,9 @@ void BatchFiltersThread::run()
 
 				}
 			}
+
+			if(encoder) { delete encoder; encoder = NULL; }
+
 		}
 	}
 
