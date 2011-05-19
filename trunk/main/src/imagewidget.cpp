@@ -19,16 +19,6 @@
 #include <stdio.h>
 #include <QPainter>
 
-ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
-	: QWidget(parent, name, f)
-{
-	mZoomFit = true; // fit to size by default
-	mZoomFitFactor = -1.; // don't know yet the zoom factor
-
-	dImage=NULL;
-	xOrigine = yOrigine = ZoomScale = 1;
-	m_colorMode = 0;
-}
 
 #include <qcolor.h>
 
@@ -79,6 +69,22 @@ unsigned char BthermicBlue2Red(int p) {
 	return B;
 }
 
+
+
+
+ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
+	: QWidget(parent, name, f)
+{
+	mZoomFit = true; // fit to size by default
+	mZoomFitFactor = -1.; // don't know yet the zoom factor
+
+	xOrigine = yOrigine = 0;
+
+	dImage=NULL;
+	ZoomScale = 1;
+	m_colorMode = 0;
+}
+
 void ImageWidget::setRefImage(QImage *pIm)
 {
 	dImage = pIm;
@@ -89,7 +95,6 @@ void ImageWidget::setRefImage(QImage *pIm)
 	}
 	update();
 }
-
 
 
 void ImageWidget::setColorMode(int mode) {
@@ -146,11 +151,37 @@ void ImageWidget::setColorMode(int mode) {
 }
 
 
+void ImageWidget::wheelEvent ( QWheelEvent * e )
+{
+	if(!e) return;
+	if(!mZoomFit) return;
 
+	float curZoom = mZoomFitFactor;
+	int numDegrees = e->delta() / 8;
+	int numSteps = numDegrees / 15;
+
+	mZoomFitFactor += numSteps;
+
+	int x = e->pos().x(), y =  e->pos().y();
+	int xZoomCenter = xOrigine + x * curZoom;
+	int yZoomCenter = yOrigine + y * curZoom;
+
+	int disp_w =  size().width();
+	int disp_h =  size().height();
+	xOrigine = xZoomCenter - disp_w*0.5f/mZoomFitFactor;
+	yOrigine = yZoomCenter - disp_h*0.5f/mZoomFitFactor;
+
+//	fprintf(stderr, "%s:%d : x,y=%d,%d\n", __func__, __LINE__,
+
+//	        );
+	update();
+
+	emit signalWheelEvent( e );
+}
 
 void ImageWidget::paintEvent( QPaintEvent * e)
 {
-//fprintf(stderr, "ImageWidget::paintEvent\n");
+	fprintf(stderr, "ImageWidget::paintEvent\n");
 	if(!dImage) {
 		return;
 	}
@@ -161,14 +192,40 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 		// Use double-buffering
 		cr = e->rect();
 	}
+
 	QPixmap pix( cr.size() );
 	pix.fill( this, cr.topLeft() );
 	QPainter p( &pix);
 
-	if(cr != this->rect())
-		p.drawImage(0,0, dImage->copy(cr));
+	if(mZoomFit)
+	{
+		fprintf(stderr, "ImageWidget::%s:%d : FIT!\n", __func__, __LINE__);
+		int wdisp = size().width()-2;
+		int hdisp = size().height()-2;
+		if(mZoomFitFactor<0.) {
+			mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
+									   (float)hdisp / (float)dImage->height() );
+
+			m_displayImage = dImage->scaled(size(), Qt::KeepAspectRatio);
+		}
+		else {
+			QImage cropImage = dImage->copy(
+						xOrigine, yOrigine,
+						wdisp/mZoomFitFactor, hdisp/mZoomFitFactor);
+
+			m_displayImage = cropImage.scaled( wdisp, hdisp,
+										Qt::KeepAspectRatio );
+		}
+		p.drawImage(0,0, m_displayImage);
+
+	}
 	else
-		p.drawImage(0,0, *dImage);
+	{
+		if(cr != this->rect())
+			p.drawImage(0,0, dImage->copy(cr));
+		else
+			p.drawImage(0,0, *dImage);
+	}
 
 
 	if(m_overlayRect.width()>0) {
