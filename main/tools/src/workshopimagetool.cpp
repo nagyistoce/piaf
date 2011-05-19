@@ -967,7 +967,8 @@ void WorkshopImageTool::slotUpdateView()
 #endif
 	if(!ViewWidget) { return; }
 
-	if(ToolMode == MODE_ADD_RECT && selectPressed) {
+	if(ToolMode == MODE_ADD_RECT && selectPressed)
+	{
 		fprintf(stderr, "WImgTool::%s:%d : adding rect : start=%d,%d stop=%d,%d\n",
 				__func__, __LINE__,
 				myStartX, myStartY,

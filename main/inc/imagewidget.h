@@ -58,6 +58,7 @@ public:
 		xOrigine = xO;
 		yOrigine = yO;
 		ZoomScale = scale;
+		mZoomFit = false;
 	}
 
 	void  paintEvent( QPaintEvent * );
@@ -97,6 +98,12 @@ signals:
 			   to the plotting area
 	 */
 	void mouseMoved( QMouseEvent *e);
+	/*!
+	  A signal which is emitted when the mouse wheel is moved
+	  \param e Mouse event object, event coordinates referring
+			   to the plotting area
+	 */
+	void signalWheelEvent ( QWheelEvent * event );
 
 protected:
 	virtual void mousePressEvent(QMouseEvent *e) {
@@ -108,6 +115,7 @@ protected:
 	virtual void mouseMoveEvent(QMouseEvent *e){
 		emit mouseMoved(e);
 	};
+	virtual void wheelEvent ( QWheelEvent * event );
 
 private:
 	QImage		*dImage;
@@ -117,6 +125,7 @@ private:
 	int m_colorMode;
 	bool mZoomFit;			///< Fit zoom to size (not integer zoom factor). Default= true
 	float mZoomFitFactor;	///< Fit zoom to size (floating point zoom factor)
+	QImage m_displayImage;
 
 	QRect m_overlayRect;
 	QColor m_overlayColor;

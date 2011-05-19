@@ -233,6 +233,9 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem* tre
 		{
 			if(mLoadImage.load(item->absoluteFilePath))
 			{
+				fprintf(stderr, "[Batch] %s:%d : loaded '%s'\n",
+						__func__, __LINE__,
+						item->absoluteFilePath.toAscii().data());
 //				QPixmap pixmap;
 //				pixmap = pixmap.fromImage(loadImage.scaled(ui->imageLabel->size(),
 //														   Qt::KeepAspectRatio));
@@ -241,6 +244,9 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem* tre
 			else
 			{
 				ui->imageLabel->setRefImage(NULL);
+				fprintf(stderr, "[Batch] %s:%d : could not load '%s'\n",
+						__func__, __LINE__,
+						item->absoluteFilePath.toAscii().data());
 			}
 		}
 	}
