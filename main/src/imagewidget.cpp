@@ -96,6 +96,29 @@ void ImageWidget::setRefImage(QImage *pIm)
 	update();
 }
 
+/* Switch to smart zooming mode */
+void ImageWidget::switchToSmartZoomMode(bool on)
+{
+	mZoomFit = on;
+	mZoomFitFactor = -1.f;
+	xMouseMoveStart = -1;
+	xOrigine = yOrigine = 0;
+
+	clipSmartZooming();
+}
+
+void ImageWidget::setZoomParams(int xO, int yO, int scale) {
+	xOrigine = xO;
+	yOrigine = yO;
+
+	mZoomFitFactor = scale;
+	if(scale < 1)
+	{
+		mZoomFitFactor = 1.f / (2.f - scale);
+	}
+	ZoomScale = scale;
+//		mZoomFit = false;
+}
 
 void ImageWidget::setColorMode(int mode) {
 	if(mode <= COLORMODE_MAX )
@@ -281,12 +304,20 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 			QImage cropImage = dImage->copy(
 						xOrigine, yOrigine,
 						wdisp/mZoomFitFactor, hdisp/mZoomFitFactor);
-
-			m_displayImage = cropImage.scaled( wdisp, hdisp,
-										Qt::KeepAspectRatio );
+			if(cropImage.isNull())
+			{
+				fprintf(stderr, "ImageWidget::%s:%d : pb with crop (%d,%d+%d/%gx%d/%g)!\n",
+						__func__, __LINE__,
+						xOrigine, yOrigine,
+						wdisp, mZoomFitFactor, hdisp, mZoomFitFactor
+						);
+			}
+			else {
+				m_displayImage = cropImage.scaled( wdisp, hdisp,
+												  Qt::KeepAspectRatio );
+			}
 		}
 		p.drawImage(0,0, m_displayImage);
-
 	}
 	else
 	{

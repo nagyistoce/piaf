@@ -55,21 +55,12 @@ public:
 	}
 
 	/** @brief Switch to smart zooming mode */
-	void switchToSmartZoomMode(bool on = true) {
-		mZoomFit = on;
-		mZoomFitFactor = -1.f;
-		xMouseMoveStart = -1;
-		xOrigine = yOrigine = 0;
-	}
+	void switchToSmartZoomMode(bool on = true);
 
-	void setZoomParams(int xO, int yO, int scale) {
-		xOrigine = xO;
-		yOrigine = yO;
-		ZoomScale = scale;
-		mZoomFit = false;
-	}
+	/** @brief Set zoom scale and origin of zooming */
+	void setZoomParams(int xO, int yO, int scale);
 
-	void  paintEvent( QPaintEvent * );
+	void paintEvent( QPaintEvent * );
 
 	/** @brief Change color display mode for 8bit images */
 	void setColorMode(int mode);

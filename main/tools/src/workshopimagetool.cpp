@@ -74,6 +74,7 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv,
 		aMenuColor->hide();
 	}
 
+	ToolMode = MODE_SMARTZOOM;
 	ViewWidget->setRefImage(&ImgRGB);
 
 	slotUpdateView();
@@ -736,236 +737,24 @@ void WorkshopImageTool::slotUpdateView()
 	fprintf(stderr, "WorkshopImageTool::slotUpdateView()\n");
 #endif
 
-#if 1
+
 	float realScale = ZoomScale;
 	if(ZoomScale < 1)
 	{
 		realScale = 1.f / (2.f - ZoomScale);
 	}
 
+	ImgRGB = ProcImgRGB.copy();
+
+	/* OBSOLETE : now the zooming is done in the display widget
 	ImgRGB = ProcImgRGB.copy(xZoomOrigine, yZoomOrigine,
 							 viewSize.width / realScale,
 							 viewSize.height / realScale
 							 ).scaled(viewSize.width, viewSize.height);
-
-	// update fake colors
-	if(ViewWidget) {
-		ViewWidget->setColorMode(m_colorMode);
-	}
-
-#else // old version with zooming coded form scratch
-
-	if(ImgRGB.depth() == 32) {
-		u32 * imgRgb = (u32 *)OrigImgRGB.bits();
-		// Display image (after zooming ...)
-		if(ZoomScale == 1) {
-			int vwidth4  = (int)viewSize.width*4;
-			int vheight = (int)viewSize.height;
-			int iwidth4  = (int)imageSize.width*4;
-			int iheight = (int)imageSize.height;
-
-			int minwidth4 = min( vwidth4, (iwidth4-4*xZoomOrigine) );
-			int minheight = min( vheight, (iheight-yZoomOrigine));
-
-			if(vwidth4 == iwidth4 && vheight == iheight
-			   && xZoomOrigine==0 && yZoomOrigine==0)
-				memcpy(ImgRGB.bits(),  originalImage, viewPixel*4);
-			else {
-				unsigned char * orig = originalImage
-									   +  yZoomOrigine*iwidth4 + 4*xZoomOrigine;
-				unsigned char * destRgb = (unsigned char *)ImgRGB.bits();
-				for(int r = 0; r<minheight; r++)
-				{
-					memcpy(destRgb + r*vwidth4,
-						   orig,
-						   minwidth4 );
-					orig += iwidth4;
-				}
-			}
-		}
-		else // over or under sampling
-			if (ZoomScale > 1) {
-			u32 * orig = (u32 *)originalImage;
-			int r,c;
-			int origx = xZoomOrigine;
-			int origy = yZoomOrigine;
-			int vwidth  = (int)viewSize.width;
-			int vheight = (int)viewSize.height;
-			int iwidth  = (int)imageSize.width;
-			int iheight = (int)imageSize.height;
-			int minwidth = min(vwidth, (iwidth-origx)*ZoomScale);
-			int minheight = min(vheight, (iheight-origy)*ZoomScale);
-			int nr;
-			//			printf("doc changed : ImgRGGB : %dx%d - viewSize : %ldx%ld - ZoomScale = %d\n",
-			//			ImgRGB.width(), ImgRGB.height(),
-			//				viewSize.width, viewSize.height,
-			//
-			//				ZoomScale);
-
-			imgRgb = (u32 *)ImgRGB.bits();
-			for(r = 0, nr=0; r<minheight; r+=ZoomScale, nr++)
-			{
-				int pos = r * vwidth ;
-				int posi = ((nr+origy)*iwidth + origx);
-				int kmax = min(ZoomScale, minheight - r);
-				int nc=0;
-				for(c=0; c<minwidth; c+=ZoomScale)
-				{
-					u32 pix = orig[posi];
-					int lmax = min(ZoomScale, minwidth  - c);
-					for(int k=0; k<kmax;k++) {
-						int dk = k * vwidth;
-						for(int l=0; l<lmax;l++)
-						{
-							int pos4 = (pos + dk + l);
-							imgRgb[pos4] = pix;
-						}
-					}
-					nc++;
-					posi ++;
-					pos  += ZoomScale;
-				}
-			}
-		}
-		else // zoomscale <= 0 : 0 = 1/2 , -1 = 1/3
-		{
-			int sample = 2-ZoomScale;
-
-			u32 * orig = (u32 *)originalImage;
-			int origx = xZoomOrigine;
-			int origy = yZoomOrigine;
-			int vwidth  = (int)viewSize.width;
-			int vheight = (int)viewSize.height;
-			int iwidth  = (int)imageSize.width;
-			int minwidth = min(vwidth, iwidth/sample);
-			int minheight = min(vheight, (int)imageSize.height/sample);
-
-			int nr = 0;
-			imgRgb = (u32 *)ImgRGB.bits();
-			for(int r=0; nr<minheight; r+=sample, nr++)
-			{
-				int pos = nr * vwidth ;
-				int posi = ((r+origy)*iwidth + origx);
-				int nc=0;
-				for(int c=0; nc<minwidth; c+=sample, nc++) {
-					u32 pix = orig[posi];
-					// under sample
-					imgRgb[pos] = pix;
-					pos ++;
-					posi+=sample;
-				}
-			}
-		}
-	} // if depth == 32
-	else // else image is 8bit depth ----------------------------------
-	{
-		unsigned char * imgGray = (unsigned char *)originalImage;
-		unsigned char * outGray = (unsigned char *)ImgRGB.bits();
-
-		// Display image (after zooming ...)
-		if(ZoomScale == 1) {
-			int vwidth4  = (int)ImgRGB.width();
-			int vheight = (int)ImgRGB.height();
-			int iwidth4  = (int)imageSize.width;
-			int iheight = (int)imageSize.height;
-
-			int minwidth4 = min( vwidth4, (iwidth4-xZoomOrigine) );
-			int minheight = min(vheight, (iheight-yZoomOrigine));
-
-			if(vwidth4 == iwidth4 && vheight == iheight
-			   && xZoomOrigine==0 && yZoomOrigine==0)
-				memcpy(outGray,  imgGray, viewPixel);
-			else {
-				unsigned char * orig = imgGray
-									   +  yZoomOrigine*iwidth4 + xZoomOrigine;
-				for(int r = 0; r<minheight; r++)
-				{
-					memcpy((unsigned char *)outGray + r*vwidth4,
-						   orig,
-						   minwidth4 );
-					orig += iwidth4;
-				}
-			}
-		}
-		else // over or under sampling
-			if (ZoomScale > 1) {
-			unsigned char * orig = (unsigned char *)originalImage;
-			int r,c;
-			int origx = xZoomOrigine;
-			int origy = yZoomOrigine;
-			int vwidth  = (int)ImgRGB.width();
-			int vheight = (int)ImgRGB.height();
-			int iwidth  = (int)imageSize.width;
-			int iheight = (int)imageSize.height;
-			int minwidth = min(vwidth, (iwidth-origx)*ZoomScale);
-			int minheight = min(vheight, (iheight-origy)*ZoomScale);
-			int nr;
-			//			printf("doc changed : ImgRGGB : %dx%d - viewSize : %ldx%ld - ZoomScale = %d\n",
-			//			ImgRGB.width(), ImgRGB.height(),
-			//				viewSize.width, viewSize.height,
-			//
-			//				ZoomScale);
-
-			for(r = 0, nr=0; r<minheight; r+=ZoomScale, nr++)
-			{
-				int pos = r * vwidth ;
-				int posi = ((nr+origy)*iwidth + origx);
-				int kmax = min(ZoomScale, minheight - r);
-				int nc=0;
-				for(c=0; c<minwidth; c+=ZoomScale)
-				{
-					unsigned char pix = orig[posi];
-					int lmax = min(ZoomScale, minwidth  - c);
-					for(int k=0; k<kmax;k++) {
-						int dk = k * vwidth;
-						for(int l=0; l<lmax;l++)
-						{
-							int pos4 = (pos + dk + l);
-							outGray[pos4] = pix;
-						}
-					}
-					nc++;
-					posi ++;
-					pos  += ZoomScale;
-				}
-			}
-		}
-		else // zoomscale <= 0 : 0 = 1/2 , -1 = 1/3
-		{
-			int sample = 2-ZoomScale;
-
-			unsigned char * orig = (unsigned char *)originalImage;
-			int origx = xZoomOrigine;
-			int origy = yZoomOrigine;
-			int vwidth  = (int)viewSize.width;
-			int vheight = (int)viewSize.height;
-			int iwidth  = (int)imageSize.width;
-			int minwidth = min(vwidth, iwidth/sample);
-			int minheight = min(vheight, (int)imageSize.height/sample);
-
-			int nr = 0;
-
-			for(int r=0; nr<minheight; r+=sample, nr++)
-			{
-				int pos = nr * vwidth ;
-				int posi = ((r+origy)*iwidth + origx);
-				int nc=0;
-				for(int c=0; nc<minwidth; c+=sample, nc++) {
-					unsigned char pix = orig[posi];
-					// under sample
-					outGray[pos] = pix;
-					pos ++;
-					posi+=sample;
-				}
-			}
-		}
-	} // end grayscaled
-
-#endif // Old version of zooming
-#ifdef DEBUG_ZOOMING
-	fprintf(stderr, "slotUpdateView : ViewWidget->update();\n");
-#endif
+*/
 	if(!ViewWidget) { return; }
+	// update fake colors mode
+	ViewWidget->setColorMode(m_colorMode);
 
 	if(ToolMode == MODE_ADD_RECT && selectPressed)
 	{
@@ -985,9 +774,10 @@ void WorkshopImageTool::slotUpdateView()
 					   QColor(0,255,0));
 	}
 
-
 	ViewWidget->setZoomParams(xZoomOrigine, yZoomOrigine, ZoomScale);
+
 	ViewWidget->update();
+
 #ifdef DEBUG_ZOOMING
 	fprintf(stderr, "\tslotUpdateView : done with ViewWidget->update();\n");
 #endif
