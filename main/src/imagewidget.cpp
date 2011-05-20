@@ -77,7 +77,7 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 {
 	mZoomFit = true; // fit to size by default
 	mZoomFitFactor = -1.; // don't know yet the zoom factor
-
+	xMouseMoveStart = -1;
 	xOrigine = yOrigine = 0;
 
 	dImage=NULL;
@@ -150,30 +150,99 @@ void ImageWidget::setColorMode(int mode) {
 	update();
 }
 
+void ImageWidget::mousePressEvent(QMouseEvent *e) {
+	emit mousePressed(e);
+	if(!mZoomFit) return;
+
+	xMouseMoveStart = e->pos().x();
+	yMouseMoveStart = e->pos().y();
+	xOriginMoveStart = xOrigine;
+	yOriginMoveStart = yOrigine;
+}
+
+void ImageWidget::mouseReleaseEvent(QMouseEvent *e){
+	emit mouseReleased(e);
+	if(!mZoomFit) return;
+	xMouseMoveStart = -1;
+}
+
+void ImageWidget::mouseMoveEvent(QMouseEvent *e){
+	emit mouseMoved(e);
+	if(!mZoomFit) { return; }
+
+	if(xMouseMoveStart<0) { return; } // not clicked
+
+	// dx,dy is the move in pixel on display
+	int dx = e->pos().x() - xMouseMoveStart ;
+	int dy = e->pos().y() - yMouseMoveStart ;
+	xOrigine = xOriginMoveStart - dx / mZoomFitFactor;
+	yOrigine = yOriginMoveStart - dy / mZoomFitFactor;
+	clipSmartZooming();
+	update();
+}
+void ImageWidget::clipSmartZooming()
+{
+	if(!dImage) return;
+
+	int width = size().width() / mZoomFitFactor;
+	int height = size().height() / mZoomFitFactor;
+	if(xOrigine + width > dImage->width()) {  xOrigine = dImage->width() - width; }
+	if(yOrigine + height > dImage->height()) {  yOrigine = dImage->height() - height; }
+
+	// do xO, yO at end to align on left and top
+	if(xOrigine < 0) { xOrigine = 0; }
+	if(yOrigine < 0) { yOrigine = 0; }
+}
 
 void ImageWidget::wheelEvent ( QWheelEvent * e )
 {
 	if(!e) return;
+	if(!dImage) return;
 	if(!mZoomFit) return;
 
+	if(mZoomFitFactor<0)
+	{
+		update();
+	}
 	float curZoom = mZoomFitFactor;
 	int numDegrees = e->delta() / 8;
 	int numSteps = numDegrees / 15;
 
-	mZoomFitFactor += numSteps;
-
-	int x = e->pos().x(), y =  e->pos().y();
-	int xZoomCenter = xOrigine + x * curZoom;
-	int yZoomCenter = yOrigine + y * curZoom;
-
 	int disp_w =  size().width();
 	int disp_h =  size().height();
+	float zoommin = std::min( (float)disp_w / (float)dImage->width(),
+							  (float)disp_h / (float)dImage->height() );
+
+
+
+	if(numSteps > 0)
+		mZoomFitFactor *= 1.2;
+	else
+		mZoomFitFactor *= 0.8;
+	if(mZoomFitFactor < zoommin) {
+		// recompute minimal zoom
+		xOrigine = yOrigine = 0;
+		mZoomFitFactor = -1.f;
+		update();
+		return ;
+	}
+	int x = e->pos().x(), y =  e->pos().y();
+	int xZoomCenter = xOrigine + x / curZoom;
+	int yZoomCenter = yOrigine + y / curZoom;
+
+	fprintf(stderr, "%s:%d : orig=%d,%d / %dx%d x,y=%d,%d zoom=%g => new=%g"
+			" => ZoomCenter=%d,%d disp=%dx%d => xOrig=%dx%d\n", __func__, __LINE__,
+			xOrigine, yOrigine, dImage->width(), dImage->height(),
+			x,y, curZoom, mZoomFitFactor,
+			xZoomCenter, yZoomCenter,
+			disp_w, disp_h,
+			xZoomCenter - disp_w*0.5f/mZoomFitFactor,
+			yZoomCenter - disp_h*0.5f/mZoomFitFactor
+			);
+
 	xOrigine = xZoomCenter - disp_w*0.5f/mZoomFitFactor;
 	yOrigine = yZoomCenter - disp_h*0.5f/mZoomFitFactor;
-
-//	fprintf(stderr, "%s:%d : x,y=%d,%d\n", __func__, __LINE__,
-
-//	        );
+	clipSmartZooming();
 	update();
 
 	emit signalWheelEvent( e );

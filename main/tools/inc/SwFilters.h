@@ -305,6 +305,9 @@ private:
 	void updateSelectedView();
 
 public slots:
+	/// Unload loaded plugins
+	void slotUnloadAll();
+
 	/// Delete all selected plugins (unload all plugin processus)
 	void slotDeleteAll();
 

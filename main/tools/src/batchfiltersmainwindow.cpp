@@ -35,6 +35,10 @@ BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
 	// dont' show warning on plugin crash
 	mFilterManager.enableWarning(false);
 	mFilterManager.hide();
+
+	mPreviewFilterManager.enableWarning(false);
+	mPreviewFilterManager.hide();
+
 	ui->controlGroupBox->setEnabled(false);
 
 	mBatchOptions.reload_at_change = true;
@@ -81,6 +85,7 @@ void BatchFiltersMainWindow::on_loadButton_clicked()
 	if(fi.isFile() && fi.exists())
 	{
 		mLastPluginsDirName = fi.absoluteDir().absolutePath();
+
 		if(mFilterManager.loadFilterList(fi.absoluteFilePath().toUtf8().data()) < 0)
 		{
 			ui->sequenceLabel->setText(tr("Invalid file"));
@@ -89,6 +94,9 @@ void BatchFiltersMainWindow::on_loadButton_clicked()
 			ui->controlGroupBox->setEnabled(true);
 			ui->sequenceLabel->setText(fi.baseName());
 			mBatchOptions.sequence_name = fi.baseName();
+			mBatchThread.setOptions(mBatchOptions);
+
+			mPreviewFilterManager.loadFilterList(fi.absoluteFilePath().toUtf8().data());
 		}
 	}
 }
@@ -231,6 +239,9 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem* tre
 		t_batch_item * item = (*it);
 		if(item->treeItem == treeItem)
 		{
+			CvSize oldSize = cvSize(mLoadImage.width(), mLoadImage.height());
+			int oldChannels = mLoadImage.depth()/8;
+
 			if(mLoadImage.load(item->absoluteFilePath))
 			{
 				fprintf(stderr, "[Batch] %s:%d : loaded '%s'\n",
@@ -240,6 +251,90 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem* tre
 //				pixmap = pixmap.fromImage(loadImage.scaled(ui->imageLabel->size(),
 //														   Qt::KeepAspectRatio));
 				ui->imageLabel->setRefImage(&mLoadImage);
+				ui->imageLabel->switchToSmartZoomMode();// reset zooming
+
+				if(strlen(mPreviewFilterManager.getPluginSequenceFile())>0)
+				{
+					// TODO : process image
+					IplImage * loadedImage = NULL;
+					try {
+						loadedImage = cvLoadImage(item->absoluteFilePath.toUtf8().data());
+					} catch(cv::Exception e)
+					{
+						fprintf(stderr, "BatchThread::%s:%d : could not load '%s' as an image\n",
+								__func__, __LINE__,
+								item->absoluteFilePath.toAscii().data());
+						loadedImage = NULL;
+					}
+
+					if(loadedImage)
+					{
+						if(mBatchOptions.reload_at_change
+						   || oldSize.width != loadedImage->width
+						   || oldSize.height != loadedImage->height
+						   || oldChannels != loadedImage->nChannels
+						   )
+						{
+							fprintf(stderr, "Batch Preview::%s:%d : reload_at_change=%c "
+									"or size changed (%dx%dx%d => %dx%dx%d) "
+									"=> reload filter sequence\n",
+									__func__, __LINE__,
+									mBatchOptions.reload_at_change ? 'T':'F',
+									oldSize.width, oldSize.height, oldChannels,
+									loadedImage->width, loadedImage->height, loadedImage->nChannels
+									);
+							// unload previously loaded filters
+							mPreviewFilterManager.slotUnloadAll();
+							// reload same file
+							mPreviewFilterManager.loadFilterList(mPreviewFilterManager.getPluginSequenceFile());
+						}
+
+						swImageStruct image;
+						memset(&image, 0, sizeof(swImageStruct));
+						image.width = loadedImage->widthStep / loadedImage->nChannels;// beware of pitch
+						image.height = loadedImage->height;
+						image.depth = loadedImage->nChannels;
+						image.buffer_size = image.width * image.height * image.depth;
+
+						image.buffer = loadedImage->imageData; // Buffer
+						fprintf(stderr, "[Batch] %s:%d : process sequence '%s' on image '%s' (%dx%dx%d)\n",
+								__func__, __LINE__,
+								mPreviewFilterManager.getPluginSequenceFile(),
+								item->absoluteFilePath.toAscii().data(),
+								loadedImage->width, loadedImage->height, loadedImage->nChannels);
+						// Process this image with filters
+						mPreviewFilterManager.processImage(&image);
+
+						fprintf(stderr, "[Batch] %s:%d : processd sequence '%s' => display image '%s' (%dx%dx%d)\n",
+								__func__, __LINE__,
+								mPreviewFilterManager.getPluginSequenceFile(),
+								item->absoluteFilePath.toAscii().data(),
+								loadedImage->width, loadedImage->height, loadedImage->nChannels);
+
+						IplImage * imgRGBdisplay = loadedImage;
+						if(loadedImage->nChannels == 1) {
+							imgRGBdisplay = swCreateImage(cvGetSize(loadedImage), IPL_DEPTH_8U, 4);
+							cvCvtColor(loadedImage, imgRGBdisplay, CV_GRAY2RGBA);
+						}
+
+
+						// Copy into QImage
+						QImage qImage( (uchar*)imgRGBdisplay->imageData,
+									   imgRGBdisplay->width, imgRGBdisplay->height, imgRGBdisplay->widthStep,
+									   ( imgRGBdisplay->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
+										QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
+										)
+									  );
+						mLoadImage = qImage.copy();
+
+						if(loadedImage->nChannels == 1) {
+							swReleaseImage(&imgRGBdisplay );
+						}
+
+						swReleaseImage(&loadedImage);
+						ui->imageLabel->update();
+					}
+				}
 			}
 			else
 			{
@@ -438,10 +533,12 @@ void BatchFiltersThread::run()
 									);
 							if(encoder) { delete encoder; encoder = NULL; }
 							// unload previously loaded filters
-							mpFilterManager->slotDeleteAll();
+							mpFilterManager->slotUnloadAll();
 							// reload same file
 							mpFilterManager->loadFilterList(mpFilterManager->getPluginSequenceFile());
 						}
+
+
 
 						swImageStruct image;
 						memset(&image, 0, sizeof(swImageStruct));
@@ -608,3 +705,9 @@ void BatchFiltersThread::run()
 	mRunning = false;
 }
 
+
+void BatchFiltersMainWindow::on_reloadPluginCheckBox_stateChanged(int )
+{
+	mBatchOptions.reload_at_change = ui->reloadPluginCheckBox->isChecked();
+	mBatchThread.setOptions(mBatchOptions);
+}
