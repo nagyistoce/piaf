@@ -54,6 +54,14 @@ public:
 		update();
 	}
 
+	/** @brief Switch to smart zooming mode */
+	void switchToSmartZoomMode(bool on = true) {
+		mZoomFit = on;
+		mZoomFitFactor = -1.f;
+		xMouseMoveStart = -1;
+		xOrigine = yOrigine = 0;
+	}
+
 	void setZoomParams(int xO, int yO, int scale) {
 		xOrigine = xO;
 		yOrigine = yO;
@@ -106,15 +114,9 @@ signals:
 	void signalWheelEvent ( QWheelEvent * event );
 
 protected:
-	virtual void mousePressEvent(QMouseEvent *e) {
-		emit mousePressed(e);
-	};
-	virtual void mouseReleaseEvent(QMouseEvent *e){
-		emit mouseReleased(e);
-	};
-	virtual void mouseMoveEvent(QMouseEvent *e){
-		emit mouseMoved(e);
-	};
+	virtual void mousePressEvent(QMouseEvent *e);
+	virtual void mouseReleaseEvent(QMouseEvent *e);
+	virtual void mouseMoveEvent(QMouseEvent *e);
 	virtual void wheelEvent ( QWheelEvent * event );
 
 private:
@@ -126,6 +128,10 @@ private:
 	bool mZoomFit;			///< Fit zoom to size (not integer zoom factor). Default= true
 	float mZoomFitFactor;	///< Fit zoom to size (floating point zoom factor)
 	QImage m_displayImage;
+
+	int xMouseMoveStart, yMouseMoveStart; ///< Start position of mouse when moving
+	int xOriginMoveStart, yOriginMoveStart; ///< Start position of mouse when moving
+	void clipSmartZooming();
 
 	QRect m_overlayRect;
 	QColor m_overlayColor;

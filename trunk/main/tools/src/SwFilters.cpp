@@ -201,7 +201,7 @@ void SwFilterManager::init() {
 #define BUFFER_SIZE 4096
 	swAllocateFrame(&frame, BUFFER_SIZE);
 
-	strcpy(mPluginSequenceFile, "(none)");
+	mPluginSequenceFile[0] = '\0';
 
 	lockProcess = false;
 	mNoWarning = false;
@@ -484,7 +484,10 @@ SwFilterManager::~SwFilterManager()
 */
 int SwFilterManager::addFilter(swPluginView * newFilter, int id)
 {
-	strcpy(mPluginSequenceFile, "(custom)");
+	if(strlen(mPluginSequenceFile) == 0)
+	{
+		strcat(mPluginSequenceFile, "(custom)");
+	}
 
 	if(id==-1)
 	{
@@ -584,23 +587,35 @@ int SwFilterManager::removeFilter(int id)
 
 int SwFilterManager::removeFilter(swPluginView * pv)
 {
+
 	// unload child process
 	uint r = selectedFilterColl->contains(pv);
 	bool reset = false;
-	if(r && pv) {
+	if(r>0
+	   && pv) {
 		int id = r;
 		if(id==idEditPlugin || id==idViewPlugin || id==(int)selectedFilterColl->count()-1)
+		{
 			reset = true;
+		}
 
 		if(pv->filter) {
 			pv->filter->unloadChildProcess();
+		} else {
+			fprintf(stderr, "[SwFilterMngr]::%s:%d: filter=NULL for pv=%p\n", __func__, __LINE__,
+					pv);
 		}
 
 		fprintf(stderr, "%s:%d : removing...\n", __func__, __LINE__);
+		if(pv->selItem) {
+			selectedListView->removeItem(pv->selItem);
+			pv->selItem = NULL;
+		}
+
+		fprintf(stderr, "%s:%d : removing item...\n", __func__, __LINE__);
 		r = selectedFilterColl->remove(pv);
-		fprintf(stderr, "%s:%d : removing...\n", __func__, __LINE__);
-		selectedListView->removeItem(pv->selItem);
-		fprintf(stderr, "%s:%d : removing...\n", __func__, __LINE__);
+
+		fprintf(stderr, "%s:%d : removing pv...\n", __func__, __LINE__);
 
 		DELETE_FILTER(pv);
 		fprintf(stderr, "%s:%d : removed...\n", __func__, __LINE__);
@@ -774,23 +789,29 @@ void SwFilterManager::updateSelectedView()
 	int i = selectedFilterColl->count()-1;
 	if(!selectedFilterColl->isEmpty()) {
 		for(curF = selectedFilterColl->last(); curF; curF = selectedFilterColl->prev()) {
-			curF->selItem = new Q3ListViewItem(selectedListView,
+			if(curF->filter && curF->filter->funcList) {
+				curF->selItem = new Q3ListViewItem(selectedListView,
 					curF->filter->funcList[curF->indexFunction].name, "" );
-			if(curF->enabled)
-				curF->selItem->setPixmap(1, check);
-			else
-				curF->selItem->setPixmap(1, uncheck);
+				if(curF->enabled)
+					curF->selItem->setPixmap(1, check);
+				else
+					curF->selItem->setPixmap(1, uncheck);
 
-			if(i == idViewPlugin) {
-				curF->selItem->setPixmap(2, eye);
+				if(i == idViewPlugin) {
+					curF->selItem->setPixmap(2, eye);
+				}
+				else
+					if(i<idViewPlugin)
+						curF->selItem->setPixmap(2, eye_grey);
+
+				if(i == idEditPlugin)
+					selectedListView->setSelected(curF->selItem, true);
+				i--;
 			}
 			else
-				if(i<idViewPlugin)
-					curF->selItem->setPixmap(2, eye_grey);
-
-			if(i == idEditPlugin)
-				selectedListView->setSelected(curF->selItem, true);
-			i--;
+			{
+				fprintf(stderr, "[SwFilters] %s:%d : invalid function in filter\n", __func__, __LINE__);
+			}
 		}
 	}
 
@@ -847,16 +868,49 @@ void SwFilterManager::slotAdd()
 	emit selectedFilterChanged();
 }
 
-void SwFilterManager::slotDelete()
+void SwFilterManager::slotUnloadAll()
 {
-	// looking for filer plugin
+	// looking for filter plugin
 	swPluginView * pv;
 	bool found = true;
 	while(found) {
 		found = false;
 		if(!selectedFilterColl->isEmpty())
 		{
-			for(pv=selectedFilterColl->first(); pv; pv=selectedFilterColl->next())
+			for(pv=selectedFilterColl->first(); pv && !found; pv=selectedFilterColl->next())
+			{
+				if(  pv->selItem  )
+				{
+					// then add it to selectedListView
+#ifdef __SWPLUGIN_MANAGER__
+					fprintf(stderr, "Delete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
+#endif
+					// wait for process flag to go down
+					while(lockProcess) {
+						usleep(10000);
+					}
+
+					removeFilter(pv);
+					found = true;
+				}
+			}
+		}
+	}
+	updateSelectedView();
+	emit selectedFilterChanged();
+
+}
+
+void SwFilterManager::slotDelete()
+{
+	// looking for filter plugin
+	swPluginView * pv;
+	bool found = true;
+	while(found) {
+		found = false;
+		if(!selectedFilterColl->isEmpty())
+		{
+			for(pv=selectedFilterColl->first(); pv && !found; pv=selectedFilterColl->next())
 			{
 				if(  selectedListView->isSelected(pv->selItem) )
 				{
@@ -865,44 +919,50 @@ void SwFilterManager::slotDelete()
 					fprintf(stderr, "Delete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
 #endif
 					// wait for process flag to go down
-					while(lockProcess)
-						usleep(100000);
+					while(lockProcess) {
+						usleep(10000);
+					}
+
 					removeFilter(pv);
 					found = true;
-
 				}
 			}
 		}
 	}
 	updateSelectedView();
-	printf("DELETE!!!\n");
 	emit selectedFilterChanged();
 }
 
 void SwFilterManager::slotDeleteAll()
 {
+	fprintf(stderr, "[FilteRManager]::%s:%d : deleting all plugins...\n", __func__, __LINE__);
+
 	bool found = true;
 	while(found) {
 		found = false;
 		if(!selectedFilterColl->isEmpty())
 		{
 			swPluginView * pv;
-			for(pv = selectedFilterColl->first(); pv; pv=selectedFilterColl->next())
+			for(pv = selectedFilterColl->first();
+				pv && !found; // break loop at every removal
+				pv=selectedFilterColl->next())
 			{
 #ifdef __SWPLUGIN_MANAGER__
 				fprintf(stderr, "Delete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
 #endif
 				// wait for process flag to go down
-				while(lockProcess)
-					usleep(100000);
+				while(lockProcess) {
+					usleep(10000);
+				}
+
 				removeFilter(pv);
 				found = true;
-
 			}
 		}
 	}
-	updateSelectedView();
 
+	// then update display
+	updateSelectedView();
 }
 /*
 	move ONE (the first) item up for one step
@@ -1876,9 +1936,9 @@ SwFilter::~SwFilter()
 }
 
 int SwFilter::destroy() {
-	fprintf(stderr, "DESTROY SwFilter '%s'...\n", exec_name);
+	fprintf(stderr, "[SwFilter]::%s:%d : DESTROYing SwFilter %p='%s'...\n",
+			__func__, __LINE__, this, exec_name);
 
-	swFreeFrame(&frame);
 
 	if(!exec_name)
 		return 0;
@@ -1889,14 +1949,13 @@ int SwFilter::destroy() {
 		unloadChildProcess();
 	}
 
-	if(buffer)
-		delete [] buffer; buffer = NULL;
-	if(exec_name)
-		delete [] exec_name; exec_name = NULL;
-	if(category)
-		delete [] category; category = NULL;
-	if(subcategory)
-		delete [] subcategory;subcategory = NULL;
+	swFreeFrame(&frame);
+
+
+	if(buffer) { delete [] buffer; buffer = NULL; }
+	if(exec_name) {	delete [] exec_name; exec_name = NULL; }
+	if(category) { delete [] category; category = NULL; }
+	if(subcategory) { delete [] subcategory;subcategory = NULL; }
 
 	if(nb_func) {
 		for(int i = 0; i < nb_func; i++)
@@ -1904,19 +1963,29 @@ int SwFilter::destroy() {
 			// destroy it
 			if( funcList[i].nb_params && funcList[i].param_list ) {
 				for(int j=0; j< funcList[i].nb_params; j++) {
-					if(funcList[i].param_list[j].name)
+					if(funcList[i].param_list[j].name) {
 						delete [] funcList[i].param_list[j].name;
+						funcList[i].param_list[j].name = NULL;
+					}
 				}
+
 				delete [] funcList[i].param_list;
+				funcList[i].param_list = NULL;
 			}
-			if( funcList[i].name)
+
+			if( funcList[i].name) {
 				delete [] funcList[i].name;
+				funcList[i].name = NULL;
+			}
 		}
 
-		if( funcList )
+		if( funcList ) {
 			delete [] funcList;
-		funcList = NULL;
+			funcList = NULL;
+		}
 	}
+
+	fprintf(stderr, "[SwFilter]::%s:%d : DESTROYed SwFilter %p.\n", __func__, __LINE__, this);
 
 	return 1;
 }
