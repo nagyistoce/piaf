@@ -120,6 +120,8 @@ void ImageWidget::setZoomParams(int xO, int yO, int scale) {
 //		mZoomFit = false;
 }
 
+
+
 void ImageWidget::setColorMode(int mode) {
 	if(mode <= COLORMODE_MAX )
 		m_colorMode = mode;
@@ -203,6 +205,9 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *e){
 	clipSmartZooming();
 	update();
 }
+
+
+
 void ImageWidget::clipSmartZooming()
 {
 	if(!dImage) return;
@@ -215,6 +220,53 @@ void ImageWidget::clipSmartZooming()
 	// do xO, yO at end to align on left and top
 	if(xOrigine < 0) { xOrigine = 0; }
 	if(yOrigine < 0) { yOrigine = 0; }
+}
+
+QPoint ImageWidget::displayToOriginal(int x, int y)
+{
+	float curZoom = mZoomFitFactor;
+	int xZoomCenter = xOrigine + x / curZoom;
+	int yZoomCenter = yOrigine + y / curZoom;
+	return QPoint(xZoomCenter, yZoomCenter);
+}
+
+/* Change zoom centered to a point with a zoom increment */
+void ImageWidget::zoomOn(int xCenterOnDisp, int yCenterOnDisp, float zoominc)
+{
+	float curZoom = mZoomFitFactor;
+	mZoomFitFactor += zoominc;
+
+
+	int disp_w =  size().width();
+	int disp_h =  size().height();
+	float zoommin = std::min( (float)disp_w / (float)dImage->width(),
+							  (float)disp_h / (float)dImage->height() );
+	if(mZoomFitFactor < zoommin) {
+		// recompute minimal zoom
+		xOrigine = yOrigine = 0;
+		mZoomFitFactor = -1.f;
+		update();
+		return ;
+	}
+
+	int xZoomCenter = xOrigine + xCenterOnDisp / curZoom;
+	int yZoomCenter = yOrigine + yCenterOnDisp / curZoom;
+
+//	fprintf(stderr, "%s:%d : orig=%d,%d / %dx%d x,y=%d,%d zoom=%g => new=%g"
+//			" => ZoomCenter=%d,%d disp=%dx%d => xOrig=%dx%d\n", __func__, __LINE__,
+//			xOrigine, yOrigine, dImage->width(), dImage->height(),
+//			x,y, curZoom, mZoomFitFactor,
+//			xZoomCenter, yZoomCenter,
+//			disp_w, disp_h,
+//			xZoomCenter - disp_w*0.5f/mZoomFitFactor,
+//			yZoomCenter - disp_h*0.5f/mZoomFitFactor
+//			);
+
+	xOrigine = xZoomCenter - disp_w*0.5f/mZoomFitFactor;
+	yOrigine = yZoomCenter - disp_h*0.5f/mZoomFitFactor;
+
+	clipSmartZooming();
+	update();
 }
 
 void ImageWidget::wheelEvent ( QWheelEvent * e )
@@ -253,15 +305,15 @@ void ImageWidget::wheelEvent ( QWheelEvent * e )
 	int xZoomCenter = xOrigine + x / curZoom;
 	int yZoomCenter = yOrigine + y / curZoom;
 
-	fprintf(stderr, "%s:%d : orig=%d,%d / %dx%d x,y=%d,%d zoom=%g => new=%g"
-			" => ZoomCenter=%d,%d disp=%dx%d => xOrig=%dx%d\n", __func__, __LINE__,
-			xOrigine, yOrigine, dImage->width(), dImage->height(),
-			x,y, curZoom, mZoomFitFactor,
-			xZoomCenter, yZoomCenter,
-			disp_w, disp_h,
-			xZoomCenter - disp_w*0.5f/mZoomFitFactor,
-			yZoomCenter - disp_h*0.5f/mZoomFitFactor
-			);
+//	fprintf(stderr, "%s:%d : orig=%d,%d / %dx%d x,y=%d,%d zoom=%g => new=%g"
+//			" => ZoomCenter=%d,%d disp=%dx%d => xOrig=%gx%g\n", __func__, __LINE__,
+//			xOrigine, yOrigine, dImage->width(), dImage->height(),
+//			x,y, curZoom, mZoomFitFactor,
+//			xZoomCenter, yZoomCenter,
+//			disp_w, disp_h,
+//			xZoomCenter - disp_w*0.5f/mZoomFitFactor,
+//			yZoomCenter - disp_h*0.5f/mZoomFitFactor
+//			);
 
 	xOrigine = xZoomCenter - disp_w*0.5f/mZoomFitFactor;
 	yOrigine = yZoomCenter - disp_h*0.5f/mZoomFitFactor;
@@ -273,7 +325,6 @@ void ImageWidget::wheelEvent ( QWheelEvent * e )
 
 void ImageWidget::paintEvent( QPaintEvent * e)
 {
-	fprintf(stderr, "ImageWidget::paintEvent\n");
 	if(!dImage) {
 		return;
 	}
@@ -291,7 +342,6 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 
 	if(mZoomFit)
 	{
-		fprintf(stderr, "ImageWidget::%s:%d : FIT!\n", __func__, __LINE__);
 		int wdisp = size().width()-2;
 		int hdisp = size().height()-2;
 		if(mZoomFitFactor<0.) {

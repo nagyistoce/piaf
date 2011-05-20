@@ -774,7 +774,7 @@ void WorkshopImageTool::slotUpdateView()
 					   QColor(0,255,0));
 	}
 
-	ViewWidget->setZoomParams(xZoomOrigine, yZoomOrigine, ZoomScale);
+//	ViewWidget->setZoomParams(xZoomOrigine, yZoomOrigine, ZoomScale);
 
 	ViewWidget->update();
 
@@ -893,30 +893,25 @@ void WorkshopImageTool::slotZoomFit(){
 	yZoomOrigine = 0;
 	xZoomCenter = (int)viewSize.width / 2;
 	yZoomCenter = (int)viewSize.height / 2;
-	CalculateZoomWindow();
-	ImgRGB.fill(0);
-	slotUpdateView();
+
+	ViewWidget->setZoomParams(0,0,1);
 }
 
 void WorkshopImageTool::slotZoomInOnce(){
 	ZoomScale++;
 //	xZoomOrigine = 0;
 //	yZoomOrigine = 0;
-//	xZoomCenter = (int)imageSize.width / 2;
-//	yZoomCenter = (int)imageSize.height / 2;
-	CalculateZoomWindow();
-	ImgRGB.fill(0);
-	slotUpdateView();
+	int x = (int)viewSize.width / 2;
+	int y  = (int)viewSize.height / 2;
+	ViewWidget->zoomOn(x, y, +1);
 }
 void WorkshopImageTool::slotZoomOutOnce(){
 	ZoomScale--;
 //	xZoomOrigine = 0;
 //	yZoomOrigine = 0;
-//	xZoomCenter = (int)imageSize.width / 2;
-//	yZoomCenter = (int)imageSize.height / 2;
-	CalculateZoomWindow();
-	ImgRGB.fill(0);
-	slotUpdateView();
+	int x = (int)viewSize.width / 2;
+	int y  = (int)viewSize.height / 2;
+	ViewWidget->zoomOn(x, y, -1);
 }
 
 void WorkshopImageTool::slotMoveMode(){
@@ -1433,17 +1428,17 @@ void WorkshopImageTool::refreshDisplay()
 
 void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 {
+	if(!ViewWidget) return;
 	switch(ToolMode)
 	{
 	default:
 		break;
 	case MODE_PICKER: {
-		int pickx, picky;
-		WindowView2Absolute(point.x(), point.y(), &pickx, &picky);
-		// Pick color in ImgRGB
+		QPoint pickPt = ViewWidget->displayToOriginal(point.x(), point.y());
 
+		// Pick color in ImgRGB
 		QRgb pickRGB = ImgRGB.pixel(point);
-		emit signalColorPicker(QPoint(pickx, picky), pickRGB);
+		emit signalColorPicker(pickPt, pickRGB);
 
 		QString colorStr;
 		colorStr.sprintf("RGB=%d,%d,%d gray=%d",
@@ -1460,17 +1455,20 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 		}break;
 		/// Zoom in, so calculate zoom origine and width
 	case MODE_ZOOM_IN:
-		WindowView2Absolute(point.x(), point.y(), &xZoomCenter, &yZoomCenter);
-		ZoomScale++;
-		CalculateZoomWindow();
-		memset(ImgRGB.bits(), 0, viewPixel*(ImgRGB.depth()/8));
+//		WindowView2Absolute(point.x(), point.y(), &xZoomCenter, &yZoomCenter);
+//		ZoomScale++;
+//		CalculateZoomWindow();
+//		memset(ImgRGB.bits(), 0, viewPixel*(ImgRGB.depth()/8));
 
+		ViewWidget->zoomOn(point.x(), point.y(), +1);
 		break;
 	case MODE_ZOOM_OUT:
-		WindowView2Absolute(point.x(), point.y(), &xZoomCenter, &yZoomCenter);
-		ZoomScale--;
-		memset(ImgRGB.bits(), 0, viewPixel*(ImgRGB.depth()/8));
-		CalculateZoomWindow();
+//		WindowView2Absolute(point.x(), point.y(), &xZoomCenter, &yZoomCenter);
+//		ZoomScale--;
+//		memset(ImgRGB.bits(), 0, viewPixel*(ImgRGB.depth()/8));
+//		CalculateZoomWindow();
+
+		ViewWidget->zoomOn(point.x(), point.y(), -1);
 		break;
 
 	case MODE_MOVE:

@@ -54,8 +54,15 @@ public:
 		update();
 	}
 
+	/** @brief Return the position in original image for one point in display */
+	QPoint displayToOriginal(int x, int y);
+
 	/** @brief Switch to smart zooming mode */
 	void switchToSmartZoomMode(bool on = true);
+
+	/** @brief Change zoom centered to a point with a zoom increment */
+	void zoomOn(int xCenter, int yCenter, float zoominc);
+
 
 	/** @brief Set zoom scale and origin of zooming */
 	void setZoomParams(int xO, int yO, int scale);
