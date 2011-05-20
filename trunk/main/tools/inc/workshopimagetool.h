@@ -274,7 +274,7 @@ private:
 	int myStopX;
 	int myStopY;
 
-	unsigned char ToolMode;
+	unsigned char ToolMode;	/// Display tool mode
 	QRect * getMaskFromPos(int x, int y);
 
 	// MASK MANAGEMENT

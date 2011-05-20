@@ -31,13 +31,14 @@
 #include <Q3PtrList>
 
 
-#define MODE_SELECT		1
-#define MODE_ADD_RECT	2
-#define MODE_ADD_FREE	3
-#define MODE_ZOOM_IN	4
-#define MODE_ZOOM_OUT	5
-#define MODE_MOVE		6
-#define MODE_PICKER		7
+#define MODE_SMARTZOOM		0
+#define MODE_SELECT			1
+#define MODE_ADD_RECT		2
+#define MODE_ADD_FREE		3
+#define MODE_ZOOM_IN		4
+#define MODE_ZOOM_OUT		5
+#define MODE_MOVE			6
+#define MODE_PICKER			7
 
 
 // Sisell Workshop include files
