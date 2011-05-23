@@ -63,6 +63,10 @@ public:
 	/** @brief Change zoom centered to a point with a zoom increment */
 	void zoomOn(int xCenter, int yCenter, float zoominc);
 
+	/** @brief Change zoom centered to a point with a zoom increment */
+	void zoomOn(QPoint ptCenter, float zoominc) {
+		zoomOn(ptCenter.x(), ptCenter.y(), zoominc);
+	}
 
 	/** @brief Set zoom scale and origin of zooming */
 	void setZoomParams(int xO, int yO, int scale);
