@@ -153,17 +153,17 @@ int SwSignalHandler::removeChild(int pid) {
 /* default constructor
 */
 SwFilterManager::SwFilterManager(VideoCaptureDoc * vdoc,
-				QWidget* parent, const char *name, Qt::WFlags wflags):
-				 Q3MainWindow(parent, name, wflags)
+				QWidget* pparent, const char *name, Qt::WFlags wflags):
+				 Q3MainWindow(pparent, name, wflags)
 {
 	pWorkspace = NULL;
-	doc=vdoc;
+	doc = vdoc;
 	init();
 }
 
 
-SwFilterManager::SwFilterManager(QWidget* parent, const char *name, Qt::WFlags wflags):
-				 Q3MainWindow(parent, name, wflags)
+SwFilterManager::SwFilterManager(QWidget* pparent, const char *name, Qt::WFlags wflags):
+				 Q3MainWindow(pparent, name, wflags)
 {
 	pWorkspace = NULL;
 	doc = NULL;
