@@ -226,7 +226,6 @@ void BatchFiltersMainWindow::on_playPauseButton_toggled(bool checked)
 		// And refresh at last image
 		mDisplayTimer.setSingleShot(100);
 	}
-
 }
 
 void BatchFiltersMainWindow::on_filesTreeWidget_itemSelectionChanged()
