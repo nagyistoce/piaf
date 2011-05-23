@@ -655,10 +655,7 @@ void WorkshopImageTool::changeViewSize()
 	printf("WorkshopImageTool::changeViewSize : %lu x %lu -> %d bytes\n",
 		   viewSize.width, viewSize.height, viewPixel);
 #endif
-	memset(ImgRGB.bits(), 0, ImgRGB.width()*ImgRGB.height()*(ImgRGB.depth()/8));
 
-	ImgRGB.create(viewSize.width, viewSize.height, OrigImgRGB.depth());
-	memset(ImgRGB.bits(), 0, ImgRGB.width()*ImgRGB.height()*(ImgRGB.depth()/8));
 	if( OrigImgRGB.depth() == 8)
 	{
 		for(int i=0; i<256; i++) {
@@ -1420,6 +1417,7 @@ void WorkshopImageTool::CalculateZoomWindow()
 		   ZoomScale, xZoomOrigine, yZoomOrigine);
 #endif
 }
+
 void WorkshopImageTool::refreshDisplay()
 {
 	ViewWidget->update();

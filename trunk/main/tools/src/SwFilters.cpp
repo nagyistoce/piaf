@@ -159,6 +159,7 @@ SwFilterManager::SwFilterManager(VideoCaptureDoc * vdoc,
 	pWorkspace = NULL;
 	doc = vdoc;
 	init();
+	hide();
 }
 
 
@@ -170,13 +171,13 @@ SwFilterManager::SwFilterManager(QWidget* pparent, const char *name, Qt::WFlags 
 
   //  doc=vdoc;
 	init();
+	hide();
 }
 void SwFilter::setWorkspace(QWorkspace * wsp) {
 
 	if(wsp) {
 		//((QWorkspace *)wsp)->addWindow((QWidget *)this);
 	}
-
 
 }
 
@@ -186,11 +187,13 @@ void SwFilterManager::setWorkspace(QWorkspace * wsp) {
 
 	if(pWorkspace) {
 		((QWorkspace *)pWorkspace)->addWindow((QWidget *)this);
+
+		show();
 	}
+
 	QPixmap winIcon = QPixmap(BASE_DIRECTORY "images/pixmaps/IconFilters.png");
 	setIcon(winIcon);
 
-	show();
 }
 
 /*  Initialisation :

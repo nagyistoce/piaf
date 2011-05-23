@@ -24,8 +24,11 @@
 #define COMP_VIDEO_LABEL    "Videos"
 #define COMP_MEASURE_LABEL  "Measures"
 
+/// Relative image directory
 #define IMAGEDIR "images/pixmaps/"
 
+/// Absolute image directory
+#define FULLIMAGEDIR	BASE_DIRECTORY IMAGEDIR
 
 #ifdef WORKSHOP_CPP
 #define WKP_EXTERN
