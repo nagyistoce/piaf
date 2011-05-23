@@ -142,8 +142,9 @@ private:
 
 private slots:
 	/// Load a plugins list (plugin files + function + parameters)
+	void on_filesTreeWidget_itemSelectionChanged();
 	void on_reloadPluginCheckBox_stateChanged(int );
- void on_filesTreeWidget_itemChanged(QTreeWidgetItem* item, int column);
+	void on_filesTreeWidget_itemChanged(QTreeWidgetItem* item, int column);
 	void on_filesTreeWidget_itemActivated(QTreeWidgetItem* item, int column);
 	void on_filesTreeWidget_itemClicked(QTreeWidgetItem* item, int column);
 

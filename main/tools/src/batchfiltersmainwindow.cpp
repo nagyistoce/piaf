@@ -33,11 +33,11 @@ BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
     ui->setupUi(this);
 
 	// dont' show warning on plugin crash
-	mFilterManager.enableWarning(false);
 	mFilterManager.hide();
+	mFilterManager.enableWarning(false);
 
-	mPreviewFilterManager.enableWarning(false);
 	mPreviewFilterManager.hide();
+	mPreviewFilterManager.enableWarning(false);
 
 	ui->controlGroupBox->setEnabled(false);
 
@@ -227,6 +227,18 @@ void BatchFiltersMainWindow::on_playPauseButton_toggled(bool checked)
 		mDisplayTimer.setSingleShot(100);
 	}
 
+}
+
+void BatchFiltersMainWindow::on_filesTreeWidget_itemSelectionChanged()
+{
+	QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems ();
+	if(selectedItems.count() != 1) // more or less than one item selecte, do nothing
+	{
+		return;
+	}
+
+	// Display or process selected items
+	on_filesTreeWidget_itemClicked(selectedItems.at(0), 0);
 }
 
 void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem* treeItem, int column)
@@ -711,3 +723,4 @@ void BatchFiltersMainWindow::on_reloadPluginCheckBox_stateChanged(int )
 	mBatchOptions.reload_at_change = ui->reloadPluginCheckBox->isChecked();
 	mBatchThread.setOptions(mBatchOptions);
 }
+

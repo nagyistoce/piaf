@@ -295,7 +295,6 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 			fprintf(stderr, "!!!!!!!!!!!!! WorkshopImageTool::setWorkshopImage : FIRST CALL WINDOW %lu x %lu\n", viewSize.width, viewSize.height);
 
 		// Zoom initialisation
-
 		if(first) {
 			viewSize.width = imageSize.width;
 			while(viewSize.width % 4) { viewSize.width--; }
@@ -905,6 +904,7 @@ void WorkshopImageTool::slotZoomInOnce(){
 	int y  = (int)viewSize.height / 2;
 	ViewWidget->zoomOn(x, y, +1);
 }
+
 void WorkshopImageTool::slotZoomOutOnce(){
 	ZoomScale--;
 //	xZoomOrigine = 0;
@@ -1275,7 +1275,6 @@ void WorkshopImageTool::resizeEvent( QResizeEvent * e)
 	CalculateZoomWindow();
 
 	slotUpdateView();
-
 }
 
 
