@@ -200,9 +200,9 @@ class SwFilterManager : public Q3MainWindow
 
 public:
 	/** Constructor */
-	SwFilterManager(VideoCaptureDoc * vdoc, QWidget* parent, const char *name, Qt::WFlags  wflags);
+	SwFilterManager(VideoCaptureDoc * vdoc, QWidget* pparent = NULL, const char *name = NULL, Qt::WFlags  wflags = 0);
 	/** Constructor */
-	SwFilterManager(QWidget* parent = NULL, const char *name=NULL, Qt::WFlags wflags = 0);
+	SwFilterManager(QWidget* pparent = NULL, const char *name=NULL, Qt::WFlags wflags = 0);
 
 	/** Destructor */
 	~SwFilterManager();
