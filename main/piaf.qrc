@@ -26,5 +26,7 @@
         <file>images/16x16/system-run.png</file>
         <file>images/22x22/edit-undo.png</file>
         <file>images/16x16/waiting.png</file>
+        <file>images/16x16/configure.png</file>
+        <file>images/16x16/help-about.png</file>
     </qresource>
 </RCC>
