@@ -723,17 +723,27 @@ bool FileVideoAcquisition::GetNextFrame()
 unsigned char * FileVideoAcquisition::readImageBuffer(long * buffersize)
 {
 	if(!myAcqIsInitialised) {
-		fprintf(stderr, "[FVA]::readImageBuffer : myAcqIsInitialised is FALSE\n");
+		fprintf(stderr, "[FVA]::%s:%d: '%s': myAcqIsInitialised is FALSE\n",
+				__func__, __LINE__, m_videoFileName);
 		return NULL;
 	}
 
 	bool ret = GetNextFrame();
 	// read next frame until end of file
-	while( !ret ) {
-		if(endOfFile())
+	int fail_counter = 0;
+	while( !ret && fail_counter < 25) {
+		if(endOfFile()) {
+			fprintf(stderr, "[FVA]::%s:%d : '%s' GetNextFrame EOF !\n",
+					__func__, __LINE__, m_videoFileName);
 			return NULL;
-		fprintf(stderr, "[FVA]::readImageBuffer GetNextFrame failed\n");
+		}
+		fail_counter++;
+		fprintf(stderr, "[FVA]::%s:%d : GetNextFrame on '%s' failed (for %d times)\n",
+				__func__, __LINE__, m_videoFileName, fail_counter);
 		ret = GetNextFrame();
+	}
+	if(!ret) {
+		return NULL;
 	}
 
 	static unsigned short oldSig = 0xffff;
@@ -754,7 +764,7 @@ unsigned char * FileVideoAcquisition::readImageBuffer(long * buffersize)
 						fprintf(stderr, "[FVA]::%s:%d : endOfFile !\n", __func__, __LINE__);
 						return NULL;
 					}
-					fprintf(stderr, "[FVA]::readImageBuffer GetNextFrame failed\n");
+					fprintf(stderr, "[FVA]::%s:%d GetNextFrame failed\n", __func__, __LINE__);
 					ret = GetNextFrame();
 				}
 			}
@@ -895,6 +905,7 @@ int FileVideoAcquisition::readImageRaw(unsigned char * rawimage,
 		fprintf(stderr, "FileVideoAcquisition::readImageRaw: readImageBuffer returned NULL\n");
 		return -1;
 	}
+
 	if(rawimage == NULL)
 		return 0;
 fprintf(stderr, "FileVA::%s:%d : read image %ld\n", __func__, __LINE__, playFrame);
@@ -928,6 +939,7 @@ int FileVideoAcquisition::readImageRGB32(unsigned char * image,
 
 		return -1;
 	}
+
 	// read raw image
 	if((imageBrute = readImageBuffer(buffersize))==NULL){
 
@@ -1210,11 +1222,16 @@ int FileVideoAcquisition::readImageYNoAcq(unsigned char* image, long * buffersiz
 
 	unsigned char *imageBrute = m_pFrame->data[0];
 
-	if( imageBrute==NULL )
-		return -1;
+	if( imageBrute==NULL ) {
+		fprintf(stderr, "FVA::%s:%d : imageBrute is null !!\n", __func__, __LINE__);
 
-	if(image == NULL)
 		return -1;
+	}
+	if(image == NULL){
+		fprintf(stderr, "FVA::%s:%d : image is null !!\n", __func__, __LINE__);
+
+		return -1;
+	}
 
 	int pitch = m_pFrame->linesize[0];
 	if(m_pCodecCtx->width == pitch) {

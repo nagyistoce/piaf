@@ -159,6 +159,7 @@ SwFilterManager::SwFilterManager(VideoCaptureDoc * vdoc,
 	pWorkspace = NULL;
 	doc = vdoc;
 	init();
+
 	hide();
 }
 
@@ -173,6 +174,7 @@ SwFilterManager::SwFilterManager(QWidget* pparent, const char *name, Qt::WFlags 
 	init();
 	hide();
 }
+
 void SwFilter::setWorkspace(QWorkspace * wsp) {
 
 	if(wsp) {
@@ -2078,9 +2080,7 @@ int SwFilter::loadChildProcess()
 	} while(!found && pos>0);
 
 	fprintf(stderr, "SwFilter::%s:%d : file='%s' => path='%s'\n", __func__, __LINE__,
-			exec_name, path
-			);
-
+			exec_name, path );
 
 	// fork and
 	// Commmunication processing

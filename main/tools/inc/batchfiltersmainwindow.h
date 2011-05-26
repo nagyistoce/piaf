@@ -132,6 +132,7 @@ private:
 	QList<t_batch_item *> mFileList;
 
 	QImage mLoadImage; ///< Loaded image form list
+	IplImage * mDisplayIplImage; ///< IplImage for display conversion
 
 	/// Filter processing manager
 	SwFilterManager mFilterManager;
