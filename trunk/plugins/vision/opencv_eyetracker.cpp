@@ -272,6 +272,9 @@ void YCrCb()
 }
 
 
+IplImage * cvAccOne = NULL;
+IplImage * cvAcc32F = NULL; ///< accumulator
+
 
 void threshold()
 {
@@ -291,6 +294,16 @@ void threshold()
 	}
 
 	// threshold
+	if(cvIm1->nChannels >= 3)
+	{
+		cvCvtColor(cvImRGB, cvImHSV, CV_BGR2HSV);
+
+		// Separate planes
+		cvCvtPixToPlane(cvImHSV, planes1[0], planes1[1], planes1[2], NULL);
+
+		// use selected plane
+		cvCopy(planes1[HSVplane.curitem], cvImGray);
+	}
 	cvThreshold(planes1[0], cvImGray, threshold_min, threshold_max, 0);
 
 	// Get the max of x and y
@@ -331,29 +344,63 @@ void threshold()
 		}
 	}
 
-	finishImages();
 
 	static std::vector<CvPoint> eye_tracking;
 
+	CvPoint cur_point = cvPoint(cross_c, cross_r);
 	//
 	if(cross_c >= 0 && cross_r >=0)
 	{
 		//
 		cvCircle(cvIm2, cvPoint(cross_c, cross_r),
 				 20, CV_RGB(255, 255, 0), 2);
-		CvPoint cur_point = cvPoint(cross_c, cross_r);
-		eye_tracking.push_back(cur_point);
 
-		std::vector<CvPoint>::iterator it;
-		for(it = eye_tracking.begin(); it != eye_tracking.end(); ++it)
-		{
-			CvPoint next_point = *it;
-			cvLine(cvIm2, cur_point, next_point,
-				   CV_RGB(255, 255, 0), 1);
-			cur_point = next_point;
-		}
+		eye_tracking.push_back(cur_point);
+	}
+	if(!cvAccOne) {
+		cvAccOne = cvCreateImage(cvGetSize(cvIm2), IPL_DEPTH_8U, 1);
+	}
+	cvZero(cvAccOne);
+
+	if(!cvAcc32F) {
+		cvAcc32F = cvCreateImage(cvGetSize(cvIm2), IPL_DEPTH_32F, 1);
+		cvZero(cvAcc32F);
 	}
 
+	std::vector<CvPoint>::iterator it;
+	int iter = 0;
+	CvPoint prev_point;
+
+	for(it = eye_tracking.begin(); it != eye_tracking.end(); ++it, ++iter)
+	{
+		prev_point = cur_point;
+		CvPoint next_point = *it;
+		if(iter > 0) {
+			cvLine(cvIm2, cur_point, next_point,
+			   CV_RGB(255, 127, 0), 2);
+			cvLine(cvAccOne, cur_point, next_point,
+			   cvScalarAll(1), 1);
+		}
+		cur_point = next_point;
+	}
+
+	if(cross_c >= 0 && cross_r >=0)
+	{
+		cvLine(cvAccOne, cur_point, prev_point,
+		   cvScalarAll(1), 1);
+	}
+
+	static int acc_count = 0;
+	acc_count++;
+	cvAcc(cvAccOne, cvAcc32F);
+	cvConvertScale(cvAcc32F, cvImGray, 1., 0);
+	if(cross_c >= 0 && cross_r >=0)
+	{
+		cvLine(cvIm2, cur_point, prev_point,
+		   CV_RGB(255, 127, 0), 1);
+	}
+
+	finishImages();
 
 }
 
