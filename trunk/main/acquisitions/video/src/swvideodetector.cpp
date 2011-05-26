@@ -322,7 +322,7 @@ void swReleaseImageHeader(IplImage ** img) {
 	if(!(*img) ) return;
 #ifdef OPENCV2
 	try {
-		swReleaseImageHeader(img);
+		cvReleaseImageHeader(img);
 	} catch(cv::Exception e) {
 		fprintf(stderr, "[swvideodetector] %s:%d : error in openCV cvReleaseImage ", __func__, __LINE__);
 	}
