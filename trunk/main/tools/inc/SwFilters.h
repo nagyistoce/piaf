@@ -305,7 +305,7 @@ private:
 	void updateSelectedView();
 
 public slots:
-	/// Unload loaded plugins
+	/// Unload loaded plugins from background thread => will not update display
 	void slotUnloadAll();
 
 	/// Delete all selected plugins (unload all plugin processus)

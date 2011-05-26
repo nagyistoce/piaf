@@ -550,9 +550,11 @@ void SwFilterManager::slotFilterDied(int pid)
 			removeFilter(fil);
 
 			fil = selectedFilterColl->current();
-		} else
+		} else {
 			fil = selectedFilterColl->next();
+		}
 	}
+
 
 	emit selectedFilterChanged();
 }
@@ -561,37 +563,14 @@ int SwFilterManager::removeFilter(int id)
 {
 	// unload child process
 	swPluginView * pv = selectedFilterColl->at((uint)id);
-	bool r = false;
-	bool reset = false;
 
-	if(pv) {
-		if(id==idEditPlugin || id==idViewPlugin || id==(int)selectedFilterColl->count()-1)
-			reset = true;
-
-		pv->filter->unloadChildProcess();
-
-		r = selectedFilterColl->remove((uint)id);
-		DELETE_FILTER(pv)
-
-		if(reset){
-			if(!selectedFilterColl->isEmpty()) {
-				idEditPlugin = selectedFilterColl->count()-1;
-				idViewPlugin = idEditPlugin;
-			}
-			else {
-				idViewPlugin = -1;
-				idEditPlugin = -1;
-			}
-		}
-
-	}
-
-	return (r ? 1 : 0);
+	return removeFilter(pv);
 }
 
 
 int SwFilterManager::removeFilter(swPluginView * pv)
 {
+	if(!pv) { return -1; }
 
 	// unload child process
 	uint r = selectedFilterColl->contains(pv);
@@ -601,10 +580,12 @@ int SwFilterManager::removeFilter(swPluginView * pv)
 		int id = r;
 		if(id==idEditPlugin || id==idViewPlugin || id==(int)selectedFilterColl->count()-1)
 		{
+			fprintf(stderr, "[SwFilterMng]::%s:%d : will reset\n", __func__, __LINE__);
 			reset = true;
 		}
 
 		if(pv->filter) {
+			fprintf(stderr, "[SwFilterMng]::%s:%d : unloadChildProcess...\n", __func__, __LINE__);
 			pv->filter->unloadChildProcess();
 		} else {
 			fprintf(stderr, "[SwFilterMngr]::%s:%d: filter=NULL for pv=%p\n", __func__, __LINE__,
@@ -638,7 +619,8 @@ int SwFilterManager::removeFilter(swPluginView * pv)
 
 		return (int)r;
 	}
-	return 0;
+
+	return -1;
 }
 
 
@@ -771,8 +753,6 @@ int SwFilterManager::loadFilter(char *filename, char *bIconname)
 void SwFilterManager::updateSelectedView()
 {
 	// clear listview then add filters
-	swPluginView * curF;
-
 	selectedListView->clear();
 
 	// --- add new items ---
@@ -785,22 +765,45 @@ void SwFilterManager::updateSelectedView()
 	QPixmap check("check.png");
 	QPixmap uncheck("uncheck.png");
 
+
+	fprintf(stderr, "SwFilterManager:%s:%d : creating items for %d filters\n",
+			__func__, __LINE__,
+		  selectedFilterColl->count() ); fflush(stderr);
+
 	int count = (int)selectedFilterColl->count()-1;
-	if(idViewPlugin > count)
+	if(idViewPlugin > count) {
 		idViewPlugin = count;
-	if(idEditPlugin > count)
+	}
+	if(idEditPlugin > count) {
 		idEditPlugin = count;
+	}
+
+	fprintf(stderr, "SwFilterManager:%s:%d : creating items for %d filters\n",
+			__func__, __LINE__,
+		  selectedFilterColl->count() ); fflush(stderr);
 
 	int i = selectedFilterColl->count()-1;
 	if(!selectedFilterColl->isEmpty()) {
-		for(curF = selectedFilterColl->last(); curF; curF = selectedFilterColl->prev()) {
+		swPluginView * curF;
+		for(curF = selectedFilterColl->last();
+			curF; curF = selectedFilterColl->prev()) {
+
+			fprintf(stderr, "SwFilterManager:%s:%d : creating items for filter %p\n",
+					__func__, __LINE__,
+				   curF->filter); fflush(stderr);
+
 			if(curF->filter && curF->filter->funcList) {
+				fprintf(stderr, "\tSwFilterManager:%s:%d : creating items for filter : funcList=%p index=%d\n",
+						__func__, __LINE__,
+					   curF->filter->funcList, curF->indexFunction ); fflush(stderr);
+
 				curF->selItem = new Q3ListViewItem(selectedListView,
 					curF->filter->funcList[curF->indexFunction].name, "" );
-				if(curF->enabled)
+				if(curF->enabled) {
 					curF->selItem->setPixmap(1, check);
-				else
+				} else {
 					curF->selItem->setPixmap(1, uncheck);
+				}
 
 				if(i == idViewPlugin) {
 					curF->selItem->setPixmap(2, eye);
@@ -821,8 +824,14 @@ void SwFilterManager::updateSelectedView()
 	}
 
 	// create an item to visualize original item
+	fprintf(stderr, "SwFilterManager:%s:%d : creating root item after %d filters\n",
+			__func__, __LINE__,
+		  selectedFilterColl->count() ); fflush(stderr);
 	originalItem = new Q3ListViewItem( selectedListView, tr("Original") );
 
+	fprintf(stderr, "SwFilterManager:%s:%d : update display after %d filters\n",
+			__func__, __LINE__,
+		  selectedFilterColl->count() ); fflush(stderr);
 	update();
 }
 
@@ -875,35 +884,39 @@ void SwFilterManager::slotAdd()
 
 void SwFilterManager::slotUnloadAll()
 {
+	fprintf(stderr, "SwFilterManager::%s:%d: unloading all plugins...\n", __func__,__LINE__);
 	// looking for filter plugin
 	swPluginView * pv;
 	bool found = true;
 	while(found) {
 		found = false;
+
 		if(!selectedFilterColl->isEmpty())
 		{
-			for(pv=selectedFilterColl->first(); pv && !found; pv=selectedFilterColl->next())
+			for(pv=selectedFilterColl->first();
+				pv && !found;  // use !found to restart at every iteration
+				pv = selectedFilterColl->next())
 			{
 				if(  pv->selItem  )
 				{
 					// then add it to selectedListView
-#ifdef __SWPLUGIN_MANAGER__
-					fprintf(stderr, "Delete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
-#endif
+//#ifdef __SWPLUGIN_MANAGER__
+					fprintf(stderr, "\tDelete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
+//#endif
 					// wait for process flag to go down
 					while(lockProcess) {
 						usleep(10000);
 					}
 
 					removeFilter(pv);
+
 					found = true;
 				}
 			}
 		}
 	}
-	updateSelectedView();
-	emit selectedFilterChanged();
 
+	fprintf(stderr, "SwFilterManager::%s:%d: unload of all plugins DONE\n", __func__,__LINE__);
 }
 
 void SwFilterManager::slotDelete()
@@ -1503,6 +1516,7 @@ void SwFilterManager::applyEditParameters()
 		pEditPlugin->filter->sendRequest(txt);
 		pEditPlugin->filter->comLock = false;
 	}
+
 	emit selectedFilterChanged();
 }
 
