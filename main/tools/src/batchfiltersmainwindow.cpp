@@ -511,11 +511,13 @@ void BatchFiltersThread::startProcessing(bool on)
 
 void BatchFiltersThread::run()
 {
-
 	mRunning = true;
 	mRun = true;
+
 	while(mRun)
 	{
+		fprintf(stderr, "BatchThread::%s:%d : processing='%c'\n", __func__, __LINE__,
+				mProcessing ? 'T':'F');
 		bool procnow = mProcessing;
 		if(procnow) {
 			if(!mpFileList) {
@@ -540,6 +542,9 @@ void BatchFiltersThread::run()
 				}
 			}
 		}
+
+		fprintf(stderr, "BatchThread::%s:%d => procnow='%c'\n", __func__, __LINE__,
+				procnow ? 'T':'F');
 
 		if(!procnow)
 		{
@@ -802,8 +807,15 @@ void BatchFiltersThread::run()
 			if(encoder) { delete encoder; encoder = NULL; }
 
 			// Unload plugins
-			mpFilterManager->slotUnloadAll();
+			if(mpFilterManager) {
+				fprintf(stderr, "BatchFiltersThread::%s:%d: Unloading plugins on %p...\n", __func__, __LINE__,
+						mpFilterManager);
+				mpFilterManager->slotUnloadAll();
+				fprintf(stderr, "BatchFiltersThread::%s:%d: Unloaded plugins.\n", __func__, __LINE__); fflush(stderr);
+			}
 		}
+
+
 	}
 
 	fprintf(stderr, "BatchFiltersThread::%s:%d: Thread ended.\n", __func__, __LINE__);
