@@ -130,11 +130,12 @@ int SwSignalHandler::killChild() {
 
 int SwSignalHandler::removeChild(int pid) {
 
-	fprintf(stderr, "SwSignalHandler::removeChild(%d)...\n",
-		pid);
+	fprintf(stderr, "SwSignalHandler::%s:%d childpid=(%d)...\n",
+			__func__, __LINE__,	pid);
 	sigFilter * sigF = NULL;
-	if(filterList.isEmpty())
+	if(filterList.isEmpty()) {
 		return 0;
+	}
 
 	for(sigF = filterList.first(); sigF; sigF = filterList.next()) {
 		if(sigF->pid == pid) {
@@ -147,6 +148,7 @@ int SwSignalHandler::removeChild(int pid) {
 			return 1;
 		}
 	}
+
 	return 0;
 }
 
@@ -2212,13 +2214,15 @@ int SwFilter::unloadChildProcess()
 	statusOpen = false;
 	usleep(100000);
 //#ifdef __SWPLUGIN_MANAGER__
-	fprintf(stderr, "Killing child '%s'\n", exec_name);
+	fprintf(stderr, "SwFilter::%s:%d : Killing child '%s'\n",
+			__func__, __LINE__, exec_name);
 	fflush(stderr);
 //#endif
 
 
 	while(waitpid(childpid, NULL, WNOHANG) >0) {
-		fprintf(stderr, "waitpid !\n");
+		fprintf(stderr, "%s:%d : waitpid(%d, WNOHANG) !\n", __func__, __LINE__,
+				childpid);
 	}
 
 	childpid = 0;
