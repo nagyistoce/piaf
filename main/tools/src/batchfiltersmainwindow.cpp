@@ -132,7 +132,10 @@ void BatchFiltersMainWindow::on_addButton_clicked()
 			item->progress = 0.f;
 			item->absoluteFilePath = fi.absoluteFilePath();
 			item->is_movie = fi.isFile(); // FIXME
-			item->processing_state = UNPROCESSED;
+			item->processing_state =
+					item->former_state = UNPROCESSED;
+
+
 			QStringList strings; strings.append(fi.completeBaseName());
 			item->treeItem = new QTreeWidgetItem(ui->filesTreeWidget, strings);
 			item->treeItem->setIcon(1, QIcon(":/images/16x16/waiting.png"));
@@ -155,6 +158,7 @@ void BatchFiltersMainWindow::on_resetButton_clicked()
 		t_batch_item * item = (*it);
 		if(item->treeItem->isSelected()) {
 			item->processing_state = UNPROCESSED;
+
 			if(item->treeItem)
 			{
 				item->treeItem->setIcon(1, QIcon());
@@ -235,6 +239,8 @@ void BatchFiltersMainWindow::on_playPauseButton_toggled(bool checked)
 
 void BatchFiltersMainWindow::on_filesTreeWidget_itemSelectionChanged()
 {
+	fprintf(stderr, "[Batch] %s:%d \n",	__func__, __LINE__);
+
 	QList<QTreeWidgetItem *> selectedItems = ui->filesTreeWidget->selectedItems ();
 	if(selectedItems.count() != 1) // more or less than one item selecte, do nothing
 	{
@@ -247,6 +253,7 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemSelectionChanged()
 
 void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem* treeItem, int column)
 {
+	fprintf(stderr, "[Batch] %s:%d \n",	__func__, __LINE__);
 	QList<t_batch_item *>::iterator it;
 	int idx = 0;
 	for(it = mFileList.begin(); it != mFileList.end(); ++it)
@@ -362,12 +369,14 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem* tre
 
 void BatchFiltersMainWindow::on_filesTreeWidget_itemActivated(QTreeWidgetItem* item, int column)
 {
+	fprintf(stderr, "[Batch] %s:%d \n",	__func__, __LINE__);
 	on_filesTreeWidget_itemClicked(item, column);
 }
 
 void BatchFiltersMainWindow::on_filesTreeWidget_itemChanged(QTreeWidgetItem* item, int column)
 {
-	on_filesTreeWidget_itemClicked(item, column);
+	fprintf(stderr, "[Batch] %s:%d %p column=%d\n",	__func__, __LINE__, item,column );
+//	on_filesTreeWidget_itemClicked(item, column);
 }
 
 void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
@@ -379,27 +388,31 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 		// remove selected
 		t_batch_item * item = (*it);
 		processed += item->progress;
-		if(item->treeItem)
+		if(item->former_state != item->processing_state)
 		{
-			if(item->processing_state == UNPROCESSED)
+			item->former_state = item->processing_state;
+			if(item->treeItem)
 			{
-				item->treeItem->setIcon(1, QIcon(":/images/16x16/waiting.png"));
-				break;
-			}
-			else {
-				// update icon
-				switch(item->processing_state)
+				if(item->processing_state == UNPROCESSED)
 				{
-				default:
-				case PROCESSED:
-					item->treeItem->setIcon(1, QIcon(":/images/16x16/dialog-ok-apply.png"));
+					item->treeItem->setIcon(1, QIcon(":/images/16x16/waiting.png"));
 					break;
-				case ERROR:
-					item->treeItem->setIcon(1, QIcon(":/images/16x16/dialog-error.png"));
-					break;
-				case PROCESSING:
-					item->treeItem->setIcon(1, QIcon(":/images/16x16/system-run.png"));
-					break;
+				}
+				else {
+					// update icon
+					switch(item->processing_state)
+					{
+					default:
+					case PROCESSED:
+						item->treeItem->setIcon(1, QIcon(":/images/16x16/dialog-ok-apply.png"));
+						break;
+					case ERROR:
+						item->treeItem->setIcon(1, QIcon(":/images/16x16/dialog-error.png"));
+						break;
+					case PROCESSING:
+						item->treeItem->setIcon(1, QIcon(":/images/16x16/system-run.png"));
+						break;
+					}
 				}
 			}
 		}
@@ -540,6 +553,11 @@ void BatchFiltersThread::run()
 						at_least_one = true;
 					}
 				}
+
+				if(!at_least_one)
+				{
+					procnow = false;
+				}
 			}
 		}
 
@@ -548,8 +566,8 @@ void BatchFiltersThread::run()
 
 		if(!procnow)
 		{
-			sleep(1);
-			fprintf(stderr, "BatchFiltersThread::%s:%d: bip.\n", __func__, __LINE__);
+			::sleep(1);
+			fprintf(stderr, "BatchFiltersThread::%s:%d: wait for unlock\n", __func__, __LINE__);
 		}
 		else
 		{
@@ -796,7 +814,7 @@ void BatchFiltersThread::run()
 
 
 					// check if wee need to make a pause
-					while(mPause && mRun)
+					while(mPause && mRun && mProcessing)
 					{
 						fprintf(stderr, "Paused...");
 						usleep(500);

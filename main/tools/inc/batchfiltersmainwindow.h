@@ -44,6 +44,7 @@ typedef enum { UNPROCESSED, PROCESSING, PROCESSED, ERROR } enum_proc_state;
 typedef struct {
 	QString absoluteFilePath;			///< Absolute path to file
 	bool is_movie;						///< flag to tell if it's a movie. If false, it's an image
+	enum_proc_state former_state;		///< state of processing at previous check
 	enum_proc_state processing_state;	///< state of processing :
 
 	QTreeWidgetItem * treeItem;			///< Item in file list treewidget
