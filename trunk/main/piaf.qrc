@@ -25,5 +25,6 @@
         <file>images/32x32/media-playback-pause.png</file>
         <file>images/16x16/system-run.png</file>
         <file>images/22x22/edit-undo.png</file>
+        <file>images/16x16/waiting.png</file>
     </qresource>
 </RCC>
