@@ -547,10 +547,11 @@ void WorkshopApp::initActions()
 		videoAcquire->setIcon(pixIcon);}
 	connect(videoAcquire, SIGNAL(activated()), this, SLOT(slotOnNewVideoAcq()));
 
-	snapshot = new QAction(tr("Snapshot"), tr("S&napshot"), this, "snap action");
-	snapshot->setStatusTip(tr("Create an image from a video snapshot"));
-	snapshot->setWhatsThis(tr("Video snapshot\n\n.Create an image from a video snapshot"));
-	//connect(snapshot, SIGNAL(activated()), this, SLOT(slotSnapshot()));
+	snapshot = NULL;
+//	snapshot = new QAction(tr("Snapshot"), tr("S&napshot"), this, "snap action");
+//	snapshot->setStatusTip(tr("Create an image from a video snapshot"));
+//	snapshot->setWhatsThis(tr("Video snapshot\n\n.Create an image from a video snapshot"));
+//	connect(snapshot, SIGNAL(activated()), this, SLOT(slotSnapshot()));
 
 
 
@@ -631,12 +632,16 @@ void WorkshopApp::initActions()
 	configAction = new QAction(tr("Configuration"), tr("&Configuration"), this, "config");
 	configAction->setStatusTip(tr("Launch the configuration dialog"));
 	configAction->setWhatsThis(tr("Configuration dialog\nDefines working directories and options."));
+	if(pixIcon.load(":images/16x16/configure.png" )) {
+		configAction->setIcon(pixIcon);}
 	connect(configAction, SIGNAL(activated()), this, SLOT(slotConfigurator()));
 
 	// Plugin action
 	pluginAction = new QAction(tr("Plugins"), tr("&Plugins"), this, "plugin");
 	pluginAction->setStatusTip(tr("Launch the plugin list dialog"));
 	pluginAction->setWhatsThis(tr("Plugin list dialog\nEdition of plugin list."));
+	if(pixIcon.load(":images/pixmaps/filter.png" )) {
+		pluginAction->setIcon(pixIcon);}
 	connect(pluginAction, SIGNAL(activated()), this, SLOT(slotPluginDialog()));
 
 }
@@ -683,16 +688,18 @@ void WorkshopApp::initMenuBar()
 	viewStatusBar->addTo(pViewMenu);
 
 	// TOOLS menu
-	pImagesTools=new Q3PopupMenu();
-	snapshot->addTo(pImagesTools);
+	pImagesTools = NULL;
+//	pImagesTools=new Q3PopupMenu();
+//	snapshot->addTo(pImagesTools);
 	pMeasuresTools=new Q3PopupMenu();
 	measureGen->addTo(pMeasuresTools);
 	pVideosTools=new Q3PopupMenu();
 	videoAcquire->addTo(pVideosTools);
 
 	pToolsMenu = new Q3PopupMenu();
-
-	pToolsMenu->insertItem(tr("Images"), pImagesTools);
+	if(pImagesTools) {
+		pToolsMenu->insertItem(tr("Images"), pImagesTools);
+	}
 	if(g_has_measures) {
 		pToolsMenu->insertItem(tr("Measures"), pMeasuresTools);
 	}
