@@ -658,7 +658,8 @@ void BatchFiltersThread::run()
 																  IPL_DEPTH_8U, loadedQImage.depth()/8);
 							cvSetData(imgHeader, loadedQImage.bits(),
 									  loadedQImage.width()* loadedQImage.depth()/8);
-							//cvCopy(loadedImage, mDisplayImage);
+							cvCopy(imgHeader, mDisplayImage);
+							swReleaseImageHeader(&imgHeader);
 						}
 
 						// Set the state to processed
