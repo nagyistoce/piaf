@@ -1739,6 +1739,7 @@ void WorkshopApp::slotOnNewVideoAcq()
 			} else {
 				ptname = name;
 			}
+			fclose(fv);
 		} else {
 			sprintf(name, "Device # %d", dev);
 			sprintf(txt, "%d - %s", dev, ptname);

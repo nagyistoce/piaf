@@ -85,6 +85,9 @@ public:
 	char * comment;
 	/// returns number of functions
 	int nbfunctions();
+
+	/** @brief
+	  */
 	int processFunction(int indexFunction, void * data_in, void * data_out, int timeout_ms);
 private:
 	swFrame frame;
@@ -212,8 +215,11 @@ public:
 
 	/** @brief process an image and store result into input structure
 		@param image input image in swImageStruct structure
+
+		@return <0 if error, >=0 if success
 	*/
-	void processImage(swImageStruct * image);
+	int processImage(swImageStruct * image);
+
 	/** @brief Show filters manager window */
 	void showWindow();
 

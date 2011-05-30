@@ -391,11 +391,14 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 		if(item->former_state != item->processing_state)
 		{
 			item->former_state = item->processing_state;
+			QIcon pixIcon;
+			QString stateStr;
 			if(item->treeItem)
 			{
 				if(item->processing_state == UNPROCESSED)
 				{
-					item->treeItem->setIcon(1, QIcon(":/images/16x16/waiting.png"));
+					pixIcon = QIcon(":/images/16x16/waiting.png");
+					stateStr = tr("Unprocessed");
 					break;
 				}
 				else {
@@ -404,16 +407,29 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 					{
 					default:
 					case PROCESSED:
-						item->treeItem->setIcon(1, QIcon(":/images/16x16/dialog-ok-apply.png"));
+						pixIcon = QIcon(":/images/16x16/dialog-ok-apply.png");
+						stateStr = tr("Processed");
 						break;
 					case ERROR:
-						item->treeItem->setIcon(1, QIcon(":/images/16x16/dialog-error.png"));
+						pixIcon = QIcon(":/images/16x16/dialog-error.png");
+						stateStr = tr("Error");
 						break;
 					case PROCESSING:
-						item->treeItem->setIcon(1, QIcon(":/images/16x16/system-run.png"));
+						pixIcon = QIcon(":/images/16x16/system-run.png");
+						stateStr = tr("Processing");
 						break;
 					}
 				}
+
+				if(!pixIcon.isNull())
+				{
+					item->treeItem->setIcon(1, pixIcon);
+				}
+				else
+				{
+					item->treeItem->setText(1, stateStr);
+				}
+
 			}
 		}
 	}
@@ -435,12 +451,12 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 			if(mDisplayIplImage &&
 					(imgRGBdisplay->widthStep != mDisplayIplImage->widthStep
 					 || imgRGBdisplay->height != mDisplayIplImage->height) ) {
-				cvReleaseImage(&mDisplayIplImage);
+				swReleaseImage(&mDisplayIplImage);
 				mDisplayIplImage = NULL;
 			}
 
 			if(!mDisplayIplImage) {
-				mDisplayIplImage = cvCreateImage(cvGetSize(imgRGBdisplay), IPL_DEPTH_8U, 4);
+				mDisplayIplImage = swCreateImage(cvGetSize(imgRGBdisplay), IPL_DEPTH_8U, 4);
 			}
 
 			if(mDisplayIplImage->nChannels != imgRGBdisplay->nChannels) {
@@ -458,12 +474,13 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 			}
 
 			// Copy into QImage
-			QImage qImage( (uchar*)imgRGBdisplay->imageData,
-						   imgRGBdisplay->width, imgRGBdisplay->height, imgRGBdisplay->widthStep,
-						   ( imgRGBdisplay->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
+			QImage qImage( (uchar*)mDisplayIplImage->imageData,
+						   mDisplayIplImage->width, mDisplayIplImage->height, mDisplayIplImage->widthStep,
+						   ( mDisplayIplImage->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
 							QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
 							)
 						  );
+
 			mLoadImage = qImage.copy();
 			ui->imageLabel->setRefImage(&mLoadImage);
 			ui->imageLabel->update();
@@ -646,7 +663,11 @@ void BatchFiltersThread::run()
 						image.buffer = loadedQImage.bits(); // Buffer
 
 						// Process this image with filters
-						mpFilterManager->processImage(&image);
+						int retproc = mpFilterManager->processImage(&image);
+						if(retproc)
+						{
+						}
+
 
 						// Check if we need to record
 						if(mBatchOptions.record_output) {
@@ -740,7 +761,9 @@ void BatchFiltersThread::run()
 											);fflush(stderr);
 									resume = false;
 								} else {
-									mpFilterManager->processImage(&image);
+									int retproc = mpFilterManager->processImage(&image);
+
+
 
 									if(fva->getFileSize()>0) {
 										item->progress = (float)fva->getAbsolutePosition()/
