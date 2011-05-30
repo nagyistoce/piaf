@@ -22,4 +22,10 @@ echo
 echo "Building piaf & plugins..."
 ./build.sh && echo "done" || echo "Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
 
+if [ "$(whoami)" == "root" ] ; then
+        echo 'installing directory /usr/local/piaf...'
+
+	./build.sh install && echo "done" || echo "Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
+fi
+
 

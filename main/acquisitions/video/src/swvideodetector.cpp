@@ -44,27 +44,28 @@ CvSize LoadPPMHeader(char *name)
 	CvSize rSize;
 
 	if(!(f = fopen(name, "rb"))) {
-			fprintf(stderr, "Cannot open file '%s'\n", name);
-			rSize.width = rSize.height = 0;
-			return rSize;
+		fprintf(stderr, "Cannot open file '%s'\n", name);
+		rSize.width = rSize.height = 0;
+		return rSize;
 	}
 
 	// Read the first line, normaly p6 for color picture, or p5 for greyscale
 	char line[512];
 	do {
-			fgets(line, 512, f);
+		fgets(line, 512, f);
 	} while( line[0] == '#'); // comment line
+
 	if(strncmp(line, "P6", 2) ==0) {
-			size = 3;
-			printf("\tColor image\n");
+		size = 3;
+		printf("\tColor image\n");
 	}
 	if(strncmp(line, "P5", 2) ==0) {
-			size = 1;
-			printf("\tGreyscaled image\n");
+		size = 1;
+		printf("\tGreyscaled image\n");
 	}
 	// read size : width height
 	do {
-			fgets(line, 512, f);
+		fgets(line, 512, f);
 	} while( line[0] == '#'); // comment line
 
 	int width, height=0;
@@ -74,6 +75,7 @@ CvSize LoadPPMHeader(char *name)
 		rSize.height = height;
 	}
 
+	fclose(f);
 	return rSize;
 }
 
@@ -86,26 +88,26 @@ int LoadPPMFile(char *name, unsigned char * Image, int maxsize)
 	char line[512];
 
 	if(!(f = fopen(name, "rb"))) {
-			fprintf(stderr, "Cannot open file '%s'\n", name);
-			return 0;
+		fprintf(stderr, "Cannot open file '%s'\n", name);
+		return 0;
 	}
 
 	// Read the first line, normaly p6 for color picture, or p5 for greyscale
 	do {
-			fgets(line, 512, f);
+		fgets(line, 512, f);
 	} while( line[0] == '#'); // comment line
 	if(strncmp(line, "P6", 2) ==0) {
-			size = 3;
-			printf("\tColor image\n");
+		size = 3;
+		printf("\tColor image\n");
 	}
 	if(strncmp(line, "P5", 2) ==0) {
-			size = 1;
-			printf("\tGreyscaled image\n");
+		size = 1;
+		printf("\tGreyscaled image\n");
 	}
 
 	// read size : width height
 	do {
-			fgets(line, 512, f);
+		fgets(line, 512, f);
 	} while( line[0] == '#'); // comment line
 
 	sscanf(line, "%d%d", &width, &height);
@@ -277,12 +279,7 @@ IplImage * swCreateImageHeader(CvSize size, int depth, int channels) {
 	*/
 	IplImage * img = cvCreateImageHeader(size, depth, channels);
 	if(img) {
-		if(!(img->imageData)) {
-			fprintf(stderr, "[utils] %s:%d : ERROR : img->imageData=NULL while "
-				"creating IplImage header => %dx%d x depth=%d x channels=%d\n",
-				__func__, __LINE__,
-				img->width, img->height, img->depth, img->nChannels);
-		}
+
 		return img;
 	} else {
 		fprintf(stderr, "[utils] %s:%d : ERROR : creating IplImage => %dx%d x depth=%d x channels=%d\n",
@@ -301,8 +298,8 @@ IplImage * swCreateImageHeader(CvSize size, int depth, int channels) {
 
 /* Release an image and clear pointer */
 void swReleaseImage(IplImage ** img) {
-	if(!img) return;
-	if(!(*img) ) return;
+	if(!img) { return; }
+	if(!(*img) ) { return; }
 
 #if defined(OPENCV2)
 	try {

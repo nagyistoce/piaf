@@ -69,7 +69,8 @@ SwPluginCore::SwPluginCore()
 // destructor
 SwPluginCore::~SwPluginCore()
 {
-	fprintf(stderr, "SwPluginCore::%s:%d : free buffer=%p\n", __func__, __LINE__, buffer);
+	fprintf(stderr, "SwPluginCore::%s:%d : exec_name='%s' free buffer=%p\n",
+			__func__, __LINE__, name, buffer);
 	if(buffer) {
 		delete [] buffer;
 		buffer = NULL;
@@ -79,37 +80,41 @@ SwPluginCore::~SwPluginCore()
 		for(int i=0; i<NbFunctions; i++) {
 			// delete descriptor
 			if(funcList[i].name) {
-				fprintf(stderr, "SwPluginCore::%s:%d : delete funcList[i].name=%p\n",
-						__func__, __LINE__, funcList[i].name);
+				fprintf(stderr, "SwPluginCore::%s:%d : '%s' : delete funcList[i].name=%p\n",
+						__func__, __LINE__, name, funcList[i].name);
 
 				delete [] funcList[i].name;
+				funcList[i].name = NULL;
 			}
+
 			if(funcList[i].param_list) {
 				for(int j=0; j<funcList[i].nb_params;j++) {
 					fprintf(stderr, "SwPluginCore::%s:%d : delete funcList[i].param_list[j].name=%p\n",
 							__func__, __LINE__, funcList[i].param_list[j].name);
 					if(funcList[i].param_list[j].name) {
 						delete [] funcList[i].param_list[j].name;
+						funcList[i].param_list[j].name = NULL;
 					}
 /*					if(funcList[i].param_list[j].value)
 						delete funcList[i].param_list[j].value;
 */				}
-				delete [] funcList[i].param_list;
 				fprintf(stderr, "SwPluginCore::%s:%d : delete funcList[i].param_list=%p\n",
 						__func__, __LINE__, funcList[i].param_list);
+				delete [] funcList[i].param_list;
 				funcList[i].param_list = NULL;
 			}
 		}
+
 		fprintf(stderr, "SwPluginCore::%s:%d : delete funcList=%p\n",
 				__func__, __LINE__, funcList);
 		delete [] funcList;
 		funcList = NULL;
+
 		NbFunctions = 0;
 	}
 
 	fprintf(stderr, "SwPluginCore::%s:%d : delete name=%p\n", __func__, __LINE__, name);
-	if(name)
-		delete [] name;
+	if(name) { delete [] name; }
 	fprintf(stderr, "SwPluginCore::%s:%d : delete category=%p\n", __func__, __LINE__, category);
 	if(category)
 		delete [] category;
@@ -726,19 +731,28 @@ void swPurgePipe(FILE *fR) {
 }
 
 
-int swReadFromPipe(unsigned char * buffer, u32 size, FILE * pipe, int timeout_ms)
+int swReadFromPipe(unsigned char * buffer, u32 size,
+				   FILE * pipe, int timeout_ms)
 {
+	if(!pipe) {
+		return 0;
+	}
 	int iter=0;
 	int itermax = timeout_ms * 1000/TIMEOUT_STEP;
 	u32 index = 0;
 	u32 result = 0;
-	while(iter < itermax && index<size) {
+	while(iter < itermax && index<size && pipe) {
 		iter++;
 
 		result = fread(buffer + index, sizeof(unsigned char), (size_t)(size-index),
 				 pipe);
-		if(!result)
+		if(!result) {
+			int errnum = errno;
+			fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d\tfread err=%d='%s'\n",
+					__func__, __LINE__,
+					errnum, strerror(errnum));
 			usleep(TIMEOUT_STEP);
+		}
 		else /*if(!ferror(pipe))*/ {
 #ifdef __SWPLUGIN_DEBUG__
 				fprintf(stderr, SWPLUGIN_SIDE_PRINT "\tread %lu/%d chars at index=%lu = 0x%02x\n", result, (size_t)(size-index), index, buffer[index]);
@@ -1779,8 +1793,9 @@ int swGetStringValueFromType(swType type, // type
 	case swStringList: {
 		swStringListStruct *s =(swStringListStruct *)value;
 		sprintf(txt, "%d|%d", s->nbitems, s->curitem);
-		for(int i=0; i< s->nbitems;i++)
+		for(int i=0; i< s->nbitems;i++) {
 			sprintf(txt, "%s|%s", txt, s->list[i]);
+		}
 		sprintf(txt, "%s", txt);
 		}
 		break;

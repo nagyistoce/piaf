@@ -7,6 +7,10 @@ SOURCES = tools/src/SwPluginCore.cpp
 INCLUDEPATH += tools/inc/ inc
 DEPENDPATH += tools/inc/ inc/
 
+OBJECTS_DIR = .obj-lib
+MOC_DIR = .moc-lib
+
+
 ##INSTALLATION
 target.path = /usr/local/lib/
 

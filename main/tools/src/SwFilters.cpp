@@ -1066,6 +1066,8 @@ void SwFilterManager::slotDown()
 
 void SwFilterManager::simpleClic(Q3ListViewItem * item)
 {
+	if(!item) { return; }
+
 	fprintf(stderr, "FilterManager::%s:%d : selected item : %p\n", __func__, __LINE__, item);
 	// look for selected item
 	if(selectedFilterColl->isEmpty()) return;
@@ -1784,7 +1786,7 @@ IMAGE PROCESSING  SECTION
 
 
 
-void SwFilterManager::processImage(swImageStruct * image)
+int SwFilterManager::processImage(swImageStruct * image)
 {
 
 	// send image to process
@@ -1799,12 +1801,15 @@ void SwFilterManager::processImage(swImageStruct * image)
 	}
 
 	if(selectedFilterColl->isEmpty()) {
-		return;
+		fprintf(stderr, "[SwFiltersManager]::%s:%d : empty filter list\n", __func__, __LINE__);
+		return -1;
 	}
-	// process each image
 
+	// process each image
 	int step = 0;
 	int ret = 1;
+
+	int global_return = 0;
 
 	if(!lockProcess) {
 		lockProcess = true;
@@ -1840,6 +1845,13 @@ void SwFilterManager::processImage(swImageStruct * image)
 							pv->mwPluginTime->setTimeUS( imTmp->deltaTus );
 						}
 					}
+					else
+					{	// Processing has one error
+						fprintf(stderr, "[SwFiltersManager]::%s:%d : filter '%s' failed \n",
+								__func__, __LINE__, pv->filter->exec_name
+								);
+						global_return --;
+					}
 				}
 			}
 
@@ -1855,6 +1867,7 @@ void SwFilterManager::processImage(swImageStruct * image)
 		}
 	}
 
+	return global_return;
 }
 
 
@@ -2024,8 +2037,10 @@ int SwFilter::forceCloseConnection() {
 
 	fprintf(stderr, "SwFilter::forceCloseConnection : closing read pipe to child %d...\n",childpid );
 	fflush(stderr);
-	//if(pipeR)
-	//	fclose(pipeR);
+	// CSE : 2011-05-30 : was commented
+	if(pipeR) {
+		fclose(pipeR);
+	}
 	pipeR = NULL;
 
 
@@ -2079,7 +2094,10 @@ int SwFilter::waitForAnswer(int timeout)
 */
 int SwFilter::loadChildProcess()
 {
-	if(!exec_name) return 0;
+	if(!exec_name) {
+		fprintf(stderr, "SwFilter::%s:%d : exec_name is null\n", __func__, __LINE__);
+		return 0;
+	}
 
 	// Go to this directory
 	char path[512]="";
@@ -2102,11 +2120,14 @@ int SwFilter::loadChildProcess()
 	// Commmunication processing
 	if( pipe( pipeOut ) == -1 || pipe( pipeIn ) == -1)
 	{
-		perror("Error in pipe()");
+		int errnum = errno;
+		fprintf(stderr, "SwFilter::%s:%d : Error in pipe() : err=%d='%s'\n",
+				__func__, __LINE__, errnum, strerror(errnum));
 	}
 	else
 	{
 		childpid = fork();
+
 		switch(childpid)
 		{
 		case -1: // error
@@ -2116,6 +2137,7 @@ int SwFilter::loadChildProcess()
 			printf("CHILD PROCESS =====> %s\n", exec_name);
 			// Child to Parent
 			close( pipeIn[0] );
+
 			if( dup2(pipeIn[1], STDOUT_FILENO) ==-1)
 			{
 				perror("Child C2P dup2() error");
@@ -2153,7 +2175,10 @@ int SwFilter::loadChildProcess()
 
 			if( pipeR == NULL)
 			{
-				perror("Parent C2P fdopen() error");
+				int errnum = errno;
+				fprintf(stderr, "SwFilter::%s:%d : ERROR: unable to open pipeR err=%d='%s'\n",
+						__func__, __LINE__, errnum, strerror(errnum));
+				return 0;
 			}
 
 			// Parent to Child
@@ -2164,7 +2189,10 @@ int SwFilter::loadChildProcess()
 			pipeW = fdopen( pipeOut[1], "w");
 			if( pipeW == NULL)
 			{
-				perror("Parent C2P fdopen() error");
+				int errnum = errno;
+
+				fprintf(stderr, "SwFilter::%s:%d : ERROR: unable to open pipeW err=%d='%s'\n",
+						__func__, __LINE__, errnum, strerror(errnum));
 				return 0;
 			}
 			statusOpen = true;
@@ -2205,11 +2233,15 @@ int SwFilter::unloadChildProcess()
 //#endif
 	if(pipeR) {
 		fclose(pipeR);
+		pipeR = NULL;
 	}
 
 	sendRequest(SWFRAME_QUIT);
-//	if(pipeW)
-//		fclose(pipeW);
+	if(pipeW) { // CSE : 2011-05-30 : was commented
+
+		fclose(pipeW);
+		pipeW = NULL;
+	}
 
 	statusOpen = false;
 	usleep(100000);

@@ -33,11 +33,19 @@ OpenCVEncoder::~OpenCVEncoder() {
 }
 
 int OpenCVEncoder::startEncoder(char *output_file) {
-
-	writer = cvCreateVideoWriter(output_file,
+#ifdef OPENCV_22
+	try {
+#endif
+		writer = cvCreateVideoWriter(output_file,
 								 CV_FOURCC('M','J','P','G'),
 								 m_fps,
-								 cvSize(m_width, m_height),3);
+								 cvSize(m_width, m_height), 3);
+#ifdef OPENCV_22
+	} catch(cv::Exception e)
+	{
+		writer = NULL;
+	}
+#endif
 	if(!writer) {
 		fprintf(stderr, "OpenCVEnc::%s:%d ERROR: cannot create encoder "
 				"with size %dx%d @ %d fps for MJPEG\n",
