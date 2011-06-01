@@ -510,8 +510,12 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 {
 	// read function number, data type, data buffer
 	int indexFunction = atoi(framebuffer);
-	if(indexFunction >= NbFunctions)
+	if(indexFunction >= NbFunctions) {
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> %s:%d : ERROR: Invalid function index # %d ...\n\n",
+				__func__, __LINE__,
+				indexFunction);
 		return 0;
+	}
 	#ifdef __SWPLUGIN_DEBUG__
 	fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> %s:%d : @@@@@@@@@@@@@@@@@ Processing function # %d ...\n\n",
 			__func__, __LINE__,

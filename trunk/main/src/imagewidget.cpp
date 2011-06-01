@@ -328,6 +328,7 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 	if(!dImage) {
 		return;
 	}
+
 	QRect cr;
 	if(!e) {
 		cr = rect();
@@ -348,7 +349,7 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 			mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
 									   (float)hdisp / (float)dImage->height() );
 
-			m_displayImage = dImage->scaled(size(), Qt::KeepAspectRatio);
+			m_displayImage = dImage->scaled(size(), Qt::KeepAspectRatio).copy(cr);
 		}
 		else {
 			QImage cropImage = dImage->copy(
@@ -364,7 +365,7 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 			}
 			else {
 				m_displayImage = cropImage.scaled( wdisp, hdisp,
-												  Qt::KeepAspectRatio );
+												  Qt::KeepAspectRatio ).copy(cr);
 			}
 		}
 		p.drawImage(0,0, m_displayImage);

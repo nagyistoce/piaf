@@ -22,7 +22,7 @@
 
 OpenCVEncoder::OpenCVEncoder(int imageWidth, int imageHeight, int frame_rate) {
 	writer = NULL;
-	imgHeader = NULL;
+	imgHeader = imgRgb24 = NULL;
 	m_width = imageWidth;
 	m_height = imageHeight;
 	m_fps = frame_rate;
@@ -55,7 +55,7 @@ int OpenCVEncoder::startEncoder(char *output_file) {
 	}
 	imgRgb24 = cvCreateImage(cvSize(m_width, m_height), IPL_DEPTH_8U, 3);
 
-	fprintf(stderr, "OpenCVEnc::%s:%d create encoder with size %dx%d @ %d fps\n",
+	fprintf(stderr, "OpenCVEnc::%s:%d created encoder with size %dx%d @ %d fps\n",
 			__func__, __LINE__,
 			m_width, m_height, m_fps);
 

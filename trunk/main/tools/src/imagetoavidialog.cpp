@@ -1,8 +1,27 @@
+/***************************************************************************
+	 imagetoavidialog.cpp  -  MJPEG encoder from list of still  images
+							 -------------------
+	begin                : Thu Sep 9 2010
+	copyright            : (C) 2010 by Christophe Seyve (CSE)
+	email                : cseyve@free.fr
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
 #include "imagetoavidialog.h"
 #include "ui_imagetoavidialog.h"
 #include <QFileDialog>
 #include "OpenCVEncoder.h"
 #include <QMessageBox>
+
+#define TMP_DIRECTORY	"/tmp/"
 
 ImageToAVIDialog::ImageToAVIDialog(QWidget *parent) :
 	QDialog(parent),
@@ -78,24 +97,46 @@ void ImageToAVIDialog::on_goButton_clicked()
 	QString errorStr;
 
 	int progress = 0, file_count = 0;
+	bool use_mencoder = false;
+
 	while(it != list.end()) {
 		QString fileName = (*it);
 		++it;
+		fprintf(stderr, "ImgToAVI::%s:%d : load file '%s'\n", __func__, __LINE__,
+				fileName.toAscii().data());
 
 		inputImage.load(fileName);
 		// if no encoder, open first image
 		if(!inputImage.isNull()) {
-			if(!encoder) {
+			if(!encoder && !use_mencoder) {
 			// read size
 				width = inputImage.width();
 				height = inputImage.height();
 				depth = inputImage.depth();
 
 				encoder = new OpenCVEncoder(width, height, ui->fpsSpinBox->value());
-				encoder->startEncoder(ui->destPathLineEdit->text().toUtf8().data());
+				int started = encoder->startEncoder(ui->destPathLineEdit->text().toUtf8().data());
+				if(!started)
+				{
+					int answer = QMessageBox::question(NULL, tr("Unsupported by OpenCV"),
+										  tr("The image size or MJPEG are not supported by OpenCV. "
+											 "This tool will try to use FFMPEG instead of OpenCV. "
+											 "Do you want to try FFMPEG or cancel conversion ?"),
+										  QMessageBox::Yes, QMessageBox::Abort);
+					if(answer == QMessageBox::Abort) {
+						return;
+					}
+
+					fprintf(stderr, "ImgToAVI::%s:%d  : use FFMPEG instead of OpenCV encoder.\n", __func__, __LINE__);
+					use_mencoder = true;
+
+					delete encoder;
+					encoder = NULL;
+				}
+
 			}
 
-			if(encoder) {
+			if(encoder) { // Use OpenCV
 				int ret_ok = 0;
 				if( width == inputImage.width()
 					&& height == inputImage.height()
@@ -124,12 +165,33 @@ void ImageToAVIDialog::on_goButton_clicked()
 					errorStr += fileName + tr("(could not encode:") + errFile + "\n";
 					error_count++;
 				}
+
+			} else if(use_mencoder) { // Use FFMPEG or Mencoder : create images
+				QString jpegPath;
+				jpegPath.sprintf("%simg%05d.jpg", TMP_DIRECTORY, file_count);
+				inputImage.save(jpegPath);
 			}
 		}
 
 		file_count++;
-		progress = (int)(100.f * (float)file_count / m_filesList.count());
+		progress = (int)((use_mencoder ? 50.f : 100.f) * (float)file_count / m_filesList.count());
 		ui->progressBar->setValue(progress);
+	}
+
+	if(use_mencoder)
+	{
+		// convert
+		char command[1024];
+		sprintf(command, "ffmpeg -i %s/img%%05d.jpg  -vcodec mjpeg -qscale 4 -r %d %s",
+				TMP_DIRECTORY,
+				ui->fpsSpinBox->value(),
+				ui->destPathLineEdit->text().toUtf8().data());
+		fprintf(stderr, "Using ffmpeg to encode : '%s' ...\n", command);
+		system(command);
+
+		sprintf(command, "rm -f %s/img*.jpg",
+				TMP_DIRECTORY);
+		system(command);
 	}
 
 	// Stop encoder
