@@ -11,6 +11,7 @@
 #define _FILE_VIDEOACQUISITION_
 
 #include "nolinux_videodev.h"
+#include "virtualdeviceacquisition.h"
 #include "workshopmovie.h"
 
 
@@ -82,7 +83,7 @@ public:
 	
 	int openDevice(const char * aDevice, tBoxSize newSize);
 	/// Gets definitive image size. You should do that to verify that your selected image size is supported by device.
-	tBoxSize getImageSize();
+	CvSize getImageSize();
 
 	/// change acquisition size
 	int changeAcqParams(tBoxSize newSize, int channel);
@@ -222,6 +223,9 @@ private:
 	AVFrame         *m_pFrameRGB;
 
 	bool m_isJpeg;
+
+	/// Real image size (because pCodecCtx may change to fit block size)
+	CvSize mImageSize;
 
 	// RAW Data buffer
  	unsigned char	*receptBuffer;

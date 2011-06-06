@@ -253,12 +253,14 @@ int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 	}
 
 	// Determine required buffer size and allocate buffer
-	int numBytes=avpicture_get_size(m_pCodecCtx->pix_fmt, m_pCodecCtx->width,
+	int numBytes = avpicture_get_size(m_pCodecCtx->pix_fmt, m_pCodecCtx->width,
 		m_pCodecCtx->height);
+	mImageSize = cvSize(m_pCodecCtx->width,
+						m_pCodecCtx->height);
 	receptBuffer = new uint8_t[numBytes];
 
-	fprintf(stderr,"FileVA::%s:%d\tSize is %d x %d @ %d fps\n", __func__, __LINE__,
-		m_pCodecCtx->width, m_pCodecCtx->height, (int)lfps);
+	fprintf(stderr,"FileVA::%s:%d\tSize is %d x %d @ %d fps => buffer [ %d ]\n", __func__, __LINE__,
+		mImageSize.width, mImageSize.height, (int)lfps, numBytes);
 
 	m_period_ms = 40; // 40 ms at 25 fps
 	m_fps = 25;
@@ -269,8 +271,8 @@ int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 
 	// Assign appropriate parts of buffer to image planes in pFrame
 	// rq. OLV : cette configuration doit remplacer les appels à calcBufferSize, display_frame, etc.
-	//avpicture_fill((AVPicture *)m_pFrame, receptBuffer, m_pCodecCtx->pix_fmt,
-	//    m_pCodecCtx->width, m_pCodecCtx->height);
+	//avpicture_fill((AVPicture *)m_pFrame, receptBuffer, mImageSize.pix_fmt,
+	//    mImageSize.width, mImageSize.height);
 	int numBytes_orig = avpicture_get_size(m_pCodecCtx->pix_fmt, m_pCodecCtx->width,
 		m_pCodecCtx->height);
 
@@ -286,12 +288,12 @@ int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 
 	// Determine required buffer size and allocate buffer
 	numBytes = avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width,
-		m_pCodecCtx->height);
-	/*fprintf(stderr, "FileVA::%s:%d : allocating %d x %d => m_inbuff [ %d ] in RGBA32....\n",
+								  m_pCodecCtx->height);
+	fprintf(stderr, "FileVA::%s:%d : allocating %d x %d => m_inbuff [ %d ] in RGBA32....\n",
 			__func__, __LINE__,
-			m_pCodecCtx->width,
-			m_pCodecCtx->height,
-			numBytes);*/
+			mImageSize.width,
+			mImageSize.height,
+			numBytes);
 
 	m_inbuff = new uint8_t [ numBytes ];
 	if(!m_inbuff) {
@@ -302,19 +304,20 @@ int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 	}
 	/*fprintf(stderr, "FileVA::%s:%d : avpicture_fill %d x %d m_pFrame=%p m_pFrameRGB=%p => m_inbuff [ %d ] in RGBA32....\n",
 			__func__, __LINE__,
-			m_pCodecCtx->width,
-			m_pCodecCtx->height,
+			mImageSize.width,
+			mImageSize.height,
 			m_pFrame,
 			m_pFrameRGB,
 			numBytes); fflush(stderr);*/
 
 	// Assign appropriate parts of buffer to image planes in pFrameRGB
 	avpicture_fill((AVPicture *)m_pFrameRGB, m_inbuff, PIX_FMT_RGBA32,
-		m_pCodecCtx->width, m_pCodecCtx->height);
+		mImageSize.width, mImageSize.height);
 	myAcqIsInitialised = true;
 	m_fileSize = url_fsize(URLPB(m_pFormatCtx->pb));
 
-	//fprintf(stderr, "FileVA::%s:%d : file size : %lu\n", __func__, __LINE__, m_fileSize);
+	fprintf(stderr, "FileVA::%s:%d : file size : %llu / img=%dx%d\n",
+			__func__, __LINE__, m_fileSize, mImageSize.width, mImageSize.height);
 
 	slotRewindMovie();
 	return 1;
@@ -327,6 +330,7 @@ int FileVideoAcquisition::VAcloseVD()
 	// Close the codec
 	if(m_pCodecCtx)
 	{
+		fprintf(stderr, "FileVA::%s:%d : closing context\n", __func__, __LINE__);
 		avcodec_close(m_pCodecCtx);
 		m_pCodecCtx = NULL;
 	}
@@ -350,29 +354,14 @@ bool FileVideoAcquisition::AcqIsInitialised()
 	return myAcqIsInitialised;
 }
 
-tBoxSize FileVideoAcquisition::getImageSize()
+CvSize FileVideoAcquisition::getImageSize()
 {
-	tBoxSize theSize;
-
-	theSize.x = 0;
-	theSize.y = 0;
-	if(m_pCodecCtx)
-	{
-		theSize.width = m_pCodecCtx->width;
-		theSize.height = m_pCodecCtx->height;
-	}
-	else
-	{
-		theSize.width = 0;
-		theSize.height = 0;
-	}
-
 #if 0
 	fprintf(stderr, "[FileVA]::getImageSize : %lu x %lu\n",
-		imageSize.width, imageSize.height);
+		mImageSize.width, mImageSize.height);
 #endif
 
-	return theSize;
+	return mImageSize;
 }
 
 int FileVideoAcquisition::setChannel(int ch)
@@ -557,7 +546,7 @@ bool FileVideoAcquisition::GetNextFrame()
 		while(bytesRemaining > 0)
 		{
 			// Decode the next chunk of data
-			bytesDecoded=avcodec_decode_video(m_pCodecCtx, m_pFrame,
+			bytesDecoded = avcodec_decode_video(m_pCodecCtx, m_pFrame,
 				&frameFinished, rawData, bytesRemaining);
 
 			// Was there an error?
@@ -643,9 +632,9 @@ bool FileVideoAcquisition::GetNextFrame()
 	while(counter<25)
 	{
 		// Read a frame/packet.
-		//fprintf(stderr, "FileVA::%s:%d m_pFormatCtx=%p m_pCodecCtx=%p %dx%d\n", __func__, __LINE__, m_pFormatCtx,
-		//	m_pCodecCtx, (int)m_pCodecCtx->width, (int)m_pCodecCtx->height
-		//	);
+//		fprintf(stderr, "FileVA::%s:%d m_pFormatCtx=%p m_pCodecCtx=%p %dx%d\n", __func__, __LINE__, m_pFormatCtx,
+//			m_pCodecCtx, (int)m_pCodecCtx->width, (int)m_pCodecCtx->height
+//			);
 
 		ret_val = av_read_frame(m_pFormatCtx, &packet);
 		if(endOfFile()) {
@@ -667,7 +656,6 @@ bool FileVideoAcquisition::GetNextFrame()
 				// Decode the packet
 				avcodec_decode_video(m_pCodecCtx, m_pFrame, &frameFinished,
 									 packet.data, packet.size);
-
 				/*
 				PRINT_FIXME
 				FILE * fpacket = FileOpen("/tmp/packet.jpg", "wb");
@@ -778,9 +766,9 @@ unsigned char * FileVideoAcquisition::readImageBuffer(long * buffersize)
 		fprintf(stderr, "FileVA::%s:%d : ret = %d\n", __func__, __LINE__, ret);
 		return NULL;
 	}
-	//*buffersize = m_pCodecCtx->width*m_pCodecCtx->height;
+	//*buffersize = mImageSize.width*mImageSize.height;
 	*buffersize = avpicture_get_size(m_pCodecCtx->pix_fmt,
-		m_pCodecCtx->width, m_pCodecCtx->height);
+									 mImageSize.width, mImageSize.height);
 
 	//fprintf(stderr, "FileVA::%s:%d : read image %d\n", __func__, __LINE__, playFrame);
 
@@ -801,11 +789,11 @@ unsigned char * FileVideoAcquisition::bufV() {
 }
 int FileVideoAcquisition::get_xsize() {
 	if(!m_pCodecCtx) return 0;
-	return m_pCodecCtx->width;
+	return mImageSize.width;
 }
 int FileVideoAcquisition::get_ysize() {
 	if(!m_pCodecCtx) return 0;
-	return m_pCodecCtx->height;
+	return mImageSize.height;
 }
 int FileVideoAcquisition::get_pitch() {
 	if(!m_pFrame) return 0;
@@ -831,8 +819,8 @@ void FileVideoAcquisition::fill_buffer()
 	unsigned char *buf = m_pFrame->data[0];
 	unsigned char *buf2 = m_pFrame->data[1];
 	unsigned char *buf3 = m_pFrame->data[2];
-	int xsize = m_pCodecCtx->width;
-	int ysize = m_pCodecCtx->height;
+	int xsize = mImageSize.width;
+	int ysize = mImageSize.height;
 	int pitch = m_pFrame->linesize[0];
 	int uW = m_pFrame->linesize[1];
 	int vW = m_pFrame->linesize[2];
@@ -842,30 +830,45 @@ void FileVideoAcquisition::fill_buffer()
 	unsigned char * image = receptBuffer;
 
 	unsigned char * yline = image;
-	unsigned char * uline = image + m_pCodecCtx->width*m_pCodecCtx->height;
-	unsigned char * vline = image + m_pCodecCtx->width*m_pCodecCtx->height*5/4;
-		  int width_div_2 = m_pCodecCtx->width/2;
+	unsigned char * uline = image + mImageSize.width*mImageSize.height;
+	int width_div_2 = mImageSize.width/2;
+	unsigned char * vline = uline + width_div_2*(mImageSize.height/2);
 
-	for(i=0;i<ysize;i++) {
+//	fprintf(stderr, "%s:%d : %dx%d => yline=%p uline=y+%d, vline=uline+%d=vline+%d\n",
+//			__func__, __LINE__,
+//			xsize, ysize,
+//			yline, (int)(uline-yline), (int)(vline-uline), (int)(vline-yline));
 
-		memcpy(yline, buf, xsize);
+	if(buf2 && buf3) {
+		for(i=0;i<ysize;i++) {
+			memcpy(yline, buf, xsize);
 
-		buf += pitch;
-		yline += m_pCodecCtx->width;
-		if(i%2==0 && buf2 && buf3 ) {
-			memcpy(uline, buf2, width_div_2);
-			uline += width_div_2;
-			buf2 += uW;
+			buf += pitch;
+			yline += mImageSize.width;
 
-			memcpy(vline, buf3, width_div_2);
-			vline += width_div_2;
-			buf3 += vW;
+			if(i%2==0) {
+				memcpy(uline, buf2, width_div_2);
+				uline += width_div_2;
+				buf2 += uW;
+
+				memcpy(vline, buf3, width_div_2);
+				vline += width_div_2;
+				buf3 += vW;
+			}
+		}
+	}else {
+		// y only
+		for(i=0;i<ysize;i++) {
+			memcpy(yline, buf, xsize);
+
+			buf += pitch;
+			yline += mImageSize.width;
 		}
 	}
 }
 
 int FileVideoAcquisition::readImageRaw(unsigned char ** rawimage,
-	unsigned char ** compbuffer , long * compsize)
+									   unsigned char ** compbuffer , long * compsize)
 {
 	int ret = readImageYUV(m_noPitchBuffer /* no buffer copy */, compsize);
 
@@ -911,7 +914,7 @@ int FileVideoAcquisition::readImageRaw(unsigned char * rawimage,
 fprintf(stderr, "FileVA::%s:%d : read image %ld\n", __func__, __LINE__, playFrame);
 	// no conversion, return raw image
 	AVPicture dummypic;
-	int imsize = avpicture_fill(&dummypic, NULL, m_pCodecCtx->pix_fmt, m_pCodecCtx->width, m_pCodecCtx->height);
+	int imsize = avpicture_fill(&dummypic, NULL, m_pCodecCtx->pix_fmt, mImageSize.width, mImageSize.height);
 
 	if(*compsize<imsize)
 		return -1;
@@ -935,7 +938,7 @@ int FileVideoAcquisition::readImageRGB32(unsigned char * image,
 	if(!myAcqIsInitialised)
 		return -1;
 
-	if( (*buffersize) < (long)avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height)) {
+	if( (*buffersize) < (long)avpicture_get_size(PIX_FMT_RGBA32, mImageSize.width, mImageSize.height)) {
 
 		return -1;
 	}
@@ -954,10 +957,10 @@ int FileVideoAcquisition::readImageRGB32(unsigned char * image,
 	// conversion to RGB32 coding
 /*	PRINT_FIXME
 	img_convert((AVPicture *)m_pFrameRGB, PIX_FMT_RGBA32, (AVPicture*)m_pFrame,
-				m_pCodecCtx->pix_fmt, m_pCodecCtx->width, m_pCodecCtx->height);
+				mImageSize.pix_fmt, mImageSize.width, mImageSize.height);
 	PRINT_FIXME
 
-	memcpy(image, m_inbuff, avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height));
+	memcpy(image, m_inbuff, avpicture_get_size(PIX_FMT_RGBA32, mImageSize.width, mImageSize.height));
 	PRINT_FIXME
 	*/
 #else // new code
@@ -994,8 +997,8 @@ int FileVideoAcquisition::readImageRGB32(unsigned char * image,
 
 		// Convert the image into YUV format that SDL uses
 		if( img_convert_ctx == NULL ) {
-			int w = m_pCodecCtx->width;
-			int h = m_pCodecCtx->height;
+			int w = mImageSize.width;
+			int h = mImageSize.height;
 
 			img_convert_ctx = sws_getContext(w, h,
 											 m_pCodecCtx->pix_fmt,
@@ -1009,27 +1012,27 @@ int FileVideoAcquisition::readImageRGB32(unsigned char * image,
 
 		sws_scale(img_convert_ctx, m_pFrame->data,
 				  m_pFrame->linesize, 0,
-				  m_pCodecCtx->height,
+				  mImageSize.height,
 				  pict.data, pict.linesize);
 		if(0) {
 			memcpy(image, m_inbuff,
-				   avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height));
-			IplImage * testImage = cvCreateImageHeader(cvSize(m_pCodecCtx->width, m_pCodecCtx->height), 8, 4);
+				   avpicture_get_size(PIX_FMT_RGBA32, mImageSize.width, mImageSize.height));
+			IplImage * testImage = cvCreateImageHeader(cvSize(mImageSize.width, mImageSize.height), 8, 4);
 			testImage->imageData = (char *)m_inbuff;
 			cvSaveImage("/dev/shm/FVA.jpg", testImage);
 			cvReleaseImageHeader(&testImage);
 		}
 		else {
-			int pitch = avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height)/m_pCodecCtx->height;
+			int pitch = avpicture_get_size(PIX_FMT_RGBA32, mImageSize.width, mImageSize.height)/mImageSize.height;
 			u32 * output = (u32 *)image;
 			u32 * input = (u32 *)m_pFrameRGB->data[0];
-			for(int r = 0; r<m_pCodecCtx->height; r++)
+			for(int r = 0; r<mImageSize.height; r++)
 			{
 				int pos = r * pitch / 4;
 				if((r%2) == 0) {
 					memcpy(output+pos, input+pos, pitch);
 				} else {
-					for(int c = 0; c<m_pCodecCtx->width; c+=2) {
+					for(int c = 0; c<mImageSize.width; c+=2) {
 						output[pos+c] = input[pos+c+1];
 						output[pos+c+1] = input[pos+c];
 					}
@@ -1056,8 +1059,8 @@ int FileVideoAcquisition::readImageYUV(unsigned char* image, long * buffersize)
 	int l_palette = getPalette();
 	int pitchU = m_pFrame->linesize[1],
 		pitchV = m_pFrame->linesize[2],
-		width = m_pCodecCtx->width,
-		height = m_pCodecCtx->height;
+		width = mImageSize.width,
+		height = mImageSize.height;
 
 	switch(l_palette) {
 	default:
@@ -1136,19 +1139,19 @@ int FileVideoAcquisition::readImageY(unsigned char* image, long * buffersize)
 		fprintf(stderr, "FileVA::%s:%d : output image is NULL\n", __func__, __LINE__);
 		return -1;
 	}*/
-	if( (*buffersize) < (long)(m_pCodecCtx->width*m_pCodecCtx->height))
+	if( (*buffersize) < (long)(mImageSize.width*mImageSize.height))
 	{
 		fprintf(stderr, "FileVA::%s:%d : (*buffersize)=%ld too short buffer (%dx%d = %ld)\n",
 			__func__, __LINE__,
 			(*buffersize),
-			m_pCodecCtx->width, m_pCodecCtx->height,
-			(long)(m_pCodecCtx->width*m_pCodecCtx->height));
+			mImageSize.width, mImageSize.height,
+			(long)(mImageSize.width*mImageSize.height));
 		return -1;
 	}
 	int posout=0, posin=0;
 	int pitch = m_pFrame->linesize[0],
-		width = m_pCodecCtx->width,
-		height = m_pCodecCtx->height;
+		width = mImageSize.width,
+		height = mImageSize.height;
 
 
 
@@ -1234,23 +1237,23 @@ int FileVideoAcquisition::readImageYNoAcq(unsigned char* image, long * buffersiz
 	}
 
 	int pitch = m_pFrame->linesize[0];
-	if(m_pCodecCtx->width == pitch) {
-		memcpy(image, imageBrute, m_pCodecCtx->width*m_pCodecCtx->height);
+	if(mImageSize.width == pitch) {
+		memcpy(image, imageBrute, mImageSize.width*mImageSize.height);
 	} else {
-		for(int r = 0; r<m_pCodecCtx->height; r++) {
-			memcpy(image + r*m_pCodecCtx->width,
-				   imageBrute+r*pitch, m_pCodecCtx->width);
+		for(int r = 0; r<mImageSize.height; r++) {
+			memcpy(image + r*mImageSize.width,
+				   imageBrute+r*pitch, mImageSize.width);
 		}
 	}
 /*
 	FILE * fdebug = fopen("/dev/shm/pictY.pgm", "wb");
 	if(fdebug) {
-			fprintf(fdebug, "P5\n%d %d\n255\n", m_pFrame->linesize[0], m_pCodecCtx->height);
-			fwrite(m_pFrame->data[0], m_pFrame->linesize[0], m_pCodecCtx->height, fdebug);
+			fprintf(fdebug, "P5\n%d %d\n255\n", m_pFrame->linesize[0], mImageSize.height);
+			fwrite(m_pFrame->data[0], m_pFrame->linesize[0], mImageSize.height, fdebug);
 			fclose(fdebug);
 	}
 */
-	*buffersize = m_pCodecCtx->width*m_pCodecCtx->height;
+	*buffersize = mImageSize.width*mImageSize.height;
 
 	return 0;
 }
@@ -1265,15 +1268,15 @@ int FileVideoAcquisition::readImageRGB32NoAcq(unsigned char* image, long * buffe
 		fprintf(stderr, "FVA::%s:%d : buffersize is null !!\n", __func__, __LINE__);
 		return -1;
 	}
-	if( (*buffersize) < (long)avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height)){
+	if( (*buffersize) < (long)avpicture_get_size(PIX_FMT_RGBA32, mImageSize.width, mImageSize.height)){
 		fprintf(stderr, "FVA::%s:%d : buffersize (%ld bytes) is not big enough : should be %ld !!\n",
 			__func__, __LINE__,
 			(*buffersize),
 			(long)avpicture_get_size(PIX_FMT_RGBA32,
-				m_pCodecCtx->width, m_pCodecCtx->height)
+				mImageSize.width, mImageSize.height)
 			);
 		*buffersize = (long)avpicture_get_size(PIX_FMT_RGBA32,
-				m_pCodecCtx->width, m_pCodecCtx->height);
+				mImageSize.width, mImageSize.height);
 		return -1;
 	}
 
@@ -1281,16 +1284,16 @@ int FileVideoAcquisition::readImageRGB32NoAcq(unsigned char* image, long * buffe
 
 	/*fprintf(stderr, "FileVA::%s:%d : m_pFrame=%p m_pFrameRGB=%p m_pCodecCtx=%p size=%d\n", __func__, __LINE__,
 		m_pFrame, m_pFrameRGB, m_pCodecCtx,
-		(int)avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height));
+		(int)avpicture_get_size(PIX_FMT_RGBA32, mImageSize.width, mImageSize.height));
 	*/
 #if 0
 	img_convert((AVPicture *)m_pFrameRGB, PIX_FMT_RGBA32, (AVPicture*)m_pFrame,
-					m_pCodecCtx->pix_fmt, m_pCodecCtx->width, m_pCodecCtx->height);
+					m_pCodecCtx->pix_fmt, mImageSize.width, mImageSize.height);
 /*FIXME	img_convert((AVPicture *)m_pFrameRGB, PIX_FMT_RGBA32, (AVPicture*)m_pFrame,
-				m_pCodecCtx->pix_fmt, m_pCodecCtx->width, m_pCodecCtx->height);
+				m_pCodecCtx->pix_fmt, mImageSize.width, mImageSize.height);
 */
 	memcpy(image, m_inbuff,
-		   avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height));
+		   avpicture_get_size(PIX_FMT_RGBA32, mImageSize.width, mImageSize.height));
 
 #else // new code
 	// use queue_picture
@@ -1318,8 +1321,8 @@ int FileVideoAcquisition::readImageRGB32NoAcq(unsigned char* image, long * buffe
 
             // Convert the image into YUV format that SDL uses
             if( img_convert_ctx == NULL ) {
-                int w = m_pCodecCtx->width;
-                int h = m_pCodecCtx->height;
+				int w = mImageSize.width;
+				int h = mImageSize.height;
 
                 img_convert_ctx = sws_getContext(w, h,
                                                  m_pCodecCtx->pix_fmt,
@@ -1333,19 +1336,19 @@ int FileVideoAcquisition::readImageRGB32NoAcq(unsigned char* image, long * buffe
             sws_scale(img_convert_ctx,
                       m_pFrame->data,
                       m_pFrame->linesize, 0,
-                      m_pCodecCtx->height,
+					  mImageSize.height,
                       pict.data, pict.linesize);
             /*
                 FILE * fdebug = fopen("/dev/shm/readImageRGB.pgm", "wb");
                 if(fdebug) {
-                        fprintf(fdebug, "P5\n%d %d\n255\n", m_pCodecCtx->width*4, m_pCodecCtx->height);
-                        fwrite(m_pFrameRGB->data[0], m_pCodecCtx->width*4, m_pCodecCtx->height, fdebug);
+						fprintf(fdebug, "P5\n%d %d\n255\n", mImageSize.width*4, mImageSize.height);
+						fwrite(m_pFrameRGB->data[0], mImageSize.width*4, mImageSize.height, fdebug);
                         fclose(fdebug);
 				}
 				FILE * fdebug = fopen("/dev/shm/pict.pgm", "wb");
                 if(fdebug) {
-						fprintf(fdebug, "P5\n%d %d\n255\n", m_pFrame->linesize[0], m_pCodecCtx->height);
-						fwrite(m_pFrame->data[0], m_pFrame->linesize[0], m_pCodecCtx->height, fdebug);
+						fprintf(fdebug, "P5\n%d %d\n255\n", m_pFrame->linesize[0], mImageSize.height);
+						fwrite(m_pFrame->data[0], m_pFrame->linesize[0], mImageSize.height, fdebug);
                         fclose(fdebug);
 				}
 */
@@ -1353,20 +1356,23 @@ int FileVideoAcquisition::readImageRGB32NoAcq(unsigned char* image, long * buffe
             if(0)
             {
                 memcpy(image, m_pFrameRGB->data[0],
-                       avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height));
+					   avpicture_get_size(PIX_FMT_RGBA32, mImageSize.width, mImageSize.height));
             } else {
-                int pitch = avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width, m_pCodecCtx->height)/m_pCodecCtx->height;
+				int pitch = avpicture_get_size(PIX_FMT_RGBA32,
+											   mImageSize.width, mImageSize.height)
+										/ mImageSize.height;
                 u32 * output = (u32 *)image;
                 u32 * input = (u32 *)m_pFrameRGB->data[0];
-                for(int r = 0; r<m_pCodecCtx->height; r++)
+				for(int r = 0; r<mImageSize.height; r++)
                 {
-                    int pos = r * pitch / 4;
+					int posout = r * pitch / 4;
+
                     if((r%2) == 0) {
-                        memcpy(output+pos, input+pos, pitch);
+						memcpy(output+posout, input+posout, pitch);
                     } else {
-                        for(int c = 0; c<m_pCodecCtx->width; c+=2) {
-                            output[pos+c] = input[pos+c+1];
-                            output[pos+c+1] = input[pos+c];
+						for(int c = 0; c<mImageSize.width; c+=2) {
+							output[posout+c] = input[posout+c+1];
+							output[posout+c+1] = input[posout+c];
                         }
                     }
                 }
@@ -1394,10 +1400,10 @@ int FileVideoAcquisition::getcapability(video_capability * vc)
 		return -1;
 	}
 
-	vc->minwidth = m_pCodecCtx->width;
-	vc->maxwidth = m_pCodecCtx->width;
-	vc->minheight = m_pCodecCtx->height;
-	vc->maxheight = m_pCodecCtx->height;
+	vc->minwidth = mImageSize.width;
+	vc->maxwidth = mImageSize.width;
+	vc->minheight = mImageSize.height;
+	vc->maxheight = mImageSize.height;
 	vc->channels = 0;
 
 	return 1;
