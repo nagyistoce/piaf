@@ -156,13 +156,13 @@ int VideoPlayerTool::setFile(char * file, int period = 0)
 
 	strcpy(VideoFile, file);
 
-	fprintf(stderr, "[VideoPlayerT]::setFile('%s') %lu x %lu @ fps=%g\n", VideoFile,
+	fprintf(stderr, "[VideoPlayerT]::setFile('%s') %d x %d @ fps=%g\n", VideoFile,
 			m_fileVA->getImageSize().width, m_fileVA->getImageSize().height,
 			playFPS);
 
 	slotRewindMovie();
 
-	tBoxSize acqSize = m_fileVA->getImageSize();
+	CvSize acqSize = m_fileVA->getImageSize();
 	if(acqSize.width != 0) {
 		int img_scale = 1;
 		while(acqSize.width / img_scale > 640) {
@@ -803,7 +803,7 @@ void VideoPlayerTool::on_grayButton_toggled(bool gray) {
 
 void VideoPlayerTool::display_frame()
 {
-	tBoxSize theSize = m_fileVA->getImageSize();
+	CvSize theSize = m_fileVA->getImageSize();
 	long buffersize;
 
 	if( (detailsImage->width()!=(long)theSize.width)
