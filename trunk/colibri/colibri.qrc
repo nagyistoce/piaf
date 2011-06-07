@@ -1,0 +1,16 @@
+<RCC>
+    <qresource prefix="/">
+        <file>icons/camera-photo.png</file>
+        <file>icons/camera-web.png</file>
+        <file>icons/image-jpeg.png</file>
+        <file>icons/WAFMeter128.icns</file>
+        <file>icons/WAFMeter24.png</file>
+        <file>icons/WAFMeter53.png</file>
+        <file>icons/WAFMeter128.png</file>
+        <file>icons/bgcolor.png</file>
+        <file>icons/Interface-montage.png</file>
+        <file>icons/Interface-montage-splash.png</file>
+        <file>icons/media-playback-start.png</file>
+        <file>icons/video-display.png</file>
+    </qresource>
+</RCC>
