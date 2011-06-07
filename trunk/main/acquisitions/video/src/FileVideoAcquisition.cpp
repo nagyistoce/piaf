@@ -140,6 +140,7 @@ int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 		purge();
 		m_inbuff = NULL;
 	}
+
    // Open video file
 	if(av_open_input_file(&m_pFormatCtx, aDevice, NULL, 0, NULL)!=0) {
 		fprintf(stderr, "FileVA::%s:%d : av_open_input_file failed ! cannot open file '%s'\n", __func__, __LINE__, aDevice);
@@ -154,16 +155,17 @@ int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 	}
 	m_isJpeg = false;
 
-
 	// Set no stream to the first video stream
 	m_videoStream=-1;
-	for(unsigned int i=0; i<m_pFormatCtx->nb_streams; i++) {
-		if(m_pFormatCtx->streams[i]->codec->codec_type==CODEC_TYPE_VIDEO)
+	for(unsigned int i=0; i<m_pFormatCtx->nb_streams; i++)
+	{
+		if(m_pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO )
 		{
 			m_videoStream=i;
 			break;
 		}
 	}
+
 	if(m_videoStream==-1) {
 		fprintf(stderr, "FileVA::%s:%d : cannot find video stream in file '%s'\n",
 			__func__, __LINE__, aDevice);
@@ -1461,10 +1463,12 @@ int FileVideoAcquisition::getPalette()
 			myVD_palette = VIDEO_PALETTE_YUV420P;
 			//fprintf(stderr, "FileVA::%s:%d : palette is VIDEO_PALETTE_YUV420P\n", __func__, __LINE__);
 			break;
+	#ifdef PIX_FMT_YUV422
 		case PIX_FMT_YUV422:
 			fprintf(stderr, "FileVA::%s:%d : palette is VIDEO_PALETTE_YUV422\n", __func__, __LINE__);
 			myVD_palette = VIDEO_PALETTE_YUV422;
 			break;
+	#endif
 		case PIX_FMT_RGB24:     ///< Packed pixel, 3 bytes per pixel, RGBRGB...
 			fprintf(stderr, "FileVA::%s:%d : palette is VIDEO_PALETTE_RGB24\n", __func__, __LINE__);
 			myVD_palette = VIDEO_PALETTE_RGB24;
