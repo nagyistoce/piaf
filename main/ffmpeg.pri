@@ -26,9 +26,11 @@ unix: {
 		exists( /usr/local/include/libavcodec/avcodec.h ) {
 			# separated includes... damn ffmpeg daily modifications !!
 			message("ffmpeg found in /usr/local/include/ffmpeg/libav*.")
+			INCLUDEPATH += /usr/local/include/
+                        INCLUDEPATH += /usr/local/include/libavutils
+
 			INCLUDEPATH += /usr/local/include/libavcodec
 			INCLUDEPATH += /usr/local/include/libavformat
-			INCLUDEPATH += /usr/local/include/libavutils
 
 			LIBSWSDIR = /usr/local/include/libswscale
 			LIBS += -L/usr/local/lib

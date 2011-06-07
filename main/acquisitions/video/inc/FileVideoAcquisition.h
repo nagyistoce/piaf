@@ -10,9 +10,7 @@
 #ifndef _FILE_VIDEOACQUISITION_
 #define _FILE_VIDEOACQUISITION_
 
-#include "nolinux_videodev.h"
-#include "virtualdeviceacquisition.h"
-#include "workshopmovie.h"
+
 
 
 #ifndef WIN32
@@ -22,12 +20,36 @@
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <signal.h>
+#include <limits.h>
+#include <unistd.h>
 
 #else
 
 #include <win32_videodev.h>
 
 #endif
+
+// Problem with ffmpeg
+#ifndef UINT64_C
+# if __WORDSIZE == 64
+#  define UINT64_C(c)   c ## UL
+# else
+#  define UINT64_C(c)   c ## ULL
+# endif
+#endif
+
+// For later versions of ffmpeg
+#ifndef PIX_FMT_RGBA32
+#define PIX_FMT_RGBA PIX_FMT_RGBA32
+#endif
+
+#include "nolinux_videodev.h"
+#include "virtualdeviceacquisition.h"
+#include "workshopmovie.h"
 
 #include "sw_types.h"
 
@@ -38,6 +60,7 @@
 #endif
 
 extern "C" {
+#include <stdint.h>
 #include <avcodec.h>
 #include <avformat.h>
 }

@@ -579,6 +579,7 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 
 			size_in = size;
 			pimage = (swImageStruct *)data_in;
+#ifdef __SWPLUGIN_DEBUG__
 			fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d Realloc data_in [ %d="
 					"sizeof(swImageStruct)=%d + buffer_size=%d + metadata_size=%d] \n",
 					__func__, __LINE__,
@@ -586,6 +587,7 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 					(int)sizeof(swImageStruct),
 					(int)tmpStruct.buffer_size, (int)tmpStruct.metadata_size
 					); fflush(stderr);
+#endif
 		}
 
 		memcpy(pimage, &tmpStruct, sizeof(swImageStruct));
@@ -651,10 +653,10 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 			memset(data_out, 0, sizeof(unsigned char) * size_in); // clear for valgrind
 			size_out = size_in;
 			pimage = (swImageStruct *)data_out;
-
+#ifdef __SWPLUGIN_DEBUG__
 			fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: Realloc data_out [ %d ] \n", __func__, __LINE__,
 					size_out); fflush(stderr);
-
+#endif
 			// Copy header
 			memcpy(data_out, data_in, sizeof(swImageStruct));
 
