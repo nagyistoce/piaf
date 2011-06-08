@@ -24,18 +24,20 @@
 
 
 #include <QtGui/QApplication>
-
+#include <QtGui/QFileDialog>
 #include "colibrimainwindow.h"
 
 int main(int argc, char *argv[])
 {
-	if(argc<2) {
-		fprintf(stderr, "Usage: ./colibri path_to_sequence.flist\n");
-		return 0;
-	}
+
     QApplication a(argc, argv);
 	ColibriMainWindow w;
-	w.setPluginSequence(argv[1]);
+	if(argc<2) {
+		w.setPluginSequence("");
+	}
+	else {
+		w.setPluginSequence(argv[1]);
+	}
 	w.show();
     return a.exec();
 }

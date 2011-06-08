@@ -371,6 +371,7 @@ void threshold()
 	int iter = 0;
 	CvPoint prev_point;
 
+	cvCopy(cvIm1, cvIm2);
 	for(it = eye_tracking.begin(); it != eye_tracking.end(); ++it, ++iter)
 	{
 		prev_point = cur_point;
@@ -393,14 +394,14 @@ void threshold()
 	static int acc_count = 0;
 	acc_count++;
 	cvAcc(cvAccOne, cvAcc32F);
-	cvConvertScale(cvAcc32F, cvImGray, 1., 0);
+	//cvConvertScale(cvAcc32F, cvImGray, 1., 0);
 	if(cross_c >= 0 && cross_r >=0)
 	{
 		cvLine(cvIm2, cur_point, prev_point,
 		   CV_RGB(255, 127, 0), 1);
 	}
 
-	finishImages();
+	//finishImages();
 
 }
 

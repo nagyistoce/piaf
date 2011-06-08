@@ -7,10 +7,16 @@ qmake piaf-lib.pro && make $@ || echo "Build failed. Missing packages ? Please u
 
 echo " + building GUI..."
 qmake piaf.pro && make $@ || echo "Build failed. Missing packages ? Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
+cd ..
+
+echo " + building Colibri GUI..."
+cd colibri
+qmake && make $@ || echo "Build failed. Missing packages ? Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
+cd ..
 
 echo "Building plugins..."
 
-cd ../plugins/vision/
+cd plugins/vision/
 ./build_all.sh $@
 
 echo "Build done. Run ./install.sh as root for installation"

@@ -53,7 +53,6 @@
 
 	\author Christophe Seyve- SISELL \email mailto:cseyve@free.fr
 	*/
-
 class SwFilter : public QObject
 {
 	Q_OBJECT

@@ -206,10 +206,10 @@ void finishImages()
 
 void HSV()
 {
-	fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
+	//fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
 	allocateImages();
 
-	fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
+	//fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
 	if(cvIm1->nChannels >= 3)
 	{
 		cvCvtColor(cvImRGB, cvImHSV, CV_BGR2HSV);
@@ -221,7 +221,7 @@ void HSV()
 		cvCopy(planes1[HSVplane.curitem], cvImGray);
 	}
 
-	fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
+	//fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
 
 	finishImages();
 
@@ -230,14 +230,14 @@ void HSV()
 		//
 
 	}
-	fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
+	//fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
 
 
 	static int iteration = 0;
 	iteration++;
 	if(iteration == 5)
 	{
-		fprintf(stderr, "registerFunctions...\n");
+		//fprintf(stderr, "registerFunctions...\n");
 		plugin.registerFunctions(functions, nb_functions );
 	}
 }

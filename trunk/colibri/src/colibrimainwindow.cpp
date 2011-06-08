@@ -65,18 +65,33 @@ ColibriMainWindow::~ColibriMainWindow()
 	delete ui;
 }
 
-void ColibriMainWindow::setPluginSequence(QString sequencepath)
+int ColibriMainWindow::setPluginSequence(QString sequencepath)
 {
+	if(sequencepath.isEmpty()) {
+		QString fileName = QFileDialog::getOpenFileName(this, ("Open plugin sequence file"),
+														 mLastPluginsDirName,
+														 ("Piaf sequence (*.flist)"));
+		QFileInfo fi(fileName);
+		if(fi.isFile() && fi.exists())
+		{
+			mLastPluginsDirName = fi.absoluteDir().absolutePath();
+			sequencepath = fileName;
+		}
+		else
+		{
+			return -1;
+		}
+	}
+
 	if(mFilterManager.loadFilterList(sequencepath.toUtf8().data()) < 0) {
 		QMessageBox::critical(NULL, tr("Invalid sequence"),
 							  tr("File containing plugins sequence is invalid : ")
 							  + sequencepath);
 		ui->toolsWidget->setEnabled(false);
-	}
-	else {
-
+		return -1;
 	}
 
+	return 0;
 }
 
 
@@ -734,6 +749,11 @@ void ColibriMainWindow::on_m_timer_timeout() {
 	}
 }
 
+
+void ColibriMainWindow::on_fullScreenButton_clicked()
+{
+	on_actionFull_screen_activated();
+}
 
 void ColibriMainWindow::on_actionFull_screen_activated()
 {

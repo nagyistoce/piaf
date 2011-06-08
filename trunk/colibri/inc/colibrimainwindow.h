@@ -75,6 +75,7 @@ public:
 
 	void lockDisplay() { mDisplayMutex.lock(); }
 	void unlockDisplay() { mDisplayMutex.unlock(); }
+
 private:
 	/// Iteration counter
 	int m_iteration;
@@ -91,6 +92,8 @@ private:
 	bool m_isRunning;
 
 	SwFilterManager * m_pFilterManager;
+
+	QString mLastPluginsDirName;	///<
 
 	IplImage * m_inputImage;
 	IplImage * m_outputImage;
@@ -110,8 +113,11 @@ public:
 	/** @brief Compute the incoming image */
 	void computeImage(IplImage * );
 
-	/** @brief Set the path of sequence */
-	void setPluginSequence(QString sequencepath);
+	/** @brief Set the path of sequence
+
+		@return <0 if error, 0 is success
+	*/
+	int setPluginSequence(QString sequencepath);
 
 private:
 	Ui::ColibriMainWindow *ui;
@@ -137,8 +143,11 @@ private:
 
 	QRect m_grabRect;
 
+	QString mLastPluginsDirName; ///< Last directory path of plugin
+
 	QImage decorImage;
 	QImage resultImage;
+
 private slots:
 	void on_fileButton_clicked();
 	void on_snapButton_clicked();
@@ -149,6 +158,7 @@ private slots:
 
 	void on_grabTimer_timeout();
 
+	void on_fullScreenButton_clicked();
 	void on_actionFull_screen_activated();
 
 };

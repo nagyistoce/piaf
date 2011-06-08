@@ -1,6 +1,8 @@
 # Piaf GUI .pro
 # Author : Christophe Seyve - cseyve@free.fr
 
+TARGET = piaf
+VERSION = "`date +%Y%m%d`"
 
 CONFIG += qt \
     warn_on \
@@ -169,10 +171,15 @@ exists(/usr/local/include/libfreenect/libfreenect.h) {
 # acquisitions/video/inc/V4L2Device.h \
 
 
-TARGET = piaf
-VERSION = 0.9.1
-MOC_DIR = moc
-OBJECTS_DIR = obj
+
+unix: {
+	MOC_DIR = .moc
+	OBJECTS_DIR = .obj
+} else {
+        MOC_DIR = moc
+        OBJECTS_DIR = obj
+}
+
 DEPENDPATH += ./inc
 DEPENDPATH += components/inc
 DEPENDPATH += tools/inc

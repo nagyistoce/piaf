@@ -4,7 +4,7 @@
         <file>icons/camera-web.png</file>
         <file>icons/image-jpeg.png</file>
         <file>icons/Colibri128.icns</file>
-        <file>icons/Colibri24.png</file>
+        <file>icons/Colibri32.png</file>
         <file>icons/Colibri53.png</file>
         <file>icons/Colibri128.png</file>
         <file>icons/bgcolor.png</file>
@@ -13,5 +13,6 @@
         <file>icons/media-playback-start.png</file>
         <file>icons/video-display.png</file>
         <file>icons/movie.png</file>
+        <file>icons/view-fullscreen.png</file>
     </qresource>
 </RCC>
