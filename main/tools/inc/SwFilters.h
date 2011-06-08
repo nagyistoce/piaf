@@ -190,6 +190,12 @@ class VideoCaptureDoc;
 
 typedef void (*sighandler_t)(int);
 
+int registerChildSig(int pid, SwFilter * filter);
+int removeChildSig(int pid);
+void sigpipe(int pid);
+void sigusr1(int pid);
+void sigchld(int pid);
+
 /**
 	\brief Filters list manager.
 
