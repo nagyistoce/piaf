@@ -19,6 +19,9 @@
 #ifndef PIAFCOMMON_H
 #define PIAFCOMMON_H
 
+#ifndef BASE_DIRECTORY
+#define BASE_DIRECTORY "/usr/local/piaf/"
+#endif
 
 
 #define EXIT_ON_ERROR fprintf(stderr,"%s (%s:%d) : EXIT - FATAL ERROR !!!!!!!!!!!!!\n",__func__,__FILE__,__LINE__);fflush(stderr);exit(0);
