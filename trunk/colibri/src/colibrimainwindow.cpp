@@ -46,6 +46,7 @@ ColibriMainWindow::ColibriMainWindow(QWidget *parent)
 
 	m_pColibriThread = NULL;
 
+	memset(&mSwImage, 0, sizeof(swImageStruct));
 	QString filename = ":/qss/Colibri.qss";
 	QFile file(filename);
 	if(file.open(QFile::ReadOnly)) {
@@ -70,6 +71,7 @@ void ColibriMainWindow::setPluginSequence(QString sequencepath)
 		QMessageBox::critical(NULL, tr("Invalid sequence"),
 							  tr("File containing plugins sequence is invalid : ")
 							  + sequencepath);
+		ui->toolsWidget->setEnabled(false);
 	}
 	else {
 
@@ -399,31 +401,31 @@ void ColibriMainWindow::computeImage(IplImage * iplImage) {
 	if(!iplImage) return;
 
 	// TODO : check if size changed
-
-	// unload previously loaded filters
-	mFilterManager.slotUnloadAll();
-	// reload same file
-	mFilterManager.loadFilterList(mFilterManager.getPluginSequenceFile());
+	if(mSwImage.width != iplImage->width || mSwImage.height != iplImage->height
+	   || mSwImage.depth != iplImage->nChannels) {
+		// unload previously loaded filters
+		mFilterManager.slotUnloadAll();
+		// reload same file
+		mFilterManager.loadFilterList(mFilterManager.getPluginSequenceFile());
+		memset(&mSwImage, 0, sizeof(swImageStruct));
+	}
 
 	// compute plugin sequence
-	swImageStruct image;
-	memset(&image, 0, sizeof(swImageStruct));
+	mSwImage.width = iplImage->width;
+	mSwImage.height = iplImage->height;
+	mSwImage.depth = iplImage->nChannels;
+	mSwImage.buffer_size = mSwImage.width * mSwImage.height * mSwImage.depth;
 
-	image.width = iplImage->width;
-	image.height = iplImage->height;
-	image.depth = iplImage->nChannels;
-	image.buffer_size = image.width * image.height * image.depth;
+	mSwImage.buffer = iplImage->imageData; // Buffer
 
-	image.buffer = iplImage->imageData; // Buffer
-
-	fprintf(stderr, "[Batch] %s:%d : process sequence '%s' on image (%dx%dx%d)\n",
-			__func__, __LINE__,
-			mFilterManager.getPluginSequenceFile(),
-			image.width, image.height, image.depth
-			);
+//	fprintf(stderr, "[Colibri] %s:%d : process sequence '%s' on image (%dx%dx%d)\n",
+//			__func__, __LINE__,
+//			mFilterManager.getPluginSequenceFile(),
+//			mSwImage.width, mSwImage.height, mSwImage.depth
+//			);
 
 	// Process this image with filters
-	mFilterManager.processImage(&image);
+	mFilterManager.processImage(&mSwImage);
 
 	// Display image as output
 	displayImage(iplImage);
@@ -484,7 +486,7 @@ void ColibriMainWindow::on_grabTimer_timeout() {
 	computeImage(header);
 
 	// Display image
-	displayImage(header);
+//	displayImage(header);
 
     show();
 
@@ -516,7 +518,9 @@ void ColibriMainWindow::displayImage(IplImage * iplImage)
 	if(!iplImage) return;
 
 	// load image to display
-	QImage qtImage = iplImageToQImage(iplImage);
+	qtImage = iplImageToQImage(iplImage);
+	ui->imageLabel->setRefImage(&qtImage);
+#if 0
 	QImage scaledImg = qtImage.scaled(
 				ui->imageLabel->width(),
 				ui->imageLabel->height(),
@@ -603,8 +607,8 @@ void ColibriMainWindow::displayImage(IplImage * iplImage)
 
 
         QPixmap localPixmap = QPixmap::fromImage(resultImage);
-        ui->imageLabel->setPixmap(localPixmap);
-
+		ui->imageLabel->setRefImage(resultImage);
+#endif // OLD VERSION OF DISPLAY WITH DIALER
 	/*
 	QString dialname=":/icons/Dialer.png";
 	QImage pixmap(dialname);
@@ -637,14 +641,18 @@ void ColibriMainWindow::on_camButton_toggled(bool checked)
 	}
 
 	if(!capture) {
-                int retry = 0;
+		int retry = 0;
 		do {
 			capture = cvCreateCameraCapture (retry);
+			fprintf(stderr, "[Colibri] %s:%d : capture #%d =%p\n", __func__, __LINE__,
+					retry, capture);
 			retry++;
-		} while(!capture && retry < 4);
-                fprintf(stderr, "%s:%d : capture=%p\n", __func__, __LINE__, capture);
+		} while(!capture && retry < 5);
 	}
-	if(!capture) { return ; }
+	if(!capture) {
+		QMessageBox::critical(NULL, tr("No webcam"),
+							  tr("Unable to find webcam. Please try disconnect/reconnect."));
+		return ; }
 
 	startBackgroundThread();
 }
@@ -724,6 +732,16 @@ void ColibriMainWindow::on_m_timer_timeout() {
 }
 
 
+void ColibriMainWindow::on_actionFull_screen_activated()
+{
+	if(!isFullScreen())
+	{
+		showFullScreen();
+	}
+	else {
+		showNormal();
+	}
+}
 
 
 
@@ -808,5 +826,6 @@ void ColibriThread::run()
 
 	m_isRunning = false;
 }
+
 
 

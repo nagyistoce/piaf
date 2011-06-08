@@ -52,11 +52,13 @@ SOURCES += src/main.cpp \
 	src/imgutils.cpp \
 	../main/tools/src/SwPluginCore.cpp \
 	../main/tools/src/SwFilters.cpp \
+	../main/src/imagewidget.cpp
 
 HEADERS += inc/colibrimainwindow.h \
 	inc/imgutils.h \
 	../main/tools/inc/SwPluginCore.h \
 	../main/tools/inc/SwFilters.h \
+	../main/inc/imagewidget.h
 
 FORMS += ui/colibrimainwindow.ui
 INCLUDEPATH += inc

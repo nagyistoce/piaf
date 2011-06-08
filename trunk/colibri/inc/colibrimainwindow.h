@@ -28,6 +28,7 @@
 #include <QtCore/QTimer>
 #include <QtGui/QMainWindow>
 #include <QThread>
+#include <QMutex>
 
 
 
@@ -89,6 +90,7 @@ private:
 	IplImage * m_inputImage;
 	IplImage * m_outputImage;
 	CvCapture * m_capture;
+
 };
 
 /** @brief Main WAFmeter window
@@ -113,7 +115,10 @@ private:
 	QTimer m_timer;
 	int m_lastIteration;
 
+	swImageStruct mSwImage; ///< Piaf plugin image struct for processing
 
+	QImage qtImage; ///< QImage for display
+	QMutex mDisplayMutex;
 	/** @brief Compute image and display result */
 	void displayImage(IplImage * iplImage);
 
@@ -139,6 +144,8 @@ private slots:
 	void on_m_timer_timeout();
 
 	void on_grabTimer_timeout();
+
+	void on_actionFull_screen_activated();
 
 };
 
