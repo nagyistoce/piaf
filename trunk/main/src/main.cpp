@@ -30,38 +30,6 @@
 #include "workshop.h"
 #include "SwFilters.h"
 
-SwSignalHandler SigHandler;
-
-int registerChildSig(int pid, SwFilter * filter)
-{
-	//
-	fprintf(stderr, "!! !! !! !! REGISTERING PROCESS %d FOR FILTER %s !! !! !! !!\n",
-		pid, filter->exec_name);
-	return SigHandler.registerChild(pid, filter);
-}
-int removeChildSig(int pid)
-{
-	//
-	fprintf(stderr, "!! !! !! !! REMOVING PROCESS %d !! !! !! !!\n",
-		pid);
-	return SigHandler.removeChild(pid);
-}
-
-void sigchld(int pid)
-{
-	fprintf(stderr, "Received signal SIGCHLD = %d\n", pid);
-	SigHandler.killChild();
-}
-void sigpipe(int pid)
-{
-	fprintf(stderr, "Received signal SIGPIPE = %d\n", pid);
-	SigHandler.killChild();
-}
-void sigusr1(int pid)
-{
-	fprintf(stderr, "Received signal SIGUSR1 = %d\n", pid);
-}
-
 
 int main(int argc, char *argv[])
 {

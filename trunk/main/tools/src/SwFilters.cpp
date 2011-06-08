@@ -18,7 +18,7 @@
 //#define __SWPLUGIN_DEBUG__
 
 #include "SwFilters.h"
-#include "workshoptool.h"
+//#include "workshoptool.h"
 #include <SwTypes.h>
 
 
@@ -45,7 +45,8 @@
 #include <fcntl.h>
 #include <errno.h>
 
-#include "videocapture.h"
+//#include "videocapture.h"
+#include "piaf-common.h"
 
 #define DELETE_FILTER(_pv)	{ \
 				if((_pv)->filter) { \
@@ -2023,9 +2024,43 @@ int SwFilter::destroy() {
 
 	return 1;
 }
+// signal handling
+#include <stdlib.h>
+#include <unistd.h>
+#include <signal.h>
 
-extern int registerChildSig(int pid, SwFilter * filter);
-extern int removeChildSig(int pid);
+SwSignalHandler SigHandler;
+
+int registerChildSig(int pid, SwFilter * filter)
+{
+	//
+	fprintf(stderr, "!! !! !! !! REGISTERING PROCESS %d FOR FILTER %s !! !! !! !!\n",
+		pid, filter->exec_name);
+	return SigHandler.registerChild(pid, filter);
+}
+int removeChildSig(int pid)
+{
+	//
+	fprintf(stderr, "!! !! !! !! REMOVING PROCESS %d !! !! !! !!\n",
+		pid);
+	return SigHandler.removeChild(pid);
+}
+
+void sigchld(int pid)
+{
+	fprintf(stderr, "Received signal SIGCHLD = %d\n", pid);
+	SigHandler.killChild();
+}
+void sigpipe(int pid)
+{
+	fprintf(stderr, "Received signal SIGPIPE = %d\n", pid);
+	SigHandler.killChild();
+}
+void sigusr1(int pid)
+{
+	fprintf(stderr, "Received signal SIGUSR1 = %d\n", pid);
+}
+
 
 // when pipe is broken
 int SwFilter::forceCloseConnection() {
