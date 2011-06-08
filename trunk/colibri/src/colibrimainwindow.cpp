@@ -428,7 +428,7 @@ void ColibriMainWindow::computeImage(IplImage * iplImage) {
 	mFilterManager.processImage(&mSwImage);
 
 	// Display image as output
-	displayImage(iplImage);
+//	displayImage(iplImage);
 }
 
 void ColibriMainWindow::on_deskButton_clicked() {
@@ -719,12 +719,15 @@ void ColibriMainWindow::on_m_timer_timeout() {
 		return;
 	}
 
+
 	// Grab image
 	int cur_iteration = m_pColibriThread->getIteration();
 	if(m_lastIteration != cur_iteration) {
 		m_lastIteration = cur_iteration;
 		// Display image
+		m_pColibriThread->lockDisplay();
 		displayImage(m_pColibriThread->getOutputImage());
+		m_pColibriThread->unlockDisplay();
 	} else {
 		//
 		fprintf(stderr, "%s:%d no fast enough\n", __func__, __LINE__);
@@ -797,26 +800,26 @@ void ColibriThread::run()
 					fprintf(stderr, "%s:%d : cvRetrieveFrame(capture=%p) FAILED\n", __func__, __LINE__, capture);
 					sleep(1);
 				} else {
-					m_pProcessor->computeImage(frame);
-
-					m_iteration++;
+					// Check if size changed
+					if(m_outputImage &&
+					   (m_outputImage->widthStep*m_outputImage->height != frame->widthStep*frame->height))
+					{
+						tmReleaseImage(&m_inputImage);
+						tmReleaseImage(&m_outputImage);
+					}
+					if(!m_inputImage) { m_inputImage = cvCloneImage(frame); }
+					else { cvCopy(frame, m_inputImage); }
+					// then process current image
+					m_pProcessor->computeImage(m_inputImage);
 
 					// copy image
-					// Check if size changed
-					if(m_inputImage &&
-					   (m_inputImage->width != frame->width
-						|| m_inputImage->height != frame->height)) {
-						tmReleaseImage(&m_inputImage);
-					}
+					mDisplayMutex.lock();
+					if(!m_outputImage) { m_outputImage = cvCloneImage(m_inputImage); }
+					else { cvCopy(m_inputImage, m_outputImage); }
+					mDisplayMutex.unlock();
 
-					if(!m_inputImage) {
-						m_inputImage = tmCreateImage(cvGetSize(frame), IPL_DEPTH_8U, frame->nChannels);
-						fprintf(stderr, "%s:%d : capture=%p "
-								"=> realloc img %dx%dx%d\n", __func__, __LINE__,
-								capture,
-								frame->width, frame->height, frame->nChannels);
-					}
-					cvCopy(frame, m_inputImage);
+
+					m_iteration++;
 				}
 			}
 		} else {

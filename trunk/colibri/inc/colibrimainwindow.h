@@ -72,12 +72,17 @@ public:
 	/** @brief Thread loop */
 	virtual void run();
 
+
+	void lockDisplay() { mDisplayMutex.lock(); }
+	void unlockDisplay() { mDisplayMutex.unlock(); }
 private:
 	/// Iteration counter
 	int m_iteration;
 
 	/// Flag to let the thread loop run
 	bool m_run;
+
+	QMutex mDisplayMutex;
 
 	/// Pointer to processing class
 	ColibriMainWindow * m_pProcessor;
@@ -118,7 +123,6 @@ private:
 	swImageStruct mSwImage; ///< Piaf plugin image struct for processing
 
 	QImage qtImage; ///< QImage for display
-	QMutex mDisplayMutex;
 	/** @brief Compute image and display result */
 	void displayImage(IplImage * iplImage);
 
