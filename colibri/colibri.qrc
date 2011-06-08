@@ -12,5 +12,6 @@
         <file>icons/Interface-montage-splash.png</file>
         <file>icons/media-playback-start.png</file>
         <file>icons/video-display.png</file>
+        <file>icons/movie.png</file>
     </qresource>
 </RCC>

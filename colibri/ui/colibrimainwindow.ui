@@ -131,7 +131,7 @@
             </property>
             <property name="icon">
              <iconset resource="../colibri.qrc">
-              <normaloff>:/icons/media-playback-start.png</normaloff>:/icons/media-playback-start.png</iconset>
+              <normaloff>:/icons/movie.png</normaloff>:/icons/movie.png</iconset>
             </property>
             <property name="checkable">
              <bool>true</bool>
