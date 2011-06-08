@@ -161,7 +161,11 @@ int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 	{
 		if(m_pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO )
 		{
-			m_videoStream=i;
+			fprintf(stderr, "FileVA::%s:%d : choosed stream #%d for file '%s'\n",
+					__func__, __LINE__,
+					i, aDevice);
+
+			m_videoStream = i;
 			break;
 		}
 	}

@@ -217,6 +217,25 @@
             </property>
            </widget>
           </item>
+          <item>
+           <widget class="QPushButton" name="fullScreenButton">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Toggle fullscreen mode (F11)</string>
+            </property>
+            <property name="text">
+             <string>F11</string>
+            </property>
+            <property name="shortcut">
+             <string>F11</string>
+            </property>
+           </widget>
+          </item>
          </layout>
         </widget>
        </item>
@@ -225,17 +244,6 @@
     </item>
    </layout>
   </widget>
-  <action name="actionFull_screen">
-   <property name="text">
-    <string>Full screen</string>
-   </property>
-   <property name="shortcut">
-    <string>F11</string>
-   </property>
-   <property name="shortcutContext">
-    <enum>Qt::ApplicationShortcut</enum>
-   </property>
-  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
