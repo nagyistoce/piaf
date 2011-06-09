@@ -87,7 +87,7 @@ unix: {
 		#message ( Testing CV lib = '$$CV_LIB' )
 		exists( $$CV_LIB ) {
 			#message( " => Linking with -lcv ('$$CV_LIB' exists)")
-			LIBS += -lcv -lcvaux -lhighgui
+			LIBS += -lcxcore -lcv -lcvaux -lhighgui
 		} else {
 			# on MacOS X with OpenCV 1, we must also link with cxcore
 			#message( Dynamic libraries : '$$LIBS_EXT' )

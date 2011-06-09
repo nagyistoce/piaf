@@ -301,7 +301,7 @@ void swReleaseImage(IplImage ** img) {
 	if(!img) { return; }
 	if(!(*img) ) { return; }
 
-#if defined(OPENCV2)
+#if defined(OPENCV_22)
 	try {
 		cvReleaseImage(img);
 	} catch(cv::Exception e) {
@@ -317,7 +317,7 @@ void swReleaseImage(IplImage ** img) {
 void swReleaseImageHeader(IplImage ** img) {
 	if(!img) return;
 	if(!(*img) ) return;
-#ifdef OPENCV2
+#ifdef OPENCV_22
 	try {
 		cvReleaseImageHeader(img);
 	} catch(cv::Exception e) {

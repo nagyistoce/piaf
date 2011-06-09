@@ -30,7 +30,7 @@ OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 			__func__, __LINE__, idx_device);
 
 	// open any type of device and index of desired device
-#ifdef OPENCV2
+#ifdef OPENCV_22
 	try {
 		m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
 	} catch (cv::Exception e) {
@@ -317,10 +317,13 @@ t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
 	m_video_properties.contrast =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONTRAST ) *IMGSETTING_TO_CV;/*Contrast of the image (only for cameras) */
 	m_video_properties.saturation =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_SATURATION ) *IMGSETTING_TO_CV;/*Saturation of the image (only for cameras) */
 	m_video_properties.hue =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_HUE ) *IMGSETTING_TO_CV;/*Hue of the image (only for cameras) */
+#ifdef CV_CAP_PROP_WHITE_BALANCE
 	m_video_properties.white_balance =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_WHITE_BALANCE ) *IMGSETTING_TO_CV;/*Currently unsupported */
-
+#endif
 	m_video_properties.gain =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_GAIN );/*Gain of the image (only for cameras) */
+#ifdef OPENCV_22	
 	m_video_properties.exposure =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_EXPOSURE );/*Exposure (only for cameras) */
+#endif
 	m_video_properties.convert_rgb =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONVERT_RGB );/*Boolean flags indicating whether images should be converted to RGB */
 
 		/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
@@ -375,10 +378,14 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 		fprintf(stderr, "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE [%d] => recreate capture...\n",
 				__func__, __LINE__, m_idx_device
 				); fflush(stderr);
-
+#ifdef OPENCV_22
 		try {
 			m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
 		} catch (cv::Exception e) {
+#else
+		m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
+		if(!m_capture) {
+#endif
 			fprintf(stderr, "[VidAcq] : VDopen ERROR : CAUGHT EXCEPTION WHILE OPENING DEVICE  [%d]\n",
 					m_idx_device
 					); fflush(stderr);
@@ -426,10 +433,13 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 	SETCAPTUREPROPSCALED(	contrast , CV_CAP_PROP_CONTRAST );/*Contrast of the image (only for cameras) */
 	SETCAPTUREPROPSCALED(	saturation , CV_CAP_PROP_SATURATION );/*Saturation of the image (only for cameras) */
 	SETCAPTUREPROPSCALED(	hue , CV_CAP_PROP_HUE );/*Hue of the image (only for cameras) */
+#ifdef CV_CAP_PROP_WHITE_BALANCE
 	SETCAPTUREPROPSCALED(	white_balance , CV_CAP_PROP_WHITE_BALANCE );/*Currently unsupported */
-
+#endif
 	SETCAPTUREPROP(	gain , CV_CAP_PROP_GAIN );/*Gain of the image (only for cameras) */
+#ifdef CV_CAP_PROP_EXPOSURE
 	SETCAPTUREPROP(	exposure , CV_CAP_PROP_EXPOSURE );/*Exposure (only for cameras) */
+#endif
 	SETCAPTUREPROP(	convert_rgb , CV_CAP_PROP_CONVERT_RGB );/*Boolean flags indicating whether images should be converted to RGB */
 
 	// unlock grab mutex
