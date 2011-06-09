@@ -21,6 +21,20 @@ unix: {
 	DEFINES += VERSION="`date +%Y%m%d`"
 	LIBS += -L/usr/local/lib
 }
+linux-g++: DEFINES += _LINUX
+
+linux-g++: {
+	DEFINES += _V4L2
+
+	HEADERS += acquisitions/video/inc/V4L2Device.h \
+		acquisitions/video/inc/v4l2uvc.h \
+		acquisitions/video/inc/utils.h \
+		acquisitions/video/inc/uvccolor.h
+
+	SOURCES += acquisitions/video/src/V4L2Device.cpp \
+		acquisitions/video/src/v4l2uvc.c \
+		acquisitions/video/src/utils.c
+}
 
 win32: {
 	DEFINES += QT_DLL QWT_DLL
@@ -61,6 +75,7 @@ SOURCES += src/main.cpp \
 	acquisitions/video/src/FileVideoAcquisition.cpp \
     acquisitions/video/src/videocapture.cpp \
     acquisitions/video/src/swvideodetector.cpp \
+	acquisitions/video/src/uvccolor.c \
     tools/src/swtoolmainwindow.cpp \
     tools/src/OpenCVEncoder.cpp \
 	tools/src/moviebookmarkform.cpp \
@@ -68,7 +83,7 @@ SOURCES += src/main.cpp \
 	acquisitions/video/src/opencvvideoacquisition.cpp \
     src/plugineditdialog.cpp \
     tools/src/batchfiltersmainwindow.cpp \
-    src/imagewidget.cpp
+	src/imagewidget.cpp
 
 # Replaced by OpenCVEncoder.cpp
 # tools/src/FFMpegEncoder.cpp  

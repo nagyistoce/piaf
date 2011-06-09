@@ -22,7 +22,7 @@
 *******************************************************************************/
 
 #include "utils.h"
-#include "color.h"
+#include "uvccolor.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

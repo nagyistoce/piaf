@@ -144,7 +144,11 @@ int swGetStringValueFromType(swType type, // type
 
 
 int swSendImage(int iFunc, swFrame * frame, swType outputType, void * data_out, FILE * fW);
-int swReceiveImage(void * data_out, FILE * fR, int timeout_ms);
+
+/** @brief
+  @param
+  */
+int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pcontinue = NULL);
 int debugWriteImage(char * filename, swImageStruct * pimage);
 
 int swReadFromPipe(unsigned char * buffer, u32 size, FILE * pipe, int timeout_ms);

@@ -229,7 +229,11 @@
              <string>Toggle fullscreen mode (F11)</string>
             </property>
             <property name="text">
-             <string>F11</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../colibri.qrc">
+              <normaloff>:/icons/view-fullscreen.png</normaloff>:/icons/view-fullscreen.png</iconset>
             </property>
             <property name="shortcut">
              <string>F11</string>

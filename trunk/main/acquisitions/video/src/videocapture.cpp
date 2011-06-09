@@ -29,7 +29,9 @@
 #include "videocapture.h"
 
 #include "opencvvideoacquisition.h"
-
+#ifdef _V4L2
+#include "V4L2Device.h"
+#endif
 
 // default and only constructor.
 VideoCaptureDoc::VideoCaptureDoc()
@@ -65,7 +67,7 @@ VideoCaptureDoc::VideoCaptureDoc(VirtualDeviceAcquisition * vAcq)
 //	connect(pImageTimer, SIGNAL(timeout()), this, SLOT(loadImage()));
 	//pImageTimer->start(1000 / Framerate);
 
-	modified=false;
+	modified = false;
 
 	// start background thread
 	start();
@@ -88,9 +90,10 @@ VideoCaptureDoc::~VideoCaptureDoc()
 	swReleaseImage(&imageRGBA);
 
 	// stop acquisition
-	if(myVAcq)
+	if(myVAcq) {
 		delete myVAcq;
-	myVAcq = NULL;
+		myVAcq = NULL;
+	}
 }
 
 
@@ -149,15 +152,18 @@ bool VideoCaptureDoc::newDocument(int dev)
 
 	fprintf(stderr, "[VideoCapture]::%s:%d ----- CREATE NEW WINDOW FOR DEVICE '%s' -----\n",
 			__func__, __LINE__, txt);
+#ifndef _V4L2
 	myVAcq = new OpenCVVideoAcquisition(dev);
-
+#else
+	myVAcq = new V4L2Device(dev);
+#endif
 	if(!myVAcq->isDeviceReady())
 	{
-		printf("(OpenCVVideoAcquisition) : Video device init failed\n");
+		printf("(VirtualVideoAcquisition) : Video device init failed\n");
 		return false;
 	}
 	else {
-		printf("(OpenCVVideoAcquisition) : Video device Init OK \n");
+		printf("(VirtualVideoAcquisition) : Video device Init OK \n");
 	}
 
 	// start acquisition
@@ -354,11 +360,11 @@ int VideoCaptureDoc::waitForImage()
 		IplImage * imageIn = myVAcq->readImageRGB32();
 		if(imageIn)
 		{
-			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRGB32() ok "
-					": %dx%dx%dx%d\n",
-					__func__, __LINE__,
-					imageIn->width, imageIn->height,
-					imageIn->nChannels, imageIn->depth);
+//			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRGB32() ok "
+//					": %dx%dx%dx%d\n",
+//					__func__, __LINE__,
+//					imageIn->width, imageIn->height,
+//					imageIn->nChannels, imageIn->depth);
 
 			if(imageIn->width>0 && imageIn->height>0)
 			{
@@ -424,6 +430,7 @@ void VideoCaptureDoc::addMask(int x, int y, int width, int height)
 	pMaskList->append(area);
 	saveMask();
 }
+
 QRect * VideoCaptureDoc::getMaskFromPos(int selX, int selY)
 {
 	// search for closest QRect
@@ -455,10 +462,11 @@ void VideoCaptureDoc::removeMask(QRect * area)
 
 unsigned char * VideoCaptureDoc::getMaskBuffer()
 {
-	if(pMaskList->count()>0)
+	if(pMaskList->count()>0) {
 		return mask;
-	else
-		return NULL;
+	}
+
+	return NULL;
 }
 
 void VideoCaptureDoc::clearMask() {

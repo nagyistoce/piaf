@@ -140,17 +140,34 @@ void ccvt_yuyv_rgb32(int width, int height, void *src, void *dst) {
 	for(pos = 0; pos < width*height; pos++) {
 		memset(dst_8u+4*pos, src_8u[2*pos], 4);
 	}
-} 
+}
+
 void ccvt_yuyv_bgr32(int width, int height, void *src, void *dst) {
 //NOT_IMPLEMENTED
 	// FAKE : use only Y
 	int pos;
 	unsigned char * src_8u = (unsigned char *) src;
 	unsigned char * dst_8u = (unsigned char *) dst;
+	unsigned char u = src_8u[1], v= src_8u[3];
+	initLut();
+
 	for(pos = 0; pos < width*height; pos++) {
-		memset(dst_8u+4*pos, src_8u[2*pos], 4);
+		int pos4 = 4*pos, pos2 = 2*pos;
+		unsigned char y = src_8u[pos2];
+		if(pos %2 == 0) {
+			u = src_8u[pos2+1];
+		} else {
+			v = src_8u[pos2+1];
+		}
+
+		dst_8u[pos4+2] = R_FROMYV(y,v);
+		dst_8u[pos4+1] = G_FROMYUV(y,u,v);
+		dst_8u[pos4+0] = B_FROMYU(y,u);
+
+		//memset(dst_8u + 4*pos, src_8u[2*pos], 4);
+
 	}
-} 
+}
 
 /* 4:2:0 YUV planar to RGB/BGR     */
 void ccvt_420p_rgb32(int width, int height, void *srcy, void *srcu, void *srcv, void *dst) NOT_IMPLEMENTED

@@ -59,6 +59,10 @@
 #endif
 #include "workshopvideocapture.h"
 
+#ifdef _V4L2
+#include "V4L2Device.h"
+#endif
+
 // SISELL Workshop Tools...
 #include "workshoptool.h"
 
@@ -811,11 +815,11 @@ void WorkshopApp::createVideoCaptureView(VideoCaptureDoc * va)
 	filterToolName(basename);
 	printf("nom : %s\n", basename.latin1());
 
-	if(va)
+	if(va) {
 		vcv = new WorkshopVideoCaptureView(va, NULL,basename,Qt::WA_DeleteOnClose);
-	else
+	} else {
 		vcv = new WorkshopVideoCaptureView((VideoCaptureDoc *)NULL, NULL,basename,Qt::WA_DeleteOnClose);
-
+	}
 	vcv->setWorkspace(pWorkspace);
 
 	connect(vcv, SIGNAL(ImageSaved(QImage *)), this, SLOT(slotSnapShot(QImage *)));
@@ -1711,10 +1715,18 @@ void WorkshopApp::slotOnNewVideoAcq()
 	// list all video devices from /proc/video/dev/video*
 	bool found;
 	int dev=0, failed =0;
+
+	int dev_idx_tab[10];
+	int dev_idx_max = 5;
+
+
+	// Find available items
+#ifdef _LINUX // for Linux, use the V4L /sys or /proc virtual file system
+	dev_idx_max = 0;
+	dev = 0;
 	do {
 		found = false;
 
-#ifdef _LINUX // for Linux, use the V4L /sys or /proc virtual file system
 		sprintf(txt, "/sys/class/video4linux/video%d/name", dev);
 		bool kern2_6 = true;
 		FILE * fv = fopen(txt, "r");
@@ -1729,28 +1741,74 @@ void WorkshopApp::slotOnNewVideoAcq()
 			fprintf(stderr, "Workshop::%s:%d : opened dev '%s'\n",
 					__func__, __LINE__, txt);
 			found = true;
-//			sprintf(txt, "/dev/video%d", dev);
-			fgets(name, 127, fv);
-			name[strlen(name) -1]='\0';
-
-			// split for seeking name
-			if(!kern2_6) {
-				for(ptname = strstr(name, ":")+1; (*ptname == ' ' || *ptname == '\t') && (ptname < (name+127)); ptname++) {}
-			} else {
-				ptname = name;
-			}
 			fclose(fv);
+		}
+
+		if(found && dev_idx_max<10)
+		{
+			dev_idx_tab[dev_idx_max] = dev;
+			dev_idx_max++;
+		}
+		dev++;
+	} while(dev < 20);
+#else
+	//  use only 5 devices
+	dev_idx_max = 5;
+	for(int dev=0; dev<dev_idx_max; dev++)
+	{
+		dev_idx_tab[dev] = dev;
+	}
+#endif
+
+	dev=0;
+	do {
+		found = false;
+		int dev_idx = dev_idx_tab[dev];
+#ifdef _LINUX // for Linux, use the V4L /sys or /proc virtual file system
+		sprintf(txt, "/sys/class/video4linux/video%d/name", dev_idx);
+		bool kern2_6 = true;
+		FILE * fv = fopen(txt, "r");
+		if(!fv) {
+			sprintf(txt, "/proc/video/dev/video%d", dev_idx);
+			fv = fopen(txt, "r");
+			kern2_6 = false;
+		}
+		char *ptname = name;
+
+		if(fv) {
+			fprintf(stderr, "Workshop::%s:%d : opened dev '%s'\n",
+					__func__, __LINE__, txt);
+			found = true;
+//			sprintf(txt, "/dev/video%d", dev_idx);
+			fgets(name, 127, fv);
+			fclose(fv);
+
+			if(strlen(name)>1 && name[strlen(name) -1]=='\n') {
+				name[strlen(name) -1]='\0';
+
+				// split for seeking name
+				if(!kern2_6) {
+					for(ptname = strstr(name, ":")+1; (*ptname == ' ' || *ptname == '\t') && (ptname < (name+127)); ptname++) {}
+				} else {
+					ptname = name;
+				}
+			}
+
 		} else {
-			sprintf(name, "Device # %d", dev);
-			sprintf(txt, "%d - %s", dev, ptname);
+			sprintf(name, "Device # %d", dev_idx);
+			sprintf(txt, "%d - %s", dev_idx, ptname);
 		}
 #endif // Linux
 
-		fprintf(stderr, "Workshop::%s:%d : create OpenCV acquisition dev '%s'\n",
-				__func__, __LINE__, txt);
+		fprintf(stderr, "Workshop::%s:%d : create OpenCV acquisition dev=%d '%s'\n",
+				__func__, __LINE__, dev_idx, txt);
 
 		//SwVideoAcquisition *myVAcq = new SwVideoAcquisition(dev);
-		OpenCVVideoAcquisition *myVAcq = new OpenCVVideoAcquisition(dev);
+#ifndef _V4L2
+		OpenCVVideoAcquisition *myVAcq = new OpenCVVideoAcquisition(dev_idx);
+#else
+		V4L2Device * myVAcq = new V4L2Device(dev_idx);
+#endif
 
 		if(!myVAcq->isDeviceReady())
 		{
@@ -1796,7 +1854,7 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 		dev++;
 
-	} while(found || dev<5);
+	} while(found || dev<dev_idx_max);
 
 
 	// FIXME : add Axis IP cameras

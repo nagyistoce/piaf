@@ -68,9 +68,9 @@ ColibriMainWindow::~ColibriMainWindow()
 int ColibriMainWindow::setPluginSequence(QString sequencepath)
 {
 	if(sequencepath.isEmpty()) {
-		QString fileName = QFileDialog::getOpenFileName(this, ("Open plugin sequence file"),
+		QString fileName = QFileDialog::getOpenFileName(this, tr("Open plugin sequence file"),
 														 mLastPluginsDirName,
-														 ("Piaf sequence (*.flist)"));
+														 tr("Piaf sequence (*.flist)"));
 		QFileInfo fi(fileName);
 		if(fi.isFile() && fi.exists())
 		{

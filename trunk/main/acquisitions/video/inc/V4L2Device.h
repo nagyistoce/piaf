@@ -31,7 +31,8 @@
 
 #include "sw_types.h"
 
-#include "VirtualDevice.h"
+//#include "VirtualDevice.h"
+#include "virtualdeviceacquisition.h"
 
 #define DEFAULT_DEVICE 						"/dev/video0"
 #define MAX_CHANNELS							10
@@ -96,16 +97,80 @@ typedef struct _v4l2device v4l2device;
 	\version 0.1.0 - \Date
 	\see SwVideoAcquisition
  */
-class V4L2Device : VirtualDevice
+class V4L2Device : public VirtualDeviceAcquisition
 {
 public:
 	
 	/// Constructor. Does not open any device.
-	V4L2Device();
+	V4L2Device(int idx_device = 0);
 	
 	/// Destructor
 	~V4L2Device();
-	
+	/** \brief Use sequential mode
+		If true, grabbing is done when a new image is requested.
+		Else a thread is started to grab */
+	void setSequentialMode(bool on);
+
+	/** \brief Function called by the doc (parent) thread */
+	int grab();
+
+	/** \brief Return true if acquisition device is ready */
+	bool isDeviceReady() { return initialised; }
+
+	/** \brief Return true if acquisition is running */
+	bool isAcquisitionRunning() { return initialised; }
+
+	/** \brief Start acquisition */
+	int startAcquisition();
+
+	/** \brief Return image size */
+	CvSize getImageSize();
+
+	/** \brief Stop acquisition */
+	int stopAcquisition();
+
+	/** \brief Grabs one image and convert to RGB32 coding format
+		if sequential mode, return last acquired image, else read and return image
+
+		\return NULL if error
+		*/
+	IplImage * readImageRGB32() ;
+
+	/** \brief Grabs one image and convert to grayscale coding format
+		if sequential mode, return last acquired image, else read and return image
+
+		\return NULL if error
+		*/
+	IplImage * readImageY();
+
+	/** \brief Grabs one image of depth buffer
+		if sequential mode, return last acquired image, else read and return image
+
+		\return NULL until V4L2 integrates Kinect driver
+		*/
+	IplImage * readImageDepth() { return NULL; }
+
+
+	/** @brief Get video properties (not updated) */
+	t_video_properties getVideoProperties();
+
+	/** @brief Update and return video properties */
+	t_video_properties updateVideoProperties();
+
+	/** @brief Set video properties (not updated) */
+	int setVideoProperties(t_video_properties props);
+
+
+private:
+
+	int m_idx_device; ///< index of device
+	CvSize m_imageSize; ///< Acquisition size
+	IplImage * m_iplImageRGB32; ///< Acquired image in BGRA
+	IplImage * m_iplImageY;		///< Acquired image in grayscaled
+	int m_nChannels;	///< number of channels
+	/// Video properties from OpenCV capture API
+	t_video_properties m_video_properties ;
+
 	/** @brief Return device node */
 	char * getDeviceName();
 	
@@ -116,9 +181,10 @@ public:
 	int VDopen(char * device, tBoxSize *newSize);
 	
 	/** @brief Set image quality on hardware compression : UNUSED for the moment */
-	int setQuality(int /*q*/) { return 0; };
+	int setQuality(int /*q*/) { return 0; }
+
 	/** @brief Set image scale for accelerating copy on some target with slow RAM : UNUSED */
-	void setCopyScale(int scale) {m_copyscale=scale;};
+	void setCopyScale(int scale) { m_copyscale=scale; }
 
 	
 	/// Close device
@@ -156,7 +222,7 @@ public:
 	bool VDIsInitialised();
 	bool VDHasMmap();
 	bool VDisPWC() { return m_isPWC;};
-	/// Returns frame buffer adress
+	/// Grab one image and returns frame buffer address
 	unsigned char * getFrameBuffer();
 	
 	/** @brief Return compressed buffer */
@@ -282,7 +348,7 @@ private:
 	bool useSelectAvailable;
 	bool initialised;
 	int fps;
-	int palette;
+	int m_capture_palette; ///< Palette as defined in V4L : VIDEO_PALETTE_RGB32...
 	int norm;
 	int hastuner;
 	int m_copyscale;
@@ -295,7 +361,12 @@ private:
 	int frequency_table;
 	int TVchannel;
 	int channel; // = input for example 0 for tuner, 1 for SVHS...
-	RGB32 *framebuffer;
+	u8 *rawframebuffer;///< Address of lastly acquired buffer
+
+	int convert2RGB32(unsigned char * src, unsigned char * dest);
+	int convert2Y(unsigned char * src, unsigned char * dest);
+
+
 	int video_width;
 	int video_height;
     int video_area;
