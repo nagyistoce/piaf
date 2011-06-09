@@ -140,7 +140,7 @@ int OpenCVEncoder::encodeFrameY(unsigned char * Yframe) {
 		imgHeader = cvCreateImageHeader(cvSize(m_width, m_height), IPL_DEPTH_8U, 1);
 	}
 	imgHeader->imageData = (char *)Yframe;
-#ifdef OPENCV2
+#ifdef OPENCV_22
 	try
 	{
 //		fprintf(stderr, "OpenCVEnc::%s:%d convert to RGB24 "
@@ -189,7 +189,7 @@ int OpenCVEncoder::encodeFrameRGB32(unsigned char *RGB32frame) {
 			m_width, m_height, m_fps);
 
 	*/
-#ifdef OPENCV2
+#ifdef OPENCV_22
 	try {
 		convertFromRGB32(RGB32frame, imgRgb24);
 
@@ -222,7 +222,7 @@ int OpenCVEncoder::encodeFrameRGB24(unsigned char *RGB24frame) {
 
 	// FIXME : convert to RGB24 and it's fine !!'
 	imgHeader->imageData = (char *)RGB24frame;
-#ifdef OPENCV2
+#ifdef OPENCV_22
 	try {
 		cvCopy(imgHeader, imgRgb24);
 

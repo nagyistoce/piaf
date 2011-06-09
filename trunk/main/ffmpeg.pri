@@ -19,9 +19,9 @@ unix: {
 				message("ffmpeg found in /usr/local/include.")
 		INCLUDEPATH += /usr/local/include/ffmpeg
 		INCLUDE_AVCODEC = /usr/local/include/ffmpeg
-
+		
 		LIBS += -L/usr/local/lib
-		LIBSWSDIR = /usr/local/include/ffmpeg
+		LIBSWSDIR = /usr/local/lib
 	} else {
 		exists( /usr/local/include/libavcodec/avcodec.h ) {
 			# separated includes... damn ffmpeg daily modifications !!
@@ -32,7 +32,7 @@ unix: {
 			INCLUDEPATH += /usr/local/include/libavcodec
 			INCLUDEPATH += /usr/local/include/libavformat
 
-			LIBSWSDIR = /usr/local/include/libswscale
+			LIBSWSDIR = /usr/local/lib
 			LIBS += -L/usr/local/lib
 		} else {
 			exists( /usr/include/libavcodec/avcodec.h ) {
@@ -43,14 +43,14 @@ unix: {
 				INCLUDEPATH += /usr/include/libavutils
 
 				#INCLUDEPATH += /usr/include/ffmpeg
-				LIBSWSDIR = /usr/include/libswscale
+				LIBSWSDIR = /usr/lib
 
-				LIBS += -L/usr/lib -lswscale
+				LIBS += -L/usr/lib 
 			} else {
 				exists( /usr/include/ffmpeg/avcodec.h ) {
 					message("ffmpeg found in /usr/include.")
 					INCLUDEPATH += /usr/include/ffmpeg
-					LIBSWSDIR = /usr/include/ffmpeg
+					LIBSWSDIR = /usr/lib
 					LIBS += -L/usr/lib
 				} else {
 					message ( "ffmpeg NOT FOUND => IT WILL NOT COMPILE" )
@@ -61,7 +61,12 @@ unix: {
 
 
 	# Check if we need to link with libswscale
-	SWSCALE_H = $$LIBSWSDIR/swscale.h
+	LIBS_EXT = dylib
+
+
+	linux-g++: LIBS_EXT = so
+
+	SWSCALE_H = $$LIBSWSDIR/libswscale.$$LIBS_EXT
 	message ( Testing SWScale lib = '$$SWSCALE_H' )
 	exists( $$SWSCALE_H ) {
 		message("Linking with libswscale")
