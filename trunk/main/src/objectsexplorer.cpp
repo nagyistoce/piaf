@@ -15,6 +15,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+#include "piaf-common.h"
 
 // QT includes
 #include <qpixmap.h>

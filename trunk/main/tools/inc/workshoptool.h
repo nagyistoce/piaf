@@ -48,9 +48,6 @@
 #include "workshopmeasure.h"
 #include "workshopcomponent.h"
 
-#ifndef BASE_DIRECTORY
-#define BASE_DIRECTORY "/usr/local/piaf/"
-#endif
 
 /**
 	\brief Modified QWidget for tools' windows in MDI.

@@ -448,31 +448,35 @@ SwFilterManager::~SwFilterManager()
 {
 	fprintf(stderr, "SwFilterManager::%s:%d DELETE SwFilterManager\n", __func__, __LINE__);
 
+	slotUnloadAll();
+
 	// empty selected filter list (to kill child process)
 	swPluginView * pv;
-	if(!selectedFilterColl->isEmpty())
-	for(pv = selectedFilterColl->first(); pv; pv = selectedFilterColl->next())
-	{
-		removeFilter(pv);
+	if(!selectedFilterColl->isEmpty()) {
+		for(pv = selectedFilterColl->first(); pv; pv = selectedFilterColl->next())
+		{
+			removeFilter(pv);
+		}
 	}
 
 	// empty available filter list
 	SwFilter * lastF = NULL;
-	if(!filterColl->isEmpty())
+	if(!filterColl->isEmpty()) {
 		for(pv = filterColl->first(); pv; pv = filterColl->next())
 		{
 			if(pv->filter != lastF) {
-#ifdef __SWPLUGIN_MANAGER__
+//#ifdef __SWPLUGIN_MANAGER__
 				fprintf(stderr, "Deleting filter '%s'[%d]='%s' from available filterColl...\n",
 					pv->filter->exec_name, pv->indexFunction, pv->filter->funcList[pv->indexFunction].name);
 					fflush(stderr);
-#endif
+///#endif
 				lastF = pv->filter;
 
 				DELETE_FILTER(pv)
 
 			}
 		}
+	}
 
 	// clear frame struct
 	swFreeFrame(&frame);
@@ -488,6 +492,7 @@ SwFilterManager::~SwFilterManager()
 					FILTER LIST MANAGEMENT
 
  ********************************************************************/
+
 /* add a new filter in filters list.
 		@param id -1 for end of list, else rank from 0
 */
@@ -501,12 +506,15 @@ int SwFilterManager::addFilter(swPluginView * newFilter, int id)
 	if(id==-1)
 	{
 		selectedFilterColl->append(newFilter);
+
 		idEditPlugin = selectedFilterColl->count()-1;
 		idViewPlugin = idEditPlugin;
-	}
-	else {
-		if(id > (int)selectedFilterColl->count())
+
+	} else {
+
+		if(id > (int)selectedFilterColl->count()) {
 			return -1;
+		}
 		else
 		{
 			selectedFilterColl->insert( (uint)id, newFilter );
@@ -514,7 +522,7 @@ int SwFilterManager::addFilter(swPluginView * newFilter, int id)
 	}
 
 	// start process
-//    newFilter->filter->loadChildProcess();
+	// newFilter->filter->loadChildProcess();
 
 	return selectedFilterColl->count();
 }
@@ -539,11 +547,12 @@ void SwFilterManager::slotFilterDied(int pid)
 			__func__, __LINE__, pid);
 
 	swPluginView * fil = NULL;
-	for(fil = selectedFilterColl->first(); fil != NULL; )
+	for(fil = selectedFilterColl->first(); fil != NULL; fil = selectedFilterColl->next())
 	{
 		if(fil->filter->getChildPid() == pid)
 		{
 			QString filename = fil->selItem->text(0);
+			fil->filter->plugin_died = true;
 
 			if(!mNoWarning ) {
 				QMessageBox::critical(NULL,
@@ -561,6 +570,8 @@ void SwFilterManager::slotFilterDied(int pid)
 		}
 	}
 
+	fprintf(stderr, "[SwFilterMng]::%s:%d : update in 200 ms for dead filter pid=%d...\n",
+			__func__, __LINE__, pid);
 	QTimer::singleShot(200, this, SLOT(updateSelectedView()) );
 
 	//emit selectedFilterChanged();
@@ -789,49 +800,59 @@ void SwFilterManager::updateSelectedView()
 			__func__, __LINE__,
 		  selectedFilterColl->count() ); fflush(stderr);
 
-	int i = selectedFilterColl->count()-1;
-	if(!selectedFilterColl->isEmpty()) {
-		swPluginView * curF;
+	bool refresh = true;
+	while(refresh) {
+		refresh = false;
+		int i = selectedFilterColl->count()-1;
 
-		for(curF = selectedFilterColl->last();
-			curF; curF = selectedFilterColl->prev()) {
+		if(!selectedFilterColl->isEmpty()) {
+			swPluginView * curF;
 
-			fprintf(stderr, "SwFilterManager:%s:%d : creating items for filter %p\n",
-					__func__, __LINE__,
-				   curF->filter); fflush(stderr);
+			for(curF = selectedFilterColl->last();
+				curF; curF = selectedFilterColl->prev()) {
 
-			if(curF->filter && curF->filter->plugin_died){
-				removeFilter(curF);
-				continue;
-			}
-
-			if(curF->filter && curF->filter->funcList) {
-				fprintf(stderr, "\tSwFilterManager:%s:%d : creating items for filter : funcList=%p index=%d\n",
+				fprintf(stderr, "SwFilterManager:%s:%d : creating items for filter %p\n",
 						__func__, __LINE__,
-					   curF->filter->funcList, curF->indexFunction ); fflush(stderr);
+					   curF->filter); fflush(stderr);
 
-				curF->selItem = new Q3ListViewItem(selectedListView,
-					curF->filter->funcList[curF->indexFunction].name, "" );
-				if(curF->enabled) {
-					curF->selItem->setPixmap(1, check);
-				} else {
-					curF->selItem->setPixmap(1, uncheck);
+				if(curF->filter && curF->filter->plugin_died){
+					fprintf(stderr, "SwFilterManager:%s:%d : filter %p died, removing it\n",
+							__func__, __LINE__,
+						   curF->filter); fflush(stderr);
+
+					removeFilter(curF);
+					refresh = true;
+					break;
 				}
 
-				if(i == idViewPlugin) {
-					curF->selItem->setPixmap(2, eye);
+				if(curF->filter && curF->filter->funcList) {
+					fprintf(stderr, "\tSwFilterManager:%s:%d : creating items for filter : funcList=%p index=%d\n",
+							__func__, __LINE__,
+						   curF->filter->funcList, curF->indexFunction ); fflush(stderr);
+
+					curF->selItem = new Q3ListViewItem(selectedListView,
+						curF->filter->funcList[curF->indexFunction].name, "" );
+					if(curF->enabled) {
+						curF->selItem->setPixmap(1, check);
+					} else {
+						curF->selItem->setPixmap(1, uncheck);
+					}
+
+					if(i == idViewPlugin) {
+						curF->selItem->setPixmap(2, eye);
+					}
+					else
+						if(i<idViewPlugin)
+							curF->selItem->setPixmap(2, eye_grey);
+
+					if(i == idEditPlugin)
+						selectedListView->setSelected(curF->selItem, true);
+					i--;
 				}
 				else
-					if(i<idViewPlugin)
-						curF->selItem->setPixmap(2, eye_grey);
-
-				if(i == idEditPlugin)
-					selectedListView->setSelected(curF->selItem, true);
-				i--;
-			}
-			else
-			{
-				fprintf(stderr, "[SwFilters] %s:%d : invalid function in filter\n", __func__, __LINE__);
+				{
+					fprintf(stderr, "[SwFilters] %s:%d : invalid function in filter\n", __func__, __LINE__);
+				}
 			}
 		}
 	}
@@ -848,8 +869,9 @@ void SwFilterManager::updateSelectedView()
 	update();
 }
 
-void  SwFilterManager::slotPluginDoubleClicAdd(Q3ListViewItem *item) {
-	if(!item) return;
+void  SwFilterManager::slotPluginDoubleClicAdd(Q3ListViewItem *item)
+{
+	if(!item) { return; }
 
 	filtersListView->setSelected(item, TRUE);
 	slotAdd();
@@ -1145,19 +1167,26 @@ void SwFilterManager::doubleClic(Q3ListViewItem * item)
 {
 	// look for selected item
 	swPluginView * pv;
+
 	int id=0;
 	idViewPlugin = -1;
-	if(!selectedFilterColl->isEmpty())
-	for(pv=selectedFilterColl->first(); pv && idViewPlugin<0; pv=selectedFilterColl->next())
-	{
-		if(pv->selItem == item) {
-			idViewPlugin = id;
+
+	if(!selectedFilterColl->isEmpty()) {
+		for(pv=selectedFilterColl->first();
+			pv && idViewPlugin<0;
+			pv=selectedFilterColl->next())
+		{
+			if( pv->selItem == item ) {
+				idViewPlugin = id;
+
 #ifdef __SWPLUGIN_MANAGER__
-			printf("SELECT FILTER '%s' as end viewing filter\n", pv->filter->funcList[pv->indexFunction].name);
+				printf("SELECT FILTER '%s' as end viewing filter\n", pv->filter->funcList[pv->indexFunction].name);
 #endif
+			}
+			id++;
 		}
-		id++;
 	}
+
 	updateSelectedView();
 
 	emit selectedFilterChanged();
@@ -2093,7 +2122,6 @@ int SwFilter::forceCloseConnection() {
 
 	removeChildSig(childpid);
 	statusOpen = false;
-	emit signalDied(childpid);
 
 	childpid = 0;
 	return 1;
@@ -2212,7 +2240,7 @@ int SwFilter::loadChildProcess()
 			break;
 		default : // parent process
 			// Child to Parent
-			printf("PARENT PROCESS ====>\n");
+			printf(" PARENT PROCESS ====>\n");
 			close( pipeIn[1] );
 
 			// set non blocking
@@ -2268,8 +2296,10 @@ void SwFilter::setReadFlag(int b)
 // Unload child process
 int SwFilter::unloadChildProcess()
 {
-	if(!statusOpen)
+	if(!statusOpen) {
+		fprintf(stderr, "SwFilter::%s:%d child '%s' no opened\n", exec_name);
 		return 0;
+	}
 
 	removeChildSig(childpid);
 
@@ -2284,8 +2314,8 @@ int SwFilter::unloadChildProcess()
 	}
 
 	sendRequest(SWFRAME_QUIT);
-	if(pipeW) { // CSE : 2011-05-30 : was commented
 
+	if(pipeW) { // CSE : 2011-05-30 : was commented
 		fclose(pipeW);
 		pipeW = NULL;
 	}
@@ -2374,6 +2404,7 @@ int SwFilter::processFunction(int indexFunction, void * data_in, void * data_out
 					// First stop reception
 					fprintf(stderr, "SwFilters::%s:%d : plugin died => close pipe...\n",
 								__func__, __LINE__);
+					emit signalDied(childpid);
 				}
 			} else {
 				ret = 0;
@@ -2442,7 +2473,7 @@ int SwFilter::treatFrame(char *frame, int framesize)
 		subcategory[slen] = '\0';
 
 //#ifdef __SWPLUGIN_MANAGER__
-		printf("\tReceived category = '%s'\tsub-category='%s'",
+		printf("\tReceived category = '%s'\tsub-category='%s'\n",
 			category, subcategory);
 //#endif
 

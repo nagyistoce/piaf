@@ -14,6 +14,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+#include "piaf-common.h"
 
 
 #include <QWorkspace>
