@@ -33,6 +33,7 @@
 #include <Q3GridLayout>
 #include <QPixmap>
 #include <QCloseEvent>
+#include <QTimer>
 
 // standard includes
 #include <stdio.h>
@@ -543,8 +544,6 @@ void SwFilterManager::slotFilterDied(int pid)
 		if(fil->filter->getChildPid() == pid)
 		{
 			QString filename = fil->selItem->text(0);
-			removeFilter(fil);
-
 
 			if(!mNoWarning ) {
 				QMessageBox::critical(NULL,
@@ -562,6 +561,7 @@ void SwFilterManager::slotFilterDied(int pid)
 		}
 	}
 
+	QTimer::singleShot(200, this, SLOT(updateSelectedView()) );
 
 	//emit selectedFilterChanged();
 }
@@ -792,12 +792,18 @@ void SwFilterManager::updateSelectedView()
 	int i = selectedFilterColl->count()-1;
 	if(!selectedFilterColl->isEmpty()) {
 		swPluginView * curF;
+
 		for(curF = selectedFilterColl->last();
 			curF; curF = selectedFilterColl->prev()) {
 
 			fprintf(stderr, "SwFilterManager:%s:%d : creating items for filter %p\n",
 					__func__, __LINE__,
 				   curF->filter); fflush(stderr);
+
+			if(curF->filter && curF->filter->plugin_died){
+				removeFilter(curF);
+				continue;
+			}
 
 			if(curF->filter && curF->filter->funcList) {
 				fprintf(stderr, "\tSwFilterManager:%s:%d : creating items for filter : funcList=%p index=%d\n",
@@ -1980,7 +1986,6 @@ int SwFilter::destroy() {
 	fprintf(stderr, "[SwFilter]::%s:%d : DESTROYing SwFilter %p='%s'...\n",
 			__func__, __LINE__, this, exec_name);
 
-
 	if(!exec_name)
 		return 0;
 	if(exec_name[0] == '\0')
@@ -2353,7 +2358,7 @@ void SwFilter::sendRequest(char * req)
 int SwFilter::processFunction(int indexFunction, void * data_in, void * data_out, int timeout_ms)
 {
 	// wait for unlock on stdin/out
-	if(waitForUnlock(200)) {
+	if(waitForUnlock(200) && !plugin_died) {
 
 		comLock = true; // lock
 		int ret = 0;
