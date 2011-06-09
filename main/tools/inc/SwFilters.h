@@ -84,7 +84,7 @@ public:
 	char * comment;
 	/// returns number of functions
 	int nbfunctions();
-
+	bool plugin_died;
 	/** @brief
 	  */
 	int processFunction(int indexFunction, void * data_in, void * data_out, int timeout_ms);
@@ -92,7 +92,7 @@ private:
 	swFrame frame;
 
 
-	bool plugin_died;
+
 	/// tells if process is loaded
 	bool statusOpen;
 	bool readFlag;
@@ -315,14 +315,14 @@ private:
 	int removeFilter(swPluginView * filter);
 
 
-	void updateSelectedView();
-
 public slots:
 	/// Unload loaded plugins from background thread => will not update display
 	void slotUnloadAll();
 
 	/// Delete all selected plugins (unload all plugin processus)
 	void slotDeleteAll();
+
+	void updateSelectedView();
 
 protected slots:
 	void slotAdd();
