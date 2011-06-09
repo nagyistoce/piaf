@@ -2,7 +2,7 @@
 TEMPLATE = lib
 
 TARGET = SwPluginCore
-
+DEFINES += SWPLUGIN_SIDE
 SOURCES = tools/src/SwPluginCore.cpp
 INCLUDEPATH += tools/inc/ inc
 DEPENDPATH += tools/inc/ inc/

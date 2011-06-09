@@ -91,6 +91,8 @@ public:
 private:
 	swFrame frame;
 
+
+	bool plugin_died;
 	/// tells if process is loaded
 	bool statusOpen;
 	bool readFlag;

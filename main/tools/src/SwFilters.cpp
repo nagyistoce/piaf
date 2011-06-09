@@ -542,15 +542,19 @@ void SwFilterManager::slotFilterDied(int pid)
 	{
 		if(fil->filter->getChildPid() == pid)
 		{
+			QString filename = fil->selItem->text(0);
+			removeFilter(fil);
+
+
 			if(!mNoWarning ) {
 				QMessageBox::critical(NULL,
 					tr("Filter Error"),
-					tr("Filter process ") + fil->selItem->text(0).latin1() + tr(" died."),
+					tr("Filter process ") + filename + tr(" died."),
 					QMessageBox::Abort,
 					QMessageBox::NoButton,
 					QMessageBox::NoButton);
 			}
-			removeFilter(fil);
+
 
 			fil = selectedFilterColl->current();
 		} else {
@@ -559,7 +563,7 @@ void SwFilterManager::slotFilterDied(int pid)
 	}
 
 
-	emit selectedFilterChanged();
+	//emit selectedFilterChanged();
 }
 
 int SwFilterManager::removeFilter(int id)
@@ -1947,6 +1951,8 @@ void SwFilter::init()
 	category = NULL;
 	subcategory = NULL;
 
+	plugin_died = false;
+
 	comLock = false;
 	buffer = new char [BUFFER_SIZE];
 
@@ -2019,7 +2025,10 @@ int SwFilter::destroy() {
 			funcList = NULL;
 		}
 	}
-
+	if(pipeR) {
+		fclose(pipeR);
+	}
+	pipeR = NULL;
 	fprintf(stderr, "[SwFilter]::%s:%d : DESTROYed SwFilter %p.\n", __func__, __LINE__, this);
 
 	return 1;
@@ -2066,18 +2075,16 @@ void sigusr1(int pid)
 int SwFilter::forceCloseConnection() {
 	fprintf(stderr, "SwFilter::forceCloseConnection : closing write pipe...\n");
 	fflush(stderr);
+
 //	if(pipeW)
 //		fclose(pipeW);
 	pipeW = NULL;
 
 	fprintf(stderr, "SwFilter::forceCloseConnection : closing read pipe to child %d...\n",childpid );
 	fflush(stderr);
-	// CSE : 2011-05-30 : was commented
-	if(pipeR) {
-		fclose(pipeR);
-	}
-	pipeR = NULL;
 
+	// CSE : 2011-05-30 : was commented
+	plugin_died = true;
 
 	removeChildSig(childpid);
 	statusOpen = false;
@@ -2336,10 +2343,12 @@ void SwFilter::sendRequest(char * req)
 
 		// close and send
 		swCloseFrame(&frame);
+
 		fwrite(frame.buffer, frame.pos, sizeof(unsigned char), pipeW);
 		fflush(pipeW);
 	}
 }
+
 
 int SwFilter::processFunction(int indexFunction, void * data_in, void * data_out, int timeout_ms)
 {
@@ -2355,7 +2364,12 @@ int SwFilter::processFunction(int indexFunction, void * data_in, void * data_out
 		// read image from pipeR
 		if(ret) {
 			if(pipeR) {
-				ret = swReceiveImage(data_out, pipeR, timeout_ms);
+				ret = swReceiveImage(data_out, pipeR, timeout_ms, &plugin_died);
+				if(plugin_died) {
+					// First stop reception
+					fprintf(stderr, "SwFilters::%s:%d : plugin died => close pipe...\n",
+								__func__, __LINE__);
+				}
 			} else {
 				ret = 0;
 			}

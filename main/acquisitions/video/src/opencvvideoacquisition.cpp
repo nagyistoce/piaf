@@ -288,6 +288,9 @@ t_video_properties OpenCVVideoAcquisition::getVideoProperties()
 {
 	return m_video_properties;
 }
+#define IMGSETTING_TO_CV	32768.
+
+
 
 /** @brief Update and return video properties */
 t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
@@ -309,14 +312,16 @@ t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
 	m_video_properties.frame_count =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_COUNT );/*Number of frames in the video file */
 	m_video_properties.format =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_FORMAT );/*The format of the Mat objects returned by retrieve() */
 	m_video_properties.mode =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_MODE );/*A backend-specific value indicating the current capture mode */
-	m_video_properties.brightness =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_BRIGHTNESS );/*Brightness of the image (only for cameras) */
-	m_video_properties.contrast =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONTRAST );/*Contrast of the image (only for cameras) */
-	m_video_properties.saturation =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_SATURATION );/*Saturation of the image (only for cameras) */
-	m_video_properties.hue =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_HUE );/*Hue of the image (only for cameras) */
+
+	m_video_properties.brightness =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_BRIGHTNESS ) *IMGSETTING_TO_CV;/*Brightness of the image (only for cameras) */
+	m_video_properties.contrast =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONTRAST ) *IMGSETTING_TO_CV;/*Contrast of the image (only for cameras) */
+	m_video_properties.saturation =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_SATURATION ) *IMGSETTING_TO_CV;/*Saturation of the image (only for cameras) */
+	m_video_properties.hue =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_HUE ) *IMGSETTING_TO_CV;/*Hue of the image (only for cameras) */
+	m_video_properties.white_balance =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_WHITE_BALANCE ) *IMGSETTING_TO_CV;/*Currently unsupported */
+
 	m_video_properties.gain =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_GAIN );/*Gain of the image (only for cameras) */
 	m_video_properties.exposure =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_EXPOSURE );/*Exposure (only for cameras) */
 	m_video_properties.convert_rgb =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONVERT_RGB );/*Boolean flags indicating whether images should be converted to RGB */
-	m_video_properties.white_balance = cvGetCaptureProperty(m_capture, CV_CAP_PROP_WHITE_BALANCE );/*Currently unsupported */
 
 		/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
 		– Property identifier. Can be one of the following:*/
@@ -331,8 +336,11 @@ t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
 		{ \
 			cvSetCaptureProperty(m_capture,(_prop_id),props._prop); \
 		}
-
-/** @brief Set video properties (not updated) */
+#define SETCAPTUREPROPSCALED(_prop,_prop_id)		if(props._prop !=m_video_properties._prop) \
+		{ \
+			cvSetCaptureProperty(m_capture,(_prop_id),props._prop/IMGSETTING_TO_CV); \
+		}
+/* Set video properties (not updated) */
 int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 {
 	if(!m_capture) {
@@ -350,7 +358,7 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 	mGrabMutex.lock();
 
 	//	m_video_properties. = cvGetCaptureProperty(m_capture, );
-	SETCAPTUREPROP(pos_msec , CV_CAP_PROP_POS_MSEC );/*Film current position in milliseconds or video capture timestamp */
+	SETCAPTUREPROP( pos_msec , CV_CAP_PROP_POS_MSEC );/*Film current position in milliseconds or video capture timestamp */
 	SETCAPTUREPROP(	pos_frames , CV_CAP_PROP_POS_FRAMES );/*0-based index of the frame to be decoded/captured next */
 	SETCAPTUREPROP(	pos_avi_ratio , CV_CAP_PROP_POS_AVI_RATIO );/*Relative position of the video file (0 - start of the film, 1 - end of the film) */
 
@@ -403,14 +411,26 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 	SETCAPTUREPROP(	frame_count , CV_CAP_PROP_FRAME_COUNT );/*Number of frames in the video file */
 	SETCAPTUREPROP(	format , CV_CAP_PROP_FORMAT );/*The format of the Mat objects returned by retrieve() */
 	SETCAPTUREPROP(	mode , CV_CAP_PROP_MODE );/*A backend-specific value indicating the current capture mode */
-	SETCAPTUREPROP(	brightness , CV_CAP_PROP_BRIGHTNESS );/*Brightness of the image (only for cameras) */
-	SETCAPTUREPROP(	contrast , CV_CAP_PROP_CONTRAST );/*Contrast of the image (only for cameras) */
-	SETCAPTUREPROP(	saturation , CV_CAP_PROP_SATURATION );/*Saturation of the image (only for cameras) */
-	SETCAPTUREPROP(	hue , CV_CAP_PROP_HUE );/*Hue of the image (only for cameras) */
+	/*
+	  Optimal parameters for Microsoft Lifecam
+
+	Props = { pos_msec=-1, pos_frames=-1, pos_avi_ratio=-1,
+	frame_width=1280, frame_height=720,
+	fps=-1, fourcc_dble=-1, fourcc='', norm='', frame_count=-1, format=-1, mode=-1,
+
+	brightness=17913.2, contrast=29491.2, saturation=19660.8, hue=0,
+
+	gain=-1, exposure=-1, convert_rgb=-1, white_balance=-32768,  }
+	*/
+	SETCAPTUREPROPSCALED(	brightness , CV_CAP_PROP_BRIGHTNESS );/*Brightness of the image (only for cameras) */
+	SETCAPTUREPROPSCALED(	contrast , CV_CAP_PROP_CONTRAST );/*Contrast of the image (only for cameras) */
+	SETCAPTUREPROPSCALED(	saturation , CV_CAP_PROP_SATURATION );/*Saturation of the image (only for cameras) */
+	SETCAPTUREPROPSCALED(	hue , CV_CAP_PROP_HUE );/*Hue of the image (only for cameras) */
+	SETCAPTUREPROPSCALED(	white_balance , CV_CAP_PROP_WHITE_BALANCE );/*Currently unsupported */
+
 	SETCAPTUREPROP(	gain , CV_CAP_PROP_GAIN );/*Gain of the image (only for cameras) */
 	SETCAPTUREPROP(	exposure , CV_CAP_PROP_EXPOSURE );/*Exposure (only for cameras) */
 	SETCAPTUREPROP(	convert_rgb , CV_CAP_PROP_CONVERT_RGB );/*Boolean flags indicating whether images should be converted to RGB */
-	SETCAPTUREPROP(	white_balance , CV_CAP_PROP_WHITE_BALANCE );/*Currently unsupported */
 
 	// unlock grab mutex
 	mGrabMutex.unlock();

@@ -17,40 +17,7 @@
 # Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA #
 #                                                                           #
 ****************************************************************************/
-#include <QtCore/qnamespace.h>
-#include <QtCore/qstring.h>
-#include <QtGui/qcolor.h>
 
-typedef struct Myrgb16 {
-	unsigned short Qt::blue:5;
-	unsigned short Qt::green:6;
-	unsigned short Qt::red:5;
-} Myrgb16;
-
-typedef struct Myrgb24 {
-	unsigned char Qt::blue;
-	unsigned char Qt::green;
-	unsigned char Qt::red;
-} Myrgb24;
-typedef struct Myrgb32 {
-	unsigned char Qt::blue;
-	unsigned char Qt::green;
-	unsigned char Qt::red;
-	unsigned char alpha;
-} Myrgb32;
-
-typedef struct MyYUV422 {
-	unsigned char y0;
-	unsigned char u;
-	unsigned char y1;
-	unsigned char v;
-} MyYUV422;
-
-typedef struct MyYUV444 {
-	unsigned char y;
-	unsigned char u;
-	unsigned char v;
-} MyYUV444;
 
 #define CLIP(color) (unsigned char)(((color)>0xFF)?0xff:(((color)<0)?0:(color)))
 

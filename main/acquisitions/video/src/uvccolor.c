@@ -20,7 +20,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h> 
-#include "color.h"
+#include "uvccolor.h"
 
 static int *LutYr = NULL;
 static int *LutYg = NULL;;
@@ -77,6 +77,8 @@ return CLIP((y) + LutBu[(u)]);
 
 void initLut(void)
 {
+	if(LutYr) return;
+
 	int i;
 	#define Rcoef 299 
 	#define Gcoef 587 

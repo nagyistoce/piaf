@@ -103,6 +103,10 @@ void WorkshopVideoCaptureView::setWorkspace(QWorkspace * wksp) {
 	pWorkspace = wksp;
 	if(pWorkspace) {
 		pWorkspace->addWindow(display());
+
+		if(detailsView) {
+			detailsView->setWorkspace((QWorkspace *)pWorkspace);
+		}
 	}
 }
 
@@ -284,7 +288,7 @@ void WorkshopVideoCaptureView::slotDocumentChanged()
 	if(freeze) {
 		return;
 	}
-	fprintf(stderr, "WorkshopVideoCaptureView::%s:%d !\n", __func__, __LINE__);
+//	fprintf(stderr, "WorkshopVideoCaptureView::%s:%d !\n", __func__, __LINE__);
 	refreshDisplay();
 }
 
@@ -308,13 +312,13 @@ void WorkshopVideoCaptureView::refreshDisplay()
 			detailsImage->create(theSize.width, theSize.height, (playGrayscale?8:32));
 		}
 
-		fprintf(stderr, "VidCaptView::%s:%d : detailsImage=%dx%dx%d "
-				"/ input=%dx%d / playGray=%c\n",
-				__func__, __LINE__,
-				detailsImage->width(), detailsImage->height(), detailsImage->depth(),
-				theSize.width, theSize.height,
-				(playGrayscale?'T':'F')
-				);
+//		fprintf(stderr, "VidCaptView::%s:%d : detailsImage=%dx%dx%d "
+//				"/ input=%dx%dx%d / playGray=%c\n",
+//				__func__, __LINE__,
+//				detailsImage->width(), detailsImage->height(), detailsImage->depth(),
+//				theSize.width, theSize.height,
+//				(playGrayscale?'T':'F')
+//				);
 
 		memcpy(detailsImage->bits(),
 			   doc->getCurrentImageRGB(),

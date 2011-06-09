@@ -616,7 +616,8 @@ end_capture:
 	    return 0;
         }
 	memcpy(vd->tmpbuffer, vd->mem[vd->buf.index],vd->buf.bytesused);
-	 /* avi recording is toggled on */
+#if 0
+	/* avi recording is toggled on */
     if (vd->toggleAvi) {
         /* if vd->avifile is NULL, then we need to initialize it */
         if (vd->avifile == NULL) {
@@ -639,6 +640,7 @@ end_capture:
             vd->framecount++;
         }
     }
+#endif // if 0 to disable AVI encoding
 	if (jpeg_decode(&vd->framebuffer, vd->tmpbuffer, &vd->width,
 	     &vd->height) < 0) {
 	    printf("jpeg decode errors\n");

@@ -34,7 +34,7 @@ void swPurgePipe(FILE *fR);
 /// Debug options for communication protocol
 //#define __SWPLUGIN_DEBUG__
 
-#ifdef SWPLUGIN_SIDE
+#ifndef SWPLUGIN_SIDE
 #define SWPLUGIN_SIDE_PRINT		"PIAF-GUI-SIDE\t"
 #else
 #define SWPLUGIN_SIDE_PRINT		"PLUGIN-SIDE\t"
@@ -752,6 +752,7 @@ int swReadFromPipe(unsigned char * buffer, u32 size,
 
 		result = fread(buffer + index, sizeof(unsigned char), (size_t)(size-index),
 				 pipe);
+
 		if(!result) {
 			int errnum = errno;
 			fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d\tfread err=%d='%s'\n",
@@ -841,12 +842,11 @@ int swWriteToPipe(unsigned char * buffer, u32 size, FILE * pipe, int timeout_ms)
 
 
 
-int swReceiveImage(void * data_out, FILE * fR, int timeout_ms)
+int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 {
 
 #ifdef __SWPLUGIN_DEBUG__
-
-		fprintf(stderr, SWPLUGIN_SIDE_PRINT "<<<<<<< %s:%d ...\n", __func__, __LINE__);
+	fprintf(stderr, SWPLUGIN_SIDE_PRINT "<<<<<<< %s:%d ...\n", __func__, __LINE__);
 #endif
 
 	// read image
@@ -854,30 +854,51 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms)
 	char * ret = NULL;
 	int iter=0;
 	int itermax = timeout_ms * 1000/TIMEOUT_STEP;
-	while(!ret && iter < itermax) {
+
+	bool stopnow = false;
+	if(!pstopnow) {
+		pstopnow = &stopnow; // flag to continue for external cutting of reception (stack in Qt)
+	}
+
+	while(!ret && iter < itermax && !(*pstopnow)) {
 		iter++;
 		ret = fgets(framebuffer, 1024, fR);
+
 		if(!ret) {
-			usleep(TIMEOUT_STEP);
+			int errnum = errno;
+
+			fprintf(stderr, SWPLUGIN_SIDE_PRINT
+					"!!!!!!! %s:%d : fread error %d=%s stopnow=%c\n",
+					__func__, __LINE__, errnum, strerror(errnum),
+					(*pstopnow)?'T':'F');
+			framebuffer[0] = 0;
+
+			if(errnum == EAGAIN && !(*pstopnow)) {
+				usleep(TIMEOUT_STEP);
+			}
+			else {
+				iter = itermax; // make
+			}
 		}
 	}
 
 	if(iter == itermax) {
-
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation.\n", __func__, __LINE__);
 		return 0;
 	}
 
 	framebuffer[1023] = '\0';
 	char * header = strstr(framebuffer, SWFRAME_HEADER);
+
 	// First arg =? SWFRAME_HEADER ??
 	if( !header)
 	{
 
-		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d: invalid header in '%s'\n", __func__, __LINE__, framebuffer);
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d: invalid header\n",
+				__func__, __LINE__);
 
 		// New reading
-		ret = fgets(framebuffer, 1023, fR);
+		ret = fgets(framebuffer, 1024, fR);
 		if(ret>0) {
 
 			fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d RETRY : '%s'\n", __func__, __LINE__, framebuffer);

@@ -393,7 +393,7 @@ int swConvert(IplImage *imageIn, IplImage * imageRGBA)
 			cvCopy(imageIn, imageRGBA);
 			break;
 		case 4:
-			cvCvtColor(imageIn, imageRGBA, CV_RGB2BGRA);
+			cvCvtColor(imageIn, imageRGBA, CV_BGR2BGRA);
 			break;
 		}
 

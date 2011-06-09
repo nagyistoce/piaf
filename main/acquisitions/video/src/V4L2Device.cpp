@@ -17,6 +17,7 @@
 
 #include "V4L2Device.h"
 #include "videocapture.h"
+#include "VirtualDevice.h"
 
 // additionnal libraries for memory/device control
 #include <assert.h>
@@ -59,29 +60,45 @@ errno_exit                      (const char *           s)
 }
 
 
-V4L2Device::V4L2Device()
+V4L2Device::V4L2Device(int dev) :
+	m_idx_device(dev)
 {
-	fprintf(stderr, "[V4L2]::%s:%d : constructor V4L2 device\n",
-			__func__, __LINE__); fflush(stderr);
+	fprintf(stderr, "[V4L2]::%s:%d : constructor V4L2 device %d\n",
+			__func__, __LINE__, dev); fflush(stderr);
 	
 	init();
+
+	if(dev>=0) {
+		videodevice = new char [32];
+		sprintf(videodevice, "V4L2-%d", dev);
+	}
 }
 
 V4L2Device::~V4L2Device() 
 {
-	if(videodevice)
-		delete [] videodevice;
-
-	videodevice = NULL;
-	if(initialised)
+	if(initialised) {
 		VDclose();
+	}
+	if(videodevice) {
+		delete [] videodevice;
+		videodevice = NULL;
+	}
+
+	swReleaseImage(&m_iplImageRGB32);
+	swReleaseImage(&m_iplImageY);
 }
 
 
 void V4L2Device::init() 
 {
 	initialised = false;
-	
+	m_imageSize.width = m_imageSize.height = 0;
+	m_nChannels = 4;
+
+	memset(&m_video_properties, 0, sizeof(t_video_properties));
+
+	rawframebuffer = NULL;
+
 	m_isPWC = false;
 	// vd.fd = -1 until is done correctly...
 	memset(&vd, 0, sizeof(v4l2device));
@@ -93,13 +110,328 @@ void V4L2Device::init()
 	// params defaults
 	norm = VIDEO_MODE_PAL;
 	channel = 0;
-    palette = -1;
+	m_capture_palette = -1;
 	frequency_table = 0;
 	TVchannel = 0;
 
 	buffers = NULL;
+	m_iplImageY = m_iplImageRGB32 = NULL;
+
+	tBoxSize newSize;
+	newSize.width = 640;
+	newSize.height = 480;
+
+	char device[32];
+	sprintf(device, "/dev/video%d", m_idx_device);
+
+
+	/*  Opens device with size
+		device device name (ex.: "/dev/video0")
+		newSize acquisition size
+	*/
+	int ret = VDopen(device, &newSize);
+	if(ret < 0) {
+		fprintf(stderr, "V4L2::%s:%d : VDOpen(%s, %dx%d) failed.\n",
+				__func__, __LINE__,  videodevice,
+				(int)newSize.width, (int)newSize.height);
+		return;
+	}
+
+	fprintf(stderr, "V4L2::%s:%d : VDOpen(%s, %dx%d) successed.\n",
+			__func__, __LINE__,
+			device,
+			(int)newSize.width, (int)newSize.height);
+
+	videodevice = new char [strlen(device)+1];
+	strcpy(videodevice, device);
 }
 
+
+
+
+
+
+
+
+
+
+
+/**************************************************************************
+  Virtual interface Specific section
+  *************************************************************************/
+
+/** \brief Use sequential mode
+	If true, grabbing is done when a new image is requested.
+	Else a thread is started to grab */
+void V4L2Device::setSequentialMode(bool on)
+{
+
+}
+
+
+/** \brief Start acquisition */
+int V4L2Device::startAcquisition()
+{
+	int retval = start_capturing();
+
+	updateVideoProperties();
+
+	return retval;
+}
+
+/* Return image size */
+CvSize V4L2Device::getImageSize()
+{
+	return m_imageSize;
+}
+
+
+int V4L2Device::grab()
+{
+	// Returns frame buffer adress
+	rawframebuffer = getFrameBuffer();
+
+	if(!rawframebuffer)
+	{
+		fprintf(stderr, "[V4L2]::%s:%d : no acq !\n", __func__, __LINE__);
+		return -1;
+	}
+
+	//fprintf(stderr, "[V4L2]::%s:%d : acq ok %p !\n", __func__, __LINE__, rawframebuffer);
+	return 0;
+
+}
+
+/** @brief Update and return video properties */
+t_video_properties V4L2Device::updateVideoProperties()
+{
+	if(!initialised) {
+		memset(&m_video_properties, 0, sizeof(t_video_properties));
+		return m_video_properties;
+	}
+
+	video_picture pic;
+	getpicture(&pic);
+#define VIDEOPICTURE_SCALE	1.
+	m_video_properties.brightness =	pic.brightness / VIDEOPICTURE_SCALE;
+	m_video_properties.contrast = pic.contrast / VIDEOPICTURE_SCALE;
+	m_video_properties.saturation = pic.colour / VIDEOPICTURE_SCALE;
+	m_video_properties.hue = pic.hue / VIDEOPICTURE_SCALE;
+	m_video_properties.white_balance = pic.whiteness / VIDEOPICTURE_SCALE;
+
+#if 0 /// \bug FIXME : implement this
+		//	m_video_properties. = cvGetCaptureProperty(m_capture, );
+	m_video_properties.pos_msec =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_POS_MSEC );/*Film current position in milliseconds or video capture timestamp */
+	m_video_properties.pos_frames =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_POS_FRAMES );/*0-based index of the frame to be decoded/captured next */
+	m_video_properties.pos_avi_ratio =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_POS_AVI_RATIO );/*Relative position of the video file (0 - start of the film, 1 - end of the film) */
+	m_video_properties.frame_width =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_WIDTH );/*Width of the frames in the video stream */
+	m_video_properties.frame_height =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_HEIGHT );/*Height of the frames in the video stream */
+	m_video_properties.fps =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_FPS );/*Frame rate */
+	m_video_properties.fourcc_dble =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FOURCC );/*4-character code of codec */
+//		char   fourcc[5] =	cvGetCaptureProperty(m_capture, FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
+//		char   norm[8] =		cvGetCaptureProperty(m_capture, Norm: pal, ntsc, secam */
+	m_video_properties.frame_count =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_COUNT );/*Number of frames in the video file */
+	m_video_properties.format =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_FORMAT );/*The format of the Mat objects returned by retrieve() */
+	m_video_properties.mode =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_MODE );/*A backend-specific value indicating the current capture mode */
+	m_video_properties.brightness =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_BRIGHTNESS );/*Brightness of the image (only for cameras) */
+	m_video_properties.contrast =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONTRAST );/*Contrast of the image (only for cameras) */
+	m_video_properties.saturation =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_SATURATION );/*Saturation of the image (only for cameras) */
+	m_video_properties.hue =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_HUE );/*Hue of the image (only for cameras) */
+	m_video_properties.gain =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_GAIN );/*Gain of the image (only for cameras) */
+	m_video_properties.exposure =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_EXPOSURE );/*Exposure (only for cameras) */
+	m_video_properties.convert_rgb =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONVERT_RGB );/*Boolean flags indicating whether images should be converted to RGB */
+	m_video_properties.white_balance = cvGetCaptureProperty(m_capture, CV_CAP_PROP_WHITE_BALANCE );/*Currently unsupported */
+#endif
+		/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
+		– Property identifier. Can be one of the following:*/
+
+	fprintf(stderr, "V4L2Device::%s:%d : props=\n", __func__, __LINE__);
+	printVideoProperties(&m_video_properties);
+
+	return m_video_properties;
+}
+
+/** @brief Get video properties (not updated) */
+t_video_properties V4L2Device::getVideoProperties()
+{
+	return m_video_properties;
+}
+int V4L2Device::setVideoProperties(t_video_properties props)
+{
+	/// \bug FIXME : implement here
+	if(m_video_properties.brightness != props.brightness
+			|| m_video_properties.contrast != props.contrast
+			|| m_video_properties.saturation != props.saturation
+			|| m_video_properties.hue != props.hue
+			|| m_video_properties.white_balance != props.white_balance
+			)
+	{
+		fprintf(stderr, "[V4L2]::%s:%d : change br=%g/contrast=%g/saturation=%g/hue=%g/whiteness=%g...\n", __func__, __LINE__,
+				props.brightness, props.contrast, props.saturation, props.hue, props.white_balance);
+		video_picture pic;
+		pic.brightness = (u16)(props.brightness*VIDEOPICTURE_SCALE);
+		pic.contrast = (u16)(props.contrast*VIDEOPICTURE_SCALE);
+		pic.colour = (u16)(props.saturation*VIDEOPICTURE_SCALE);
+		pic.hue = (u16)(props.hue*VIDEOPICTURE_SCALE);
+		pic.whiteness = (u16)(props.white_balance*VIDEOPICTURE_SCALE);
+		setpicture(pic.brightness, pic.hue, pic.colour, pic.contrast, pic.whiteness);
+	}
+
+	fprintf(stderr, "V4L2Device::%s:%d : props=\n", __func__, __LINE__);
+	m_video_properties = props;
+	printVideoProperties(&m_video_properties);
+
+	return 0;
+}
+
+IplImage * V4L2Device::readImageRGB32()
+{
+	if(!rawframebuffer) { return NULL; }
+	if(!m_iplImageRGB32) {
+		m_iplImageRGB32 = swCreateImage(m_imageSize, IPL_DEPTH_8U,
+								   4);
+	}
+
+	// Convert into BGR32
+	unsigned char * image = (unsigned char *)m_iplImageRGB32->imageData;
+
+	// if needed, conversion to RGB32 coding
+	if(m_capture_palette == VIDEO_PALETTE_RGB32) {
+		memcpy(image,  rawframebuffer, m_imageSize.width*m_imageSize.height*4);
+
+		return 0;
+	}
+//		fprintf(stderr, "%s:%d : convert2RGB32...\n", __func__, __LINE__);
+	convert2RGB32(rawframebuffer, image);
+
+
+	return m_iplImageRGB32;
+}
+
+IplImage * V4L2Device::readImageY()
+{
+	if(!rawframebuffer) { return NULL; }
+	if(!m_iplImageY) {
+		m_iplImageY = swCreateImage(m_imageSize, IPL_DEPTH_8U,
+								   1);
+	}
+	// Convert into BGR32
+	unsigned char * image = (unsigned char *)m_iplImageRGB32->imageData;
+
+	// if needed, conversion to RGB32 coding
+	if(m_capture_palette == VIDEO_PALETTE_GREY) {
+		memcpy(image,  rawframebuffer, m_imageSize.width*m_imageSize.height);
+
+		return 0;
+	}
+	fprintf(stderr, "%s:%d : convert2Y...\n", __func__, __LINE__);
+	convert2Y(rawframebuffer, image);
+
+	return m_iplImageY;
+}
+
+
+int V4L2Device::convert2RGB32(unsigned char * src, unsigned char * dest)
+{
+	unsigned char *dy, *du, *dv;
+	int i;
+	int n = m_imageSize.width * m_imageSize.height;
+//	fprintf(stderr, "[V4L2]::%s:%d : convert from pal = %d\n", __func__, __LINE__,
+//			m_capture_palette
+//			);
+	// Conversion RGB 32...certainement à compléter !
+	switch (m_capture_palette)
+	{
+	case VIDEO_PALETTE_RGB32:
+		/* cool... */
+		memcpy(dest, src, n * 4);
+		break;
+
+	case VIDEO_PALETTE_RGB24:
+		for (i = 0; i < n; i++)
+		{
+			dest[0] = src[0];
+			dest[1] = src[1];
+			dest[2] = src[2];
+			src += 3;
+			dest += 4;
+		}
+		break;
+
+	case VIDEO_PALETTE_YUV420P:
+		// Base format with Philips webcams (at least the PCVC 740K = ToUCam PRO)
+		dy = src;
+		du = src + n;
+		dv = du + (n / 4);
+
+		ccvt_420p_bgr32(m_imageSize.width, m_imageSize.height, dy, du, dv, dest);
+		break;
+
+	case VIDEO_PALETTE_YUV420:
+		// Non planar format... Hmm...
+		ccvt_420i_bgr32(m_imageSize.width, m_imageSize.height, src, dest);
+		break;
+
+	case VIDEO_PALETTE_YUYV:
+		// Hmm. CPiA cam has this nativly. Anyway, it's just another format. The last one, as far as I'm concerned ;)
+		/* we need to work this one out... */
+		ccvt_yuyv_bgr32(m_imageSize.width, m_imageSize.height, src, dest);
+		break;
+	}
+	return 0;
+}
+
+
+int V4L2Device::convert2Y(unsigned char * src, unsigned char * dest)
+{
+   //dst = RGB[CurBuffer].bits();
+   //dy = Y[CurBuffer].bits();
+   //du = U[CurBuffer].bits();
+   //dv = V[CurBuffer].bits();
+	unsigned char *dy, *du, *dv;
+	int i;
+	int n = m_imageSize.width*m_imageSize.height;
+
+	// Conversion RGB 32...certainement à compléter !
+	switch (m_capture_palette)
+	{
+	case VIDEO_PALETTE_YUV420:
+		// Non planar format... Hmm...
+	case VIDEO_PALETTE_RGB32:
+		/* cool... */
+		readImageRGB32(); // to convert to BGRA
+
+		// then convert to Y
+		cvCvtColor(m_iplImageRGB32, m_iplImageY, CV_BGRA2GRAY);
+		break;
+
+//		case VIDEO_PALETTE_RGB24:
+//			for (i = 0; i < n; i++)
+//			{
+//				dest[0] = src[1]; /// \bug FIXME use only green
+//				src += 3;
+//				dest ++;
+//			}
+//			break;
+
+	case VIDEO_PALETTE_YUV420P:
+		// Base format with Philips webcams (at least the PCVC 740K = ToUCam PRO)
+		memcpy(dest, src, m_imageSize.width * m_imageSize.height);
+		break;
+	}
+
+	return 0;
+}
+/* Stop acquisition */
+int V4L2Device::stopAcquisition()
+{
+
+	return VDclose();
+}
+
+/**************************************************************************
+  V4L2 Specific section
+  *************************************************************************/
 
 int V4L2Device::init_mmap() {
 	struct v4l2_requestbuffers req;
@@ -164,10 +496,7 @@ int V4L2Device::init_mmap() {
 
 
 int V4L2Device::start_capturing() {
-	
-	
-	
-	
+
 	/* set framerate */
 	struct v4l2_streamparm* setfps;  
 	setfps=(struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
@@ -175,7 +504,7 @@ int V4L2Device::start_capturing() {
 	memset(setfps, 0, sizeof(struct v4l2_streamparm));
 	setfps->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	
-	setfps->parm.capture.timeperframe.numerator=1;
+	setfps->parm.capture.timeperframe.numerator = 1;
 	setfps->parm.capture.timeperframe.denominator = vd.frame_rate;
 
 	int ret = ioctl(vd.fd, VIDIOC_S_PARM, setfps); 
@@ -272,14 +601,15 @@ int V4L2Device::changeSize(tBoxSize * newSize)
 
 	// Init memory map
     init_mmap();
-   
 	
-	fprintf(stderr, "[V4L2]::%s:%d \n", __func__, __LINE__);
-	
+	fprintf(stderr, "[V4L2]::%s:%d: size=%dx%d \n", __func__, __LINE__, w, h);
 	
 	video_width = w;
 	video_height = h;
 	video_area = video_width * video_height;
+
+	m_imageSize = cvSize(w,h);
+
 	// tell caller that the size changed
 	newSize->width  = w;
 	newSize->height = h;
@@ -398,30 +728,32 @@ int V4L2Device::init_device(int w, int h) {
 					__func__, __LINE__,
 					FourCC[0], FourCC[1], FourCC[2], FourCC[3],
 					w,h);
-			
+			m_nChannels = 4; // use 32bit output by default
 			switch(fmt.fmt.pix.pixelformat) {
 			default:
-				palette = -1;
+				m_capture_palette = -1;
 				break;
 			case V4L2_PIX_FMT_GREY:
-				palette = VIDEO_PALETTE_GREY;
+				m_capture_palette = VIDEO_PALETTE_GREY;
+				m_nChannels = 1;
 				break;
 			case V4L2_PIX_FMT_YUYV:
-				palette = VIDEO_PALETTE_YUYV;
+				m_capture_palette = VIDEO_PALETTE_YUYV;
 				break;
 			case V4L2_PIX_FMT_YVU420:
 			case V4L2_PIX_FMT_YUV420:
-				palette = VIDEO_PALETTE_YUV420P;
+				m_capture_palette = VIDEO_PALETTE_YUV420P;
 				break;
 			case V4L2_PIX_FMT_RGB24:
-				palette = VIDEO_PALETTE_RGB24;
+				m_capture_palette = VIDEO_PALETTE_RGB24;
 				break;
 			case V4L2_PIX_FMT_RGB32:
-				palette = VIDEO_PALETTE_RGB32;
+				m_capture_palette = VIDEO_PALETTE_RGB32;
 				break;
 			}
+
 			fprintf(stderr, "[V4L2]::%s:%d :  %c%c%c%c => palette V4L=%d!! !!\n", __func__, __LINE__,
-				FourCC[0], FourCC[1], FourCC[2], FourCC[3], palette);
+				FourCC[0], FourCC[1], FourCC[2], FourCC[3], m_capture_palette);
 			
 		}
 	}
@@ -868,10 +1200,12 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 
 int V4L2Device::VDclose()
 {
-	fprintf(stderr, "\t\t[V4L2] : Closing device...\n");
-    if(!initialised) 
+	if(!initialised) {
+		fprintf(stderr, "\t\t[V4L2]::%s:%d : already closed.\n", __func__, __LINE__);
 		return -1;
-	
+	}
+
+	fprintf(stderr, "\t\t[V4L2] : Closing device...\n");
 	initialised = false;
 	
 	// Stop_capturing
@@ -1147,17 +1481,17 @@ int V4L2Device::getpalette()
 	if(g_debug_V4L2Device) {	
 		for(int i=0;i<NB_PALETTES;i++)
 		{
-			if(palettes_defined[i].value == palette)
+			if(palettes_defined[i].value == m_capture_palette)
 			{
 				fprintf(stderr, "[V4L2]::getpalette : current palette : %d='%s'\n", 
-					palette, palettes_defined[i].designation);
-				return palette;
+					m_capture_palette, palettes_defined[i].designation);
+				return m_capture_palette;
 			}
 		}
 
-		fprintf(stderr, "[V4L2] : not defined for palette=%d\n", palette);
+		fprintf(stderr, "[V4L2] : not defined for palette=%d\n", m_capture_palette);
 	}
-	return palette;
+	return m_capture_palette;
 }
 
 int V4L2Device::getcapturewindow (video_window * dest)
@@ -1352,7 +1686,7 @@ int V4L2Device::setpalette(int pal)
 	if(ioctl(vd.fd, VIDIOCSPICT, &(vd.picture)) < 0)
 		return -1;
 
-	palette = pal;
+	m_capture_palette = pal;
 	vd.picture.palette = pal;
 	return 0;
 }
@@ -1611,7 +1945,7 @@ int V4L2Device::GrabCheck(int pal)
     fprintf(stderr, "\t\t[V4L2]::GrabCheck(%d) : v4l_getpicture returned pal = %d\n", 
 		pal, vd.picture.palette);
 	
-	palette = vd.picture.palette;
+	m_capture_palette = vd.picture.palette;
 	return 0;
 }
 
@@ -1636,7 +1970,7 @@ int V4L2Device::setGrabFormat(int pal)
 	for(i=0; i<NB_PALETTES; i++) 
     	if(palettes_defined[i].value == vd.picture.palette) {
 			fprintf(stderr, "'%s' SUPPORTED !!\n", palettes_defined[i].designation);
-			palette = palettes_defined[i].value;
+			m_capture_palette = palettes_defined[i].value;
 			return 0;
 		}
 	
@@ -1645,7 +1979,7 @@ int V4L2Device::setGrabFormat(int pal)
         	fprintf(stderr, "\t\t[V4L2]::setGrabFormat : Palette %s is supported.\n",
          		palettes_defined[i].designation);
 			
-			palette = palettes_defined[i].value;
+			m_capture_palette = palettes_defined[i].value;
 			
 			return 0;
 		}
@@ -1700,7 +2034,7 @@ int V4L2Device::v4l_setpalette(int pal)
 		perror("!\t!\t[V4L2]::v4l_setpalette:VIDIOCSPICT");
 		return -1;
 	}
-	palette = pal;
+	m_capture_palette = pal;
 	return 0;
 }
 
