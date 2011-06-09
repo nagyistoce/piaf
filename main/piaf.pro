@@ -51,7 +51,6 @@ INCLUDEPATH += tools/inc/
 INCLUDEPATH += acquisitions/inc/
 INCLUDEPATH += acquisitions/video/inc/
 INCLUDEPATH += components/inc/
-INCLUDEPATH += tools/inc/
 
 
 SOURCES += src/main.cpp \

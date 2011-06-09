@@ -18,6 +18,8 @@
 #ifndef WORKSHOPIMAGETOOL_H
 #define WORKSHOPIMAGETOOL_H
 
+#include "piaf-common.h"
+
 // include files for Qt
 #include <qwidget.h>
 #include <qpushbutton.h>

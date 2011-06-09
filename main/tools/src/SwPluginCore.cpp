@@ -113,25 +113,21 @@ SwPluginCore::~SwPluginCore()
 		NbFunctions = 0;
 	}
 
-	fprintf(stderr, "SwPluginCore::%s:%d : delete name=%p\n", __func__, __LINE__, name);
+//	fprintf(stderr, "SwPluginCore::%s:%d : delete name=%p\n", __func__, __LINE__, name);
 	if(name) { delete [] name; }
-	fprintf(stderr, "SwPluginCore::%s:%d : delete category=%p\n", __func__, __LINE__, category);
-	if(category)
-		delete [] category;
-	fprintf(stderr, "SwPluginCore::%s:%d : delete subcategory=%p\n", __func__, __LINE__, subcategory);
-	if(subcategory)
-		delete [] subcategory;
+//	fprintf(stderr, "SwPluginCore::%s:%d : delete category=%p\n", __func__, __LINE__, category);
+	if(category) { delete [] category; }
+//	fprintf(stderr, "SwPluginCore::%s:%d : delete subcategory=%p\n", __func__, __LINE__, subcategory);
+	if(subcategory) { delete [] subcategory; }
 
-	fprintf(stderr, "SwPluginCore::%s:%d : delete data_in=%p\n", __func__, __LINE__, data_in);
-	if(data_in)
-		delete [] data_in;
-	fprintf(stderr, "SwPluginCore::%s:%d : delete data_out=%p\n", __func__, __LINE__, data_out);
-	if(data_out)
-		delete [] data_out;
+//	fprintf(stderr, "SwPluginCore::%s:%d : delete data_in=%p\n", __func__, __LINE__, data_in);
+	if(data_in) { delete [] data_in; }
+//	fprintf(stderr, "SwPluginCore::%s:%d : delete data_out=%p\n", __func__, __LINE__, data_out);
+	if(data_out) { delete [] data_out; }
 
-	fprintf(stderr, "SwPluginCore::%s:%d : swFreeFrame(%p)\n", __func__, __LINE__, &frame);
+//	fprintf(stderr, "SwPluginCore::%s:%d : swFreeFrame(%p)\n", __func__, __LINE__, &frame);
 	swFreeFrame(&frame);
-	fprintf(stderr, "SwPluginCore::%s:%d : swFreeFrame done\n", __func__, __LINE__);
+	fprintf(stderr, "SwPluginCore::%s:%d : deletion done\n", __func__, __LINE__);
 }
 
 

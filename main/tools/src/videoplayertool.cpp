@@ -66,7 +66,7 @@ VideoPlayerTool::~VideoPlayerTool()
 	if(m_editBookmarksForm)
 		delete m_editBookmarksForm;
 
-	fprintf(stderr, "%s::%s:%d : deleted.", __FILE__, __func__, __LINE__);
+//	fprintf(stderr, "%s::%s:%d : deleted.\n", __FILE__, __func__, __LINE__);
 }
 
 void VideoPlayerTool::run() {

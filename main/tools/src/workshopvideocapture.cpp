@@ -14,6 +14,7 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+#include "piaf-common.h"
 
 // include files for Qt
 #include <qprinter.h>

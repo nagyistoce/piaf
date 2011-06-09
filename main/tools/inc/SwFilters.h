@@ -325,8 +325,12 @@ public slots:
 	void updateSelectedView();
 
 protected slots:
+	/// Add the selected filter into activated list
 	void slotAdd();
+
+	/// Double clic on filter adds it
 	void slotPluginDoubleClicAdd(Q3ListViewItem *);
+
 	void slotDelete();
 	void slotEdit();
 	void slotDisable();

@@ -122,7 +122,7 @@ protected:
 	virtual void wheelEvent ( QWheelEvent * event );
 
 private:
-	QImage		*dImage;
+	QImage *dImage;
 	int xOrigine;
 	int yOrigine;
 	int ZoomScale;			///< Integer zoom scale : 1 = 1:1 : 2=2:1 ; 0=1:2 ...

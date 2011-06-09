@@ -127,6 +127,9 @@ private slots:
 	/** Save configuration on exit */
 	void saveSettings();
 
+	/// Clean everything before quit
+	void purge();
+
 	// General slots
 	void slotNewVirtualMeasure(WorkshopMeasure *);
 

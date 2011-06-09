@@ -16,6 +16,8 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "piaf-common.h"
+
 #include <math.h>
 // Qt includes
 #include <q3vbox.h>
@@ -161,8 +163,27 @@ WorkshopApp::WorkshopApp()
 
 WorkshopApp::~WorkshopApp()
 {
+	fprintf(stderr, "WorkshopApp:%s:%d : save settings and exit\n", __func__, __LINE__);
 	saveSettings();
+
+	purge();
+}
+
+void WorkshopApp::purge() {
 	delete printer;
+
+	// Cleanly delete tools
+	// finding the tool
+	WorkshopTool *wt;
+	if(!pWToolList->isEmpty())
+	{
+		for(wt = pWToolList->first(); wt;  wt = pWToolList->first())
+		{
+			pWToolList->remove(wt);
+		}
+	}
+
+	fprintf(stderr, "WorkshopApp:%s:%d : purged", __func__, __LINE__);
 }
 
 
@@ -1000,7 +1021,7 @@ bool WorkshopApp::eventFilter(QObject* object, QEvent* event)
 	if((event->type() == QEvent::Close)&&((WorkshopApp*)object!=this))
 	{
 		QCloseEvent* e=(QCloseEvent*)event;
-		printf("close event !\n");
+		printf("close event for object=%p !\n", object);
 
 		// finding the tool
 		WorkshopTool *wt;
@@ -1022,9 +1043,14 @@ bool WorkshopApp::eventFilter(QObject* object, QEvent* event)
 			e->accept();
 		else
 			e->ignore();
+
+
 	} else {
-		if((event->type() == QEvent::Close)&&((WorkshopApp*)object==this)) {
+
+		if((event->type() == QEvent::Close) && ((WorkshopApp*)object==this)) {
+			fprintf(stderr, "WorkshopApp:%s:%d : closing workshop...\n", __func__, __LINE__);
 			saveSettings();
+			purge();
 		}
 
 	}
@@ -1138,6 +1164,8 @@ void WorkshopApp::slotNewVirtualMeasure(WorkshopMeasure *src)
 // received when a double-click has occured in the object browser
 void WorkshopApp::slotOnDoubleClickOnObject(Q3ListViewItem *item)
 {
+	if(!item) return;
+
 	ExplorerItem *pItem = (ExplorerItem *)item;
 	switch(pItem->getItemType()) {
 	case ROOT_ITEM:

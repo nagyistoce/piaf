@@ -118,6 +118,7 @@ void ImageWidget::setZoomParams(int xO, int yO, int scale) {
 	}
 	ZoomScale = scale;
 //		mZoomFit = false;
+	update();
 }
 
 
@@ -214,8 +215,13 @@ void ImageWidget::clipSmartZooming()
 
 	int width = size().width() / mZoomFitFactor;
 	int height = size().height() / mZoomFitFactor;
-	if(xOrigine + width > dImage->width()) {  xOrigine = dImage->width() - width; }
-	if(yOrigine + height > dImage->height()) {  yOrigine = dImage->height() - height; }
+
+	if(xOrigine + width > dImage->width()) {
+		xOrigine = dImage->width() - width;
+	}
+	if(yOrigine + height > dImage->height()) {
+		yOrigine = dImage->height() - height;
+	}
 
 	// do xO, yO at end to align on left and top
 	if(xOrigine < 0) { xOrigine = 0; }
@@ -231,20 +237,31 @@ QPoint ImageWidget::displayToOriginal(int x, int y)
 }
 
 /* Change zoom centered to a point with a zoom increment */
-void ImageWidget::zoomOn(int xCenterOnDisp, int yCenterOnDisp, float zoominc)
+void ImageWidget::zoomOn( int xCenterOnDisp, int yCenterOnDisp,
+						  float zoominc )
 {
-	float curZoom = mZoomFitFactor;
-	mZoomFitFactor += zoominc;
+	if(mZoomFitFactor<0.) {
+		int wdisp = size().width()-2;
+		int hdisp = size().height()-2;
 
+		mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
+								   (float)hdisp / (float)dImage->height() );
+	}
+
+	float curZoom = mZoomFitFactor;
+
+	mZoomFitFactor += zoominc;
 
 	int disp_w =  size().width();
 	int disp_h =  size().height();
 	float zoommin = std::min( (float)disp_w / (float)dImage->width(),
 							  (float)disp_h / (float)dImage->height() );
+
 	if(mZoomFitFactor < zoommin) {
 		// recompute minimal zoom
 		xOrigine = yOrigine = 0;
 		mZoomFitFactor = -1.f;
+
 		update();
 		return ;
 	}
@@ -266,6 +283,7 @@ void ImageWidget::zoomOn(int xCenterOnDisp, int yCenterOnDisp, float zoominc)
 	yOrigine = yZoomCenter - disp_h*0.5f/mZoomFitFactor;
 
 	clipSmartZooming();
+
 	update();
 }
 
@@ -328,7 +346,6 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 	if(!dImage) {
 		return;
 	}
-
 	QRect cr;
 	if(!e) {
 		cr = rect();
@@ -336,6 +353,9 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 		// Use double-buffering
 		cr = e->rect();
 	}
+//	fprintf(stderr, "ImageWidget::%s:%d : size=%dx%d => cr=%dx%d fit=%c\n",
+//			__func__, __LINE__, size().width(), size().height(),
+//			cr.width(), cr.height(), mZoomFit ? 'T':'F');
 
 	QPixmap pix( cr.size() );
 	pix.fill( this, cr.topLeft() );
@@ -346,12 +366,13 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 		int wdisp = size().width()-2;
 		int hdisp = size().height()-2;
 		if(mZoomFitFactor<0.) {
-			mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
-									   (float)hdisp / (float)dImage->height() );
+//			mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
+//									   (float)hdisp / (float)dImage->height() );
 
 			m_displayImage = dImage->scaled(size(), Qt::KeepAspectRatio).copy(cr);
 		}
-		else {
+		else
+		{
 			QImage cropImage = dImage->copy(
 						xOrigine, yOrigine,
 						wdisp/mZoomFitFactor, hdisp/mZoomFitFactor);
@@ -368,6 +389,7 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 												  Qt::KeepAspectRatio ).copy(cr);
 			}
 		}
+
 		p.drawImage(0,0, m_displayImage);
 	}
 	else

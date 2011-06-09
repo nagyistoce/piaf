@@ -6,6 +6,8 @@
 	email                : cseyve@free.fr
  ***************************************************************************/
 
+#include "workshopimagetool.h"
+
 #include <unistd.h>
 
 // include files for Qt
@@ -30,7 +32,7 @@
 #include <QCloseEvent>
 #include <QMenu>
 
-#include "workshopimagetool.h"
+
 
 // application specific includes
 #include <QWorkspace>
@@ -852,8 +854,9 @@ void WorkshopImageTool::slotZoomInMode(){
 
 	ToolMode = MODE_ZOOM_IN;
 	QCursor zoomCursor = QCursor( QBitmap( "CursorZoomIn.bmp", 0),
-								  QBitmap( "CursorZoomInMask.bmp", 0));
+								  QBitmap( "CursorZoomInMask.bmp", 0) );
 	ViewWidget->setCursor(zoomCursor);
+
 	updateToolbar();
 }
 
@@ -1450,6 +1453,7 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 				ViewWidget
 				);
 		}break;
+
 		/// Zoom in, so calculate zoom origine and width
 	case MODE_ZOOM_IN:
 //		WindowView2Absolute(point.x(), point.y(), &xZoomCenter, &yZoomCenter);
@@ -1457,15 +1461,16 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 //		CalculateZoomWindow();
 //		memset(ImgRGB.bits(), 0, viewPixel*(ImgRGB.depth()/8));
 
-		ViewWidget->zoomOn(point.x(), point.y(), +1);
+		ViewWidget->zoomOn( point.x(), point.y(), +1 );
 		break;
+
 	case MODE_ZOOM_OUT:
 //		WindowView2Absolute(point.x(), point.y(), &xZoomCenter, &yZoomCenter);
 //		ZoomScale--;
 //		memset(ImgRGB.bits(), 0, viewPixel*(ImgRGB.depth()/8));
 //		CalculateZoomWindow();
 
-		ViewWidget->zoomOn(point.x(), point.y(), -1);
+		ViewWidget->zoomOn( point.x(), point.y(), -1 );
 		break;
 
 	case MODE_MOVE:
@@ -1478,6 +1483,7 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 		selectPressed = true;
 		//		printf("Move view : start at (%d,%d)\n", myStartX, myStartY);
 		break;
+
 	case MODE_SELECT: {
 		int selX, selY;
 		WindowView2Absolute(point.x(), point.y(), &selX, &selY);
@@ -1487,6 +1493,7 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 
 		}
 		break;
+
 	case MODE_ADD_RECT:
 		WindowView2Absolute(point.x(), point.y(), &myStartX, &myStartY);
 		myStopX = myStartX; // for drawing first rectangle
