@@ -2283,6 +2283,7 @@ int SwFilter::loadChildProcess()
 			writeFlag = false;
 		}
 	}
+
 	return 1;
 }
 
@@ -2297,7 +2298,8 @@ void SwFilter::setReadFlag(int b)
 int SwFilter::unloadChildProcess()
 {
 	if(!statusOpen) {
-		fprintf(stderr, "SwFilter::%s:%d child '%s' no opened\n", exec_name);
+		fprintf(stderr, "SwFilter::%s:%d child '%s' no opened\n",
+				__func__, __LINE__, exec_name);
 		return 0;
 	}
 

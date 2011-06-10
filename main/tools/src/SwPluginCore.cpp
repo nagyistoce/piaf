@@ -69,7 +69,7 @@ SwPluginCore::SwPluginCore()
 // destructor
 SwPluginCore::~SwPluginCore()
 {
-	fprintf(stderr, "SwPluginCore::%s:%d : exec_name='%s' free buffer=%p\n",
+	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : exec_name='%s' free buffer=%p\n",
 			__func__, __LINE__, name, buffer);
 	if(buffer) {
 		delete [] buffer;
@@ -80,8 +80,8 @@ SwPluginCore::~SwPluginCore()
 		for(int i=0; i<NbFunctions; i++) {
 			// delete descriptor
 			if(funcList[i].name) {
-				fprintf(stderr, "SwPluginCore::%s:%d : '%s' : delete funcList[i].name=%p\n",
-						__func__, __LINE__, name, funcList[i].name);
+//				fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : '%s' : delete funcList[i].name=%p\n",
+//						__func__, __LINE__, name, funcList[i].name);
 
 				delete [] funcList[i].name;
 				funcList[i].name = NULL;
@@ -89,8 +89,8 @@ SwPluginCore::~SwPluginCore()
 
 			if(funcList[i].param_list) {
 				for(int j=0; j<funcList[i].nb_params;j++) {
-					fprintf(stderr, "SwPluginCore::%s:%d : delete funcList[i].param_list[j].name=%p\n",
-							__func__, __LINE__, funcList[i].param_list[j].name);
+//					fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : delete funcList[i].param_list[j].name=%p\n",
+//							__func__, __LINE__, funcList[i].param_list[j].name);
 					if(funcList[i].param_list[j].name) {
 						delete [] funcList[i].param_list[j].name;
 						funcList[i].param_list[j].name = NULL;
@@ -98,36 +98,36 @@ SwPluginCore::~SwPluginCore()
 /*					if(funcList[i].param_list[j].value)
 						delete funcList[i].param_list[j].value;
 */				}
-				fprintf(stderr, "SwPluginCore::%s:%d : delete funcList[i].param_list=%p\n",
-						__func__, __LINE__, funcList[i].param_list);
+//				fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : delete funcList[i].param_list=%p\n",
+//						__func__, __LINE__, funcList[i].param_list);
 				delete [] funcList[i].param_list;
 				funcList[i].param_list = NULL;
 			}
 		}
 
-		fprintf(stderr, "SwPluginCore::%s:%d : delete funcList=%p\n",
-				__func__, __LINE__, funcList);
+//		fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : delete funcList=%p\n",
+//				__func__, __LINE__, funcList);
 		delete [] funcList;
 		funcList = NULL;
 
 		NbFunctions = 0;
 	}
 
-//	fprintf(stderr, "SwPluginCore::%s:%d : delete name=%p\n", __func__, __LINE__, name);
+//	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : delete name=%p\n", __func__, __LINE__, name);
 	if(name) { delete [] name; }
-//	fprintf(stderr, "SwPluginCore::%s:%d : delete category=%p\n", __func__, __LINE__, category);
+//	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : delete category=%p\n", __func__, __LINE__, category);
 	if(category) { delete [] category; }
-//	fprintf(stderr, "SwPluginCore::%s:%d : delete subcategory=%p\n", __func__, __LINE__, subcategory);
+//	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : delete subcategory=%p\n", __func__, __LINE__, subcategory);
 	if(subcategory) { delete [] subcategory; }
 
-//	fprintf(stderr, "SwPluginCore::%s:%d : delete data_in=%p\n", __func__, __LINE__, data_in);
+//	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : delete data_in=%p\n", __func__, __LINE__, data_in);
 	if(data_in) { delete [] data_in; }
-//	fprintf(stderr, "SwPluginCore::%s:%d : delete data_out=%p\n", __func__, __LINE__, data_out);
+//	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : delete data_out=%p\n", __func__, __LINE__, data_out);
 	if(data_out) { delete [] data_out; }
 
-//	fprintf(stderr, "SwPluginCore::%s:%d : swFreeFrame(%p)\n", __func__, __LINE__, &frame);
+//	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : swFreeFrame(%p)\n", __func__, __LINE__, &frame);
 	swFreeFrame(&frame);
-	fprintf(stderr, "SwPluginCore::%s:%d : deletion done\n", __func__, __LINE__);
+	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : deletion done\n", __func__, __LINE__);
 }
 
 
