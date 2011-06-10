@@ -1,0 +1,5 @@
+piaf (SVN rev. 106) 2011-06-10
+
+New release with enhances GUI and new tools : 
+- batch processor for processing a list of images or movies with a plugin sequence (saved in Piaf main GUI)
+- Colibri, lightweight version for processing a still image, live webcam or movie with light GUI (great for demos).
