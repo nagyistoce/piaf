@@ -2176,7 +2176,7 @@ int SwFilter::loadChildProcess()
 
 	// Go to this directory
 	char path[512]="";
-	sprintf(path, exec_name);
+	strcpy(path, exec_name);
 	int pos = strlen(path)-1;
 	bool found = false;
 	do {
