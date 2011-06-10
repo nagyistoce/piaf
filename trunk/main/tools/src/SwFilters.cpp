@@ -547,26 +547,14 @@ void SwFilterManager::slotFilterDied(int pid)
 			__func__, __LINE__, pid);
 
 	swPluginView * fil = NULL;
-	for(fil = selectedFilterColl->first(); fil != NULL; fil = selectedFilterColl->next())
+	for(fil = selectedFilterColl->first(); fil != NULL;
+		fil = selectedFilterColl->next())
 	{
 		if(fil->filter->getChildPid() == pid)
 		{
-			QString filename = fil->selItem->text(0);
+			fprintf(stderr, "[SwFilterMng]::%s:%d : dead filter pid=%d (but no warning)...\n",
+					__func__, __LINE__, pid);
 			fil->filter->plugin_died = true;
-
-			if(!mNoWarning ) {
-				QMessageBox::critical(NULL,
-					tr("Filter Error"),
-					tr("Filter process ") + filename + tr(" died."),
-					QMessageBox::Abort,
-					QMessageBox::NoButton,
-					QMessageBox::NoButton);
-			}
-
-
-			fil = selectedFilterColl->current();
-		} else {
-			fil = selectedFilterColl->next();
 		}
 	}
 
@@ -823,6 +811,22 @@ void SwFilterManager::updateSelectedView()
 							__func__, __LINE__,
 						   curF->filter); fflush(stderr);
 					a_plugin_crashed = true;
+
+
+					if(!mNoWarning ) {
+						QString filename = QString(curF->filter->exec_name);
+						QMessageBox::critical(NULL,
+							tr("Filter Error"),
+							tr("Filter process ") + filename + tr(" died."),
+							QMessageBox::Abort,
+							QMessageBox::NoButton,
+							QMessageBox::NoButton);
+					}
+					else {
+						fprintf(stderr, "[SwFilterMng]::%s:%d : dead filter (but no warning)...\n",
+								__func__, __LINE__);
+					}
+
 					removeFilter(curF);
 					refresh = true;
 					break;
@@ -2088,6 +2092,7 @@ int registerChildSig(int pid, SwFilter * filter)
 		pid, filter->exec_name);
 	return SigHandler.registerChild(pid, filter);
 }
+
 int removeChildSig(int pid)
 {
 	//
@@ -2411,8 +2416,8 @@ int SwFilter::processFunction(int indexFunction, void * data_in, void * data_out
 				ret = swReceiveImage(data_out, pipeR, timeout_ms, &plugin_died);
 				if(plugin_died) {
 					// First stop reception
-					fprintf(stderr, "SwFilters::%s:%d : plugin died => close pipe...\n",
-								__func__, __LINE__);
+					fprintf(stderr, "SwFilters::%s:%d : plugin died pid=%d => close pipe...\n",
+								__func__, __LINE__, childpid);
 					emit signalDied(childpid);
 				}
 			} else {
