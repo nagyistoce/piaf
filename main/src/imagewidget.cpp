@@ -240,6 +240,10 @@ QPoint ImageWidget::displayToOriginal(int x, int y)
 void ImageWidget::zoomOn( int xCenterOnDisp, int yCenterOnDisp,
 						  float zoominc )
 {
+	fprintf(stderr, "ImageWidget::%s:%d : mZoomFitFactor=%g => center=%d,%d inc=%g\n",
+			__func__,__LINE__,
+			mZoomFitFactor, xCenterOnDisp, yCenterOnDisp, zoominc);
+
 	if(mZoomFitFactor<0.) {
 		int wdisp = size().width()-2;
 		int hdisp = size().height()-2;
@@ -293,10 +297,14 @@ void ImageWidget::wheelEvent ( QWheelEvent * e )
 	if(!dImage) return;
 	if(!mZoomFit) return;
 
-	if(mZoomFitFactor<0)
-	{
-		update();
+	if(mZoomFitFactor<0.) {
+		int wdisp = size().width()-2;
+		int hdisp = size().height()-2;
+
+		mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
+								   (float)hdisp / (float)dImage->height() );
 	}
+
 	float curZoom = mZoomFitFactor;
 	int numDegrees = e->delta() / 8;
 	int numSteps = numDegrees / 15;
@@ -312,7 +320,9 @@ void ImageWidget::wheelEvent ( QWheelEvent * e )
 		mZoomFitFactor *= 1.2;
 	else
 		mZoomFitFactor *= 0.8;
+
 	if(mZoomFitFactor < zoommin) {
+
 		// recompute minimal zoom
 		xOrigine = yOrigine = 0;
 		mZoomFitFactor = -1.f;
