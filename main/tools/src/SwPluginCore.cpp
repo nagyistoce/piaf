@@ -1002,7 +1002,8 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 			fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: ERROR while reading metadata"
 					"metadata_size=%ld bytes in metadata=%p\n",
 					__func__, __LINE__,
-					imOut->metadata, (long)imOut->metadata_size);
+					(long)imOut->metadata_size,
+					imOut->metadata);
 			return 0;
 		}
 	}
