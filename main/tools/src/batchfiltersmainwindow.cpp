@@ -559,7 +559,8 @@ void BatchFiltersThread::run()
 				// check if at least one needs to be processed
 				bool at_least_one = false;
 				QList<t_batch_item *>::iterator it;
-				for(it = mpFileList->begin(); it != mpFileList->end() && !at_least_one; ++it)
+				for(it = mpFileList->begin();
+					mRun && it != mpFileList->end() && !at_least_one; ++it)
 				{
 					t_batch_item * item = (*it);
 					if(item->processing_state == UNPROCESSED)
@@ -595,7 +596,7 @@ void BatchFiltersThread::run()
 
 			// Process file
 			QList<t_batch_item *>::iterator it;
-			for(it = mpFileList->begin(); it != mpFileList->end(); ++it)
+			for(it = mpFileList->begin(); mRun && it != mpFileList->end(); ++it)
 			{
 				t_batch_item * item = (*it);
 				if(item->processing_state == UNPROCESSED)
@@ -739,7 +740,7 @@ void BatchFiltersThread::run()
 
 							image.buffer = loadedImage->imageData; // Buffer
 							bool resume = true;
-							while(resume)
+							while(resume && mRun)
 							{
 								bool read_frame = fva->GetNextFrame();
 								long buffersize = image.buffer_size ;
