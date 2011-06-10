@@ -47,6 +47,7 @@ ColibriMainWindow::ColibriMainWindow(QWidget *parent)
 	m_pColibriThread = NULL;
 
 	memset(&mSwImage, 0, sizeof(swImageStruct));
+
 	QString filename = ":/qss/Colibri.qss";
 	QFile file(filename);
 	if(file.open(QFile::ReadOnly)) {
@@ -54,10 +55,10 @@ ColibriMainWindow::ColibriMainWindow(QWidget *parent)
 		//setStyleSheet(styleSheet);
 	}
 
-	connect(&m_timer, SIGNAL(timeout()), this, SLOT(on_m_timer_timeout()));
+	qtImage.load(":/icons/Colibri128.png");
+	ui->imageLabel->setRefImage(&qtImage);
 
-	decorImage.load(":icons/Interface-montage.png");
-	decorImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+	connect(&m_timer, SIGNAL(timeout()), this, SLOT(on_m_timer_timeout()));
 
 }
 ColibriMainWindow::~ColibriMainWindow()

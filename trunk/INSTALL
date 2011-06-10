@@ -6,19 +6,20 @@ user$ ./build.sh
 
 	If build fails, you need to install the required packages for building piaf.
 	A script if provided for Debian/Ubuntu packages, run as root:
-root# ./prepare_debian.sh
+root# ./prepare.sh
 
 - Then, as root : create local directories and install all built
 root# ./install.sh
 
 # LATER COMPILATION :
-- if you patched Piaf lib or GUI:
+- if you patched Piaf SwPluginCore lib or GUI:
 	- for testing: run build.sh as user to update GUI binary and libs
 	- for installing or build+install: just run the ./install.sh
-- if you modified the plugins' source code: as user, run the build script to build plugins :
+
+- if you modified only the plugins' source code: as user, run the build script to build plugins :
 user$ ./build.sh
 
-OR: go to the plugin directory plugins/vision/ and run ./build_all.sh
+OR: go directly to the plugin directory, e.g. plugins/vision/ and run ./build_all.sh
 user$ ./build_all.sh
-
+You don't need installation or restarting the GUI, the binaries are already updated so Piaf GUI can load then at any time.
 

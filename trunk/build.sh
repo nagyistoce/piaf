@@ -24,5 +24,6 @@ echo "Building plugins..."
 cd plugins/vision/
 ./build_all.sh $@
 
-echo "Build done. Run ./install.sh as root for installation"
-
+if [ ! -n "$1" ]; then
+	echo "Build done. Run ./install.sh as root for installation"
+fi
