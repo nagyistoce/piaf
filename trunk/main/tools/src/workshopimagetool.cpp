@@ -710,6 +710,7 @@ void WorkshopImageTool::slotUpdateImage()
 
 		filterManager->processImage(&image);
 	}
+
 /*
 	fprintf(stderr, "WImgTool::%s:%d : Encoding image ? record=%c mpegEncoder=%p\n",
 			__func__, __LINE__,

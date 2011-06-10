@@ -593,9 +593,11 @@ int SwFilterManager::removeFilter(swPluginView * pv)
 	// unload child process
 	uint r = selectedFilterColl->contains(pv);
 	bool reset = false;
-	if(r>0
-	   && pv) {
+
+	if(r>0 && pv)
+	{
 		int id = r;
+
 		if(id==idEditPlugin || id==idViewPlugin || id==(int)selectedFilterColl->count()-1)
 		{
 			fprintf(stderr, "[SwFilterMng]::%s:%d : will reset\n", __func__, __LINE__);
@@ -628,8 +630,7 @@ int SwFilterManager::removeFilter(swPluginView * pv)
 			if(!selectedFilterColl->isEmpty()) {
 				idEditPlugin = selectedFilterColl->count()-1;
 				idViewPlugin = idEditPlugin;
-			}
-			else {
+			} else {
 				idViewPlugin = -1;
 				idEditPlugin = -1;
 			}
@@ -801,6 +802,8 @@ void SwFilterManager::updateSelectedView()
 		  selectedFilterColl->count() ); fflush(stderr);
 
 	bool refresh = true;
+	bool a_plugin_crashed = false;
+
 	while(refresh) {
 		refresh = false;
 		int i = selectedFilterColl->count()-1;
@@ -819,7 +822,7 @@ void SwFilterManager::updateSelectedView()
 					fprintf(stderr, "SwFilterManager:%s:%d : filter %p died, removing it\n",
 							__func__, __LINE__,
 						   curF->filter); fflush(stderr);
-
+					a_plugin_crashed = true;
 					removeFilter(curF);
 					refresh = true;
 					break;
@@ -866,6 +869,10 @@ void SwFilterManager::updateSelectedView()
 	fprintf(stderr, "SwFilterManager:%s:%d : update display after %d filters\n",
 			__func__, __LINE__,
 		  selectedFilterColl->count() ); fflush(stderr);
+
+	if(a_plugin_crashed) {
+		emit selectedFilterChanged();
+	}
 	update();
 }
 
