@@ -54,56 +54,79 @@ public:
 	// loop for processing commands	
 	int loop();
 
-	/// buffers for data in
+	/// mBuffers for data in
 	unsigned char * data_in;
-	/// buffers for data out
+	/// mBuffers for data out
 	unsigned char * data_out;
 
 private:
+
+	// -- EXPORTED DATA --
+
+	// global properties
+	char * name;		///< Registered name of plugin
+	char * category;	///< Registered category of plugin (image, 2D...)
+	char * subcategory;	///< Subgategory
+
+	/// List of registered functions
+	swFunctionDescriptor * funcList;
+
+	/// Number of functions
+	int NbFunctions;
+
+
+	// -- COMMUNICATION DATA and functions --
     int size_in;
     int size_out;
-    int quit;
+	int quit;	///< quit command
     
-	// read parameters from file
+	/// read parameters from file
 	int readConfigurationFile();
 
-	// frame struct for dialog
+	/// frame struct for dialog
 	swFrame frame;
-	char * buffer;
+	/// Emitting/recepting buffer
+	char * mBuffer;
 	
-	// format output frame
+	/// format output frame
 	int formatFrame(char *frameDescriptor);
 	
-	// Export data to file or stdout
+	// -- export data or parameters to file or stdout --
+
+	/// Export data to file or stdout
 	int exportOutputToFile(char *filename);
+	/// Export output data to stdout (instead of stderr)
 	int exportOutputToStdout();
+	/// Export parameters to file (OBSOLETE, not implemented)
 	int exportParameters();
 	
 	// entry points : treatFrame
+
+	/// Process frame: parse command and data, and execute command
 	int treatFrame(char *frame, int framesize);
 	
-	/// writes function list to stdout
+	/// writes function list to stderr
 	char * sendFunctions();
 	
-	
-	unsigned long calculateChecksum();
+	/// Check data integrity (not implemented)
+	unsigned long computeChecksum();
+
+	/// Decode frame contents (not implemented)
 	int decodeFrame();
+
+	/** @brief Change a function parameter */
 	int setFunctionParameters(char *frame, int len);
+
+	/** @brief Call a registered function */
 	int processFunction(char *frame, int len);
 
-	// global properties
-	char * name;
-	char * category;
-	char * subcategory;
+
 	/// writes category frame to stdout
 	void sendCategory(); 
 	
+	/// send a message to parent process (through stdout)
 	int sendMessage(char * msg);
 	
-	// 
-	swFunctionDescriptor * funcList;
-	int NbFunctions;
-
 	
 	// For any function, returns
 	int sendFunctionDescriptor(int funcnum);
@@ -115,7 +138,7 @@ private:
 int swAllocateFrame(swFrame *current, int size);
 int swAddHeaderToFrame(swFrame * current);
 int swAddStringToFrame(swFrame *current, char *txt);
-int swAddBufferToFrame(swFrame * current, void * buffer, int size);
+int swAddBufferToFrame(swFrame * current, void * mBuffer, int size);
 int swAddSeparatorToFrame(swFrame *current);
 int swAddScalarToDescriptor(swFrame *current, char *name, unsigned char type, char *value);
 int swAddBooleanToDescriptor(swFrame *current, char *name, unsigned char type, bool value);
@@ -151,7 +174,7 @@ int swSendImage(int iFunc, swFrame * frame, swType outputType, void * data_out, 
 int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pcontinue = NULL);
 int debugWriteImage(char * filename, swImageStruct * pimage);
 
-int swReadFromPipe(unsigned char * buffer, u32 size, FILE * pipe, int timeout_ms);
+int swReadFromPipe(unsigned char * mBuffer, u32 size, FILE * pipe, int timeout_ms);
 
 	
 // FILE SECTION
