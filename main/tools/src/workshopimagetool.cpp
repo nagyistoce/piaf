@@ -786,7 +786,7 @@ void WorkshopImageTool::slotUpdateView()
 /////////////////////////////////////
 void WorkshopImageTool::slotSaveImage()
 {
-	savedImage = OrigImgRGB;
+	savedImage = ProcImgRGB;
 	fprintf(stderr, "WorkshopImageTool::%s:%d: %d x %d x%d !\n",
 			__func__, __LINE__,
 			savedImage.width(), savedImage.height(), savedImage.depth());

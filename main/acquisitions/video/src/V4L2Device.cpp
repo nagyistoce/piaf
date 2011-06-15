@@ -443,11 +443,16 @@ int V4L2Device::init_mmap() {
 	req.memory              = V4L2_MEMORY_MMAP;
 
 	if (-1 == xioctl(vd.fd, VIDIOC_REQBUFS, &req)) {
-		if (EINVAL == errno) {
-			fprintf (stderr, "%s does not support "
-					 "memory mapping\n", videodevice);
+		int errnum = errno;
+		if (EINVAL == errnum) {
+			fprintf (stderr, "%s:%d : %s does not support "
+					 "memory mapping => exit\n",
+					 __func__, __LINE__, videodevice); fflush(stderr);
 			exit (EXIT_FAILURE);
 		} else {
+			fprintf (stderr, "%s:%d : %s does not support "
+					 "memory mapping => exit\n",
+					 __func__, __LINE__, videodevice); fflush(stderr);
 			errno_exit ("VIDIOC_REQBUFS");
 		}
 	}
@@ -898,12 +903,13 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 	struct v4l2_format      v4l2Format;        // format use to set the device
 		memset(&v4l2Format, 0, sizeof(struct v4l2_format));
 	char * device_node = videodevice;
+
 	struct v4l2_frmsize_stepwise v4l2FrameSize;
-		memset(&v4l2FrameSize, 0, sizeof(struct v4l2_frmsize_stepwise));
+	memset(&v4l2FrameSize, 0, sizeof(struct v4l2_frmsize_stepwise));
 	
 	int v4l2fd = vd.fd;
 	struct v4l2_capability  v4l2Capabilities ; // Device capabilities
-		memset(&v4l2Capabilities, 0, sizeof(struct v4l2_capability));
+	memset(&v4l2Capabilities, 0, sizeof(struct v4l2_capability));
 	// get capabilities
 	if(-1 == ioctl(v4l2fd, VIDIOC_QUERYCAP, &v4l2Capabilities))
 	{
@@ -1013,7 +1019,74 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 		V4L2_printf(" - Input status   %d\n", v4l2Input.status) ;  // This field provides status information about the input. See Table 3 for flags. status is only valid when this is the current input.
 		v4l2Input.index ++ ;
 	}
-	
+
+
+#if 0
+	// FRAME SIZE
+	struct v4l2_frmsizeenum fsize;
+
+	memset(&fsize, 0, sizeof(fsize));
+	fsize.index = 0;
+	fsize.pixel_format = pixfmt;
+	while ((ret = xioctl(fd, VIDIOC_ENUM_FRAMESIZES, &fsize)) == 0)
+	{
+		fsize.index++;
+		if (fsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
+		{
+			printf("{ discrete: width = %u, height = %u }\n",
+					 fsize.discrete.width, fsize.discrete.height);
+
+			fsizeind++;
+			listVidFormats[fmtind-1].listVidCap = g_renew(VidCap,
+														  listVidFormats[fmtind-1].listVidCap,
+														  fsizeind);
+
+			listVidFormats[fmtind-1].listVidCap[fsizeind-1].width = fsize.discrete.width;
+			listVidFormats[fmtind-1].listVidCap[fsizeind-1].height = fsize.discrete.height;
+
+			ret = enum_frame_intervals(listVidFormats,
+									   pixfmt,
+									   fsize.discrete.width,
+									   fsize.discrete.height,
+									   fmtind,
+									   fsizeind,
+									   fd);
+
+			if (ret != 0) perror("  Unable to enumerate frame sizes");
+		}
+		else if (fsize.type == V4L2_FRMSIZE_TYPE_CONTINUOUS)
+		{
+			printf("{ continuous: min { width = %u, height = %u } .. "
+					 "max { width = %u, height = %u } }\n",
+					 fsize.stepwise.min_width, fsize.stepwise.min_height,
+					 fsize.stepwise.max_width, fsize.stepwise.max_height);
+			printf("  will not enumerate frame intervals.\n");
+		}
+		else if (fsize.type == V4L2_FRMSIZE_TYPE_STEPWISE)
+		{
+			printf("{ stepwise: min { width = %u, height = %u } .. "
+					 "max { width = %u, height = %u } / "
+					 "stepsize { width = %u, height = %u } }\n",
+					 fsize.stepwise.min_width, fsize.stepwise.min_height,
+					 fsize.stepwise.max_width, fsize.stepwise.max_height,
+					 fsize.stepwise.step_width, fsize.stepwise.step_height);
+			printf("  will not enumerate frame intervals.\n");
+		}
+		else
+		{
+			printf("  fsize.type not supported: %d\n", fsize.type);
+			printf("     (Discrete: %d   Continuous: %d  Stepwise: %d)\n",
+					   V4L2_FRMSIZE_TYPE_DISCRETE,
+					   V4L2_FRMSIZE_TYPE_CONTINUOUS,
+					   V4L2_FRMSIZE_TYPE_STEPWISE);
+		}
+	}
+	if (ret != 0 && errno != EINVAL)
+	{
+		perror("VIDIOC_ENUM_FRAMESIZES - Error enumerating frame sizes");
+		return errno;
+	}
+#endif
 	
 	// select video input : S-Video = index 3
 	int VideoInputIndex = 0 ;
@@ -2048,6 +2121,104 @@ int V4L2Device::v4l_setpalette(int pal)
  */
 int V4L2Device::v4l_setpicture(int br, int hue, int col, int cont, int white)
 {
+	int count = 20, ret, i;
+	struct v4l2_ext_control controls_list[20];
+	int hdevice = vd.fd;
+	struct v4l2_ext_controls ctrls;
+	memset(&ctrls, 0, sizeof(struct v4l2_ext_controls));
+
+	ctrls.ctrl_class = V4L2_CTRL_CLASS_USER; //current->class;
+	ctrls.count = count;
+	ctrls.controls = controls_list;
+	count = 35;
+	ret = xioctl(hdevice, VIDIOC_G_EXT_CTRLS, &ctrls);
+	if(ret)
+	{
+		printf("VIDIOC_G_EXT_CTRLS failed\n");
+		struct v4l2_control ctrl;
+		//get the controls one by one
+		//if( current->class == V4L2_CTRL_CLASS_USER)
+		{
+
+			printf("   using VIDIOC_G_CTRL for user class controls\n");
+			for(i=0; i < count && ctrl.id!=V4L2_CID_LASTP1; i++)
+			{
+				memset(&ctrl, 0, sizeof(struct v4l2_control));
+				ctrl.id = V4L2_CID_BRIGHTNESS + i; //clist[i].id;
+				ctrl.value = 0;
+				ret = xioctl(hdevice, VIDIOC_G_CTRL, &ctrl);
+				if(ret) {
+					int errnum = errno;
+					fprintf(stderr, "\t%s:%d: Control = %08lx=+%d failed with err=%d='%s'\n",
+						__func__, __LINE__,
+						(long unsigned int)ctrl.id, i,
+							errnum, strerror(errnum));
+					ctrls.count = 1;
+
+					struct v4l2_ext_control controls_list_item;
+					memset(&controls_list_item, 0, sizeof(v4l2_ext_control));
+					controls_list_item.id = ctrl.id;
+					controls_list_item.value = 0;
+					ctrls.controls = &controls_list_item;
+					ret = xioctl(hdevice, VIDIOC_G_EXT_CTRLS, &ctrls);
+					if(ret) {
+						 errnum = errno;
+						fprintf(stderr, "\t\t%s:%d: Control = %08lx=+%d failed with err=%d='%s'\n",
+							__func__, __LINE__,
+							(long unsigned int)ctrl.id, i,
+								errnum, strerror(errnum));
+					} else {
+						fprintf(stderr, "\t\t%s:%d: Control = %08lx=+%d succeed with val=%d\n",
+							__func__, __LINE__,
+							(long unsigned int)ctrl.id, i,
+							(int)controls_list_item.value);
+					}
+//					continue;
+				//clist[i].value = ctrl.value;
+				} else {
+					fprintf(stderr, "\t%s:%d: Control = %08lx => val=%lu\n",
+						__func__, __LINE__,
+						(long unsigned int)ctrl.id,
+						(long unsigned int)ctrl.value);
+				}
+			}
+		}
+//		else
+//		{
+////			printf("   using VIDIOC_G_EXT_CTRLS on single controls for class: 0x%08x\n",
+////				   current->class);
+//			for(i=0;i < count; i++)
+//			{
+//				ctrls.count = 1;
+//				ctrls.controls = &clist[i];
+//				ret = xioctl(hdevice, VIDIOC_G_EXT_CTRLS, &ctrls);
+//				if(ret)
+//					printf("control id: 0x%08x failed to get (error %i)\n",
+//						   clist[i].id, ret);
+//			}
+//		}
+	}
+
+//	struct v4l2_ext_controls ctrl;
+//	int errnum = errno;
+
+//	ctrl.id = V4L2_CID_AUTOGAIN;
+//	ctrl.value = 0;
+//	ret = xioctl(vd.fd, VIDIOC_G_CTRL, &ctrl);
+//	errnum = errno;
+//	fprintf(stderr, "%s:%d : control id: 0x%08x returned %d to get value (err=%d='%s')\n",
+//				__func__, __LINE__,
+//				ctrl.id, ret, ret, errnum, strerror(errnum));
+
+//	ctrl.id = V4L2_CID_EXPOSURE;
+//	ctrl.value = br;
+//	ret = xioctl(vd.fd, VIDIOC_G_EXT_CTRLS, &ctrl);
+//	errnum = errno;
+//	fprintf(stderr, "%s:%d : control id: 0x%08x returned %d to get value (err=%d='%s')\n",
+//				__func__, __LINE__,
+//				ctrl.id, ret, errnum, strerror(errnum));
+return ret;
+
 	if(br>=0)
 		vd.picture.brightness = br;
 	if(hue>=0)
@@ -2058,10 +2229,13 @@ int V4L2Device::v4l_setpicture(int br, int hue, int col, int cont, int white)
 		vd.picture.contrast = cont;
 	if(white>=0)
 		vd.picture.whiteness = white;
+
 	if(ioctl(vd.fd, VIDIOCSPICT, &(vd.picture)) < 0) {
 		perror("!\t!\t[V4L2]::v4l_setpicture:VIDIOCSPICT");
 		return -1;
 	}
+
+
 	return 0;
 }
 
