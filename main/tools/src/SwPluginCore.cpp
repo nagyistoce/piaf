@@ -40,8 +40,8 @@ void swPurgePipe(FILE *fR);
 #define SWPLUGIN_SIDE_PRINT		"PLUGIN-SIDE\t"
 #endif // 		SWPLUGIN_SIDE
 
-/// Size of frame buffer for communication with plugin
-#define SWPLUGINCORE_BUFFER_SIZE 4096
+/// Size of frame mBuffer for communication with plugin
+#define SWPLUGINCORE_mBuffer_SIZE 4096
 
 
 // Default constructor
@@ -57,10 +57,10 @@ SwPluginCore::SwPluginCore()
 	size_in = size_out = 0;
 
 	category = subcategory = name = NULL;
-	swAllocateFrame(&frame, SWPLUGINCORE_BUFFER_SIZE);
+	swAllocateFrame(&frame, SWPLUGINCORE_mBuffer_SIZE);
 
-	buffer = new char [SWPLUGINCORE_BUFFER_SIZE];
-	memset(buffer, 0, SWPLUGINCORE_BUFFER_SIZE*sizeof(char)); // for valgrind uninitialized test
+	mBuffer = new char [SWPLUGINCORE_mBuffer_SIZE];
+	memset(mBuffer, 0, SWPLUGINCORE_mBuffer_SIZE*sizeof(char)); // for valgrind uninitialized test
 
 
 }
@@ -69,11 +69,11 @@ SwPluginCore::SwPluginCore()
 // destructor
 SwPluginCore::~SwPluginCore()
 {
-	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : exec_name='%s' free buffer=%p\n",
-			__func__, __LINE__, name, buffer);
-	if(buffer) {
-		delete [] buffer;
-		buffer = NULL;
+	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : exec_name='%s' free mBuffer=%p\n",
+			__func__, __LINE__, name, mBuffer);
+	if(mBuffer) {
+		delete [] mBuffer;
+		mBuffer = NULL;
 	}
 
 	if(funcList) {
@@ -351,7 +351,7 @@ int SwPluginCore::sendFunctionDescriptor(int funcnum)
 int SwPluginCore::loop()
 {
 	quit = false;
-	buffer[0] = '\0'; // clear buffer
+	mBuffer[0] = '\0'; // clear mBuffer
 
 	// reads standard input then close
 	//fcntl(STDIN_FILENO, F_SETFL, fcntl(STDIN_FILENO, F_GETFL) | O_RDONLY & ~O_NONBLOCK);
@@ -359,14 +359,14 @@ int SwPluginCore::loop()
 	char *ret=NULL;
 	while(!quit)
 	{
-		buffer[0]='\0';
-		ret = fgets(buffer, SWPLUGINCORE_BUFFER_SIZE-1, stdin);
+		mBuffer[0]='\0';
+		ret = fgets(mBuffer, SWPLUGINCORE_mBuffer_SIZE-1, stdin);
 #ifdef __SWPLUGIN_DEBUG__
-		fprintf(stderr, SWPLUGIN_SIDE_PRINT "PLUGIN: (BUFSIZ=%d) Read buffer='%s'\n", BUFSIZ, buffer); fflush(stderr);
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "PLUGIN: (BUFSIZ=%d) Read mBuffer='%s'\n", BUFSIZ, mBuffer); fflush(stderr);
 #endif
-		if(ret && buffer[0] != '\0') {
-			buffer[strlen(buffer)] = '\0';
-			treatFrame(buffer, strlen(ret));
+		if(ret && mBuffer[0] != '\0') {
+			mBuffer[strlen(mBuffer)] = '\0';
+			treatFrame(mBuffer, strlen(ret));
 		}
 		else {
 			usleep(20000);
@@ -395,8 +395,9 @@ int SwPluginCore::sendMessage(char * msg)
 	swAddStringToFrame(&frame, msg);
 	swAddSeparatorToFrame(&frame);
 
-	// close and send
+	// close frame and send
 	swCloseFrame(&frame);
+
 	swSendFrame(&frame);
 
 	return 1;
@@ -409,11 +410,11 @@ int SwPluginCore::sendMessage(char * msg)
  * Description : decompose and classify frame for examining
  * YOU DO NOT NEED TO MODIFY THIS FUNCTION
  *****************************************************************/
-int SwPluginCore::treatFrame(char * framebuffer, int framesize)
+int SwPluginCore::treatFrame(char * framemBuffer, int framesize)
 {
 	// Decompose frame
 	//		look for header
-	char *header = strstr(framebuffer, SWFRAME_HEADER);
+	char *header = strstr(framemBuffer, SWFRAME_HEADER);
 	if(!header) // First arg =? SWFRAME_HEADER ??
 	{
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! SwPluginCore: Invalid header in treatFrame()\n");
@@ -485,14 +486,14 @@ fprintf(stderr, SWPLUGIN_SIDE_PRINT "sending function list...\n");
 	// Function call
 	if(strncmp(command, SWFRAME_SETFUNCTIONDESC, strlen(SWFRAME_SETFUNCTIONDESC)) == 0)
 	{
-		setFunctionParameters(arg, framesize - (arg - framebuffer) );
+		setFunctionParameters(arg, framesize - (arg - framemBuffer) );
 		return 1;
 	}
 
 	// Function call
 	if(strncmp(command, SWFRAME_PROCESSRESULT, strlen(SWFRAME_PROCESSRESULT)) == 0)
 	{
-		processFunction(arg, framesize - (arg - framebuffer) );
+		processFunction(arg, framesize - (arg - framemBuffer) );
 		return 1;
 	}
 
@@ -502,10 +503,10 @@ fprintf(stderr, SWPLUGIN_SIDE_PRINT "sending function list...\n");
 /*****************************************************************
  * Description : treat frame for executing an internal function
  *****************************************************************/
-int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
+int SwPluginCore::processFunction(char *framemBuffer, int )//unused len)
 {
-	// read function number, data type, data buffer
-	int indexFunction = atoi(framebuffer);
+	// read function number, data type, data mBuffer
+	int indexFunction = atoi(framemBuffer);
 	if(indexFunction >= NbFunctions) {
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> %s:%d : ERROR: Invalid function index # %d ...\n\n",
 				__func__, __LINE__,
@@ -519,7 +520,7 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 	#endif
 
 	// read data type
-	char * arg = framebuffer;
+	char * arg = framemBuffer;
 	char * arg2 = nextTab(arg);
 	arg = arg2;
 	arg2 = nextTab(arg);
@@ -539,8 +540,8 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 	// read data
 	switch (inputType) {
 	case swImage: {
-		// data is from this format : swImageStruct as binary field, then buffer
-		// we must read image struct to get buffer size, then read size
+		// data is from this format : swImageStruct as binary field, then mBuffer
+		// we must read image struct to get mBuffer size, then read size
 		// read struct
 		swImageStruct tmpStruct;
 		int timeout_ms = 100;
@@ -549,14 +550,14 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 			return 0;
 		}
 
-		// allocate buffer for input data
+		// allocate mBuffer for input data
 		int size = sizeof(swImageStruct) + tmpStruct.buffer_size + tmpStruct.metadata_size;
 
 #ifdef __SWPLUGIN_DEBUG__
 		// debug
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> SwPluginCore::%s:%d: Read image:"
 				 "\tSize : %dx%d"
-				 "\tbuffer_size=%ld"
+				 "\tmBuffer_size=%ld"
 				 "\tmetadata_size=%ld => size=%d\n",
 				 __func__, __LINE__,
 				 (int)tmpStruct.width, (int)tmpStruct.height,
@@ -577,7 +578,7 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 			pimage = (swImageStruct *)data_in;
 #ifdef __SWPLUGIN_DEBUG__
 			fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d Realloc data_in [ %d="
-					"sizeof(swImageStruct)=%d + buffer_size=%d + metadata_size=%d] \n",
+					"sizeof(swImageStruct)=%d + mBuffer_size=%d + metadata_size=%d] \n",
 					__func__, __LINE__,
 					size,
 					(int)sizeof(swImageStruct),
@@ -593,7 +594,7 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 #ifdef __SWPLUGIN_DEBUG__
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> SwPluginCore::%s:%d: copy header:"
 				 "\tSize : %dx%d"
-				 "\tbuffer_size=%ld metadata_size=%ld\n",
+				 "\tmBuffer_size=%ld metadata_size=%ld\n",
 				 __func__, __LINE__,
 				 (int)pimage->width,  (int)pimage->height,
 				 (long)pimage->buffer_size,
@@ -601,9 +602,9 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 				 ); fflush(stderr);
 #endif
 
-		// read info from stdin to buffer
+		// read info from stdin to mBuffer
 #ifdef __SWPLUGIN_DEBUG__
-		fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> SwPluginCore::%s:%d: reading image buffers.\n", __func__, __LINE__);
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> SwPluginCore::%s:%d: reading image mBuffers.\n", __func__, __LINE__);
 #endif
 		if(!swReadFromPipe((unsigned char *)pimage->buffer, (u32)(pimage->buffer_size),
 						   stdin, timeout_ms)) {
@@ -636,10 +637,10 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 	// check if output is allocated
 	switch (funcList[indexFunction].outputType) {
 	case swImage: {
-		// data is from this format : swImageStruct as binary field, then buffer
-		// we must read image struct to get buffer size, then read size
+		// data is from this format : swImageStruct as binary field, then mBuffer
+		// we must read image struct to get mBuffer size, then read size
 
-		// allocate buffer for data_out
+		// allocate mBuffer for data_out
 		swImageStruct * pimage = (swImageStruct *)data_out;
 		if(!data_out || size_out != size_in)
 		{
@@ -656,14 +657,14 @@ int SwPluginCore::processFunction(char *framebuffer, int )//unused len)
 			// Copy header
 			memcpy(data_out, data_in, sizeof(swImageStruct));
 
-			// Restore buffers
+			// Restore mBuffers
 			pimage->buffer = (unsigned char *)data_out + sizeof(swImageStruct);
 			pimage->metadata = (unsigned char *)data_out + sizeof(swImageStruct) + pimage->buffer_size;
 
 #ifdef __SWPLUGIN_DEBUG__
 			fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: data_out header : \n"
 					"\tSize : %dx%d\n"
-					"\tbuffer_size=%ld\n"
+					"\tmBuffer_size=%ld\n"
 					"\tmetadata_size=%ld\n",
 					__func__, __LINE__,
 					(int)pimage->width, (int)pimage->height,
@@ -733,7 +734,7 @@ void swPurgePipe(FILE *fR) {
 }
 
 
-int swReadFromPipe(unsigned char * buffer, u32 size,
+int swReadFromPipe(unsigned char * mBuffer, u32 size,
 				   FILE * pipe, int timeout_ms)
 {
 	if(!pipe) {
@@ -746,7 +747,7 @@ int swReadFromPipe(unsigned char * buffer, u32 size,
 	while(iter < itermax && index<size && pipe) {
 		iter++;
 
-		result = fread(buffer + index, sizeof(unsigned char), (size_t)(size-index),
+		result = fread(mBuffer + index, sizeof(unsigned char), (size_t)(size-index),
 				 pipe);
 
 		if(!result) {
@@ -758,7 +759,7 @@ int swReadFromPipe(unsigned char * buffer, u32 size,
 		}
 		else /*if(!ferror(pipe))*/ {
 #ifdef __SWPLUGIN_DEBUG__
-				fprintf(stderr, SWPLUGIN_SIDE_PRINT "\tread %lu/%d chars at index=%lu = 0x%02x\n", result, (size_t)(size-index), index, buffer[index]);
+				fprintf(stderr, SWPLUGIN_SIDE_PRINT "\tread %lu/%d chars at index=%lu = 0x%02x\n", result, (size_t)(size-index), index, mBuffer[index]);
 #endif
 				index += result;
 			}
@@ -767,7 +768,7 @@ int swReadFromPipe(unsigned char * buffer, u32 size,
 	{
 #ifdef __SWPLUGIN_DEBUG__
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "\tRead %lu bytes\n", (ulong)index);
-//		for(int k=0;k<index;k++) fprintf(stderr, SWPLUGIN_SIDE_PRINT "0x%02x ", *((unsigned char *)buffer + k));
+//		for(int k=0;k<index;k++) fprintf(stderr, SWPLUGIN_SIDE_PRINT "0x%02x ", *((unsigned char *)mBuffer + k));
 #endif
 		return 1;
 	}
@@ -780,7 +781,7 @@ int swReadFromPipe(unsigned char * buffer, u32 size,
 
 
 
-int swWriteToPipe(unsigned char * buffer, u32 size, FILE * pipe, int timeout_ms)
+int swWriteToPipe(unsigned char * mBuffer, u32 size, FILE * pipe, int timeout_ms)
 {
 	int iter=0;
 	int itermax = timeout_ms * 1000/TIMEOUT_STEP;
@@ -795,7 +796,7 @@ int swWriteToPipe(unsigned char * buffer, u32 size, FILE * pipe, int timeout_ms)
 			iter--;
 		}
 
-		result = fwrite(buffer + index, sizeof(unsigned char), tobewritten,
+		result = fwrite(mBuffer + index, sizeof(unsigned char), tobewritten,
 				 pipe);
 		fflush(pipe);
 
@@ -808,7 +809,7 @@ int swWriteToPipe(unsigned char * buffer, u32 size, FILE * pipe, int timeout_ms)
 #ifdef __SWPLUGIN_DEBUG__
 			fprintf(stderr, SWPLUGIN_SIDE_PRINT "\t%s:%d\twrote %lu/%d chars at index=%lu = 0x%02x\n",
 					__func__, __LINE__,
-					 (ulong)result, (int)(size-index), (ulong)index, buffer[index]);
+					 (ulong)result, (int)(size-index), (ulong)index, mBuffer[index]);
 #endif
 			if(result > 0) {
 				index += result;
@@ -825,7 +826,7 @@ int swWriteToPipe(unsigned char * buffer, u32 size, FILE * pipe, int timeout_ms)
 	{
 #ifdef __SWPLUGIN_DEBUG__
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "\tWrote %lu bytes\n", (ulong)index);
-//		for(int k=0;k<index;k++) fprintf(stderr, SWPLUGIN_SIDE_PRINT "0x%02x ", *((unsigned char *)buffer + k));
+//		for(int k=0;k<index;k++) fprintf(stderr, SWPLUGIN_SIDE_PRINT "0x%02x ", *((unsigned char *)mBuffer + k));
 #endif
 		return 1;
 	}
@@ -846,7 +847,7 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 #endif
 
 	// read image
-	char framebuffer[1024] = "";
+	char framemBuffer[1024] = "";
 	char * ret = NULL;
 	int iter=0;
 	int itermax = timeout_ms * 1000/TIMEOUT_STEP;
@@ -858,7 +859,7 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 
 	while(!ret && iter < itermax && !(*pstopnow)) {
 		iter++;
-		ret = fgets(framebuffer, 1024, fR);
+		ret = fgets(framemBuffer, 1024, fR);
 
 		if(!ret) {
 			int errnum = errno;
@@ -867,7 +868,7 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 					"!!!!!!! %s:%d : fread error %d=%s stopnow=%c\n",
 					__func__, __LINE__, errnum, strerror(errnum),
 					(*pstopnow)?'T':'F');
-			framebuffer[0] = 0;
+			framemBuffer[0] = 0;
 
 			if(errnum == EAGAIN && !(*pstopnow)) {
 				usleep(TIMEOUT_STEP);
@@ -883,8 +884,8 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 		return 0;
 	}
 
-	framebuffer[1023] = '\0';
-	char * header = strstr(framebuffer, SWFRAME_HEADER);
+	framemBuffer[1023] = '\0';
+	char * header = strstr(framemBuffer, SWFRAME_HEADER);
 
 	// First arg =? SWFRAME_HEADER ??
 	if( !header)
@@ -894,11 +895,11 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 				__func__, __LINE__);
 
 		// New reading
-		ret = fgets(framebuffer, 1024, fR);
+		ret = fgets(framemBuffer, 1024, fR);
 		if(ret>0) {
 
-			fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d RETRY : '%s'\n", __func__, __LINE__, framebuffer);
-			header = strstr(framebuffer, SWFRAME_HEADER);
+			fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d RETRY : '%s'\n", __func__, __LINE__, framemBuffer);
+			header = strstr(framemBuffer, SWFRAME_HEADER);
 			if(!header) {
 				fprintf(stderr, SWPLUGIN_SIDE_PRINT "FAILED -> returning 0\n");
 				swPurgePipe(fR);
@@ -947,12 +948,12 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 	// ok, we've got header and
 	// readimage  header
 	swImageStruct * imOut = (swImageStruct *)data_out;
-	unsigned char * buffer = (unsigned char *)imOut->buffer;
+	unsigned char * mBuffer = (unsigned char *)imOut->buffer;
 	unsigned char * metadata = (unsigned char *)imOut->metadata;
 	if(! swReadFromPipe((unsigned char *)imOut,
 		(u32) sizeof(swImageStruct),
 		fR, timeout_ms )) {
-		imOut->buffer = buffer;
+		imOut->buffer = mBuffer;
 
 
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d FAILED FOR swReceiveImage\n", __func__, __LINE__);
@@ -962,17 +963,17 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 	}
 
 	// Restore pointers to local values
-	imOut->buffer = buffer;
+	imOut->buffer = mBuffer;
 	imOut->metadata = metadata;
 
 	// debug
 #ifdef __SWPLUGIN_DEBUG__
-	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: received image %dx%d = buffer_size=%ld bytes metadata=%ld\n", __func__, __LINE__,
+	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: received image %dx%d = mBuffer_size=%ld bytes metadata=%ld\n", __func__, __LINE__,
 			(int)imOut->width, (int)imOut->height,
 			(long)imOut->buffer_size, (long)imOut->metadata_size);
 #endif
 
-	// Read image buffer from pipe
+	// Read image mBuffer from pipe
 	if(! swReadFromPipe((unsigned char *)imOut->buffer, (u32)imOut->buffer_size, fR, timeout_ms)) {
 
 		return 0;
@@ -1055,11 +1056,11 @@ int swSendImage(int iFunc, swFrame * frame, swType outputType, void * data_out, 
 		sprintf(txt, "%d\t%c\n", iFunc, *(char *)(&outputType));
 		swAddStringToFrame(frame, txt);
 
-		// send buffer
+		// send mBuffer
 		fwrite(frame->buffer, sizeof(unsigned char), frame->pos, fW);
 		fflush(fW);
 
-		// write image struct and buffer
+		// write image struct and mBuffer
 		swImageStruct * pimage = (swImageStruct *)data_out;
 
 		// send header
@@ -1067,7 +1068,7 @@ int swSendImage(int iFunc, swFrame * frame, swType outputType, void * data_out, 
 //		for(int k=0;k<sizeof(swImageStruct);k++) fprintf(stderr, SWPLUGIN_SIDE_PRINT "0x%02x ", *((unsigned char *)pimage + k));
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "&&&&&&&&&&&&&&&&&&\t%s:%d : send header :"
 				 "\tSize : %dx%d"
-				 "\tbuffer_size=%d metadata_size=%d metadata=%p\n",
+				 "\tmBuffer_size=%d metadata_size=%d metadata=%p\n",
 				 __func__, __LINE__,
 				 (int)pimage->width, (int)pimage->height,
 				 (int)pimage->buffer_size,
@@ -1078,16 +1079,16 @@ int swSendImage(int iFunc, swFrame * frame, swType outputType, void * data_out, 
 		fflush(fW);
 
 
-		// send image buffer
+		// send image mBuffer
 #ifdef __SWPLUGIN_DEBUG__
-		fprintf(stderr, SWPLUGIN_SIDE_PRINT "&&&&&&&&&&&&&&&&&&\t%s:%d: send buffer %d + metadata %d\n",
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "&&&&&&&&&&&&&&&&&&\t%s:%d: send mBuffer %d + metadata %d\n",
 				__func__, __LINE__, (int)pimage->buffer_size, (int)pimage->metadata_size
 				);
 #endif
 		if(!swWriteToPipe((unsigned char *)pimage->buffer,
 						  pimage->buffer_size,
 						  fW, 1000)) {
-			fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d : write failed ! for buffer_size=%d\n",
+			fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d : write failed ! for mBuffer_size=%d\n",
 					__func__, __LINE__, (int)pimage->buffer_size); fflush(stderr);
 			return 0;
 		}
@@ -1150,6 +1151,11 @@ int SwPluginCore::setFunctionParameters(char *frame, int //unused: len
 	//read function number
 	int indexFunction = atoi(frame);
 	if(indexFunction >= NbFunctions) {
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : "
+				"ERROR: invalid function index %d >= nbFunctions=%d...\n",
+				__func__, __LINE__,
+				indexFunction,
+				NbFunctions);
 		return 0;
 	}
 
@@ -1263,9 +1269,9 @@ int SwPluginCore::exportOutputToStdout()
  ***************************************************************************/
 int SwPluginCore::exportParameters()
 {
-/*	FILE *f;
+	/*
+	FILE *f;
 	char line[512] = "#";
-
 
 	// Open configuration file in default directory or in current firectory
 	if(( f = swFopen(SW_name_CFGFILE, "w")))
@@ -1450,11 +1456,11 @@ int swAddStringToFrame(swFrame *current, char *txt)
 	return 1;
 }
 
-int swAddBufferToFrame(swFrame *current, void * buffer, int size)
+int swAddBufferToFrame(swFrame *current, void * mBuffer, int size)
 {
 	if( current->pos + size >= current->maxlen) return 0;
 
-	memcpy(current->buffer + current->pos, buffer, size);
+	memcpy(current->buffer + current->pos, mBuffer, size);
 	current->pos += size;
 	*(current->buffer + current->pos) = '\0';
 	return 1;
@@ -1473,9 +1479,9 @@ int swAddImageToFrame(swFrame *current, swImageStruct * image)
 
 	// write struct descriptor
 	memcpy(current->buffer + current->pos, image, sizeof(swImageStruct));
-	// (we wrote address of buffer, which won't be used)
+	// (we wrote address of mBuffer, which won't be used)
 
-	// write image buffer
+	// write image mBuffer
 	memcpy(current->buffer + current->pos + sizeof(swImageStruct),
 		image->buffer, image->buffer_size);
 
@@ -1496,9 +1502,9 @@ int swAddMeasure1DToFrame(swFrame *current, swMeasure1DStruct * measure)
 
 	// write struct descriptor
 	memcpy(current->buffer + current->pos, measure, sizeof(swMeasure1DStruct));
-	// (we wrote address of buffer, which won't be used)
+	// (we wrote address of mBuffer, which won't be used)
 
-	// write image buffer
+	// write image mBuffer
 	memcpy(current->buffer + current->pos + sizeof(swMeasure1DStruct),
 		measure->buffer, measure->buffer_size);
 
