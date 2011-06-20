@@ -175,8 +175,9 @@ int SwPluginCore::registerFunctions(swFunctionDescriptor * list, int nbfunc)
 	// allocation
 	NbFunctions  = nbfunc;
 	if(NbFunctions) {
-		if(!funcList)
+		if(!funcList) {
 			funcList = new swFunctionDescriptor [ NbFunctions ];
+		}
 	}
 	else {
 		funcList = NULL;

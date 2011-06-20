@@ -26,8 +26,9 @@
 #include "OpenCVEncoder.h"
 
 BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
-		QMainWindow(parent),
-		ui(new Ui::BatchFiltersMainWindow)
+	QMainWindow(parent),
+	ui(new Ui::BatchFiltersMainWindow),
+	mSettings(PIAFBATCHSETTINGS)
 {
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
     ui->setupUi(this);
@@ -253,6 +254,8 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemSelectionChanged()
 
 void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem* treeItem, int column)
 {
+	if(!ui->viewButton->isChecked()) { return; }
+
 	fprintf(stderr, "[Batch] %s:%d \n",	__func__, __LINE__);
 	QList<t_batch_item *>::iterator it;
 	int idx = 0;
@@ -375,13 +378,24 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemActivated(QTreeWidgetItem* i
 
 void BatchFiltersMainWindow::on_filesTreeWidget_itemChanged(QTreeWidgetItem* item, int column)
 {
-	fprintf(stderr, "[Batch] %s:%d %p column=%d\n",	__func__, __LINE__, item,column );
+//	fprintf(stderr, "[Batch] %s:%d %p column=%d\n",	__func__, __LINE__, item,column );
 //	on_filesTreeWidget_itemClicked(item, column);
 }
+
+typedef struct {
+	int nb_total;
+	int nb_errors;
+	int nb_processed;
+
+} t_batch_progress;
+
 
 void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 {
 	QList<t_batch_item *>::iterator it;
+	t_batch_progress progress;
+	memset(&progress, 0, sizeof(t_batch_progress));
+
 	float processed = 0.f;
 	for(it = mFileList.begin(); it != mFileList.end(); ++it)
 	{
@@ -395,31 +409,28 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 			QString stateStr;
 			if(item->treeItem)
 			{
-				if(item->processing_state == UNPROCESSED)
+				// update icon
+				switch(item->processing_state)
 				{
+				default:
+				case UNPROCESSED:
 					pixIcon = QIcon(":/images/16x16/waiting.png");
 					stateStr = tr("Unprocessed");
 					break;
+				case PROCESSED:
+					pixIcon = QIcon(":/images/16x16/dialog-ok-apply.png");
+					stateStr = tr("Processed");
+					break;
+				case ERROR:
+					pixIcon = QIcon(":/images/16x16/dialog-error.png");
+					stateStr = tr("Error");
+					break;
+				case PROCESSING:
+					pixIcon = QIcon(":/images/16x16/system-run.png");
+					stateStr = tr("Processing");
+					break;
 				}
-				else {
-					// update icon
-					switch(item->processing_state)
-					{
-					default:
-					case PROCESSED:
-						pixIcon = QIcon(":/images/16x16/dialog-ok-apply.png");
-						stateStr = tr("Processed");
-						break;
-					case ERROR:
-						pixIcon = QIcon(":/images/16x16/dialog-error.png");
-						stateStr = tr("Error");
-						break;
-					case PROCESSING:
-						pixIcon = QIcon(":/images/16x16/system-run.png");
-						stateStr = tr("Processing");
-						break;
-					}
-				}
+
 
 				if(!pixIcon.isNull())
 				{
@@ -432,8 +443,30 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 
 			}
 		}
+
+
+
+		// update stats
+		switch(item->processing_state)
+		{
+		default:
+		case PROCESSED:
+			progress.nb_processed++;
+			break;
+		case ERROR:
+		case ERROR_READ:
+		case ERROR_PROCESS:
+			progress.nb_errors++;
+			break;
+		}
 	}
 
+	progress.nb_total = mFileList.count();
+
+	QString progressStr = tr("Proc: ") + QString::arg("%d", progress.nb_processed)
+			+ tr("Err: ") + QString::arg("%d", progress.nb_errors)
+			+ tr(" / ")  + QString::arg("%d", progress.nb_total);
+	ui->nbFilesLabel->setText(progressStr);
 	if(mBatchOptions.view_image)
 	{
 		IplImage * imgRGBdisplay = mBatchThread.getDisplayImage();
@@ -516,9 +549,11 @@ BatchFiltersThread::BatchFiltersThread()
 
 BatchFiltersThread::~BatchFiltersThread()
 {
-	mRun = false;
+	mRun = false; // tell thread to stop
 	while(mRunning)
 	{
+		fprintf(stderr, "[BatchThread]::%s:%d : waiting for thread to end up...\n",
+				__func__, __LINE__);
 		sleep(1);
 	}
 
@@ -539,6 +574,8 @@ void BatchFiltersThread::startProcessing(bool on)
 	mProcessing = on;
 }
 
+bool g_debug_BatchFiltersThread = false;
+
 void BatchFiltersThread::run()
 {
 	mRunning = true;
@@ -546,8 +583,10 @@ void BatchFiltersThread::run()
 
 	while(mRun)
 	{
-		fprintf(stderr, "BatchThread::%s:%d : processing='%c'\n", __func__, __LINE__,
-				mProcessing ? 'T':'F');
+		if(g_debug_BatchFiltersThread) {
+			fprintf(stderr, "BatchThread::%s:%d : processing='%c'\n", __func__, __LINE__,
+					mProcessing ? 'T':'F');
+		}
 		bool procnow = mProcessing;
 		if(procnow) {
 			if(!mpFileList) {
@@ -565,9 +604,11 @@ void BatchFiltersThread::run()
 					t_batch_item * item = (*it);
 					if(item->processing_state == UNPROCESSED)
 					{
-						fprintf(stderr, "BatchFiltersThread::%s:%d: file '%s' is not processed yet.\n",
+						if(g_debug_BatchFiltersThread) {
+							fprintf(stderr, "BatchFiltersThread::%s:%d: file '%s' is not processed yet.\n",
 								__func__, __LINE__,
 								item->absoluteFilePath.toAscii().data() );
+						}
 						at_least_one = true;
 					}
 				}
@@ -579,13 +620,17 @@ void BatchFiltersThread::run()
 			}
 		}
 
-		fprintf(stderr, "BatchThread::%s:%d => procnow='%c'\n", __func__, __LINE__,
-				procnow ? 'T':'F');
+		if(g_debug_BatchFiltersThread) {
+			fprintf(stderr, "BatchThread::%s:%d => procnow='%c'\n", __func__, __LINE__,
+					procnow ? 'T':'F');
+		}
 
 		if(!procnow)
 		{
 			::sleep(1);
-			fprintf(stderr, "BatchFiltersThread::%s:%d: wait for unlock\n", __func__, __LINE__);
+			if(g_debug_BatchFiltersThread) {
+				fprintf(stderr, "BatchFiltersThread::%s:%d: wait for unlock\n", __func__, __LINE__);
+			}
 		}
 		else
 		{
@@ -603,9 +648,11 @@ void BatchFiltersThread::run()
 				{
 					item->processing_state = PROCESSING;
 
-					fprintf(stderr, "BatchThread::%s:%d : processing '%s'...\n",
+					if(g_debug_BatchFiltersThread) {
+						fprintf(stderr, "BatchThread::%s:%d : processing '%s'...\n",
 							__func__, __LINE__,
 							item->absoluteFilePath.toAscii().data());
+					}
 
 					// Create movie player or load image
 					//IplImage * loadedImage = cvLoadImage => does not work
@@ -626,16 +673,19 @@ void BatchFiltersThread::run()
 
 					if(!loadedQImage.isNull() && item->processing_state != ERROR)
 					{
-						fprintf(stderr, "BatchThread::%s:%d : loaded '%s' as an image...\n",
+						if(g_debug_BatchFiltersThread) {
+							fprintf(stderr, "BatchThread::%s:%d : loaded '%s' as an image...\n",
 								__func__, __LINE__,
 								item->absoluteFilePath.toAscii().data());
+						}
 						if(mBatchOptions.reload_at_change
 						   || oldSize.width != loadedQImage.width()
 						   || oldSize.height != loadedQImage.height()
 						   || oldDepth != loadedQImage.depth()
 						   )
 						{
-							fprintf(stderr, "BatchThread::%s:%d : reload_at_change=%c "
+							if(g_debug_BatchFiltersThread) {
+								fprintf(stderr, "BatchThread::%s:%d : reload_at_change=%c "
 									"or size changed (%dx%dx%d => %dx%dx%d) "
 									"=> reload filter sequence\n",
 									__func__, __LINE__,
@@ -643,6 +693,7 @@ void BatchFiltersThread::run()
 									oldSize.width, oldSize.height, oldDepth,
 									loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
 									);
+							}
 							if(encoder) { delete encoder; encoder = NULL; }
 
 							// unload previously loaded filters
@@ -665,45 +716,46 @@ void BatchFiltersThread::run()
 
 						// Process this image with filters
 						int retproc = mpFilterManager->processImage(&image);
-						if(retproc)
+						if(retproc < 0)
 						{
-						}
+							item->processing_state = ERROR;
+						} else {
 
-
-						// Check if we need to record
-						if(mBatchOptions.record_output) {
-							QFileInfo fi(item->absoluteFilePath);
-							QString outFile = item->absoluteFilePath
-											  + "-" + mBatchOptions.sequence_name + "." + fi.extension();
-							loadedQImage.save(outFile);
-						}
-
-						// Check if we need to copy an image for display
-						if(mBatchOptions.view_image) {
-							if(mDisplayImage &&
-									( mDisplayImage->width!=loadedQImage.width()
-									 || mDisplayImage->height!=loadedQImage.height()
-									 || mDisplayImage->nChannels!=loadedQImage.depth()/8
-									 )) {
-								swReleaseImage(&mDisplayImage);
+							// Check if we need to record
+							if(mBatchOptions.record_output) {
+								QFileInfo fi(item->absoluteFilePath);
+								QString outFile = item->absoluteFilePath
+												  + "-" + mBatchOptions.sequence_name + "." + fi.extension();
+								loadedQImage.save(outFile);
 							}
 
-							if(!mDisplayImage) {
-								mDisplayImage = swCreateImage(cvSize(loadedQImage.width(), loadedQImage.height()),
-															  IPL_DEPTH_8U, loadedQImage.depth()/8);
-								cvSet(mDisplayImage, cvScalarAll(255));
-							}
+							// Check if we need to copy an image for display
+							if(mBatchOptions.view_image) {
+								if(mDisplayImage &&
+										( mDisplayImage->width!=loadedQImage.width()
+										 || mDisplayImage->height!=loadedQImage.height()
+										 || mDisplayImage->nChannels!=loadedQImage.depth()/8
+										 )) {
+									swReleaseImage(&mDisplayImage);
+								}
 
-							IplImage * imgHeader =  swCreateImageHeader(cvSize(loadedQImage.width(), loadedQImage.height()),
+								if(!mDisplayImage) {
+									mDisplayImage = swCreateImage(cvSize(loadedQImage.width(), loadedQImage.height()),
 																  IPL_DEPTH_8U, loadedQImage.depth()/8);
-							cvSetData(imgHeader, loadedQImage.bits(),
-									  loadedQImage.width()* loadedQImage.depth()/8);
-							cvCopy(imgHeader, mDisplayImage);
-							swReleaseImageHeader(&imgHeader);
-						}
+									cvSet(mDisplayImage, cvScalarAll(255));
+								}
 
-						// Set the state to processed
-						item->processing_state = PROCESSED;
+								IplImage * imgHeader =  swCreateImageHeader(cvSize(loadedQImage.width(), loadedQImage.height()),
+																	  IPL_DEPTH_8U, loadedQImage.depth()/8);
+								cvSetData(imgHeader, loadedQImage.bits(),
+										  loadedQImage.width()* loadedQImage.depth()/8);
+								cvCopy(imgHeader, mDisplayImage);
+								swReleaseImageHeader(&imgHeader);
+							}
+
+							// Set the state to processed
+							item->processing_state = PROCESSED;
+						}
 						item->progress = 1.f;
 
 					}
@@ -757,9 +809,11 @@ void BatchFiltersThread::run()
 
 								if(!read_frame)
 								{
-									fprintf(stderr, "BatchThread::%s:%d : File '%s' EOF\n",
+									if(g_debug_BatchFiltersThread) {
+										fprintf(stderr, "BatchThread::%s:%d : File '%s' EOF\n",
 											__func__, __LINE__, item->absoluteFilePath.toAscii().data()
 											);fflush(stderr);
+									}
 									resume = false;
 								} else {
 									int retproc = mpFilterManager->processImage(&image);
@@ -851,17 +905,23 @@ void BatchFiltersThread::run()
 
 			// Unload plugins
 			if(mpFilterManager) {
-				fprintf(stderr, "BatchFiltersThread::%s:%d: Unloading plugins on %p...\n", __func__, __LINE__,
+				if(g_debug_BatchFiltersThread) {
+					fprintf(stderr, "BatchFiltersThread::%s:%d: Unloading plugins on %p...\n", __func__, __LINE__,
 						mpFilterManager);
+				}
 				mpFilterManager->slotUnloadAll();
-				fprintf(stderr, "BatchFiltersThread::%s:%d: Unloaded plugins.\n", __func__, __LINE__); fflush(stderr);
+				if(g_debug_BatchFiltersThread) {
+					fprintf(stderr, "BatchFiltersThread::%s:%d: Unloaded plugins.\n", __func__, __LINE__); fflush(stderr);
+				}
 			}
 		}
 
 
 	}
 
-	fprintf(stderr, "BatchFiltersThread::%s:%d: Thread ended.\n", __func__, __LINE__);
+	if(g_debug_BatchFiltersThread) {
+		fprintf(stderr, "BatchFiltersThread::%s:%d: Thread ended.\n", __func__, __LINE__);
+	}
 	mRunning = false;
 }
 

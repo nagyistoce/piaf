@@ -122,6 +122,8 @@ private:
 	void readFunctionList();
 	/** Function list */
 	swFunctionDescriptor * funcList;
+
+	/** Number of functions */
 	int nb_func;
 
 	/* treat received framebuffer */
