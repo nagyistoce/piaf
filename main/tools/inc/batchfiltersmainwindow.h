@@ -27,6 +27,7 @@
 #include <QTreeWidgetItem>
 #include <QMutex>
 #include <QWaitCondition>
+#include <QSettings>
 
 #include "SwFilters.h"
 #include "swvideodetector.h"
@@ -35,7 +36,16 @@ namespace Ui {
     class BatchFiltersMainWindow;
 }
 
-typedef enum { UNPROCESSED, PROCESSING, PROCESSED, ERROR } enum_proc_state;
+typedef enum {
+	UNPROCESSED,
+	PROCESSING,
+	PROCESSED,
+	ERROR,
+	ERROR_READ,	///< Error while reading the file
+	ERROR_PROCESS	///< Error while processing the file
+} enum_proc_state;
+
+#define PIAFBATCHSETTINGS	"PiafBatch"
 
 
 /** \brief File item for batch processing
@@ -107,6 +117,8 @@ private:
 	QWaitCondition mWaitCondition; ///< wait condition for waiting loop
 	SwFilterManager * mpFilterManager;
 	IplImage * mDisplayImage;
+
+
 signals:
 	void signalFileProcessed(t_batch_item *);
 };
@@ -141,6 +153,11 @@ private:
 
 	BatchFiltersThread mBatchThread; ///< Batch processing thread
 	t_batch_options mBatchOptions;	///< batch processing options: greyscale, reload plugins, ...
+
+
+
+	/// Settings for saving last path, ...
+	QSettings mSettings;
 
 private slots:
 	/// Load a plugins list (plugin files + function + parameters)

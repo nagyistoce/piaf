@@ -50,7 +50,7 @@
 #include "piaf-common.h"
 
 #define DELETE_FILTER(_pv)	{ \
-				if((_pv)->filter) { \
+				if((_pv)->filter && (_pv)->indexFunction == 0) { \
 					delete (_pv)->filter; \
 				} \
 				if((_pv)->icon) { \
@@ -70,6 +70,8 @@
 
 #include <QWorkspace>
 
+bool g_debug_SwFilterManager = false;
+
 int SwSignalHandler::registerChild(int pid, SwFilter * filter) {
 
 	fprintf(stderr, "SwSignalHandler::registerChild(%d, '%s')...\n",
@@ -84,35 +86,52 @@ int SwSignalHandler::registerChild(int pid, SwFilter * filter) {
 	return 1;
 }
 
+bool g_debug_SwSignalHandler = false;
 int SwSignalHandler::killChild() {
 
 	sigFilter * sigF = NULL;
+
 	if(filterList.isEmpty()) {
 		fprintf(stderr, "SwSignalHandler::%s:%d : nothing in list => return 0 !\n", __func__, __LINE__);
 		return 0;
 	}
+
 	while(waitpid(-1, NULL, WNOHANG) >0) {
-		fprintf(stderr, "SwSignalHandler::%s:%d : waitpid>0 !\n", __func__, __LINE__);
+		if(g_debug_SwSignalHandler)  {
+			fprintf(stderr, "SwSignalHandler::%s:%d : waitpid>0 !\n", __func__, __LINE__);
+		}
 	}
+
 	for(sigF = filterList.first(); sigF; sigF = filterList.next()) {
-		fprintf(stderr, "SwSignalHandler::%s:%d: Testing child '%s' pid=%d...\n",
+		if(g_debug_SwSignalHandler)  {
+			fprintf(stderr, "SwSignalHandler::%s:%d: Testing child '%s' pid=%d...\n",
 				__func__, __LINE__,
 				sigF->pFilter->exec_name, sigF->pid);
+		}
 
 		if( kill(sigF->pid, SIGUSR1)<0)
 		{
 			int err = errno;
 			if(err == ESRCH) {
-				fprintf(stderr, "!! !! !! !! KILLING CHILD %d ('%s') !! !! !! !!\n",
-					sigF->pid, sigF->pFilter->exec_name);
+				if(g_debug_SwSignalHandler) {
+					fprintf(stderr, "!! !! !! !! KILLING CHILD %d ('%s') !! !! !! !!\n",
+						sigF->pid, sigF->pFilter->exec_name);
+				}
+
 				fflush(stderr);
 				int status = 0;
 
-				fprintf(stderr, "\tExited with WIFEXITED %d\n", WIFEXITED(status) );
-				fprintf(stderr, "\tExited with WEXITSTATUS %d\n", WEXITSTATUS(status) );
-				if(WIFSIGNALED(status))
-					fprintf(stderr, "\tExited because a signal were not caught\n");
+				int retWIFEXITED = WIFEXITED(status);
+				int retWEXITSTATUS = WEXITSTATUS(status);
+				if(g_debug_SwSignalHandler) {
+					fprintf(stderr, "\tExited with WIFEXITED %d\n", retWIFEXITED );
+					fprintf(stderr, "\tExited with WEXITSTATUS %d\n", retWEXITSTATUS );
+				}
 
+				if(WIFSIGNALED(status)) {
+				//	if(g_debug_SwSignalHandler)
+					fprintf(stderr, "\tExited because a signal were not caught\n");
+				}
 
 				sigF->pFilter->forceCloseConnection();
 //				filterList.remove(sigF);
@@ -124,8 +143,10 @@ int SwSignalHandler::killChild() {
 		}
 	}
 
-	fprintf(stderr, "SwSignalHandler::%s:%d : filter not found in list => return 0 !\n",
-			__func__, __LINE__);
+	if(g_debug_SwSignalHandler) {
+		fprintf(stderr, "SwSignalHandler::%s:%d : WARNING: filter not found in list => return 0 !\n",
+				__func__, __LINE__);
+	}
 
 	return 0;
 }
@@ -728,11 +749,8 @@ int SwFilterManager::loadFilter(char *filename, char *bIconname)
 	connect(newFilter, SIGNAL(signalDied(int)), this, SLOT(slotFilterDied(int)));
 
 	newFilter->setWorkspace(pWorkspace);
-	char *bIcon = NULL;
-	if(bIconname) {
-		bIcon = new char [strlen(bIconname)+1];
-		strcpy(bIcon, bIconname);
-	}
+
+
 
 	for(int i=0; i<newFilter->nbfunctions(); i++) {
 		swPluginView * pv = new swPluginView;
@@ -740,7 +758,11 @@ int SwFilterManager::loadFilter(char *filename, char *bIconname)
 		pv->availItem = NULL;
 		pv->filter = newFilter;
 		pv->indexFunction = i;
-		pv->icon = bIcon;
+
+		if(bIconname) {
+			pv->icon = new char [strlen(bIconname) + 2];
+			strcpy(pv->icon, bIconname);
+		}
 
 		fprintf(stderr, "[SwFilterMng]::%s:%d : append filter (exec='%s') / func [ %d/%d ]='%s'\n", __func__, __LINE__,
 				pv->filter->exec_name,
@@ -913,6 +935,7 @@ void SwFilterManager::slotAdd()
 				addFilter(newPV, -1);
 
 #ifdef __SWPLUGIN_MANAGER__
+				if(g_debug_SwFilterManager)
 				fprintf(stderr, "[SwFilterMngr]::%s:%d : Added filter '%s' \n", __func__, __LINE__,
 						newPV->filter->funcList[newPV->indexFunction].name);
 #endif
@@ -930,7 +953,10 @@ void SwFilterManager::slotAdd()
 
 void SwFilterManager::slotUnloadAll()
 {
-	fprintf(stderr, "SwFilterManager::%s:%d: unloading all plugins...\n", __func__,__LINE__);
+	if(g_debug_SwFilterManager) {
+		fprintf(stderr, "SwFilterManager::%s:%d: unloading all plugins...\n", __func__,__LINE__);
+	}
+
 	// looking for filter plugin
 	swPluginView * pv;
 	bool found = true;
@@ -947,7 +973,10 @@ void SwFilterManager::slotUnloadAll()
 				{
 					// then add it to selectedListView
 //#ifdef __SWPLUGIN_MANAGER__
-					fprintf(stderr, "\tDelete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
+					if(pv->indexFunction< pv->filter->nb_func) {
+						fprintf(stderr, "\tDelete filter '%s' \n",
+							pv->filter->funcList[pv->indexFunction].name);
+					}
 //#endif
 					// wait for process flag to go down
 					while(lockProcess) {
@@ -961,8 +990,9 @@ void SwFilterManager::slotUnloadAll()
 			}
 		}
 	}
-
-	fprintf(stderr, "SwFilterManager::%s:%d: unload of all plugins DONE\n", __func__,__LINE__);
+	if(g_debug_SwFilterManager) {
+		fprintf(stderr, "SwFilterManager::%s:%d: unload of all plugins DONE\n", __func__,__LINE__);
+	}
 }
 
 void SwFilterManager::slotDelete()
@@ -980,7 +1010,11 @@ void SwFilterManager::slotDelete()
 				{
 					// then add it to selectedListView
 #ifdef __SWPLUGIN_MANAGER__
-					fprintf(stderr, "Delete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
+					if(g_debug_SwFilterManager && pv->indexFunction<pv->filter->nb_func) {
+						fprintf(stderr, "\t%s:%d : Delete filter '%s' \n",
+								__func__, __LINE__,
+								pv->filter->funcList[pv->indexFunction].name);
+					}
 #endif
 					// wait for process flag to go down
 					while(lockProcess) {
@@ -999,7 +1033,9 @@ void SwFilterManager::slotDelete()
 
 void SwFilterManager::slotDeleteAll()
 {
-	fprintf(stderr, "[FilteRManager]::%s:%d : deleting all plugins...\n", __func__, __LINE__);
+	if(g_debug_SwFilterManager) {
+		fprintf(stderr, "[FilteRManager]::%s:%d : deleting all plugins...\n", __func__, __LINE__);
+	}
 
 	bool found = true;
 	while(found) {
@@ -1012,7 +1048,11 @@ void SwFilterManager::slotDeleteAll()
 				pv=selectedFilterColl->next())
 			{
 #ifdef __SWPLUGIN_MANAGER__
-				fprintf(stderr, "Delete filter '%s' \n", pv->filter->funcList[pv->indexFunction].name);
+				if(g_debug_SwFilterManager &&  pv->indexFunction<pv->filter->nb_func) {
+					fprintf(stderr, "[FilteRManager]::%s:%d : Delete filter '%s' \n",
+							__func__, __LINE__,
+							pv->filter->funcList[pv->indexFunction].name);
+				}
 #endif
 				// wait for process flag to go down
 				while(lockProcess) {
@@ -1048,13 +1088,22 @@ void SwFilterManager::slotUp()
 			idEditPlugin = id;
 			fid = id-1;
 #ifdef __SWPLUGIN_MANAGER__
-			printf("Up filter '%s' at %d\n", pv->filter->funcList[pv->indexFunction].name, fid);
+			if(g_debug_SwFilterManager) {
+				fprintf(stderr, "[FilteRManager]::%s:%d : "
+						"Up filter '%s' at %d\n",
+						__func__, __LINE__,
+						pv->filter->funcList[pv->indexFunction].name, fid);
+			}
 #endif
 		}
 		id++;
 	}
 	if(idEditPlugin<0 || fid<0) {
-		fprintf(stderr, "Up filter: cannot find or mount filter.\n");
+		if(g_debug_SwFilterManager) {
+			fprintf(stderr, "[FilteRManager]::%s:%d :
+					"Up filter: cannot find or mount filter.\n",
+					__func__, __LINE__);
+		}
 		return;
 	}
 
@@ -1065,7 +1114,6 @@ void SwFilterManager::slotUp()
 	idEditPlugin = fid;
 	updateSelectedView();
 
-	printf("UP!!!\n");
 	emit selectedFilterChanged();
 
 }
@@ -1999,13 +2047,16 @@ void SwFilter::init()
 
 	plugin_died = false;
 
-	comLock = false;
-	buffer = new char [BUFFER_SIZE];
-
 	// functions
 	funcList = NULL;
 	nb_func = 0;
 	childpid = 0;
+
+	comLock = false;
+	buffer = new char [BUFFER_SIZE];
+	memset(buffer, 0, sizeof(BUFFER_SIZE));
+
+
 
 	// pipes initialisation
 	pipeIn[0]  = 0;
