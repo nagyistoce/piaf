@@ -834,6 +834,7 @@ void SwFilterManager::updateSelectedView()
 
 	while(refresh) {
 		refresh = false;
+
 		int i = selectedFilterColl->count()-1;
 
 		if(!selectedFilterColl->isEmpty()) {
@@ -848,12 +849,12 @@ void SwFilterManager::updateSelectedView()
 						   curF->filter); fflush(stderr);
 				}
 
-				if(curF->filter && curF->filter->plugin_died){
+				if(curF->filter && curF->filter->plugin_died)
+				{
 					fprintf(stderr, "SwFilterManager:%s:%d : filter %p died, removing it\n",
 							__func__, __LINE__,
-						   curF->filter); fflush(stderr);
+						   curF->filter);
 					a_plugin_crashed = true;
-
 
 					if(!mNoWarning ) {
 						QString filename = QString(curF->filter->exec_name);
@@ -875,7 +876,6 @@ void SwFilterManager::updateSelectedView()
 				}
 
 				if(curF->filter && curF->filter->funcList) {
-					if(g_debug_SwFilterManager) {
 
 					curF->loaded = true;
 

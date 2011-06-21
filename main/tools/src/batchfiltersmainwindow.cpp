@@ -672,6 +672,7 @@ void BatchFiltersThread::run()
 			QList<t_batch_item *>::iterator it;
 			bool still_processing = false;
 			bool was_paused = false;
+
 			while(still_processing) {
 				still_processing = false;
 				was_paused = false;
@@ -958,7 +959,6 @@ void BatchFiltersThread::run()
 
 			// Unload plugins at end of list
 			if(mpFilterManager) {
-
 				if(g_debug_BatchFiltersThread) {
 					fprintf(stderr, "BatchFiltersThread::%s:%d: Unloading plugins on %p...\n", __func__, __LINE__,
 						mpFilterManager);
