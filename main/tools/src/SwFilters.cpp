@@ -76,7 +76,6 @@ bool g_debug_SwFilter = false;
 			}
 
 
-
 int SwSignalHandler::registerChild(int pid, SwFilter * filter) {
 
 	fprintf(stderr, "SwSignalHandler::registerChild(%d, '%s')...\n",
@@ -810,10 +809,11 @@ void SwFilterManager::updateSelectedView()
 	QPixmap check("check.png");
 	QPixmap uncheck("uncheck.png");
 
-
-	fprintf(stderr, "SwFilterManager:%s:%d : creating items for %d filters\n",
+	if(g_debug_SwFilterManager) {
+		fprintf(stderr, "SwFilterManager:%s:%d : creating items for %d filters\n",
 			__func__, __LINE__,
 		  selectedFilterColl->count() ); fflush(stderr);
+	}
 
 	int count = (int)selectedFilterColl->count()-1;
 	if(idViewPlugin > count) {
@@ -823,9 +823,11 @@ void SwFilterManager::updateSelectedView()
 		idEditPlugin = count;
 	}
 
-	fprintf(stderr, "SwFilterManager:%s:%d : creating items for %d filters\n",
-			__func__, __LINE__,
-		  selectedFilterColl->count() ); fflush(stderr);
+	if(g_debug_SwFilterManager) {
+		fprintf(stderr, "SwFilterManager:%s:%d : creating items for %d filters\n",
+				__func__, __LINE__,
+			  selectedFilterColl->count() ); fflush(stderr);
+	}
 
 	bool refresh = true;
 	bool a_plugin_crashed = false;
@@ -840,9 +842,11 @@ void SwFilterManager::updateSelectedView()
 			for(curF = selectedFilterColl->last();
 				curF; curF = selectedFilterColl->prev()) {
 
-				fprintf(stderr, "SwFilterManager:%s:%d : creating items for filter %p\n",
-						__func__, __LINE__,
-					   curF->filter); fflush(stderr);
+				if(g_debug_SwFilterManager) {
+					fprintf(stderr, "SwFilterManager:%s:%d : creating items for filter %p\n",
+							__func__, __LINE__,
+						   curF->filter); fflush(stderr);
+				}
 
 				if(curF->filter && curF->filter->plugin_died){
 					fprintf(stderr, "SwFilterManager:%s:%d : filter %p died, removing it\n",
@@ -871,9 +875,7 @@ void SwFilterManager::updateSelectedView()
 				}
 
 				if(curF->filter && curF->filter->funcList) {
-					fprintf(stderr, "\tSwFilterManager:%s:%d : creating items for filter : funcList=%p index=%d\n",
-							__func__, __LINE__,
-						   curF->filter->funcList, curF->indexFunction ); fflush(stderr);
+					if(g_debug_SwFilterManager) {
 
 					curF->loaded = true;
 
@@ -916,9 +918,12 @@ void SwFilterManager::updateSelectedView()
 		originalItem = NULL;
 	}
 
-	fprintf(stderr, "SwFilterManager:%s:%d : update display after %d filters\n",
-			__func__, __LINE__,
-		  selectedFilterColl->count() ); fflush(stderr);
+	if(g_debug_SwFilterManager) {
+		fprintf(stderr, "SwFilterManager:%s:%d : update display after %d filters\n",
+				__func__, __LINE__,
+				selectedFilterColl->count() );
+		fflush(stderr);
+	}
 
 	if(a_plugin_crashed) {
 		emit selectedFilterChanged();
@@ -1129,6 +1134,7 @@ void SwFilterManager::slotUp()
 					"Up filter: cannot find or mount filter.\n",
 					__func__, __LINE__);
 		}
+
 		return;
 	}
 
@@ -2280,9 +2286,10 @@ int SwFilter::loadChildProcess()
 		}
 	} while(!found && pos>0);
 
-	fprintf(stderr, "SwFilter::%s:%d : file='%s' => path='%s'\n", __func__, __LINE__,
+	if(g_debug_SwFilter) {
+		fprintf(stderr, "SwFilter::%s:%d : file='%s' => path='%s'\n", __func__, __LINE__,
 			exec_name, path );
-
+	}
 	// fork and
 	// Commmunication processing
 	if( pipe( pipeOut ) == -1 || pipe( pipeIn ) == -1)
