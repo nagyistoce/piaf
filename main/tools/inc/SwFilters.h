@@ -183,6 +183,7 @@ typedef struct _swPluginView {
 	char * icon;
 	int indexFunction;
 	bool enabled;
+	bool loaded;	///< plugin has been activated
 	Q3ListViewItem * availItem;
 	Q3ListViewItem * selItem;
 	QWidget * mwPluginEdit;
@@ -259,10 +260,13 @@ protected slots:
 
 
 private:
+	/// Buffer frame for communication with plugins
 	swFrame frame;
+
 	virtual void closeEvent(QCloseEvent*);
 
 	QWorkspace * pWorkspace;
+	bool mHasGUI;	///< Flag for GUI implementation: if false, does not load pixmaps or anything
 
 	// main window for filters
 	Q3MainWindow * filtersWindow;

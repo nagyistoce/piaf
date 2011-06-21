@@ -43,6 +43,7 @@ void swPurgePipe(FILE *fR);
 /// Size of frame mBuffer for communication with plugin
 #define SWPLUGINCORE_mBuffer_SIZE 4096
 
+bool g_debug_SwPluginCore = false;
 
 // Default constructor
 SwPluginCore::SwPluginCore()
@@ -69,8 +70,11 @@ SwPluginCore::SwPluginCore()
 // destructor
 SwPluginCore::~SwPluginCore()
 {
-	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : exec_name='%s' free mBuffer=%p\n",
+	if(g_debug_SwPluginCore) {
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : exec_name='%s' free mBuffer=%p\n",
 			__func__, __LINE__, name, mBuffer);
+	}
+
 	if(mBuffer) {
 		delete [] mBuffer;
 		mBuffer = NULL;
@@ -127,7 +131,9 @@ SwPluginCore::~SwPluginCore()
 
 //	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : swFreeFrame(%p)\n", __func__, __LINE__, &frame);
 	swFreeFrame(&frame);
-	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : deletion done\n", __func__, __LINE__);
+	if(g_debug_SwPluginCore) {
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d : deletion done\n", __func__, __LINE__);
+	}
 }
 
 
@@ -375,8 +381,9 @@ int SwPluginCore::loop()
 	}
 
 //#ifdef __SWPLUGIN_DEBUG__
-	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore: exit from loop !!\n");
-
+	if(g_debug_SwPluginCore) {
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore: exit from loop !!\n");
+	}
 //#endif
 	return 1;
 }
@@ -534,10 +541,12 @@ int SwPluginCore::processFunction(char *framemBuffer, int )//unused len)
 				(int)inputType, (int)funcList[indexFunction].inputType);
 		return 0;
 	}
-#ifdef __SWPLUGIN_DEBUG__
-	fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> SwPluginCore::%s:%d: Input type = %d\n",
-			__func__, __LINE__, (int)inputType);
-#endif
+	if(g_debug_SwPluginCore) {
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> SwPluginCore::%s:%d: Input type = %d\n",
+				__func__, __LINE__, (int)inputType);
+	}
+
+
 	// read data
 	switch (inputType) {
 	case swImage: {

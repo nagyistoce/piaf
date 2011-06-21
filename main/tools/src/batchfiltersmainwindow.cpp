@@ -81,6 +81,7 @@ void BatchFiltersMainWindow::changeEvent(QEvent *e)
     }
 }
 
+
 void BatchFiltersMainWindow::on_loadButton_clicked()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open plugin sequence file"),
@@ -237,6 +238,15 @@ void BatchFiltersMainWindow::on_playPauseButton_toggled(bool checked)
 		mDisplayTimer.setSingleShot(100);
 	}
 }
+
+
+void BatchFiltersMainWindow::on_reloadPluginCheckBox_stateChanged(int )
+{
+	mBatchOptions.reload_at_change = ui->reloadPluginCheckBox->isChecked();
+	mBatchThread.setOptions(mBatchOptions);
+}
+
+
 
 void BatchFiltersMainWindow::on_filesTreeWidget_itemSelectionChanged()
 {
@@ -450,6 +460,7 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 		switch(item->processing_state)
 		{
 		default:
+			break;
 		case PROCESSED:
 			progress.nb_processed++;
 			break;
@@ -462,14 +473,25 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 	}
 
 	progress.nb_total = mFileList.count();
+	QString procStr, errStr, totalStr;
+	procStr.sprintf("%d", progress.nb_processed);
+	ui->nbProcLabel->setText(procStr);
 
-	QString progressStr = tr("Proc: ") + QString::arg("%d", progress.nb_processed)
-			+ tr("Err: ") + QString::arg("%d", progress.nb_errors)
-			+ tr(" / ")  + QString::arg("%d", progress.nb_total);
-	ui->nbFilesLabel->setText(progressStr);
+	errStr.sprintf("%d", progress.nb_errors);
+	ui->nbErrLabel->setText(errStr);
+
+	totalStr.sprintf("%d", progress.nb_total);
+	ui->nbFilesLabel->setText(totalStr);
+
+	int progress_percent = (int)roundf(processed *100.f / (float)mFileList.count());
+	ui->progressBar->setValue(progress_percent);
+
+
+	// display current processed image if needed
 	if(mBatchOptions.view_image)
 	{
 		IplImage * imgRGBdisplay = mBatchThread.getDisplayImage();
+
 		if(imgRGBdisplay) {
 
 //			if(imgRGBdisplay->nChannels == 4 && imgRGBdisplay->imageData[0]==0)
@@ -520,8 +542,6 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 		}
 	}
 
-	int progress = (int)(processed *100.f / (float)mFileList.count());
-	ui->progressBar->setValue(progress);
 }
 
 
@@ -818,8 +838,60 @@ void BatchFiltersThread::run()
 								} else {
 									int retproc = mpFilterManager->processImage(&image);
 
+									if(retproc < 0) {
+										// Set the state to processing error
+										item->processing_state = ERROR_PROCESS;
 
+									}
+									else {
 
+										// Check if we need to record
+										if(mBatchOptions.record_output) {
+											if(!encoder) {
+												QFileInfo fi(item->absoluteFilePath);
+												QString outputFile = item->absoluteFilePath
+																  + "-" + mBatchOptions.sequence_name + ".avi";
+												encoder = new OpenCVEncoder(loadedImage->width,
+																			loadedImage->height,
+																			(int)roundf(fva->getFrameRate()));
+												encoder->startEncoder(outputFile.toUtf8().data());
+											}
+
+											if(encoder) {
+												switch(loadedImage->nChannels)
+												{
+												default:
+													break;
+												case 3:
+													encoder->encodeFrameRGB24((uchar *)loadedImage->imageData);
+													break;
+												case 4:
+													encoder->encodeFrameRGB32((uchar *)loadedImage->imageData);
+													break;
+												case 1:
+													encoder->encodeFrameY((uchar *)loadedImage->imageData);
+													break;
+												}
+
+											}
+										}
+
+										// Check if we need to copy an image for display
+										if(mBatchOptions.view_image) {
+											if(mDisplayImage && (mDisplayImage->widthStep!=loadedImage->widthStep || mDisplayImage->height!=loadedImage->height)) {
+												swReleaseImage(&mDisplayImage);
+											}
+											if(!mDisplayImage) {
+												mDisplayImage = cvCloneImage(loadedImage);
+											}
+											else {
+												//fprintf(stderr, "disp=%dx%dx%d", mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
+												cvCopy(loadedImage, mDisplayImage);
+											}
+										}
+									}
+
+									// compute progress
 									if(fva->getFileSize()>0) {
 										item->progress = (float)fva->getAbsolutePosition()/
 													 (float)fva->getFileSize();
@@ -829,63 +901,22 @@ void BatchFiltersThread::run()
 //												item->progress * 100.f
 //												);
 									}
-
-									// Check if we need to record
-									if(mBatchOptions.record_output) {
-										if(!encoder) {
-											QFileInfo fi(item->absoluteFilePath);
-											QString outputFile = item->absoluteFilePath
-															  + "-" + mBatchOptions.sequence_name + ".avi";
-											encoder = new OpenCVEncoder(loadedImage->width,
-																		loadedImage->height,
-																		(int)roundf(fva->getFrameRate()));
-											encoder->startEncoder(outputFile.toUtf8().data());
-										}
-
-										if(encoder) {
-											switch(loadedImage->nChannels)
-											{
-											default:
-												break;
-											case 3:
-												encoder->encodeFrameRGB24((uchar *)loadedImage->imageData);
-												break;
-											case 4:
-												encoder->encodeFrameRGB32((uchar *)loadedImage->imageData);
-												break;
-											case 1:
-												encoder->encodeFrameY((uchar *)loadedImage->imageData);
-												break;
-											}
-
-										}
-									}
-
-									// Check if we need to copy an image for display
-									if(mBatchOptions.view_image) {
-										if(mDisplayImage && (mDisplayImage->widthStep!=loadedImage->widthStep || mDisplayImage->height!=loadedImage->height)) {
-											swReleaseImage(&mDisplayImage);
-										}
-										if(!mDisplayImage) {
-											mDisplayImage = cvCloneImage(loadedImage);
-										}
-										else {
-											//fprintf(stderr, "disp=%dx%dx%d", mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
-											cvCopy(loadedImage, mDisplayImage);
-										}
-									}
-
 								}
-
-
 							}
+
 							// Set the state to processed
-							item->processing_state = PROCESSED;
+							if(item->processing_state == PROCESSING) {
+								item->processing_state = PROCESSED;
+							}
+
 							item->progress = 1.f;
-							fprintf(stderr, "File '%s' PROCESSED : progress= %4.2f %%",
+
+							fprintf(stderr, "File '%s' %s : progress= %4.2f %%",
 									item->absoluteFilePath.toAscii().data(),
+									item->processing_state == PROCESSED ? "PROCESSED" : "ERROR_PROCESS",
 									item->progress * 100.f
 									);
+
 							swReleaseImage(&loadedImage);
 						}
 					}
@@ -899,17 +930,20 @@ void BatchFiltersThread::run()
 					}
 
 				}
-			}
+			} // end of iterator on file list
 
 			if(encoder) { delete encoder; encoder = NULL; }
 
-			// Unload plugins
+			// Unload plugins at end of list
 			if(mpFilterManager) {
+
 				if(g_debug_BatchFiltersThread) {
 					fprintf(stderr, "BatchFiltersThread::%s:%d: Unloading plugins on %p...\n", __func__, __LINE__,
 						mpFilterManager);
 				}
+
 				mpFilterManager->slotUnloadAll();
+
 				if(g_debug_BatchFiltersThread) {
 					fprintf(stderr, "BatchFiltersThread::%s:%d: Unloaded plugins.\n", __func__, __LINE__); fflush(stderr);
 				}
@@ -926,9 +960,4 @@ void BatchFiltersThread::run()
 }
 
 
-void BatchFiltersMainWindow::on_reloadPluginCheckBox_stateChanged(int )
-{
-	mBatchOptions.reload_at_change = ui->reloadPluginCheckBox->isChecked();
-	mBatchThread.setOptions(mBatchOptions);
-}
 
