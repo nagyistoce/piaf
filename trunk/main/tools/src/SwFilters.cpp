@@ -49,6 +49,13 @@
 //#include "videocapture.h"
 #include "piaf-common.h"
 
+
+#include <QWorkspace>
+bool g_debug_SwSignalHandler = false;
+bool g_debug_SwFilterManager = false;
+bool g_debug_SwFilter = false;
+
+/// Delete a filter in manager (parameters and widgets)
 #define DELETE_FILTER(_pv)	{ \
 				if((_pv)->filter && (_pv)->indexFunction == 0) { \
 					delete (_pv)->filter; \
@@ -68,9 +75,7 @@
 				delete (_pv); \
 			}
 
-#include <QWorkspace>
 
-bool g_debug_SwFilterManager = false;
 
 int SwSignalHandler::registerChild(int pid, SwFilter * filter) {
 
@@ -86,7 +91,6 @@ int SwSignalHandler::registerChild(int pid, SwFilter * filter) {
 	return 1;
 }
 
-bool g_debug_SwSignalHandler = false;
 int SwSignalHandler::killChild() {
 
 	sigFilter * sigF = NULL;
@@ -183,6 +187,7 @@ SwFilterManager::SwFilterManager(VideoCaptureDoc * vdoc,
 {
 	pWorkspace = NULL;
 	doc = vdoc;
+	mHasGUI = false;
 	init();
 
 	hide();
@@ -194,6 +199,7 @@ SwFilterManager::SwFilterManager(QWidget* pparent, const char *name, Qt::WFlags 
 {
 	pWorkspace = NULL;
 	doc = NULL;
+	mHasGUI = false;
 
   //  doc=vdoc;
 	init();
@@ -214,12 +220,14 @@ void SwFilterManager::setWorkspace(QWorkspace * wsp) {
 
 	if(pWorkspace) {
 		((QWorkspace *)pWorkspace)->addWindow((QWidget *)this);
+		mHasGUI = true;
+
+
+		QPixmap winIcon = QPixmap(BASE_DIRECTORY "images/pixmaps/IconFilters.png");
+		setIcon(winIcon);
 
 		show();
 	}
-
-	QPixmap winIcon = QPixmap(BASE_DIRECTORY "images/pixmaps/IconFilters.png");
-	setIcon(winIcon);
 
 }
 
@@ -621,19 +629,27 @@ int SwFilterManager::removeFilter(swPluginView * pv)
 					pv);
 		}
 
-		fprintf(stderr, "%s:%d : removing...\n", __func__, __LINE__);
 		if(pv->selItem) {
+			if(g_debug_SwFilterManager) {
+				fprintf(stderr, "%s:%d : removing selItem...\n", __func__, __LINE__);
+			}
 			selectedListView->removeItem(pv->selItem);
 			pv->selItem = NULL;
 		}
 
-		fprintf(stderr, "%s:%d : removing item...\n", __func__, __LINE__);
+		if(g_debug_SwFilterManager) {
+			fprintf(stderr, "%s:%d : removing from selectedFilterColl...\n", __func__, __LINE__);
+		}
 		r = selectedFilterColl->remove(pv);
 
-		fprintf(stderr, "%s:%d : removing pv...\n", __func__, __LINE__);
+		if(g_debug_SwFilterManager) {
+			fprintf(stderr, "%s:%d : deleting...\n", __func__, __LINE__);
+		}
 
 		DELETE_FILTER(pv);
-		fprintf(stderr, "%s:%d : removed...\n", __func__, __LINE__);
+		if(g_debug_SwFilterManager) {
+			fprintf(stderr, "%s:%d : deleted.\n", __func__, __LINE__);
+		}
 
 		if(reset){
 			if(!selectedFilterColl->isEmpty()) {
@@ -859,23 +875,28 @@ void SwFilterManager::updateSelectedView()
 							__func__, __LINE__,
 						   curF->filter->funcList, curF->indexFunction ); fflush(stderr);
 
-					curF->selItem = new Q3ListViewItem(selectedListView,
-						curF->filter->funcList[curF->indexFunction].name, "" );
-					if(curF->enabled) {
-						curF->selItem->setPixmap(1, check);
-					} else {
-						curF->selItem->setPixmap(1, uncheck);
+					curF->loaded = true;
+
+					if(mHasGUI) { // create display for selected item
+						curF->selItem = new Q3ListViewItem(selectedListView,
+							curF->filter->funcList[curF->indexFunction].name, "" );
+						if(curF->enabled) {
+							curF->selItem->setPixmap(1, check);
+						} else {
+							curF->selItem->setPixmap(1, uncheck);
+						}
+
+						if(i == idViewPlugin) {
+							curF->selItem->setPixmap(2, eye);
+						}
+						else
+							if(i<idViewPlugin)
+								curF->selItem->setPixmap(2, eye_grey);
+
+						if(i == idEditPlugin)
+							selectedListView->setSelected(curF->selItem, true);
 					}
 
-					if(i == idViewPlugin) {
-						curF->selItem->setPixmap(2, eye);
-					}
-					else
-						if(i<idViewPlugin)
-							curF->selItem->setPixmap(2, eye_grey);
-
-					if(i == idEditPlugin)
-						selectedListView->setSelected(curF->selItem, true);
 					i--;
 				}
 				else
@@ -886,11 +907,14 @@ void SwFilterManager::updateSelectedView()
 		}
 	}
 
-	// create an item to visualize original item
-	fprintf(stderr, "SwFilterManager:%s:%d : creating root item after %d filters\n",
-			__func__, __LINE__,
-		  selectedFilterColl->count() ); fflush(stderr);
-	originalItem = new Q3ListViewItem( selectedListView, tr("Original") );
+	if(mHasGUI) {	// create an item to visualize original item
+		fprintf(stderr, "SwFilterManager:%s:%d : creating root item after %d filters\n",
+				__func__, __LINE__,
+			  selectedFilterColl->count() ); fflush(stderr);
+		originalItem = new Q3ListViewItem( selectedListView, tr("Original") );
+	} else {
+		originalItem = NULL;
+	}
 
 	fprintf(stderr, "SwFilterManager:%s:%d : update display after %d filters\n",
 			__func__, __LINE__,
@@ -899,6 +923,7 @@ void SwFilterManager::updateSelectedView()
 	if(a_plugin_crashed) {
 		emit selectedFilterChanged();
 	}
+
 	update();
 }
 
@@ -969,7 +994,7 @@ void SwFilterManager::slotUnloadAll()
 				pv && !found;  // use !found to restart at every iteration
 				pv = selectedFilterColl->next())
 			{
-				if(  pv->selItem  )
+				if(  pv->loaded  )
 				{
 					// then add it to selectedListView
 //#ifdef __SWPLUGIN_MANAGER__
@@ -1006,7 +1031,7 @@ void SwFilterManager::slotDelete()
 		{
 			for(pv=selectedFilterColl->first(); pv && !found; pv=selectedFilterColl->next())
 			{
-				if(  selectedListView->isSelected(pv->selItem) )
+				if( pv->selItem && selectedListView->isSelected(pv->selItem) )
 				{
 					// then add it to selectedListView
 #ifdef __SWPLUGIN_MANAGER__
@@ -1100,7 +1125,7 @@ void SwFilterManager::slotUp()
 	}
 	if(idEditPlugin<0 || fid<0) {
 		if(g_debug_SwFilterManager) {
-			fprintf(stderr, "[FilteRManager]::%s:%d :
+			fprintf(stderr, "[FilteRManager]::%s:%d: "
 					"Up filter: cannot find or mount filter.\n",
 					__func__, __LINE__);
 		}
@@ -1131,7 +1156,7 @@ void SwFilterManager::slotDown()
 	if(!selectedFilterColl->isEmpty())
 	for(pv=selectedFilterColl->first(); pv && idEditPlugin<0; pv=selectedFilterColl->next())
 	{
-		if(  selectedListView->isSelected(pv->selItem) )
+		if( pv->selItem && selectedListView->isSelected(pv->selItem) )
 		{
 			sel = pv;
 			fid = id+1;
@@ -1224,6 +1249,8 @@ void SwFilterManager::simpleClic(Q3ListViewItem * item)
 
 void SwFilterManager::doubleClic(Q3ListViewItem * item)
 {
+	if(!item) { return; }
+
 	// look for selected item
 	swPluginView * pv;
 
@@ -1263,7 +1290,7 @@ void SwFilterManager::slotEdit()
 	if(!selectedFilterColl->isEmpty()) {
 		for(pv=selectedFilterColl->first(); pv && idEditPlugin<0; pv=selectedFilterColl->next())
 		{
-			if(  selectedListView->isSelected(pv->selItem) )
+			if( pv->selItem && selectedListView->isSelected(pv->selItem) )
 			{
 				idEditPlugin = id;
 				pEditPlugin = pv;
@@ -1513,7 +1540,7 @@ void SwFilterManager::slotTime() {
 	if(!selectedFilterColl->isEmpty())
 	for(pv=selectedFilterColl->first(); pv && idEditPlugin<0; pv=selectedFilterColl->next())
 	{
-		if(  selectedListView->isSelected(pv->selItem) )
+		if( pv->selItem && selectedListView->isSelected(pv->selItem) )
 		{
 			idEditPlugin = id;
 			pEditPlugin = pv;
@@ -1642,7 +1669,7 @@ void SwFilterManager::slotDisable()
 	if(!selectedFilterColl->isEmpty())
 	for(pv=selectedFilterColl->first(); pv && idEditPlugin<0; pv=selectedFilterColl->next())
 	{
-		if(  selectedListView->isSelected(pv->selItem) )
+		if(pv->selItem &&  selectedListView->isSelected(pv->selItem) )
 		{
 			idEditPlugin = id;
 			sel = pv;
@@ -1842,6 +1869,7 @@ int SwFilterManager::loadFilterList(char * filename)
 
 			newPV->indexFunction = id;
 			newPV->enabled = true;
+			newPV->loaded = false;
 
 			// No widget at start
 			newPV->mwPluginEdit = NULL;
@@ -2125,8 +2153,9 @@ int SwFilter::destroy() {
 		fclose(pipeR);
 	}
 	pipeR = NULL;
-	fprintf(stderr, "[SwFilter]::%s:%d : DESTROYed SwFilter %p.\n", __func__, __LINE__, this);
-
+	if(g_debug_SwFilter) {
+		fprintf(stderr, "[SwFilter]::%s:%d : DESTROYed SwFilter %p.\n", __func__, __LINE__, this);
+	}
 	return 1;
 }
 // signal handling

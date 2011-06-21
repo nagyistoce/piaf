@@ -658,15 +658,17 @@ void WorkshopApp::initActions()
 	configAction->setStatusTip(tr("Launch the configuration dialog"));
 	configAction->setWhatsThis(tr("Configuration dialog\nDefines working directories and options."));
 	if(pixIcon.load(":images/16x16/configure.png" )) {
-		configAction->setIcon(pixIcon);}
+		configAction->setIcon(pixIcon);
+	}
 	connect(configAction, SIGNAL(activated()), this, SLOT(slotConfigurator()));
 
 	// Plugin action
 	pluginAction = new QAction(tr("Plugins"), tr("&Plugins"), this, "plugin");
 	pluginAction->setStatusTip(tr("Launch the plugin list dialog"));
 	pluginAction->setWhatsThis(tr("Plugin list dialog\nEdition of plugin list."));
-	if(pixIcon.load(":images/pixmaps/filter.png" )) {
-		pluginAction->setIcon(pixIcon);}
+	if(pixIcon.load(":images/pixmaps/filter.png")) {
+		pluginAction->setIcon(pixIcon);
+	}
 	connect(pluginAction, SIGNAL(activated()), this, SLOT(slotPluginDialog()));
 
 }
