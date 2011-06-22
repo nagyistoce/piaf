@@ -36,9 +36,12 @@ BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
 	// dont' show warning on plugin crash
 	mFilterManager.hide();
 	mFilterManager.enableWarning(false);
+	mFilterManager.enableAutoReloadSequence(true);
+
 
 	mPreviewFilterManager.hide();
 	mPreviewFilterManager.enableWarning(false);
+	mPreviewFilterManager.enableAutoReloadSequence(true);
 
 	ui->controlGroupBox->setEnabled(false);
 
@@ -113,8 +116,11 @@ void BatchFiltersMainWindow::on_addButton_clicked()
 							 NULL,
 							 tr("Select one or more image or movie files to open"),
 							 mLastDirName,
-							 tr("Images (*.png *.xpm *.jpg *.jpeg *.bmp *.tif*);;"
-								"Movies (*.mpg *.avi *.wmv *.mov)"));
+							 tr("Images or movies") + "(*.png *.xpm *.jpg *.jpeg *.bmp *.tif*"
+								"*.mpg *.avi *.wmv *.mov);;"
+								+ tr("Images") + " (*.png *.xpm *.jpg *.jpeg *.bmp *.tif*);;"
+								+ tr("Movies") + " (*.mpg *.avi *.wmv *.mov)"
+								);
 /*
 	fileName = Q3FileDialog::getOpenFileName(imageDirName,
 											 "Images (*.png *.jpg *.jpeg *.bmp *.tif*)", this,
@@ -219,6 +225,7 @@ void BatchFiltersMainWindow::on_playPauseButton_toggled(bool checked)
 {
 	ui->recordButton->setEnabled(!checked);
 	ui->greyButton->setEnabled(!checked);
+	ui->buttonsWidget->setEnabled(!checked);
 
 	if(checked)
 	{
@@ -436,11 +443,11 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 					stateStr = tr("Error");
 					break;
 				case ERROR_PROCESS:
-					pixIcon = QIcon(":/images/16x16/dialog-error.png");
+					pixIcon = QIcon(":/images/16x16/dialog-error-process.png");
 					stateStr = tr("Error proc");
 					break;
 				case ERROR_READ:
-					pixIcon = QIcon(":/images/16x16/dialog-error.png");
+					pixIcon = QIcon(":/images/16x16/dialog-error-read.png");
 					stateStr = tr("Error file");
 					break;
 				case PROCESSING:
@@ -670,7 +677,7 @@ void BatchFiltersThread::run()
 
 			// Process file
 			QList<t_batch_item *>::iterator it;
-			bool still_processing = false;
+			bool still_processing = true;
 			bool was_paused = false;
 
 			while(still_processing) {
@@ -860,10 +867,10 @@ void BatchFiltersThread::run()
 										if(retproc < 0) {
 											// Set the state to processing error
 											item->processing_state = ERROR_PROCESS;
-
+											// but it may be reloaded on next frame
 										}
 										else {
-
+											item->processing_state = PROCESSING;
 											// Check if we need to record
 											if(mBatchOptions.record_output) {
 												if(!encoder) {
