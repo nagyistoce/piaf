@@ -213,8 +213,6 @@ class SwFilterManager : public Q3MainWindow
 
 public:
 	/** Constructor */
-	SwFilterManager(VideoCaptureDoc * vdoc, QWidget* pparent = NULL, const char *name = NULL, Qt::WFlags  wflags = 0);
-	/** Constructor */
 	SwFilterManager(QWidget* pparent = NULL, const char *name=NULL, Qt::WFlags wflags = 0);
 
 	/** Destructor */
@@ -243,8 +241,10 @@ public:
 
 	/** @brief Get last file sequence loaded */
 	char * getPluginSequenceFile() { return mPluginSequenceFile; }
-	/** @brief show warning on plugin crash */
+	/** @brief show warning on plugin crash (default: true) */
 	void enableWarning(bool on) { mNoWarning = !on; }
+	/** @brief reload automatically plugin sequence when a plugin crash (default: false) */
+	void enableAutoReloadSequence(bool on) { mAutoReloadSequence = on; }
 private:
 	swImageStruct *imageTmp;
 	bool lockProcess;
@@ -255,7 +255,10 @@ private:
 	/// List of active filters
 	Q3PtrList<swPluginView> *selectedFilterColl;
 
-	VideoCaptureDoc * doc;
+	/// Auto reload of plugin sequence on a plugin crash
+	bool mAutoReloadSequence;
+
+
 protected slots:
 
 

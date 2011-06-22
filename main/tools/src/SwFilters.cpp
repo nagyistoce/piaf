@@ -180,24 +180,11 @@ int SwSignalHandler::removeChild(int pid) {
 
 /* default constructor
 */
-SwFilterManager::SwFilterManager(VideoCaptureDoc * vdoc,
-				QWidget* pparent, const char *name, Qt::WFlags wflags):
-				 Q3MainWindow(pparent, name, wflags)
-{
-	pWorkspace = NULL;
-	doc = vdoc;
-	mHasGUI = false;
-	init();
-
-	hide();
-}
-
 
 SwFilterManager::SwFilterManager(QWidget* pparent, const char *name, Qt::WFlags wflags):
 				 Q3MainWindow(pparent, name, wflags)
 {
 	pWorkspace = NULL;
-	doc = NULL;
 	mHasGUI = false;
 
   //  doc=vdoc;
@@ -227,7 +214,6 @@ void SwFilterManager::setWorkspace(QWorkspace * wsp) {
 
 		show();
 	}
-
 }
 
 /*  Initialisation :
@@ -238,10 +224,12 @@ void SwFilterManager::init() {
 #define BUFFER_SIZE 4096
 	swAllocateFrame(&frame, BUFFER_SIZE);
 
+
 	mPluginSequenceFile[0] = '\0';
 
 	lockProcess = false;
 	mNoWarning = false;
+	mAutoReloadSequence = false; // do not reload plugins when user need to confirm or make modifications
 
 	idEditPlugin = 0;
 	idViewPlugin = 0;
@@ -926,7 +914,20 @@ void SwFilterManager::updateSelectedView()
 	}
 
 	if(a_plugin_crashed) {
-		emit selectedFilterChanged();
+		if(mAutoReloadSequence)
+		{
+			fprintf(stderr, "[SwfilterManager]::%s:%d : a plugin crashed & auto-reload is on "
+					"=> unload then reload plugin sequence '%s'\n",
+					__func__, __LINE__,
+					getPluginSequenceFile());
+			// unload previously loaded filters
+			slotUnloadAll();
+			// reload same file
+			loadFilterList(getPluginSequenceFile());
+		}
+		else {
+			emit selectedFilterChanged();
+		}
 	}
 
 	update();
@@ -1958,11 +1959,12 @@ int SwFilterManager::processImage(swImageStruct * image)
 			for(pv = selectedFilterColl->first(); pv && ret && id<=idViewPlugin; pv = selectedFilterColl->next()) {
 				// process
 				if( pv->enabled ) {
-#ifdef __SWPLUGIN_DEBUG_
-					fprintf(stderr, "FILTERMANAGER: processing filter func[%d]=%s\n",
-							pv->indexFunction,
-							pv->filter->funcList[pv->indexFunction].name);
-#endif
+					if(g_debug_SwFilterManager) {
+						fprintf(stderr, "FILTERMANAGER: processing filter func[%d]=%s\n",
+												pv->indexFunction,
+												pv->filter->funcList[pv->indexFunction].name);
+					}
+
 					ret = pv->filter->processFunction(pv->indexFunction, im1, im2, 2000 );
 					if(ret)
 					{
@@ -1980,10 +1982,12 @@ int SwFilterManager::processImage(swImageStruct * image)
 					}
 					else
 					{	// Processing has one error
-						fprintf(stderr, "[SwFiltersManager]::%s:%d : filter '%s' failed \n",
-								__func__, __LINE__, pv->filter->exec_name
-								);
 						global_return --;
+						fprintf(stderr, "[SwFiltersManager]::%s:%d : filter '%s' failed "
+								"=> will return %d\n",
+								__func__, __LINE__, pv->filter->exec_name,
+								global_return
+								);
 					}
 				}
 			}
@@ -1997,6 +2001,20 @@ int SwFilterManager::processImage(swImageStruct * image)
 		if(ret && (step % 2) == 1) // odd, must invert
 		{
 			memcpy(image->buffer, imageTmp->buffer, image->buffer_size);
+		}
+	}
+
+	if(global_return < 0) {
+		if(mAutoReloadSequence)
+		{
+			fprintf(stderr, "[SwfilterManager]::%s:%d : a plugin failed & auto-reload is on "
+					"=> unload then reload plugin sequence '%s'\n",
+					__func__, __LINE__,
+					getPluginSequenceFile());
+			// unload previously loaded filters
+			slotUnloadAll();
+			// reload same file
+			loadFilterList(getPluginSequenceFile());
 		}
 	}
 
