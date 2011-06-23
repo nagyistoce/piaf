@@ -159,7 +159,6 @@ void BatchFiltersMainWindow::on_addButton_clicked()
 void BatchFiltersMainWindow::on_resetButton_clicked()
 {
 	QList<t_batch_item *>::iterator it;
-	int idx = 0;
 	for(it = mFileList.begin(); it != mFileList.end(); ++it)
 	{
 		// remove selected
@@ -269,13 +268,13 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemSelectionChanged()
 	on_filesTreeWidget_itemClicked(selectedItems.at(0), 0);
 }
 
-void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(QTreeWidgetItem* treeItem, int column)
+void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
+		QTreeWidgetItem* treeItem, int /*column*/)
 {
 	if(!ui->viewButton->isChecked()) { return; }
 
 	fprintf(stderr, "[Batch] %s:%d \n",	__func__, __LINE__);
 	QList<t_batch_item *>::iterator it;
-	int idx = 0;
 	for(it = mFileList.begin(); it != mFileList.end(); ++it)
 	{
 		// remove selected
@@ -393,12 +392,13 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemActivated(QTreeWidgetItem* i
 	on_filesTreeWidget_itemClicked(item, column);
 }
 
-void BatchFiltersMainWindow::on_filesTreeWidget_itemChanged(QTreeWidgetItem* item, int column)
+void BatchFiltersMainWindow::on_filesTreeWidget_itemChanged(QTreeWidgetItem* /*item*/, int /*column*/)
 {
 //	fprintf(stderr, "[Batch] %s:%d %p column=%d\n",	__func__, __LINE__, item,column );
 //	on_filesTreeWidget_itemClicked(item, column);
 }
 
+/// Progression structure
 typedef struct {
 	int nb_total;
 	int nb_errors;

@@ -808,6 +808,16 @@ int swWriteToPipe(unsigned char * mBuffer, u32 size, FILE * pipe, int timeout_ms
 
 		result = fwrite(mBuffer + index, sizeof(unsigned char), tobewritten,
 				 pipe);
+		if(result < 0) {
+			int errnum = errno;
+			fprintf(stderr, SWPLUGIN_SIDE_PRINT "\t%s:%d: ERROR: fwrite failed with err=%d='%s'\n",
+					__func__, __LINE__, errnum, strerror(errnum));
+			if(errnum != EINTR) {
+				fprintf(stderr, SWPLUGIN_SIDE_PRINT "\t%s:%d: ERROR: fwrite failed with err=%d='%s' != EINTR=%d => return 0\n",
+						__func__, __LINE__, errnum, strerror(errnum), EINTR);
+				return 0;
+			}
+		}
 		fflush(pipe);
 
 		if( tobewritten == BUFSIZ ) {

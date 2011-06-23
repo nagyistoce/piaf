@@ -2518,12 +2518,14 @@ int SwFilter::processFunction(int indexFunction, void * data_in, void * data_out
 		if(ret) {
 			if(pipeR) {
 				ret = swReceiveImage(data_out, pipeR, timeout_ms, &plugin_died);
+
 				if(plugin_died) {
 					// First stop reception
 					fprintf(stderr, "SwFilters::%s:%d : plugin died pid=%d => close pipe...\n",
 								__func__, __LINE__, childpid);
 					emit signalDied(childpid);
 				}
+
 			} else {
 				ret = 0;
 			}
