@@ -36,7 +36,8 @@ void MovieBookmarkForm::setBookmarkList(QList<video_bookmark_t> list) {
 		str.sprintf("%d %%", mk.percent);
 		itemList.append(str);
 
-		QTreeWidgetItem * newItem = new QTreeWidgetItem(ui->treeWidget, itemList);
+		//QTreeWidgetItem * newItem =
+				new QTreeWidgetItem(ui->treeWidget, itemList);
 	}
 }
 
