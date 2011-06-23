@@ -84,7 +84,7 @@ public:
 	char * comment;
 	/// returns number of functions
 	int nbfunctions();
-	bool plugin_died;
+	bool plugin_died;	///< Flag indicating that the plugin has or must be disconnected
 	/** @brief
 	  */
 	int processFunction(int indexFunction, void * data_in, void * data_out, int timeout_ms);

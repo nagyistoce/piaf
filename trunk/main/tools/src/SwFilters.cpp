@@ -2134,9 +2134,7 @@ int SwFilter::destroy() {
 	if(exec_name[0] == '\0')
 		return 0;
 
-	if(statusOpen) {
-		unloadChildProcess();
-	}
+	unloadChildProcess();
 
 	swFreeFrame(&frame);
 
@@ -2420,19 +2418,20 @@ int SwFilter::unloadChildProcess()
 		return 0;
 	}
 
+	plugin_died = true; // force swReceiveImage to end after pipe read timeout
+
 	removeChildSig(childpid);
 
 	// send quit message
 //#ifdef __SWPLUGIN_MANAGER__
 	fprintf(stderr, "unloadChildProcess : Sending quit message to child '%s'\n", exec_name);
-	fflush(stderr);
+	sendRequest(SWFRAME_QUIT);
+
 //#endif
 	if(pipeR) {
 		fclose(pipeR);
 		pipeR = NULL;
 	}
-
-	sendRequest(SWFRAME_QUIT);
 
 	if(pipeW) { // CSE : 2011-05-30 : was commented
 		fclose(pipeW);
@@ -2440,7 +2439,7 @@ int SwFilter::unloadChildProcess()
 	}
 
 	statusOpen = false;
-	usleep(100000);
+	usleep(100000); // let the plugin disconnect
 //#ifdef __SWPLUGIN_MANAGER__
 	fprintf(stderr, "SwFilter::%s:%d : Killing child '%s'\n",
 			__func__, __LINE__, exec_name);
