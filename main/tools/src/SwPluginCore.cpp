@@ -889,6 +889,10 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 		}
 	}
 
+	if((*pstopnow)) {
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation.\n", __func__, __LINE__);
+		return 0;
+	}
 	if(iter == itermax) {
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation.\n", __func__, __LINE__);
 		return 0;
@@ -898,7 +902,7 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 	char * header = strstr(framemBuffer, SWFRAME_HEADER);
 
 	// First arg =? SWFRAME_HEADER ??
-	if( !header)
+	if( !header && !(*pstopnow))
 	{
 
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d: invalid header\n",
@@ -955,6 +959,12 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 	fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d: Input type = %d\n", __func__, __LINE__, (int)inputType); fflush(stderr);
 #endif
 
+	if((*pstopnow)) {
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation.\n", __func__, __LINE__);
+		return 0;
+	}
+
+
 	// ok, we've got header and
 	// readimage  header
 	swImageStruct * imOut = (swImageStruct *)data_out;
@@ -982,6 +992,10 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 			(int)imOut->width, (int)imOut->height,
 			(long)imOut->buffer_size, (long)imOut->metadata_size);
 #endif
+	if((*pstopnow)) {
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation.\n", __func__, __LINE__);
+		return 0;
+	}
 
 	// Read image mBuffer from pipe
 	if(! swReadFromPipe((unsigned char *)imOut->buffer, (u32)imOut->buffer_size, fR, timeout_ms)) {
@@ -1003,6 +1017,11 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 
 	// Then read metadata
 	if(imOut->metadata && imOut->metadata_size > 0) {
+		if((*pstopnow)) {
+			fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation.\n", __func__, __LINE__);
+			return 0;
+		}
+
 		// Read metadata from pipe
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: read metadata"
 				"metadata_size=%ld bytes in metadata=%p\n",
