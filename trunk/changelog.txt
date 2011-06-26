@@ -1,3 +1,9 @@
+piaf (SVN rev. 122) 2011-06-26
+
+New features for batch processing : 
+- Added statistics on processing time with mean, standard deviation, median and histogram display.
+- allow a few operations during pause: remove items, ...
+
 piaf (SVN rev. 106) 2011-06-10
 
 New release with enhances GUI and new tools : 

@@ -45,6 +45,7 @@ typedef enum {
 	ERROR_PROCESS	///< Error while processing the file
 } enum_proc_state;
 
+/// Settings for piaf batch processor
 #define PIAFBATCHSETTINGS	"PiafBatch"
 
 
@@ -61,6 +62,8 @@ typedef struct {
 	float progress;						///< Processing progress in 0..1
 } t_batch_item;
 
+/** \brief Processing and display options
+*/
 typedef struct {
 	bool use_grey;						///< use grayscale input image
 	bool reload_at_change;				///< reload plugin when file changes (usefull when all files aren't the same size)
@@ -68,6 +71,20 @@ typedef struct {
 	bool view_image;					///< periodically display image when processing
 	QString sequence_name;				///< name of sequence file
 } t_batch_options;
+
+/** \brief Processing time statistics
+*/
+typedef struct {
+	int nb_iter;
+	unsigned int * histogram;
+	int max_histogram;	///< nb of items in max_histogram array
+	float time_scale;	///< time scale : item us to index in array
+	int index_max;		///< index of histogram max
+	unsigned int value_max;
+	int overflow_count; ///< nb of overflow count
+	double overflow_cumul_us; ///< Cumul of overflow times
+} t_time_histogram;
+
 
 /** \brief Threaded batch processing
 
@@ -90,14 +107,27 @@ public:
 	/** @brief Set the processing list */
 	void setFileList(QList<t_batch_item *> * pFileList);
 
-	/** @brief start/pause the processing */
+	/** @brief start/stop the processing */
 	void startProcessing(bool on );
+	/** @brief pause the processing */
+	void setPause(bool on);
 
 	/** @brief Set filter options */
 	void setOptions(t_batch_options options);
 
 	/** @brief Get the image for display */
 	IplImage * getDisplayImage() { return mDisplayImage; }
+
+	void lockDisplay(bool on) {
+		if(on) {
+			mDisplayMutex.lock();
+		} else {
+			mDisplayMutex.unlock();
+		}
+	}
+
+	/// \brief get time histogram
+	t_time_histogram getTimeHistogram() { return mTimeHistogram; }
 
 protected:
 	void run();
@@ -110,11 +140,19 @@ private:
 
 	t_batch_options mBatchOptions;	///< batch processing options: greyscale, reload plugins, ...
 
+	t_time_histogram mTimeHistogram; ///< time histogram
+	void appendTimeUS(float proctime_us); ///< Append processing time in us
+	void allocHistogram(float maxproctime_us);
+
 	QList<t_batch_item *> * mpFileList; ///< pointer to processing list
 
 	QMutex mProcMutex; ///< Processing mutex
 	QMutex mLoopMutex; ///< Mutex for loop wait condition
 	QWaitCondition mWaitCondition; ///< wait condition for waiting loop
+
+	QMutex mDisplayMutex; ///< Mutex for display
+
+
 	SwFilterManager * mpFilterManager;
 	IplImage * mDisplayImage;
 
@@ -122,6 +160,14 @@ private:
 signals:
 	void signalFileProcessed(t_batch_item *);
 };
+
+
+
+
+
+
+
+
 
 /** \brief Main window for batch processing
 
@@ -156,8 +202,12 @@ private:
 
 
 
+
 	/// Settings for saving last path, ...
 	QSettings mSettings;
+
+	void loadSettings();
+	void saveSettings();
 
 private slots:
 	/// Load a plugins list (plugin files + function + parameters)
