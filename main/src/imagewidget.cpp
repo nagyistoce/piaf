@@ -177,19 +177,25 @@ void ImageWidget::setColorMode(int mode) {
 }
 
 void ImageWidget::mousePressEvent(QMouseEvent *e) {
-	emit mousePressed(e);
-	if(!mZoomFit) return;
-
-	xMouseMoveStart = e->pos().x();
-	yMouseMoveStart = e->pos().y();
-	xOriginMoveStart = xOrigine;
-	yOriginMoveStart = yOrigine;
+	emit mousePressed(e); // Forward signal
+	if(e->button() == Qt::LeftButton) {
+		if(mZoomFit) {
+			xMouseMoveStart = e->pos().x();
+			yMouseMoveStart = e->pos().y();
+			xOriginMoveStart = xOrigine;
+			yOriginMoveStart = yOrigine;
+		}
+	}
 }
+
 
 void ImageWidget::mouseReleaseEvent(QMouseEvent *e){
 	emit mouseReleased(e);
-	if(!mZoomFit) return;
-	xMouseMoveStart = -1;
+	if(e->button() == Qt::LeftButton) {
+		if(mZoomFit) {
+			xMouseMoveStart = -1;
+		}
+	}
 }
 
 void ImageWidget::mouseMoveEvent(QMouseEvent *e){

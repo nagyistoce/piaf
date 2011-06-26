@@ -1922,7 +1922,6 @@ IMAGE PROCESSING  SECTION
 
 int SwFilterManager::processImage(swImageStruct * image)
 {
-
 	// send image to process
 	if(!imageTmp)
 	{
@@ -1954,6 +1953,9 @@ int SwFilterManager::processImage(swImageStruct * image)
 		ret = 1;
 		int id=0;
 
+		// Time accumulation in us
+		float total_time_us = 0.f;
+
 		if(!selectedFilterColl->isEmpty())
 		{
 			for(pv = selectedFilterColl->first(); pv && ret && id<=idViewPlugin; pv = selectedFilterColl->next()) {
@@ -1974,6 +1976,8 @@ int SwFilterManager::processImage(swImageStruct * image)
 						swImageStruct *imTmp = im2;
 						im2 = im1;
 						im1 = imTmp;
+
+						total_time_us += imTmp->deltaTus;
 
 						// time statistics
 						if( pv->mwPluginTime ) {
@@ -2002,7 +2006,11 @@ int SwFilterManager::processImage(swImageStruct * image)
 		{
 			memcpy(image->buffer, imageTmp->buffer, image->buffer_size);
 		}
+
+		// store accumulated time in output image
+		image->deltaTus = total_time_us;
 	}
+
 
 	if(global_return < 0) {
 		if(mAutoReloadSequence)

@@ -183,7 +183,7 @@ void WorkshopApp::purge() {
 		}
 	}
 
-	fprintf(stderr, "WorkshopApp:%s:%d : purged", __func__, __LINE__);
+	fprintf(stderr, "WorkshopApp:%s:%d : purged\n", __func__, __LINE__);
 }
 
 
@@ -550,7 +550,7 @@ void WorkshopApp::initActions()
 	fileQuit->setStatusTip(tr("Quits the application"));
 	fileQuit->setWhatsThis(tr("Exit\n\nQuits the application"));
 	fileQuit->setIconVisibleInMenu(true);
-	if(pixIcon.load(BASE_DIRECTORY "images/16x16/system-shutdown.png" )) {
+	if(pixIcon.load(":/images/16x16/system-shutdown.png" )) {
 		fileQuit->setIcon(pixIcon);}
 	connect(fileQuit, SIGNAL(activated()), this, SLOT(slotFileQuit()));
 
@@ -569,7 +569,9 @@ void WorkshopApp::initActions()
 	videoAcquire->setStatusTip(tr("Start a new video acquisition"));
 	videoAcquire->setWhatsThis(tr("Video device acquisition\n\n.Start a new video acquisition"));
 	if(pixIcon.load(BASE_DIRECTORY "images/pixmaps/camera-web16.png" )) {
-		videoAcquire->setIcon(pixIcon);}
+		videoAcquire->setIcon(pixIcon);
+		videoAcquire->setIconVisibleInMenu(true);
+	}
 	connect(videoAcquire, SIGNAL(activated()), this, SLOT(slotOnNewVideoAcq()));
 
 	snapshot = NULL;
@@ -640,16 +642,18 @@ void WorkshopApp::initActions()
 	convertAction->setWhatsThis(tr("Convert dialog\n"
 								   "Convert a list of image files into a MJPEG AVI movie file."));
 	if(pixIcon.load(BASE_DIRECTORY "images/pixmaps/movie16.png" )) {
-		convertAction->setIcon(pixIcon);}
+		convertAction->setIcon(pixIcon);
+		convertAction->setIconVisibleInMenu(true);
+	}
 	connect(convertAction, SIGNAL(activated()), this, SLOT(slotConvertor()));
 
 	// Batch processor
-	batchAction = new QAction(tr("Batch processor"), tr(""), this, "batch");
+	QIcon batchIcon(":/images/22x22/system-run.png");
+	batchAction = new QAction(batchIcon, tr("Batch processor"), this);
 	batchAction->setStatusTip(tr("Process a list of files with plugins"));
 	batchAction->setWhatsThis(tr("Batch processor\n"
 								   "Process a list of image or movie files with plugins"));
-	if(pixIcon.load(BASE_DIRECTORY "images/pixmaps/movie16.png" )) {
-		batchAction->setIcon(pixIcon);}
+	batchAction->setIconVisibleInMenu(true);
 	connect(batchAction, SIGNAL(activated()), this, SLOT(slotBatch()));
 
 
@@ -657,17 +661,20 @@ void WorkshopApp::initActions()
 	configAction = new QAction(tr("Configuration"), tr("&Configuration"), this, "config");
 	configAction->setStatusTip(tr("Launch the configuration dialog"));
 	configAction->setWhatsThis(tr("Configuration dialog\nDefines working directories and options."));
-	if(pixIcon.load(":images/16x16/configure.png" )) {
+	if(pixIcon.load(":/images/16x16/configure.png" )) {
 		configAction->setIcon(pixIcon);
+		configAction->setIconVisibleInMenu(true);
 	}
+
 	connect(configAction, SIGNAL(activated()), this, SLOT(slotConfigurator()));
 
 	// Plugin action
 	pluginAction = new QAction(tr("Plugins"), tr("&Plugins"), this, "plugin");
 	pluginAction->setStatusTip(tr("Launch the plugin list dialog"));
 	pluginAction->setWhatsThis(tr("Plugin list dialog\nEdition of plugin list."));
-	if(pixIcon.load(":images/pixmaps/filter.png")) {
+	if(pixIcon.load(":/images/pixmaps/filter.png")) {
 		pluginAction->setIcon(pixIcon);
+		pluginAction->setIconVisibleInMenu(true);
 	}
 	connect(pluginAction, SIGNAL(activated()), this, SLOT(slotPluginDialog()));
 
@@ -720,7 +727,7 @@ void WorkshopApp::initMenuBar()
 //	snapshot->addTo(pImagesTools);
 	pMeasuresTools=new Q3PopupMenu();
 	measureGen->addTo(pMeasuresTools);
-	pVideosTools=new Q3PopupMenu();
+	pVideosTools = new Q3PopupMenu();
 	videoAcquire->addTo(pVideosTools);
 
 	pToolsMenu = new Q3PopupMenu();
@@ -730,7 +737,8 @@ void WorkshopApp::initMenuBar()
 	if(g_has_measures) {
 		pToolsMenu->insertItem(tr("Measures"), pMeasuresTools);
 	}
-	pToolsMenu->insertItem(tr("Videos"), pVideosTools);
+	pToolsMenu->insertItem(QPixmap(BASE_DIRECTORY "images/pixmaps/movie16.png"),
+						   tr("Videos"), pVideosTools);
 	pToolsMenu->insertSeparator();
 
 	configAction->addTo(pToolsMenu);
@@ -2216,8 +2224,9 @@ void WorkshopApp::slotFileSaveAs()
 
 				item->setText(0, pWmov->getLabelString());
 			}
-			else
+			else {
 				statusBar()->message(tr("Error while trying to save a movie..."));
+			}
 		/////////////////////////////
 	}
 

@@ -45,12 +45,14 @@ BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
 
 	ui->controlGroupBox->setEnabled(false);
 
-	mBatchOptions.reload_at_change = true;
-	mBatchOptions.use_grey = false;
-	mBatchOptions.record_output = false;
-	mBatchOptions.view_image = true;
+	mBatchOptions.reload_at_change = ui->reloadPluginCheckBox->isChecked();
+	mBatchOptions.use_grey = ui->greyButton->isOn();
+	mBatchOptions.record_output = ui->recordButton->isOn();
+	mBatchOptions.view_image = ui->viewButton->isOn() ;
 
 	mBatchThread.setOptions(mBatchOptions);
+
+	// assign a filter manager to background processing thread
 	mBatchThread.setFilterManager(&mFilterManager);
 	mBatchThread.setFileList(&mFileList);
 
@@ -60,6 +62,32 @@ BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
 
 	mLastPluginsDirName = g_pluginDirName;
 	mLastDirName = g_imageDirName;
+
+	loadSettings();
+}
+
+#define BATCHSETTING_LASTPLUGINDIR "batch.lastPluginDir"
+#define BATCHSETTING_LASTFILEDIR "batch.lastFileDir"
+
+void BatchFiltersMainWindow::loadSettings() {
+	// overwrite with batch settings
+	QString entry = mSettings.readEntry(BATCHSETTING_LASTPLUGINDIR);
+	if(!entry.isNull())
+	{
+		mLastPluginsDirName = entry;
+	}
+
+	entry = mSettings.readEntry(BATCHSETTING_LASTFILEDIR);
+	if(!entry.isNull())
+	{
+		mLastDirName = entry;
+	}
+}
+
+void BatchFiltersMainWindow::saveSettings() {
+	// overwrite with batch settings
+	mSettings.writeEntry(BATCHSETTING_LASTPLUGINDIR, mLastPluginsDirName);
+	mSettings.writeEntry(BATCHSETTING_LASTFILEDIR, mLastDirName);
 }
 
 
@@ -107,6 +135,8 @@ void BatchFiltersMainWindow::on_loadButton_clicked()
 
 			mPreviewFilterManager.loadFilterList(fi.absoluteFilePath().toUtf8().data());
 		}
+
+		saveSettings();
 	}
 }
 
@@ -151,6 +181,8 @@ void BatchFiltersMainWindow::on_addButton_clicked()
 			mFileList.append(item);
 
 			mLastDirName = fi.absoluteDir().absolutePath();
+
+			saveSettings();
 		}
 	}
 
@@ -202,6 +234,10 @@ void BatchFiltersMainWindow::on_recordButton_toggled(bool checked)
 void BatchFiltersMainWindow::on_viewButton_toggled(bool checked)
 {
 	mBatchOptions.view_image = checked;
+
+	fprintf(stderr, "[Batch]::%s:%d : display = %c\n",
+			__func__, __LINE__, mBatchOptions.view_image ? 'T':'F');
+
 	mBatchThread.setOptions(mBatchOptions);
 }
 
@@ -226,6 +262,11 @@ void BatchFiltersMainWindow::on_playPauseButton_toggled(bool checked)
 	ui->greyButton->setEnabled(!checked);
 	ui->buttonsWidget->setEnabled(!checked);
 
+	// Start thread and timer
+	if(!mDisplayTimer.isActive()) {
+		mDisplayTimer.start(1000);
+	}
+
 	if(checked)
 	{
 		if(!mBatchThread.isRunning())
@@ -236,12 +277,9 @@ void BatchFiltersMainWindow::on_playPauseButton_toggled(bool checked)
 		//
 		mBatchThread.startProcessing(true);
 
-		// Start thread and timer
-		mDisplayTimer.start(1000);
+		mBatchThread.setPause(false); // set pause on
 	} else {
-		mDisplayTimer.stop();
-		// And refresh at last image
-		mDisplayTimer.setSingleShot(100);
+		mBatchThread.setPause(true); // set pause on
 	}
 }
 
@@ -403,6 +441,7 @@ typedef struct {
 	int nb_total;
 	int nb_errors;
 	int nb_processed;
+	int nb_unprocessed;
 
 } t_batch_progress;
 
@@ -476,6 +515,9 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 		{
 		default:
 			break;
+		case UNPROCESSED:
+			progress.nb_unprocessed++;
+			break;
 		case PROCESSED:
 			progress.nb_processed++;
 			break;
@@ -502,14 +544,27 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 	int progress_percent = (int)roundf(processed *100.f / (float)mFileList.count());
 	ui->progressBar->setValue(progress_percent);
 
+	fprintf(stderr, "[Batch]::%s:%d : display = %c\n",
+			__func__, __LINE__,
+			mBatchOptions.view_image ? 'T':'F');
+
+	if(progress.nb_unprocessed == 0) {
+		// we're done
+		ui->playPauseButton->setOn(false);
+	}
 
 	// display current processed image if needed
 	if(mBatchOptions.view_image)
 	{
+		mBatchThread.lockDisplay(true); // lock display for thread-safe execution
 		IplImage * imgRGBdisplay = mBatchThread.getDisplayImage();
 
-		if(imgRGBdisplay) {
+		if(!imgRGBdisplay) {
+			mBatchThread.lockDisplay(false);
 
+			fprintf(stderr, "[Batch]::%s:%d : no display image\n",
+					__func__, __LINE__);
+		} else {
 //			if(imgRGBdisplay->nChannels == 4 && imgRGBdisplay->imageData[0]==0)
 //			{	// FORCE ALPHA CHANNEL
 //				for(int i = 0 ; i<imgRGBdisplay->widthStep * imgRGBdisplay->height; i+=4)
@@ -542,7 +597,15 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 					cvCvtColor(imgRGBdisplay, mDisplayIplImage, CV_RGB2RGBA);
 					break;
 				}
+			} else {
+				cvCopy(imgRGBdisplay, mDisplayIplImage);
 			}
+			mBatchThread.lockDisplay(false);// image is copied, so we can unlock it
+			fprintf(stderr, "[Batch]::%s:%d : display image: %dx%dx%d => %dx%dx%d\n",
+					__func__, __LINE__,
+					imgRGBdisplay->width, imgRGBdisplay->height, imgRGBdisplay->nChannels,
+					mDisplayIplImage->width, mDisplayIplImage->height, mDisplayIplImage->nChannels
+					);
 
 			// Copy into QImage
 			QImage qImage( (uchar*)mDisplayIplImage->imageData,
@@ -557,6 +620,166 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 			ui->imageLabel->update();
 		}
 	}
+
+
+
+	// display time histogram
+	t_time_histogram time_histo = mBatchThread.getTimeHistogram();
+	if(time_histo.nb_iter > 0) {
+		IplImage * histoImg = swCreateImage(cvSize(time_histo.max_histogram, ui->histogramLabel->height()-2),
+											IPL_DEPTH_8U, 4);
+		// get max
+		time_histo.index_max = 0;
+		time_histo.value_max = time_histo.histogram[0];
+		double cumul_us = 0.;
+		unsigned int cumul_nb = 0;
+		for(int h = 1; h<time_histo.max_histogram; h++)
+		{
+			cumul_us += (double)h * (double)(time_histo.histogram[h])/ (double)time_histo.time_scale;
+			cumul_nb += time_histo.histogram[h];
+
+			if(time_histo.histogram[h] > time_histo.value_max) {
+				time_histo.value_max = time_histo.histogram[h];
+				time_histo.index_max = h;
+			}
+		}
+
+		if(time_histo.value_max == 0) {
+			swReleaseImage(&histoImg);
+			return;
+		}
+		if(time_histo.value_max < time_histo.overflow_count) {
+			time_histo.value_max = time_histo.overflow_count ;
+		}
+
+
+		// Draw log of histogram
+		float scale_log = histoImg->height / log(time_histo.value_max);
+		float max_ms = time_histo.max_histogram / time_histo.time_scale / 1000.f;
+
+
+		for(int ms = 10; ms<max_ms; ms+=10) {
+			int h = roundf(time_histo.time_scale * ms * 1000.f);
+			cvLine(histoImg,
+				   cvPoint(h, histoImg->height-1),
+				   cvPoint(h, 0),
+				   cvScalarAll(64), 1);
+		}
+
+		for(int ms = 50; ms<max_ms; ms+=50) {
+			int h = roundf(time_histo.time_scale * ms * 1000.f);
+			cvLine(histoImg,
+				   cvPoint(h, histoImg->height-1),
+				   cvPoint(h, 0),
+				   cvScalarAll(192), 1);
+		}
+
+
+		int median_idx = -1;
+		unsigned int median_cumul = 0;
+		double mean_ms = cumul_us / (1000. * cumul_nb);
+
+		double stddev_cumul = 0.f;
+
+		// draw log histo
+		for(int h = 0; h<time_histo.max_histogram; h++) {
+			if(time_histo.histogram[h]>0) {
+				if(median_idx < 0) {
+					median_cumul += time_histo.histogram[h];
+					if(median_cumul > cumul_nb/2) {
+						median_idx = h;
+					}
+				}
+				float time_ms = (float)h / time_histo.time_scale / 1000.;
+				stddev_cumul += fabs(time_ms - mean_ms)*time_histo.histogram[h];
+
+				CvScalar drawColor = CV_RGB(64,192,64);
+				if(time_ms > 40) {
+					// draw yellow
+					drawColor = CV_RGB(192,192,64);
+					if(time_ms > 80) {
+						// draw orange
+						drawColor = CV_RGB(255,142,64);
+
+						if(time_ms > 1000) { // more than 1 second
+							// draw red
+							drawColor = CV_RGB(255,64,64);
+						}
+					}
+
+				}
+				cvLine(histoImg,
+					   cvPoint(h, histoImg->height-1),
+					   cvPoint(h, histoImg->height-1 - (int)log(time_histo.histogram[h]) * scale_log),
+					   drawColor, 1);
+			}
+		}
+
+
+
+		QString maxStr;
+		maxStr.sprintf("%g ms", roundf(max_ms*10.f)/10.f);
+		QString medianStr; medianStr.sprintf("%g ms", roundf((float)median_idx / time_histo.time_scale)/1000.f);
+		QString majStr; majStr.sprintf("%g ms", roundf((float)time_histo.index_max / time_histo.time_scale / 100.)/10.f);
+
+		QString meanStr; meanStr.sprintf("%g ms", roundf(mean_ms*100.f)/100.f);
+		float overflows = 100.f * time_histo.overflow_count / cumul_nb;
+		QString overflowStr; overflowStr.sprintf("%g %%", overflows);
+
+		stddev_cumul /= (double)cumul_nb;
+		QString stddevStr; stddevStr.sprintf("%g ms", roundf((stddev_cumul)*100.)/100.f);
+
+		QString statStr =
+				//						  tr("majority=") + majStr
+				tr("mean=") + meanStr + ", "
+				+ tr("stddev=") + stddevStr + " / "
+				+ tr("median=") + medianStr
+				//+ tr(" /display max=") + maxStr
+				;
+		ui->histoStatsLabel->setText(statStr);
+
+		ui->histoMaxLabel->setText(tr("over=") + overflowStr + tr(" display max:") + maxStr + "|");
+
+		// draw mean & median
+		int hmean = time_histo.time_scale * mean_ms * 1000.f;
+		int hstddev = time_histo.time_scale * stddev_cumul * 1000.f;
+
+		cvLine(histoImg,
+					   cvPoint(hmean-hstddev , 1),
+					   cvPoint(hmean+hstddev , 1),
+					   CV_RGB(60,60,190), 3);
+		cvLine(histoImg,
+			   cvPoint(hmean, histoImg->height-1),
+			   cvPoint(hmean, 0),
+			   CV_RGB(0,0,255), 1);
+
+		hmean = median_idx;
+		cvLine(histoImg,
+			   cvPoint(hmean, histoImg->height-1),
+			   cvPoint(hmean, 0),
+			   CV_RGB(255,0,255), 1);
+
+		// Draw overflow indicator
+		if(time_histo.overflow_count>0) {
+			cvLine(histoImg,
+				   cvPoint(histoImg->width-1, histoImg->height-1),
+				   cvPoint(histoImg->width-2,
+						   histoImg->height-1
+						   - (int)log(time_histo.overflow_count) * scale_log),
+				   CV_RGB(255,0,0), 1);
+		}
+			   QImage qImage( (uchar*)histoImg->imageData,
+					   histoImg->width, histoImg->height, histoImg->widthStep,
+					   ( histoImg->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
+						QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
+						)
+					  );
+		QPixmap pixImage = QPixmap::fromImage(qImage);
+		ui->histogramLabel->setPixmap(pixImage);
+
+		swReleaseImage(&histoImg);
+	}
+
 
 }
 
@@ -575,6 +798,9 @@ BatchFiltersThread::BatchFiltersThread()
 	mRun = mRunning = mProcessing = false;
 	mpFilterManager = NULL;
 	mpFileList = NULL;
+
+	memset(&mTimeHistogram, 0, sizeof(t_time_histogram));
+	mTimeHistogram.nb_iter = -4; // to prevent from counting first iterations
 
 	mPause = false;
 
@@ -600,6 +826,7 @@ void BatchFiltersThread::setOptions(t_batch_options options)
 {
 	mBatchOptions = options;
 }
+
 void BatchFiltersThread::setFileList(QList<t_batch_item *> * pFileList)
 {
 	mpFileList = pFileList;
@@ -610,7 +837,79 @@ void BatchFiltersThread::startProcessing(bool on)
 	mProcessing = on;
 }
 
+void BatchFiltersThread::setPause(bool on)
+{
+	mPause = on;
+}
+
+
 bool g_debug_BatchFiltersThread = false;
+
+
+void BatchFiltersThread::allocHistogram(float maxproctime_us)
+{
+	mTimeHistogram.max_histogram = 256;
+	mTimeHistogram.histogram = new unsigned int [ mTimeHistogram.max_histogram ];
+	memset(mTimeHistogram.histogram, 0, sizeof(unsigned int)*mTimeHistogram.max_histogram);
+
+	// Scale : max = 2*first proc time
+	mTimeHistogram.time_scale = mTimeHistogram.max_histogram / maxproctime_us;
+	fprintf(stderr, "[BatchThread]::%s:%d: max proc time at init : %g us "
+			"=> max=%d => scale=%g item/us\n",
+			__func__, __LINE__, maxproctime_us,
+			mTimeHistogram.max_histogram,
+			mTimeHistogram.time_scale
+			);
+
+}
+
+void BatchFiltersThread::appendTimeUS(float proctime_us)
+{
+	// don't count first iteration
+	mTimeHistogram.nb_iter++;
+	if(mTimeHistogram.nb_iter<=0) { return; }
+
+	if(!mTimeHistogram.histogram) {
+		// use twice the proctime as max
+		allocHistogram(2.f * proctime_us);
+	}
+
+	int index = (int)roundf(mTimeHistogram.time_scale * proctime_us);
+
+	if(index > mTimeHistogram.max_histogram) {
+		mTimeHistogram.overflow_count ++;
+		mTimeHistogram.overflow_cumul_us += proctime_us;
+	} else {
+		mTimeHistogram.histogram[index]++;
+	}
+
+	if(mTimeHistogram.overflow_count > 1
+	   && mTimeHistogram.overflow_count > mTimeHistogram.nb_iter / 5)
+	{	// too many overflows, recompute
+		float overflow_mean = mTimeHistogram.overflow_cumul_us / (double)mTimeHistogram.overflow_count;
+
+		unsigned int * oldhistogram = mTimeHistogram.histogram;
+		if(oldhistogram) {
+			float old_scale = mTimeHistogram.time_scale;
+
+			// realloc histogram, then convert old stats
+			allocHistogram(2.f * overflow_mean);
+			for(int h = 0; h< mTimeHistogram.max_histogram; h++)
+			{
+				// convert to new scale
+				float old_us = (float)h / old_scale;
+				int newh = old_us * mTimeHistogram.time_scale;
+				mTimeHistogram.histogram[newh] = oldhistogram[h];
+			}
+
+			// delete old
+			delete [] oldhistogram;
+		}
+		mTimeHistogram.overflow_count = 0;
+		mTimeHistogram.overflow_cumul_us = 0.;
+	}
+
+}
 
 void BatchFiltersThread::run()
 {
@@ -643,7 +942,7 @@ void BatchFiltersThread::run()
 						if(g_debug_BatchFiltersThread) {
 							fprintf(stderr, "BatchFiltersThread::%s:%d: file '%s' is not processed yet.\n",
 								__func__, __LINE__,
-								item->absoluteFilePath.toAscii().data() );
+								item->absoluteFilePath.toUtf8().data() );
 						}
 						at_least_one = true;
 					}
@@ -693,7 +992,7 @@ void BatchFiltersThread::run()
 						if(g_debug_BatchFiltersThread) {
 							fprintf(stderr, "BatchThread::%s:%d : processing '%s'...\n",
 								__func__, __LINE__,
-								item->absoluteFilePath.toAscii().data());
+								item->absoluteFilePath.toUtf8().data());
 						}
 
 						// Create movie player or load image
@@ -709,7 +1008,7 @@ void BatchFiltersThread::run()
 						{
 							fprintf(stderr, "BatchThread::%s:%d : could not load '%s' as an image\n",
 									__func__, __LINE__,
-									item->absoluteFilePath.toAscii().data());
+									item->absoluteFilePath.toUtf8().data());
 							item->processing_state = ERROR_READ;
 						}
 
@@ -720,7 +1019,7 @@ void BatchFiltersThread::run()
 								fprintf(stderr, "BatchThread::%s:%d : "
 										"loaded '%s' as an image...\n",
 										__func__, __LINE__,
-										item->absoluteFilePath.toAscii().data());
+										item->absoluteFilePath.toUtf8().data());
 							}
 
 							if(mBatchOptions.reload_at_change
@@ -766,6 +1065,8 @@ void BatchFiltersThread::run()
 								item->processing_state = ERROR_PROCESS;
 
 							} else {
+								// Store statistics
+								appendTimeUS(image.deltaTus);
 
 								// Check if we need to record
 								if(mBatchOptions.record_output) {
@@ -807,8 +1108,8 @@ void BatchFiltersThread::run()
 						}
 						else {
 							// Load ad movie
-							FileVideoAcquisition * fva = new FileVideoAcquisition(item->absoluteFilePath.toUtf8().data());
-
+							FileVideoAcquisition * fva = new FileVideoAcquisition(
+									item->absoluteFilePath.toUtf8().data());
 							CvSize size = cvSize(fva->getImageSize().width,
 												 fva->getImageSize().height);
 							if(size.width <=0 || size.height <=0)
@@ -840,6 +1141,29 @@ void BatchFiltersThread::run()
 								bool resume = true;
 								while(resume && mRun)
 								{
+									// Check if we are in pause
+									if(mPause) {
+
+										fprintf(stderr, "Paused !");
+										while(mPause && mRun && mProcessing)
+										{
+											fprintf(stderr, "Paused...");
+											usleep(500000);
+										}
+
+										// if the item is no more in processing list
+										if(mpFileList->findIndex(item) < 0) {
+											was_paused = true;
+											still_processing = true;
+											// Forget this item because it may have been destroyed
+											item = NULL;
+											break;
+										}
+
+									}
+
+
+
 									bool read_frame = fva->GetNextFrame();
 									long buffersize = image.buffer_size ;
 									int ret = -1;
@@ -870,7 +1194,11 @@ void BatchFiltersThread::run()
 											// but it may be reloaded on next frame
 										}
 										else {
+											// Store statistics
+											appendTimeUS(image.deltaTus);
+
 											item->processing_state = PROCESSING;
+
 											// Check if we need to record
 											if(mBatchOptions.record_output) {
 												if(!encoder) {
@@ -904,16 +1232,21 @@ void BatchFiltersThread::run()
 
 											// Check if we need to copy an image for display
 											if(mBatchOptions.view_image) {
+												mDisplayMutex.lock();
 												if(mDisplayImage && (mDisplayImage->widthStep!=loadedImage->widthStep || mDisplayImage->height!=loadedImage->height)) {
 													swReleaseImage(&mDisplayImage);
 												}
+
 												if(!mDisplayImage) {
 													mDisplayImage = cvCloneImage(loadedImage);
+													fprintf(stderr, "clone disp=%dx%dx%d", mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
 												}
 												else {
 													//fprintf(stderr, "disp=%dx%dx%d", mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
 													cvCopy(loadedImage, mDisplayImage);
 												}
+												mDisplayMutex.unlock();
+
 											}
 										}
 
@@ -931,29 +1264,32 @@ void BatchFiltersThread::run()
 								}
 
 								// Set the state to processed
-								if(item->processing_state == PROCESSING) {
-									item->processing_state = PROCESSED;
+								if(item) {
+									if(item->processing_state == PROCESSING) {
+										item->processing_state = PROCESSED;
+									}
+
+									item->progress = 1.f;
+
+									fprintf(stderr, "File '%s' %s : progress= %4.2f %%",
+											item->absoluteFilePath.toAscii().data(),
+											item->processing_state == PROCESSED ? "PROCESSED" : "ERROR_PROCESS",
+											item->progress * 100.f
+											);
 								}
-
-								item->progress = 1.f;
-
-								fprintf(stderr, "File '%s' %s : progress= %4.2f %%",
-										item->absoluteFilePath.toAscii().data(),
-										item->processing_state == PROCESSED ? "PROCESSED" : "ERROR_PROCESS",
-										item->progress * 100.f
-										);
 
 								swReleaseImage(&loadedImage);
 							}
 						}
 
 
-						// check if wee need to make a pause
+						// check if we need to make a pause
 						if(mPause) {
+							fprintf(stderr, "Paused !");
 							while(mPause && mRun && mProcessing)
 							{
 								fprintf(stderr, "Paused...");
-								usleep(500);
+								usleep(500000);
 							}
 							was_paused = true;
 							still_processing = true;
