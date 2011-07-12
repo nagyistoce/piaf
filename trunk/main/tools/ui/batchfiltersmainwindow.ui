@@ -15,7 +15,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../../piaf.qrc">
-    <normaloff>:/images/pixmaps/filter.png</normaloff>:/images/pixmaps/filter.png</iconset>
+    <normaloff>:/images/22x22/system-run.png</normaloff>:/images/22x22/system-run.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
@@ -202,6 +202,12 @@
          <property name="toolTip">
           <string>Record output image or movies</string>
          </property>
+         <property name="statusTip">
+          <string>Record output image when inputs are still images or movies when inputs are movies</string>
+         </property>
+         <property name="whatsThis">
+          <string>what's this ?Record output image or movies</string>
+         </property>
          <property name="text">
           <string>Record</string>
          </property>
@@ -218,6 +224,9 @@
         <widget class="QPushButton" name="greyButton">
          <property name="toolTip">
           <string>if down, the images will be converted to grayscale befor eprocessing</string>
+         </property>
+         <property name="statusTip">
+          <string>Process input files in color or in grayscale: conversion is done before sending the images to plugins</string>
          </property>
          <property name="text">
           <string>Color</string>
@@ -242,6 +251,9 @@
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
+         </property>
+         <property name="statusTip">
+          <string>Start processing or pause it</string>
          </property>
          <property name="text">
           <string>Start</string>
@@ -327,6 +339,12 @@
            <verstretch>0</verstretch>
           </sizepolicy>
          </property>
+         <property name="toolTip">
+          <string>Statistics indicators</string>
+         </property>
+         <property name="statusTip">
+          <string>Statistics indicators: mean, standard deviation and median values</string>
+         </property>
          <property name="text">
           <string>--</string>
          </property>
@@ -343,6 +361,9 @@
          <property name="toolTip">
           <string>Time histogram</string>
          </property>
+         <property name="statusTip">
+          <string>Time histogram with a log scale on vertical axis and linear on horizontal axis</string>
+         </property>
          <property name="styleSheet">
           <string notr="true"/>
          </property>
@@ -356,6 +377,12 @@
        </item>
        <item>
         <widget class="QLabel" name="histoMaxLabel">
+         <property name="statusTip">
+          <string>Max value of histogram on horizontal axis</string>
+         </property>
+         <property name="whatsThis">
+          <string>Max value of histogram on horizontal axis</string>
+         </property>
          <property name="text">
           <string>--</string>
          </property>

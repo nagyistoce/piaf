@@ -718,16 +718,17 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 
 
 		QString maxStr;
-		maxStr.sprintf("%g ms", roundf(max_ms*10.f)/10.f);
-		QString medianStr; medianStr.sprintf("%g ms", roundf((float)median_idx / time_histo.time_scale)/1000.f);
-		QString majStr; majStr.sprintf("%g ms", roundf((float)time_histo.index_max / time_histo.time_scale / 100.)/10.f);
+#define BATCHSTATS_DISPLAY_RES	10.f
+		maxStr.sprintf("%gms", roundf(max_ms*10.f)/10.f);
+		QString medianStr; medianStr.sprintf("%gms", roundf((float)median_idx / time_histo.time_scale)/1000.f);
+		QString majStr; majStr.sprintf("%gms", roundf((float)time_histo.index_max / time_histo.time_scale / (1000.*BATCHSTATS_DISPLAY_RES))/BATCHSTATS_DISPLAY_RES);
 
-		QString meanStr; meanStr.sprintf("%g ms", roundf(mean_ms*100.f)/100.f);
+		QString meanStr; meanStr.sprintf("%gms", roundf(mean_ms*BATCHSTATS_DISPLAY_RES)/BATCHSTATS_DISPLAY_RES);
 		float overflows = 100.f * time_histo.overflow_count / cumul_nb;
 		QString overflowStr; overflowStr.sprintf("%g %%", overflows);
 
 		stddev_cumul /= (double)cumul_nb;
-		QString stddevStr; stddevStr.sprintf("%g ms", roundf((stddev_cumul)*100.)/100.f);
+		QString stddevStr; stddevStr.sprintf("%gms", roundf((stddev_cumul)*BATCHSTATS_DISPLAY_RES)/BATCHSTATS_DISPLAY_RES);
 
 		QString statStr =
 				//						  tr("majority=") + majStr

@@ -737,8 +737,9 @@ void WorkshopApp::initMenuBar()
 	if(g_has_measures) {
 		pToolsMenu->insertItem(tr("Measures"), pMeasuresTools);
 	}
-	pToolsMenu->insertItem(QPixmap(BASE_DIRECTORY "images/pixmaps/movie16.png"),
-						   tr("Videos"), pVideosTools);
+
+	QIcon movieIcon(":images/pixmaps/movie.png");
+	pToolsMenu->insertItem(movieIcon, tr("Videos"), pVideosTools);
 	pToolsMenu->insertSeparator();
 
 	configAction->addTo(pToolsMenu);
