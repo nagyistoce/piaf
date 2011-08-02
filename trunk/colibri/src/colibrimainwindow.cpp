@@ -35,13 +35,11 @@
 u8 mode_file = 0;
 
 ColibriMainWindow::ColibriMainWindow(QWidget *parent)
-	: QMainWindow(parent), ui(new Ui::ColibriMainWindow)
+	:
+	QMainWindow(parent),
+	ui(new Ui::ColibriMainWindow),
+	mSettings(PIAFCOLIBRISETTINGS)
 {
-	char home[512]=".";
-	if(getenv("HOME")) {
-		strcpy(home, getenv("HOME"));
-	}
-	m_path = QString(home);
 	ui->setupUi(this);
 
 	m_pColibriThread = NULL;
@@ -60,9 +58,47 @@ ColibriMainWindow::ColibriMainWindow(QWidget *parent)
 
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(on_m_timer_timeout()));
 
+	loadSettings();
 }
+
+#define COLIBRISETTING_LASTPLUGINDIR	"LastPluginDir"
+#define COLIBRISETTING_LASTIMAGEDIR		"LastImageDir"
+#define COLIBRISETTING_LASTMOVIEDIR		"LastMovieDir"
+
+
+void ColibriMainWindow::loadSettings() {
+	// overwrite with batch settings
+	QString entry = mSettings.readEntry(COLIBRISETTING_LASTPLUGINDIR);
+	if(!entry.isNull())
+	{
+		mLastSettings.lastPluginsDir = entry;
+	}
+
+	entry = mSettings.readEntry(COLIBRISETTING_LASTIMAGEDIR);
+	if(!entry.isNull())
+	{
+		mLastSettings.lastImagesDir = entry;
+	}
+
+	entry = mSettings.readEntry(COLIBRISETTING_LASTMOVIEDIR);
+	if(!entry.isNull())
+	{
+		mLastSettings.lastMoviesDir = entry;
+	}
+
+}
+
+void ColibriMainWindow::saveSettings()
+{
+	// overwrite with batch settings
+	mSettings.writeEntry(COLIBRISETTING_LASTPLUGINDIR, mLastSettings.lastPluginsDir);
+	mSettings.writeEntry(COLIBRISETTING_LASTIMAGEDIR, mLastSettings.lastImagesDir);
+	mSettings.writeEntry(COLIBRISETTING_LASTMOVIEDIR, mLastSettings.lastMoviesDir);
+}
+
 ColibriMainWindow::~ColibriMainWindow()
 {
+	saveSettings();
 	delete ui;
 }
 
@@ -70,12 +106,14 @@ int ColibriMainWindow::setPluginSequence(QString sequencepath)
 {
 	if(sequencepath.isEmpty()) {
 		QString fileName = QFileDialog::getOpenFileName(this, tr("Open plugin sequence file"),
-														 mLastPluginsDirName,
+														 mLastSettings.lastPluginsDir,
 														 tr("Piaf sequence (*.flist)"));
 		QFileInfo fi(fileName);
 		if(fi.isFile() && fi.exists())
 		{
-			mLastPluginsDirName = fi.absoluteDir().absolutePath();
+			mLastSettings.lastPluginsDir = fi.absoluteDir().absolutePath();
+			saveSettings();
+
 			sequencepath = fileName;
 		}
 		else
@@ -99,18 +137,24 @@ int ColibriMainWindow::setPluginSequence(QString sequencepath)
 void ColibriMainWindow::on_fileButton_clicked()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-						 m_path,
-						 tr("Images (*.png *.xpm *.jpg)"));
+													mLastSettings.lastImagesDir,
+													tr("Images (*.png *.PNG "
+													   "*.xpm "
+													   "*.jpg *.jpeg *.JPG *.JPEG "
+													   "*.bmp *.BMP)"));
 	if(fileName.isEmpty()) return;
 
 	QFileInfo fi(fileName);
 	if(!fi.exists()) return;
 
-	m_path = fi.absolutePath();
+	mLastSettings.lastImagesDir = fi.absolutePath();
+	saveSettings();
 
 	// load file
 	IplImage * iplImage = cvLoadImage(fileName.toUtf8().data());
 	computeImage(iplImage);
+
+	displayImage(iplImage);
 
 	tmReleaseImage(&iplImage);
 }
@@ -444,7 +488,7 @@ void ColibriMainWindow::computeImage(IplImage * iplImage) {
 	mFilterManager.processImage(&mSwImage);
 
 	// Display image as output
-//	displayImage(iplImage);
+	//displayImage(iplImage);
 }
 
 void ColibriMainWindow::on_deskButton_clicked() {
@@ -452,7 +496,7 @@ void ColibriMainWindow::on_deskButton_clicked() {
     QRect currect = QApplication::activeWindow()->rect();
     QPoint imgPos = QApplication::activeWindow()->geometry().topLeft();
     QRect imgRect = ui->imageLabel->rect();
-/*
+
     fprintf(stderr, "%s:%d: curpos=%dx%d +%dx%d imageLabel=%d,%d rect=%d,%d+%dx%d\n",
             __func__, __LINE__,
             curpos.x(), curpos.y(),
@@ -461,11 +505,11 @@ void ColibriMainWindow::on_deskButton_clicked() {
             imgRect.x(), imgRect.y(),
             imgRect.width(), imgRect.height()
             );
-*/
+
     m_grabRect = QRect(imgPos.x()+1, imgPos.y()+1,
                        imgRect.width(), imgRect.height());
     hide();
-    QTimer::singleShot(100, this, SLOT(on_grabTimer_timeout()));
+	QTimer::singleShot(200, this, SLOT(on_grabTimer_timeout()));
 }
 
 void ColibriMainWindow::on_grabTimer_timeout() {
@@ -473,10 +517,10 @@ void ColibriMainWindow::on_grabTimer_timeout() {
     QPixmap desktopPixmap = QPixmap::grabWindow(
             //QApplication::activeWindow()->winId());
             QApplication::desktop()->winId());
-  /*  fprintf(stderr, "%s:%d: desktopImage=%dx%dx%d\n",
+   fprintf(stderr, "%s:%d: desktopImage=%dx%dx%d\n",
             __func__, __LINE__,
             desktopPixmap.width(), desktopPixmap.height(), desktopPixmap.depth());
-*/
+   //desktopPixmap.save("/tmp/desktop.png");
     //QApplication::activeWindow()->show();
 
     // Crop where the window is
@@ -489,24 +533,36 @@ void ColibriMainWindow::on_grabTimer_timeout() {
     QImage desktopImage;
     desktopImage = ( desktopPixmap.copy(m_grabRect).toImage() );
 
-    if(desktopImage.isNull()) return;
-   /* fprintf(stderr, "%s:%d: desktopImage=%dx%dx%d\n",
+	if(desktopImage.isNull()) {
+		fprintf(stderr, "%s:%d: desktopImage is null !\n",
+					__func__, __LINE__);
+
+		return;
+	}
+	fprintf(stderr, "%s:%d: desktopImage=%dx%dx%d\n",
             __func__, __LINE__,
             desktopImage.width(), desktopImage.height(), desktopImage.depth());
-*/
 
-    IplImage * header = cvCreateImageHeader(cvSize(desktopImage.width(), desktopImage.height()),
+
+	IplImage * iplImage = cvCreateImage(cvSize(desktopImage.width(), desktopImage.height()),
                                             IPL_DEPTH_8U, desktopImage.depth()/8);
-    header->imageData = (char *)desktopImage.bits();
+	memcpy(iplImage->imageData, (char *)desktopImage.bits(), iplImage->widthStep*iplImage->height);
 
-	computeImage(header);
+//	// We have to set the alpha flag
+//	u8 * alpha = (u8 *) iplImage->imageData;
 
-	// Display image
-//	displayImage(header);
+//	for(int pos = 3; pos <iplImage->widthStep*iplImage->height; pos+=4)
+//	{
+//		alpha[pos] = 255;
+//	}
+//	cvSaveImage("/dev/shm/unprocessed.png", iplImage);
+	computeImage(iplImage);
+//	cvSaveImage("/dev/shm/processed.png", iplImage);
+	displayImage(iplImage);
 
     show();
 
-    cvReleaseImageHeader(&header);
+	tmReleaseImage(&iplImage);
 }
 
 void ColibriMainWindow::on_snapButton_clicked() {
@@ -536,106 +592,6 @@ void ColibriMainWindow::displayImage(IplImage * iplImage)
 	// load image to display
 	qtImage = iplImageToQImage(iplImage);
 	ui->imageLabel->setRefImage(&qtImage);
-#if 0
-	QImage scaledImg = qtImage.scaled(
-				ui->imageLabel->width(),
-				ui->imageLabel->height(),
-				Qt::KeepAspectRatio
-				);
-	/*
-
-	 QPainter::CompositionMode mode = currentMode();
-
-	 QPainter painter(&resultImage);
-	 painter.setCompositionMode(QPainter::CompositionMode_Source);
-	 painter.fillRect(resultImage.rect(), Qt::transparent);
-	 painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-	 painter.drawImage(0, 0, destinationImage);
-	 painter.setCompositionMode(mode);
-	 painter.drawImage(0, 0, sourceImage);
-	 painter.setCompositionMode(QPainter::CompositionMode_DestinationOver);
-	 painter.fillRect(resultImage.rect(), Qt::white);
-	 painter.end();
-
-	 resultLabel->setPixmap(QPixmap::fromImage(resultImage));
-	*/
-
-//	QImage resultImage(ui->imageLabel->width(),
-//					   ui->imageLabel->height(),
-//                                           QImage::Format_ARGB32_Premultiplied);
-        resultImage = qtImage.scaled(
-                ui->imageLabel->width(),
-                ui->imageLabel->height(),
-                Qt::IgnoreAspectRatio
-                );
-
-	QPainter painter(&resultImage);
-
-        QImage destinationImage = decorImage;
-        QImage sourceImage = scaledImg;
-        sourceImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
-
-	//QImage alphaMask = decorImage.createMaskFromColor(qRgb(0,0,0));
-	//decorImage.setAlphaChannel(alphaMask);
-	painter.setCompositionMode(QPainter::CompositionMode_Source);
-	painter.fillRect(resultImage.rect(), Qt::transparent);
-	painter.setCompositionMode(QPainter::CompositionMode_Source);
-        painter.fillRect(resultImage.rect(), Qt::white);
-	painter.drawImage((resultImage.width() - sourceImage.width())/2,
-					  0, sourceImage);
-	painter.setCompositionMode(QPainter::CompositionMode_SourceOver);
-	painter.drawImage(0, 0, destinationImage);
-	painter.setCompositionMode(QPainter::CompositionMode_DestinationOver);
-//        painter.fillRect(resultImage.rect(), Qt::white);
-
-	painter.setCompositionMode(QPainter::CompositionMode_Source);
-
-	float waf_factor = 0.3f;
-
-        // Display waf with dial ----------------------------------------------
-        painter.setRenderHint(QPainter::Antialiasing, true);
-        // Margin on both sides of of the dial
-	float theta_min = 0.05;
-	float theta = (3.1415927-2*theta_min) * (1. - waf_factor) + theta_min;
-	float r = 130.f;
-
-	// Center of background image : 160, 416
-	QPen pen(qRgb(255,0,0));
-	pen.setWidth(2);
-	pen.setCapStyle(Qt::RoundCap);
-
-
-	// Draw main result first, to draw smaller dial over it
-	pen.setColor(qRgb(0,0,0));
-	pen.setColor(qRgba(10,10,10, 32));
-	pen.setWidth(5);
-	painter.setPen(pen);
-	r = 140;
-	theta = (3.1415927-2*theta_min) * (1. - waf_factor) + theta_min;
-	painter.drawLine(QPoint(160, 416),
-					 QPoint(160+r * cos(theta), 416-r*sin(theta)));
-	r = 125;
-
-	pen.setColor(qRgba(10,10,10, 128));
-	painter.setPen(pen);
-	painter.drawEllipse(QPoint(160, 416), 8,8);
-        painter.end();
-
-
-        QPixmap localPixmap = QPixmap::fromImage(resultImage);
-		ui->imageLabel->setRefImage(resultImage);
-#endif // OLD VERSION OF DISPLAY WITH DIALER
-	/*
-	QString dialname=":/icons/Dialer.png";
-	QImage pixmap(dialname);
-	pixmap = pixmap.convertToFormat(QImage::Format_Indexed8);
-	pixmap.setNumColors(256);
-	for(int col = 0; col < 256; col++)
-		pixmap.setColor(col, qRgb(col, col, col));
-	int arrow = (int)(255.f * waf.waf_factor);
-	pixmap.setColor(arrow, qRgb(255, 0, 0));
-	ui->dialLabel->setPixmap(QPixmap(pixmap));
-*/
 }
 
 CvCapture* capture = 0;
@@ -676,14 +632,16 @@ void ColibriMainWindow::on_camButton_toggled(bool checked)
 void ColibriMainWindow::on_movieButton_toggled(bool checked)
 {
 	if(!checked) {
-		if(m_timer.isActive())
+		if(m_timer.isActive()) {
 			m_timer.stop();
+		}
 
 		// Stop thread
 		if(m_pColibriThread) {
 			m_pColibriThread->stop();
 			m_pColibriThread->setCapture(NULL);
 		}
+
 		cvReleaseCapture(&capture);
 		capture = NULL;
 
@@ -692,14 +650,16 @@ void ColibriMainWindow::on_movieButton_toggled(bool checked)
 
 	if(!capture) {
 		QString fileName = QFileDialog::getOpenFileName(this, tr("Open File"),
-							 m_path,
+							 mLastSettings.lastMoviesDir,
 							 tr("Movies (*.avi *.mp* *.mov)"));
 		if(fileName.isEmpty()) return;
 
 		QFileInfo fi(fileName);
 		if(!fi.exists()) return;
 
-		m_path = fi.absolutePath();
+		mLastSettings.lastMoviesDir = fi.absolutePath();
+		saveSettings();
+
 
 		capture = cvCaptureFromFile( fi.absoluteFilePath().toUtf8().data() );
 

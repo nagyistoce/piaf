@@ -248,6 +248,21 @@ void VideoCaptureDoc::setDetectionMask(char * /*maskfile*/)
 {
 	// NOT IMPLEMENTED
 }
+/*  Set exposure value in us */
+int VideoCaptureDoc::setexposure( int exposure_us )
+{
+	if(!myVAcq) return -1;
+	t_video_properties props = myVAcq->updateVideoProperties();
+	props.exposure = exposure_us/100; // in V4L2, exposure in in 100us step
+	return myVAcq->setVideoProperties(props);
+}
+int VideoCaptureDoc::setgain( int gain)
+{
+	if(!myVAcq) return -1;
+	t_video_properties props = myVAcq->updateVideoProperties();
+	props.gain = gain; // in V4L2,
+	return myVAcq->setVideoProperties(props);
+}
 
 int VideoCaptureDoc::setpicture(int br, int hue, int col, int cont, int white)
 {

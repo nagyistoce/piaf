@@ -135,6 +135,7 @@ void WorkshopVideoCaptureView::init()
 	color = pic.colour;
 	white = pic.whiteness;
 	hue = pic.hue;
+	exposure = 0;
 
 	pWin->setCaption(tr("Video Acquisition"));
 	connect(pWin, SIGNAL(signalResizeEvent(QResizeEvent *)),
@@ -496,6 +497,18 @@ void WorkshopVideoCaptureView::slotSetWhite(int w)
 	white = w;
 	doc->setpicture( brightness, hue, color, contrast, white );
 }
+void WorkshopVideoCaptureView::slotSetExposure(int exp)
+{
+	exposure = exp*1000;
+	doc->setexposure( exposure );
+}
+
+void WorkshopVideoCaptureView::slotSetGain( int g)
+{
+	gain = g;
+	doc->setgain( gain );
+
+}
 
 void WorkshopVideoCaptureView::slotDeviceParams()
 {
@@ -513,15 +526,15 @@ void WorkshopVideoCaptureView::slotDeviceParams()
 
 	Q3GridLayout * grid = new Q3GridLayout(deviceParamsWidget, 2, 0, 0);
 
-	QLabel * label1 = new QLabel(tr("Brightness :"), deviceParamsWidget, 0, 0);
+	QLabel * label1 = new QLabel(tr("Brightness:"), deviceParamsWidget, 0, 0);
 	label1->setAlignment( Qt::AlignBottom | Qt::AlignLeft );
 	int gridpos = 0;
 	grid->addWidget(label1, gridpos, 0);
 
-	QSlider * slider1 = new QSlider(0, 65535, // min and max values
+	QSlider * slider1 = new QSlider(0, 255, // min and max values
 				1, 0, // increment, start
 				Qt::Horizontal, deviceParamsWidget
-		);
+				);
 	grid->addWidget(slider1, gridpos++, 1);
 	slider1->setMinimumSize( 100, 20);
 	slider1->setTickmarks( QSlider::NoMarks );
@@ -531,10 +544,10 @@ void WorkshopVideoCaptureView::slotDeviceParams()
 	slider1->update();
 	connect( slider1, SIGNAL( valueChanged( int ) ), this, SLOT( slotSetBrightness( int ) ) );
 
-	QLabel * label2 = new QLabel(tr("Contrast :"), deviceParamsWidget, 0, 0);
+	QLabel * label2 = new QLabel(tr("Contrast:"), deviceParamsWidget, 0, 0);
 	grid->addWidget(label2, gridpos, 0);
 	label2->setAlignment( Qt::AlignBottom | Qt::AlignLeft );
-	QSlider * slider2 = new QSlider(0, 65535, // min and max values
+	QSlider * slider2 = new QSlider(0, 255, // min and max values
 			   1, 0, // increment, start
 				Qt::Horizontal, deviceParamsWidget
 	   );
@@ -547,10 +560,10 @@ void WorkshopVideoCaptureView::slotDeviceParams()
 	slider2->update();
 	connect( slider2, SIGNAL( valueChanged( int ) ), this, SLOT( slotSetContrast( int ) ) );
 
-	QLabel * label3 = new QLabel(tr("Hue :"), deviceParamsWidget, 0, 0);
+	QLabel * label3 = new QLabel(tr("Hue:"), deviceParamsWidget, 0, 0);
 	grid->addWidget(label3, gridpos, 0);
 	label3->setAlignment( Qt::AlignBottom | Qt::AlignLeft );
-	QSlider * slider3 = new QSlider(0, 65535, // min and max values
+	QSlider * slider3 = new QSlider(0, 255, // min and max values
 			   1, 0, // increment, start
 				Qt::Horizontal, deviceParamsWidget
 	   );
@@ -563,10 +576,10 @@ void WorkshopVideoCaptureView::slotDeviceParams()
 	slider3->update();
 	connect( slider3, SIGNAL( valueChanged( int ) ), this, SLOT( slotSetHue( int ) ) );
 
-	QLabel * label4 = new QLabel(tr("Color :"), deviceParamsWidget, 0, 0);
+	QLabel * label4 = new QLabel(tr("Saturation:"), deviceParamsWidget, 0, 0);
 	grid->addWidget(label4, gridpos, 0);
 	label4->setAlignment( Qt::AlignBottom | Qt::AlignLeft );
-	QSlider * slider4 = new QSlider(0, 65535, // min and max values
+	QSlider * slider4 = new QSlider(0, 255, // min and max values
 			   1, 0, // increment, start
 				Qt::Horizontal, deviceParamsWidget
 	   );
@@ -579,11 +592,12 @@ void WorkshopVideoCaptureView::slotDeviceParams()
 	slider4->update();
 	connect( slider4, SIGNAL( valueChanged( int ) ), this, SLOT( slotSetColor( int ) ) );
 
-	QLabel * label5 = new QLabel(tr("Whiteness :"), deviceParamsWidget, 0, 0);
+	// WHITENESS
+	QLabel * label5 = new QLabel(tr("Whiteness:"), deviceParamsWidget, 0, 0);
 	grid->addWidget(label5, gridpos, 0);
 
 	label5->setAlignment( Qt::AlignBottom | Qt::AlignLeft );
-	QSlider * slider5 = new QSlider(0, 65535, // min and max values
+	QSlider * slider5 = new QSlider(0, 255, // min and max values
 			   1, 0, // increment, start
 				Qt::Horizontal, deviceParamsWidget
 	   );
@@ -596,6 +610,55 @@ void WorkshopVideoCaptureView::slotDeviceParams()
 	slider5->update();
 	connect( slider5, SIGNAL( valueChanged( int ) ), this, SLOT( slotSetWhite( int ) ) );
 
+
+
+
+	// EXPOSURE
+	QLabel * label6 = new QLabel(tr("Exposure:"), deviceParamsWidget, 0, 0);
+	grid->addWidget(label6, gridpos, 0);
+
+	label6->setAlignment( Qt::AlignBottom | Qt::AlignLeft );
+	QSlider * slider6 = new QSlider(0, 255, // min and max values
+			   1, 0, // increment, start
+			   Qt::Horizontal, deviceParamsWidget
+			   );
+	grid->addWidget(slider6, gridpos++, 1);
+	slider6->setMinimumSize( 100, 20);
+	slider6->setTickmarks( QSlider::NoMarks );
+	slider6->setValue(white);
+	slider6->setGeometry( 100, 0, 100, 20);
+	slider6->updateGeometry();
+	slider6->update();
+	connect( slider6, SIGNAL( valueChanged( int ) ), this, SLOT( slotSetExposure( int ) ) );
+
+
+
+
+	// GAIN
+	QLabel * label7 = new QLabel(tr("Gain:"), deviceParamsWidget, 0, 0);
+	grid->addWidget(label7, gridpos, 0);
+
+	label7->setAlignment( Qt::AlignBottom | Qt::AlignLeft );
+	QSlider * slider7 = new QSlider(0, 255, // min and max values
+			   1, 0, // increment, start
+			   Qt::Horizontal, deviceParamsWidget
+			   );
+	grid->addWidget(slider7, gridpos++, 1);
+	slider7->setMinimumSize( 100, 20);
+	slider7->setTickmarks( QSlider::NoMarks );
+	slider7->setValue(white);
+	slider7->setGeometry( 100, 0, 100, 20);
+	slider7->updateGeometry();
+	slider7->update();
+	connect( slider7, SIGNAL( valueChanged( int ) ), this, SLOT( slotSetGain( int ) ) );
+
+
+
+
+
+
+
+	// TITLE
 	deviceParamsWidget->setCaption( tr("Image settings") );
 	//	mw->setCentralWidget( slider1 );
 //	grid->updateGeometry();

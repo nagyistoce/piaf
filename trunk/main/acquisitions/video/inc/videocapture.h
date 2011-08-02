@@ -149,7 +149,13 @@ public:
     int setpicture(int br, int hue, int col, int cont, int white);
     /// read picture acquisition parameters (brightness, contrast, hue, whiteness...)
     int getpicture(video_picture * pic);
-    // read device capabilities (min and max size)
+
+	/** \brief Set exposure value in us */
+	int setexposure( int exposure_us );
+	/** \brief Set gain value */
+	int setgain( int gain );
+
+	// read device capabilities (min and max size)
     int getcapability(video_capability * vc);
     // change video acquisition size
     int changeAcqParams(tBoxSize newSize, int ch);

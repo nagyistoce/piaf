@@ -29,6 +29,7 @@
 #include <QtGui/QMainWindow>
 #include <QThread>
 #include <QMutex>
+#include <QSettings>
 
 
 
@@ -42,6 +43,8 @@ namespace Ui
 }
 
 class ColibriMainWindow;
+
+
 
 /** @brief Background acquisition and processing thread
   */
@@ -93,13 +96,20 @@ private:
 
 	SwFilterManager * m_pFilterManager;
 
-	QString mLastPluginsDirName;	///<
-
 	IplImage * m_inputImage;
 	IplImage * m_outputImage;
 	CvCapture * m_capture;
 
 };
+
+/** \brief Saved settings for Colibri : paths, options ... */
+typedef struct
+{
+	QString lastPluginsDir;	///< Last path of plugin sequence
+	QString lastImagesDir;	///< Last path of loaded image
+	QString lastMoviesDir;	///< Last path of loaded movie
+
+} t_colibri_settings;
 
 /** @brief Main WAFmeter window
   */
@@ -121,7 +131,6 @@ public:
 
 private:
 	Ui::ColibriMainWindow *ui;
-	QString m_path;
 
 	QTimer m_timer;
 	int m_lastIteration;
@@ -143,7 +152,15 @@ private:
 
 	QRect m_grabRect;
 
-	QString mLastPluginsDirName; ///< Last directory path of plugin
+/// Settings for piaf Colibri independant app
+#define PIAFCOLIBRISETTINGS	"PiafColibri"
+
+	QSettings mSettings;			///< Settings for restoring previous session
+	void loadSettings();
+	void saveSettings();
+
+	t_colibri_settings mLastSettings; ///< Last directory settings (paths of plugin, image, movie ...)
+
 
 	QImage decorImage;
 	QImage resultImage;
