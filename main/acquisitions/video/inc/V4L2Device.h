@@ -236,6 +236,16 @@ private:
 	int setsubcapture	( int x, int y, int width, int height, int decimation, int flags);
 	int changeSize(tBoxSize * newSize);
 
+	/** \brief change camera control on V4L2 device using ioctl
+
+	*/
+	int setCameraControl(unsigned int controlId, int value);
+
+	/** \brief get camera control on V4L2 device using ioctl
+
+	*/
+	int getCameraControl(unsigned int controlId);
+
 	// precise settings
 	int setdefaultnorm	(int defaultNorme);
 	int setchannel			(int ch);

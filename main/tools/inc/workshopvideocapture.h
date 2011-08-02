@@ -157,6 +157,8 @@ private :
 	int white;
 	int color;
 
+	int exposure; ///< exposure in us
+	int gain; ///< gain
 	Q3ToolBar * toolBar;
 	QMenuBar * menuBar;
 
@@ -178,6 +180,9 @@ private :
 	void slotSetHue(int h);
 	void slotSetBrightness(int br);
 	void slotSetWhite(int w);
+
+	void slotSetExposure(int exp);
+	void slotSetGain( int );
 
 	// change size
 	void slotSetSize( const QString & str );

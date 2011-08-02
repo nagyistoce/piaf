@@ -274,7 +274,65 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 		pic.colour = (u16)(props.saturation*VIDEOPICTURE_SCALE);
 		pic.hue = (u16)(props.hue*VIDEOPICTURE_SCALE);
 		pic.whiteness = (u16)(props.white_balance*VIDEOPICTURE_SCALE);
-		setpicture(pic.brightness, pic.hue, pic.colour, pic.contrast, pic.whiteness);
+
+		setCameraControl(V4L2_CID_BRIGHTNESS, pic.brightness);
+		setCameraControl(V4L2_CID_CONTRAST, pic.contrast);
+		setCameraControl(V4L2_CID_SATURATION, pic.colour);
+		setCameraControl(V4L2_CID_HUE, pic.hue);
+		setCameraControl(V4L2_CID_WHITENESS, pic.whiteness);
+
+		//setpicture(pic.brightness, pic.hue, pic.colour, pic.contrast, pic.whiteness);
+	}
+
+	// EXPOSURE
+	if(m_video_properties.exposure != props.exposure) {
+		/* http://v4l2spec.bytesex.org/spec-single/v4l2.html
+
+V4L2_CID_EXPOSURE_AUTO 	integer
+	Enables automatic adjustments of the exposure time and/or iris aperture. The effect of manual changes of the exposure time or iris aperture while these features are enabled is undefined, drivers should ignore such requests. Possible values are:
+
+V4L2_EXPOSURE_AUTO 	Automatic exposure time, automatic iris aperture.
+V4L2_EXPOSURE_MANUAL 	Manual exposure time, manual iris.
+V4L2_EXPOSURE_SHUTTER_PRIORITY 	Manual exposure time, auto iris.
+V4L2_EXPOSURE_APERTURE_PRIORITY 	Auto exposure time, manual iris.
+
+V4L2_CID_EXPOSURE_ABSOLUTE 	integer
+	Determines the exposure time of the camera sensor. The exposure time is limited by the frame interval. Drivers should interpret the values as 100 µs units, where the value 1 stands for 1/10000th of a second, 10000 for 1 second and 100000 for 10 seconds.
+
+V4L2_CID_EXPOSURE_AUTO_PRIORITY 	boolean
+	When V4L2_CID_EXPOSURE_AUTO is set to AUTO or SHUTTER_PRIORITY, this control determines if the device may dynamically vary the frame rate. By default this feature is disabled (0) and the frame rate must remain constant.
+		*/
+		//an array of v4l2_ext_control
+	//	 setCameraControl(unsigned int controlId, int value);
+		/*
+V4L2_CID_EXPOSURE_AUTO_PRIORITY value: 0
+V4L2_CID_EXPOSURE_AUTO value: V4L2_EXPOSURE_MANUAL
+V4L2_CID_EXPOSURE_ABSOLUTE value: 100
+		 */
+		if(props.exposure > 0) {
+			setCameraControl( V4L2_CID_EXPOSURE_AUTO_PRIORITY, 0);
+			setCameraControl( V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL);
+			setCameraControl( V4L2_CID_EXPOSURE_ABSOLUTE, props.exposure);
+		} else {
+			setCameraControl( V4L2_CID_EXPOSURE_AUTO_PRIORITY, 1);
+			//setCameraControl( V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_AUTO);
+			setCameraControl( V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_APERTURE_PRIORITY);
+			//setCameraControl( V4L2_CID_EXPOSURE_ABSOLUTE, props.exposure);
+
+		}
+	}
+
+	// EXPOSURE
+	if(m_video_properties.gain != props.gain) {
+
+		fprintf(stderr, "V4L2Device::%s:%d : change gain=%d\n",
+				__func__, __LINE__, (int)props.gain);
+		if(props.gain>0) {
+			setCameraControl( V4L2_CID_AUTOGAIN, 0);
+			setCameraControl( V4L2_CID_GAIN, props.gain);
+		}else {
+			setCameraControl( V4L2_CID_AUTOGAIN, 1);
+		}
 	}
 
 	fprintf(stderr, "V4L2Device::%s:%d : props=\n", __func__, __LINE__);
@@ -1508,7 +1566,13 @@ int V4L2Device::getpicture(video_picture * dest)
 	if(!initialised)
 		return -1;
 
-	memcpy(dest, &(vd.picture), sizeof(video_picture));
+	memset(dest, 0, sizeof(video_picture));
+	dest->brightness = getCameraControl(V4L2_CID_BRIGHTNESS);
+	dest->contrast = getCameraControl(V4L2_CID_CONTRAST);
+	fprintf(stderr, "[V4L2]::%s:%d : brightness=%d contrast=%d\n", __func__, __LINE__,
+			dest->brightness, dest->contrast);
+
+//	memcpy(dest, &(vd.picture), sizeof(video_picture));
 	return 0;
 }
 
@@ -2110,6 +2174,76 @@ int V4L2Device::v4l_setpalette(int pal)
 	m_capture_palette = pal;
 	return 0;
 }
+
+int V4L2Device::setCameraControl(unsigned int controlId, int value)
+{
+	//an array of v4l2_ext_control
+	struct v4l2_ext_control clist[1];
+	clist[0].id      = controlId;
+	clist[0].value = value;
+
+	//v4l2_ext_controls with list of v4l2_ext_control
+	struct v4l2_ext_controls ctrls = {0};
+	ctrls.ctrl_class = controlId & 0xFFFF0000;
+	ctrls.count = 1;
+	ctrls.controls = clist;
+
+	if (-1 == ioctl (vd.fd, VIDIOC_S_EXT_CTRLS, &ctrls))
+	{
+		//...error handling
+		fprintf(stderr, "[V4L2]::%s:%d : VIDIOC_S_EXT_CTRLS failed for "
+				"id=0x%08x val=%d\n", __func__, __LINE__,
+				controlId, value);
+		return -1;
+	}
+	 //read back the value
+	if (-1 == ioctl (vd.fd, VIDIOC_G_EXT_CTRLS, &ctrls))
+	{
+		//..... error handling
+		fprintf(stderr, "[V4L2]::%s:%d : VIDIOC_G_EXT_CTRLS failed\n", __func__, __LINE__);
+		return -1;
+	}
+
+	if(clist[0].value != value)
+	{
+		fprintf(stderr, "[V4L2]::%s:%d : VIDIOC_S_EXT_CTRLS could not change value for "
+				"id=0x%08x val=%d => current val = %d\n", __func__, __LINE__,
+				controlId, value,
+				clist[0].value);
+
+	}
+	return 0;
+}
+
+
+int V4L2Device::getCameraControl(unsigned int controlId)
+{
+	//an array of v4l2_ext_control
+	struct v4l2_ext_control clist[1];
+	clist[0].id      = controlId;
+	clist[0].value = 0;
+
+	//v4l2_ext_controls with list of v4l2_ext_control
+	struct v4l2_ext_controls ctrls = {0};
+	ctrls.ctrl_class = controlId & 0xFFFF0000;
+	ctrls.count = 1;
+	ctrls.controls = clist;
+
+	//read back the value
+	if (-1 == ioctl (vd.fd, VIDIOC_G_EXT_CTRLS, &ctrls))
+	{
+		//..... error handling
+		fprintf(stderr, "[V4L2]::%s:%d : VIDIOC_G_EXT_CTRLS id=%08x FAILED\n", __func__, __LINE__,
+				controlId);
+		return -1;
+	}
+
+	fprintf(stderr, "[V4L2]::%s:%d : VIDIOC_G_EXT_CTRLS id=%08x => val=%d\n", __func__, __LINE__,
+			controlId, clist[0].value);
+
+	return clist[0].value;
+}
+
 
 /** v4l_setpicture - set the picture properties 
  @param vd device handling struct
