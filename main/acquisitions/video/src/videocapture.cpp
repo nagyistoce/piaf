@@ -78,6 +78,10 @@ VideoCaptureDoc::~VideoCaptureDoc()
 {
 	fprintf(stderr, "VideoCaptureDoc::~VideoCaptureDoc()\n");
 	fflush(stderr);
+
+	// signal to observers that the doc will be deleted
+	emit documentClosed(this);
+
 	// wait for finishing thread
 	m_run = false;
 	while(m_run) {
@@ -244,6 +248,27 @@ int VideoCaptureDoc::allocateImages()
 	return 1;
 }
 
+t_video_properties VideoCaptureDoc::getVideoProperties()
+{
+	if(!myVAcq) {
+		t_video_properties empty;
+		memset(&empty, 0, sizeof(t_video_properties));
+		return empty;
+	}
+
+	t_video_properties props = myVAcq->updateVideoProperties();
+	return props;
+}
+
+int VideoCaptureDoc::setVideoProperties(t_video_properties props)
+{
+	if(!myVAcq) {
+		fprintf(stderr, "VidCapDoc::%s:%d : no vid acq\n", __func__, __LINE__);
+		return -1;
+	}
+
+	return myVAcq->setVideoProperties(props);
+}
 void VideoCaptureDoc::setDetectionMask(char * /*maskfile*/)
 {
 	// NOT IMPLEMENTED

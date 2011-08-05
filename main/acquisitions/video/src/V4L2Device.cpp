@@ -245,6 +245,21 @@ t_video_properties V4L2Device::updateVideoProperties()
 		/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
 		– Property identifier. Can be one of the following:*/
 
+	m_video_properties.auto_brightness = getCameraControl(V4L2_CID_AUTOBRIGHTNESS);
+	m_video_properties.brightness = getCameraControl(V4L2_CID_BRIGHTNESS);
+
+	m_video_properties.contrast = getCameraControl(V4L2_CID_CONTRAST);
+	m_video_properties.saturation = getCameraControl(V4L2_CID_SATURATION);
+	m_video_properties.hue = getCameraControl(V4L2_CID_HUE);
+
+	m_video_properties.auto_white_balance = getCameraControl(V4L2_CID_AUTO_WHITE_BALANCE);
+	m_video_properties.white_balance = getCameraControl(V4L2_CID_WHITE_BALANCE_TEMPERATURE);
+
+	m_video_properties.exposure = getCameraControl(V4L2_CID_EXPOSURE);
+	m_video_properties.auto_exposure = getCameraControl(V4L2_CID_EXPOSURE_AUTO);
+	m_video_properties.gain = getCameraControl(V4L2_CID_GAIN);
+	m_video_properties.auto_gain = getCameraControl(V4L2_CID_AUTOGAIN);
+
 	fprintf(stderr, "V4L2Device::%s:%d : props=\n", __func__, __LINE__);
 	printVideoProperties(&m_video_properties);
 
@@ -256,9 +271,22 @@ t_video_properties V4L2Device::getVideoProperties()
 {
 	return m_video_properties;
 }
+
 int V4L2Device::setVideoProperties(t_video_properties props)
 {
 	/// \bug FIXME : implement here
+	if(m_video_properties.auto_white_balance != props.auto_white_balance) {
+		setCameraControl(V4L2_CID_AUTO_WHITE_BALANCE, props.auto_white_balance);
+	}
+	if(props.do_white_balance) {
+		setCameraControl(V4L2_CID_DO_WHITE_BALANCE, 1);
+		props.do_white_balance = false;
+	}
+
+	if(m_video_properties.auto_brightness != props.auto_brightness) {
+		setCameraControl(V4L2_CID_AUTOBRIGHTNESS, props.auto_brightness);
+	}
+
 	if(m_video_properties.brightness != props.brightness
 			|| m_video_properties.contrast != props.contrast
 			|| m_video_properties.saturation != props.saturation
@@ -274,17 +302,27 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 		pic.colour = (u16)(props.saturation*VIDEOPICTURE_SCALE);
 		pic.hue = (u16)(props.hue*VIDEOPICTURE_SCALE);
 		pic.whiteness = (u16)(props.white_balance*VIDEOPICTURE_SCALE);
+		fprintf(stderr, "[V4L2]::%s:%d :x%g => change br=%g/contrast=%g/saturation=%g/hue=%g/whiteness=%g...\n", __func__, __LINE__,
+				VIDEOPICTURE_SCALE,
+				props.brightness, props.contrast, props.saturation, props.hue, props.white_balance);
 
-		setCameraControl(V4L2_CID_BRIGHTNESS, pic.brightness);
-		setCameraControl(V4L2_CID_CONTRAST, pic.contrast);
-		setCameraControl(V4L2_CID_SATURATION, pic.colour);
-		setCameraControl(V4L2_CID_HUE, pic.hue);
-		setCameraControl(V4L2_CID_WHITENESS, pic.whiteness);
+		// copy vaklues directly in V4L2
+		setCameraControl(V4L2_CID_BRIGHTNESS, props.brightness);
+		setCameraControl(V4L2_CID_CONTRAST, props.contrast);
+		setCameraControl(V4L2_CID_SATURATION, props.saturation);
+		setCameraControl(V4L2_CID_HUE, props.hue);
+		//setCameraControl(V4L2_CID_WHITENESS, pic.whiteness);
+		setCameraControl(V4L2_CID_WHITE_BALANCE_TEMPERATURE, props.white_balance);
 
 		//setpicture(pic.brightness, pic.hue, pic.colour, pic.contrast, pic.whiteness);
 	}
 
 	// EXPOSURE
+	if(m_video_properties.auto_exposure != props.auto_exposure) {
+		//setCameraControl( V4L2_CID_EXPOSURE_AUTO_PRIORITY, 0);
+
+		setCameraControl( V4L2_CID_EXPOSURE_AUTO, props.auto_exposure);
+	}
 	if(m_video_properties.exposure != props.exposure) {
 		/* http://v4l2spec.bytesex.org/spec-single/v4l2.html
 
@@ -310,11 +348,11 @@ V4L2_CID_EXPOSURE_AUTO value: V4L2_EXPOSURE_MANUAL
 V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 		 */
 		if(props.exposure > 0) {
-			setCameraControl( V4L2_CID_EXPOSURE_AUTO_PRIORITY, 0);
+			//setCameraControl( V4L2_CID_EXPOSURE_AUTO_PRIORITY, 0);
 			setCameraControl( V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL);
 			setCameraControl( V4L2_CID_EXPOSURE_ABSOLUTE, props.exposure);
 		} else {
-			setCameraControl( V4L2_CID_EXPOSURE_AUTO_PRIORITY, 1);
+			//setCameraControl( V4L2_CID_EXPOSURE_AUTO_PRIORITY, 1);
 			//setCameraControl( V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_AUTO);
 			setCameraControl( V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_APERTURE_PRIORITY);
 			//setCameraControl( V4L2_CID_EXPOSURE_ABSOLUTE, props.exposure);
@@ -506,12 +544,12 @@ int V4L2Device::init_mmap() {
 			fprintf (stderr, "%s:%d : %s does not support "
 					 "memory mapping => exit\n",
 					 __func__, __LINE__, videodevice); fflush(stderr);
-			exit (EXIT_FAILURE);
+			return -1;
 		} else {
 			fprintf (stderr, "%s:%d : %s does not support "
-					 "memory mapping => exit\n",
+					 "memory mapping => VIDIOC_REQBUFS\n",
 					 __func__, __LINE__, videodevice); fflush(stderr);
-			errno_exit ("VIDIOC_REQBUFS");
+			return -1;
 		}
 	}
 
@@ -671,6 +709,9 @@ int V4L2Device::changeSize(tBoxSize * newSize)
 	video_height = h;
 	video_area = video_width * video_height;
 
+	m_video_properties.frame_width = w;
+	m_video_properties.frame_height = h;
+
 	m_imageSize = cvSize(w,h);
 
 	// tell caller that the size changed
@@ -690,7 +731,8 @@ int V4L2Device::changeSize(tBoxSize * newSize)
 
 
 
-int V4L2Device::init_device(int w, int h) {
+int V4L2Device::init_device(int w, int h)
+{
 	// From http://v4l2spec.bytesex.org/spec/a12020.htm
 	struct v4l2_capability cap;
     struct v4l2_cropcap cropcap;
@@ -726,7 +768,8 @@ int V4L2Device::init_device(int w, int h) {
 	
 	cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	
-	if (0 == xioctl(vd.fd, VIDIOC_CROPCAP, &cropcap)) {
+	if (0 == xioctl(vd.fd, VIDIOC_CROPCAP, &cropcap))
+	{
 		crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
         crop.c = cropcap.defrect; /* reset to default */
 		
@@ -743,6 +786,7 @@ int V4L2Device::init_device(int w, int h) {
 				break;
 			}
 		}
+
 	} else {
 		/* Errors ignored. */
 		fprintf(stderr, "V4L2::%s:%d :xioctl failed.\n", __func__, __LINE__);
@@ -764,12 +808,12 @@ int V4L2Device::init_device(int w, int h) {
 	int retry_format = 0;
 #define MAX_PIXELFORMATS 6
 	__u32 pixelformats[MAX_PIXELFORMATS] = {
-			V4L2_PIX_FMT_YUYV,
-			V4L2_PIX_FMT_GREY,
-			V4L2_PIX_FMT_YVU420,
-			V4L2_PIX_FMT_RGB24,
-			V4L2_PIX_FMT_RGB32 ,
-			V4L2_PIX_FMT_YUV420};
+		V4L2_PIX_FMT_GREY,
+		V4L2_PIX_FMT_YUYV,
+		V4L2_PIX_FMT_YVU420,
+		V4L2_PIX_FMT_RGB24,
+		V4L2_PIX_FMT_RGB32 ,
+		V4L2_PIX_FMT_YUV420};
 	
 	
 	bool format_ok = false;
@@ -1849,7 +1893,7 @@ unsigned char * V4L2Device::read_frame(void)
 			/* fall through */
 		
 		default:
-			errno_exit ("VIDIOC_DQBUF");
+			perror ("VIDIOC_DQBUF");
 		}
 		
 		return NULL;

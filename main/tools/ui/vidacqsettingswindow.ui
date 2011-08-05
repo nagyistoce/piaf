@@ -6,157 +6,255 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>358</width>
-    <height>542</height>
+    <width>433</width>
+    <height>587</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>MainWindow</string>
+   <string>Acquisition settings</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../piaf.qrc">
+    <normaloff>:/images/16x16/configure.png</normaloff>:/images/16x16/configure.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QGroupBox" name="groupBox_3">
+     <widget class="QGroupBox" name="formatGroupBox">
       <property name="title">
        <string>Format</string>
       </property>
-      <widget class="QLabel" name="sizeLabel">
-       <property name="geometry">
-        <rect>
-         <x>90</x>
-         <y>20</y>
-         <width>57</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Size</string>
-       </property>
-      </widget>
-      <widget class="QSpinBox" name="fpsSpinBox">
-       <property name="geometry">
-        <rect>
-         <x>40</x>
-         <y>30</y>
-         <width>53</width>
-         <height>25</height>
-        </rect>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_2">
-       <property name="geometry">
-        <rect>
-         <x>0</x>
-         <y>30</y>
-         <width>57</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>FPS</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label_3">
-       <property name="geometry">
-        <rect>
-         <x>10</x>
-         <y>70</y>
-         <width>57</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Mode</string>
-       </property>
-      </widget>
-      <widget class="QLabel" name="label">
-       <property name="geometry">
-        <rect>
-         <x>20</x>
-         <y>10</y>
-         <width>57</width>
-         <height>15</height>
-        </rect>
-       </property>
-       <property name="text">
-        <string>Size</string>
-       </property>
-      </widget>
-     </widget>
-    </item>
-    <item>
-     <widget class="QGroupBox" name="groupBox">
-      <property name="title">
-       <string>Render</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout">
+      <layout class="QGridLayout" name="gridLayout_3">
        <item row="0" column="0">
-        <widget class="QLabel" name="label_4">
+        <widget class="QLabel" name="label">
          <property name="text">
-          <string>Brightnesss</string>
+          <string>Size</string>
          </property>
         </widget>
        </item>
-       <item row="0" column="2">
-        <widget class="QSlider" name="brightnessSlider">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+       <item row="0" column="1" colspan="2">
+        <widget class="QComboBox" name="widthComboBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
          </property>
+         <item>
+          <property name="text">
+           <string>160</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>320</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>352</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>388</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>600</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>640</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>720</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>800</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>900</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1024</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1280</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1920</string>
+          </property>
+         </item>
         </widget>
        </item>
-       <item row="1" column="0">
-        <widget class="QLabel" name="label_5">
+       <item row="0" column="3">
+        <widget class="QLabel" name="label_11">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="maximumSize">
+          <size>
+           <width>16</width>
+           <height>16777215</height>
+          </size>
+         </property>
          <property name="text">
-          <string>Contrast</string>
+          <string>x</string>
          </property>
-        </widget>
-       </item>
-       <item row="1" column="2">
-        <widget class="QSlider" name="contrastSlider">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="0">
-        <widget class="QLabel" name="label_7">
-         <property name="text">
-          <string>Saturation</string>
+         <property name="alignment">
+          <set>Qt::AlignCenter</set>
          </property>
         </widget>
        </item>
        <item row="3" column="0">
-        <widget class="QLabel" name="label_6">
+        <widget class="QLabel" name="label_2">
          <property name="text">
-          <string>Hue</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QSlider" name="horizontalSlider">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="3" column="2">
-        <widget class="QSlider" name="horizontalSlider_2">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
-         </property>
-        </widget>
-       </item>
-       <item row="4" column="2">
-        <widget class="QSlider" name="horizontalSlider_3">
-         <property name="orientation">
-          <enum>Qt::Horizontal</enum>
+          <string>FPS</string>
          </property>
         </widget>
        </item>
        <item row="4" column="0">
-        <widget class="QLabel" name="label_8">
+        <widget class="QLabel" name="label_3">
          <property name="text">
-          <string>Whiteness</string>
+          <string>Mode</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="1" colspan="7">
+        <widget class="QComboBox" name="formatComboBox">
+         <property name="statusTip">
+          <string>Format mode: YUV, MJPEG...</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>YUYV</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>MJPG</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="3" column="1" colspan="2">
+        <widget class="QSpinBox" name="fpsSpinBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="4" colspan="2">
+        <widget class="QLabel" name="fpsLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="4" colspan="2">
+        <widget class="QComboBox" name="heightComboBox">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <item>
+          <property name="text">
+           <string>120</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>240</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>288</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>400</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>448</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>480</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>576</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>720</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>800</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>900</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1024</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>1080</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="0" column="6" colspan="2">
+        <widget class="QLabel" name="sizeLabel">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
+         <property name="statusTip">
+          <string>effective size</string>
+         </property>
+         <property name="text">
+          <string>--</string>
          </property>
         </widget>
        </item>
@@ -164,12 +262,240 @@
      </widget>
     </item>
     <item>
-     <widget class="QGroupBox" name="groupBox_2">
+     <widget class="QGroupBox" name="renderGroupBox">
+      <property name="title">
+       <string>Render</string>
+      </property>
+      <layout class="QGridLayout" name="gridLayout">
+       <item row="1" column="4">
+        <widget class="QSlider" name="brightnessSlider">
+         <property name="maximum">
+          <number>255</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="0">
+        <widget class="QLabel" name="label_5">
+         <property name="text">
+          <string>Contrast</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="4">
+        <widget class="QSlider" name="contrastSlider">
+         <property name="maximum">
+          <number>255</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="0">
+        <widget class="QLabel" name="label_7">
+         <property name="text">
+          <string>Saturation</string>
+         </property>
+        </widget>
+       </item>
+       <item row="5" column="0" rowspan="2">
+        <widget class="QLabel" name="label_6">
+         <property name="text">
+          <string>Hue</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="4">
+        <widget class="QSlider" name="saturationSlider">
+         <property name="maximum">
+          <number>255</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="4">
+        <widget class="QSlider" name="hueSlider">
+         <property name="maximum">
+          <number>255</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="4">
+        <widget class="QSlider" name="wbSlider">
+         <property name="statusTip">
+          <string>White balance in Kelvin</string>
+         </property>
+         <property name="maximum">
+          <number>10000</number>
+         </property>
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="6">
+        <widget class="QLabel" name="brightnessLabel">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="3" column="6">
+        <widget class="QLabel" name="contrastLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="4" column="6">
+        <widget class="QLabel" name="saturationLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="6" column="6">
+        <widget class="QLabel" name="hueLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="6">
+        <widget class="QLabel" name="wbLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="7" column="6">
+        <widget class="QLabel" name="wbModeLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="2">
+        <widget class="QComboBox" name="wbModeComboBox">
+         <property name="statusTip">
+          <string>White balance mode</string>
+         </property>
+         <item>
+          <property name="text">
+           <string>Manual</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Auto</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="6" column="2">
+        <widget class="QComboBox" name="hueModeComboBox">
+         <item>
+          <property name="text">
+           <string>Manual</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Auto</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="2">
+        <widget class="QComboBox" name="brightnessModeComboBox">
+         <item>
+          <property name="text">
+           <string>Manual</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Auto</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="1" column="0">
+        <widget class="QLabel" name="label_12">
+         <property name="text">
+          <string>Brightness</string>
+         </property>
+        </widget>
+       </item>
+       <item row="1" column="3">
+        <widget class="QLabel" name="brightnessModeLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="0">
+        <widget class="QLabel" name="label_8">
+         <property name="statusTip">
+          <string>White balance</string>
+         </property>
+         <property name="text">
+          <string>WB</string>
+         </property>
+        </widget>
+       </item>
+       <item row="8" column="3">
+        <widget class="QPushButton" name="wbDoButton">
+         <property name="statusTip">
+          <string>Perform white balance evaluation and hold if manual</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../../piaf.qrc">
+           <normaloff>:/images/16x16/view-refresh.png</normaloff>:/images/16x16/view-refresh.png</iconset>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </item>
+    <item>
+     <widget class="QPushButton" name="resetButton">
+      <property name="statusTip">
+       <string>Reset settings to defaults (Piaf's own choices)</string>
+      </property>
+      <property name="text">
+       <string>Reset to piaf's defaults</string>
+      </property>
+      <property name="icon">
+       <iconset resource="../../piaf.qrc">
+        <normaloff>:/images/22x22/edit-undo.png</normaloff>:/images/22x22/edit-undo.png</iconset>
+      </property>
+     </widget>
+    </item>
+    <item>
+     <widget class="QGroupBox" name="exposureGroupBox">
       <property name="title">
        <string>Exposure</string>
       </property>
       <layout class="QGridLayout" name="gridLayout_2">
-       <item row="1" column="0">
+       <item row="0" column="0" rowspan="2" colspan="2">
         <widget class="QLabel" name="label_9">
          <property name="text">
           <string>Exposure</string>
@@ -178,40 +504,28 @@
        </item>
        <item row="1" column="2">
         <widget class="QSlider" name="exposureSlider">
+         <property name="maximum">
+          <number>255</number>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
         </widget>
        </item>
-       <item row="2" column="0" colspan="2">
-        <widget class="QCheckBox" name="autoGainCheckBox">
-         <property name="text">
-          <string>Auto gain</string>
-         </property>
-        </widget>
-       </item>
-       <item row="2" column="2">
-        <widget class="QLabel" name="gainLabel">
-         <property name="text">
-          <string>--</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="0" colspan="2">
-        <widget class="QCheckBox" name="autoExposureCheckBox">
-         <property name="text">
-          <string>Auto exposure</string>
-         </property>
-        </widget>
-       </item>
        <item row="1" column="3">
         <widget class="QLabel" name="exposureLabel">
+         <property name="minimumSize">
+          <size>
+           <width>50</width>
+           <height>0</height>
+          </size>
+         </property>
          <property name="text">
-          <string>--</string>
+          <string>-</string>
          </property>
         </widget>
        </item>
-       <item row="3" column="0">
+       <item row="2" column="0" rowspan="2" colspan="2">
         <widget class="QLabel" name="label_10">
          <property name="text">
           <string>Gain:</string>
@@ -220,6 +534,9 @@
        </item>
        <item row="3" column="2">
         <widget class="QSlider" name="gainSlider">
+         <property name="maximum">
+          <number>255</number>
+         </property>
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
          </property>
@@ -229,24 +546,59 @@
         <widget class="QComboBox" name="exposureModeComboBox">
          <item>
           <property name="text">
-           <string>Auto mode</string>
+           <string>P - Auto mode</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Manual mode</string>
+           <string>M - Manual mode</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Shutter priority mode</string>
+           <string>Tv - Shutter priority mode</string>
           </property>
          </item>
          <item>
           <property name="text">
-           <string>Aperture priority mod</string>
+           <string>Av - Aperture priority mode</string>
           </property>
          </item>
+        </widget>
+       </item>
+       <item row="3" column="3">
+        <widget class="QLabel" name="gainLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="2" column="2">
+        <widget class="QComboBox" name="gainModeComboBox">
+         <item>
+          <property name="text">
+           <string>Manual</string>
+          </property>
+         </item>
+         <item>
+          <property name="text">
+           <string>Auto</string>
+          </property>
+         </item>
+        </widget>
+       </item>
+       <item row="2" column="3">
+        <widget class="QLabel" name="gainModeLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
+        </widget>
+       </item>
+       <item row="0" column="3">
+        <widget class="QLabel" name="exposureModeLabel">
+         <property name="text">
+          <string>-</string>
+         </property>
         </widget>
        </item>
       </layout>
@@ -256,6 +608,8 @@
   </widget>
   <widget class="QStatusBar" name="statusbar"/>
  </widget>
- <resources/>
+ <resources>
+  <include location="../../piaf.qrc"/>
+ </resources>
  <connections/>
 </ui>

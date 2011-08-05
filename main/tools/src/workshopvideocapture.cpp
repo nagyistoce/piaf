@@ -108,11 +108,18 @@ void WorkshopVideoCaptureView::setWorkspace(QWorkspace * wksp) {
 		if(detailsView) {
 			detailsView->setWorkspace((QWorkspace *)pWorkspace);
 		}
+
+		if(mVidAcqSettingsWindow) {
+			pWorkspace->addWindow(mVidAcqSettingsWindow);
+		}
 	}
+
 }
 
 void WorkshopVideoCaptureView::init()
 {
+	mVidAcqSettingsWindow = NULL;
+
 	// thread for background grabbing with synchronized unlocking
 	m_pWorkshopVideoCaptureThread = new WorkshopVideoCaptureThread(doc);
 
@@ -160,7 +167,9 @@ void WorkshopVideoCaptureView::initTool()
 
 WorkshopVideoCaptureView::~WorkshopVideoCaptureView()
 {
-
+	if(mVidAcqSettingsWindow) {
+		delete mVidAcqSettingsWindow;
+	}
 }
 
 VideoCaptureDoc *WorkshopVideoCaptureView::getDocument() const
@@ -357,6 +366,16 @@ int vsizes_max = 7;
 
 void WorkshopVideoCaptureView::slotDeviceSize()
 {
+	if(!mVidAcqSettingsWindow) {
+		mVidAcqSettingsWindow = new VidAcqSettingsWindow();
+		mVidAcqSettingsWindow->setVideoCaptureDoc(doc);
+		if(pWorkspace) {
+			pWorkspace->addWindow(mVidAcqSettingsWindow);
+		}
+	}
+	mVidAcqSettingsWindow->show();
+	return;
+
 	// select acquisition size
 	if(deviceSettingsWidget) {
 		deviceSettingsWidget->show();
@@ -512,6 +531,9 @@ void WorkshopVideoCaptureView::slotSetGain( int g)
 
 void WorkshopVideoCaptureView::slotDeviceParams()
 {
+	slotDeviceSize();
+	return;
+
 	//modif!!
 	if(deviceParamsWidget){
 		deviceParamsWidget->show();
