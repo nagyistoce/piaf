@@ -1,5 +1,5 @@
 /***************************************************************************
-	 VirtualDeviceAcquisition.h  - Virtual acquisition class for video capture
+	 virtualdeviceacquisition.h  - Virtual acquisition class for video capture
 							 -------------------
 	begin                : Thu Dec 2 2010
 	copyright            : (C) 2010 by Christophe Seyve (CSE)
@@ -36,26 +36,44 @@ INHERITED FROM OPENCV's CAPTURE API
 
 */
 typedef struct {
-	double pos_msec;		/*! CV_CAP_PROP_POS_MSEC Film current position in milliseconds or video capture timestamp */
-	double pos_frames;		/*! CV_CAP_PROP_POS_FRAMES 0-based index of the frame to be decoded/captured next */
-	double pos_avi_ratio;	/*! CV_CAP_PROP_POS_AVI_RATIO Relative position of the video file (0 - start of the film, 1 - end of the film) */
-	double frame_width;		/*! Frame width CV_CAP_PROP_FRAME_WIDTH Width of the frames in the video stream */
-	double frame_height;	/*! Frame height CV_CAP_PROP_FRAME_HEIGHT Height of the frames in the video stream */
-	double fps;				/*! Frame rate CV_CAP_PROP_FPS Frame rate */
-	double fourcc_dble;		/*! FourCC coding as double CV_CAP_PROP_FOURCC 4-character code of codec */
-	char   fourcc[5];		/*! FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
-	char   norm[8];			/*! Norm: pal, ntsc, secam */
-	double frame_count;		/*! Frame count CV_CAP_PROP_FRAME_COUNT Number of frames in the video file */
-	double format;			/*! CV_CAP_PROP_FORMAT The format of the Mat objects returned by retrieve() */
-	double mode;			/*! CV_CAP_PROP_MODE A backend-specific value indicating the current capture mode */
-	double brightness;		/*! Brightness CV_CAP_PROP_BRIGHTNESS Brightness of the image (only for cameras) */
-	double contrast;		/*! Contrast CV_CAP_PROP_CONTRAST Contrast of the image (only for cameras) */
-	double saturation;		/*! Saturation CV_CAP_PROP_SATURATION Saturation of the image (only for cameras) */
-	double hue;			/*! Hue CV_CAP_PROP_HUE Hue of the image (only for cameras) */
-	double gain;			/*! Gain CV_CAP_PROP_GAIN Gain of the image (only for cameras) */
-	double exposure;		/*! CV_CAP_PROP_EXPOSURE Exposure (only for cameras) */
-	double convert_rgb;		/*! CV_CAP_PROP_CONVERT_RGB Boolean flags indicating whether images should be converted to RGB */
-	double white_balance;	/*! CV_CAP_PROP_WHITE_BALANCE Currently unsupported */
+	double pos_msec;		/*!< CV_CAP_PROP_POS_MSEC Film current position in milliseconds or video capture timestamp */
+	double pos_frames;		/*!< CV_CAP_PROP_POS_FRAMES 0-based index of the frame to be decoded/captured next */
+	double pos_avi_ratio;	/*!< CV_CAP_PROP_POS_AVI_RATIO Relative position of the video file (0 - start of the film, 1 - end of the film) */
+	double frame_width;		/*!< Frame width CV_CAP_PROP_FRAME_WIDTH Width of the frames in the video stream */
+	double frame_height;	/*!< Frame height CV_CAP_PROP_FRAME_HEIGHT Height of the frames in the video stream */
+	double fps;				/*!< Frame rate CV_CAP_PROP_FPS Frame rate */
+	double fourcc_dble;		/*!< FourCC coding as double CV_CAP_PROP_FOURCC 4-character code of codec */
+	char   fourcc[5];		/*!< FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
+	char   norm[8];			/*!< Norm: pal, ntsc, secam */
+	double frame_count;		/*!< Frame count CV_CAP_PROP_FRAME_COUNT Number of frames in the video file */
+	double format;			/*!< CV_CAP_PROP_FORMAT The format of the Mat objects returned by retrieve() */
+	double mode;			/*!< CV_CAP_PROP_MODE A backend-specific value indicating the current capture mode */
+	int auto_brightness;	/*!< Auto-Brightness mode
+
+								 */
+	double brightness;		/*!< Brightness CV_CAP_PROP_BRIGHTNESS Brightness of the image (only for cameras) */
+	double contrast;		/*!< Contrast CV_CAP_PROP_CONTRAST Contrast of the image (only for cameras) */
+	double saturation;		/*!< Saturation CV_CAP_PROP_SATURATION Saturation of the image (only for cameras) */
+	double hue;				/*!< Hue CV_CAP_PROP_HUE Hue of the image (only for cameras) */
+
+	u8 auto_gain;			/*!< Auto gain mode */
+	double gain;			/*!< Gain CV_CAP_PROP_GAIN Gain of the image (only for cameras) */
+
+	int auto_exposure;		/*!< Auto exposure mode:
+								 Enables automatic adjustments of the exposure time and/or iris aperture. The effect of manual changes of the exposure time or iris aperture while these features are enabled is undefined, drivers should ignore such requests. Possible values are:
+
+								0=V4L2_EXPOSURE_AUTO 	Automatic exposure time, automatic iris aperture.
+								1=V4L2_EXPOSURE_MANUAL 	Manual exposure time, manual iris.
+								2=V4L2_EXPOSURE_SHUTTER_PRIORITY 	Manual exposure time, auto iris.
+								3=V4L2_EXPOSURE_APERTURE_PRIORITY 	Auto exposure time, manual iris.
+
+								ref: http://v4l2spec.bytesex.org/spec-single/v4l2.html*/
+	double exposure;		/*!< CV_CAP_PROP_EXPOSURE Exposure (only for cameras) */
+
+	double convert_rgb;		/*!< CV_CAP_PROP_CONVERT_RGB Boolean flags indicating whether images should be converted to RGB */
+	int auto_white_balance;	///< Automatic white balance
+	bool do_white_balance;	///< Perform automatic white balance (will be set to 0 afterwards)
+	double white_balance;	/*!< CV_CAP_PROP_WHITE_BALANCE Currently unsupported */
 
 	/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
 	– Property identifier. Can be one of the following:*/

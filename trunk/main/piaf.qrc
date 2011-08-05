@@ -30,5 +30,6 @@
         <file>images/16x16/help-about.png</file>
         <file>images/16x16/dialog-error-process.png</file>
         <file>images/16x16/dialog-error-read.png</file>
+        <file>images/16x16/view-refresh.png</file>
     </qresource>
 </RCC>

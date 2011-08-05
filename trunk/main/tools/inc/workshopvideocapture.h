@@ -54,6 +54,7 @@
 // Sisell Workshop include files
 #include "workshopmeasure.h"
 #include "workshoptool.h"
+#include "vidacqsettingswindow.h"
 
 class VideoCaptureDoc;
 class WorkshopImage;
@@ -115,7 +116,8 @@ public:
 protected:
 	virtual void closeEvent(QCloseEvent*);
 
-	VideoCaptureDoc *doc;
+	VideoCaptureDoc * doc;
+	VidAcqSettingsWindow * mVidAcqSettingsWindow;
 
 	// -------------------- VIDEO SPECIFIC SECTION ---------------------
 public:

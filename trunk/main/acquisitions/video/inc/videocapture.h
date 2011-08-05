@@ -104,11 +104,22 @@ public:
 	*/
 	int waitForImage();
 
+	/** @brief Set the video acquisition properties
+
+	  @return @see VirtualDeviceAcquisition
+	*/
+	int setVideoProperties(t_video_properties props);
+
+	/** @brief Get the video acquisition properties
+	*/
+	t_video_properties getVideoProperties();
+
 private:
     /** the modified flag of the current document */
     bool modified;
     QString m_title;
     QString m_filename;
+
     /** the list of the views currently connected to the document */
     QList<WorkshopVideoCaptureView> *pViewList;
 
@@ -187,7 +198,10 @@ private:
 	IplImage * imageRGBA;
 
 signals:
-    void documentChanged();
+	void documentChanged();
+
+	void documentClosed(VideoCaptureDoc *);
+
 };
 
 #endif

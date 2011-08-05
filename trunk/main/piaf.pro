@@ -82,6 +82,7 @@ SOURCES += src/main.cpp \
 	acquisitions/video/src/opencvvideoacquisition.cpp \
     src/plugineditdialog.cpp \
     tools/src/batchfiltersmainwindow.cpp \
+	tools/src/vidacqsettingswindow.cpp \
 	src/imagewidget.cpp
 
 # Replaced by OpenCVEncoder.cpp
@@ -155,8 +156,10 @@ HEADERS += inc/workshop.h \
     acquisitions/video/inc/opencvvideoacquisition.h \
     inc/plugineditdialog.h \
     tools/inc/batchfiltersmainwindow.h \
-    inc/piaf-settings.h \
-    inc/imagewidget.h
+	tools/inc/vidacqsettingswindow.h \
+	inc/piaf-settings.h \
+	inc/nolinux_videodev.h \
+	inc/imagewidget.h
 
 exists(/usr/local/include/libfreenect/libfreenect.h) {
 	message("The system known Freenect ;)")
@@ -225,7 +228,7 @@ linux-g++: {
 }
 
 # INCLUDEPATH += ../otherlibs/qwt-sisell-0.1/inc
-INCLUDEPATH += ui
+INCLUDEPATH += ui tools/ui
 
 # INCLUDEPATH += /usr/include/qwt-qt4
 INCLUDEPATH += images/pixmaps
@@ -254,7 +257,8 @@ FORMS += tools/ui/swtoolmainwindow.ui \
 		tools/ui/imagetoavidialog.ui \
 		tools/ui/moviebookmarkform.ui \
     ui/plugineditdialog.ui \
-    tools/ui/batchfiltersmainwindow.ui
+	tools/ui/batchfiltersmainwindow.ui \
+	tools/ui/vidacqsettingswindow.ui
 
 HEADERS += tools/inc/imagetoavidialog.h
 
