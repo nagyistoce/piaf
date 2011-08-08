@@ -9,8 +9,8 @@ void printVideoProperties(t_video_properties * props)
 	fprintf(stderr, "pos_msec=%g, ", props->pos_msec);
 	fprintf(stderr, "pos_frames=%g, ", props->pos_frames);
 	fprintf(stderr, "pos_avi_ratio=%g, ", props->pos_avi_ratio);
-	fprintf(stderr, "frame_width=%g, ", props->frame_width);
-	fprintf(stderr, "frame_height=%g, ", props->frame_height);
+	fprintf(stderr, "frame_width=%d x ", props->frame_width);
+	fprintf(stderr, "frame_height=%d, ", props->frame_height);
 	fprintf(stderr, "fps=%g, ", props->fps);
 	fprintf(stderr, "fourcc_dble=%g, ", props->fourcc_dble);
 	fprintf(stderr, "fourcc='%s', ", props->fourcc);

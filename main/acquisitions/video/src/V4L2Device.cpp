@@ -30,14 +30,16 @@
 #include <pthread.h>
 #include <errno.h>
 
+
 u8 g_debug_V4L2Device = 0;
 
 extern "C" {
 #include "v4l2uvc.h"
+#include "utils.h"
 }
 
 #define g_debug_V4L2Device	0
-#define V4L2_printf(...)	{fprintf(stderr,"[V4L2 '%s']::%s:%d",videodevice,__func__,__LINE__);fprintf(stderr,__VA_ARGS__);fflush(stderr);}
+#define V4L2_printf(...)	{fprintf(stderr,"[V4L2 '%s']::%s:%d: ",mVideoDevice,__func__,__LINE__);fprintf(stderr,__VA_ARGS__);fflush(stderr);}
 
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 static int xioctl(int fd, int request, void * arg)
@@ -69,8 +71,8 @@ V4L2Device::V4L2Device(int dev) :
 	init();
 
 	if(dev>=0) {
-		videodevice = new char [32];
-		sprintf(videodevice, "V4L2-%d", dev);
+		mVideoDevice = new char [32];
+		sprintf(mVideoDevice, "/dev/video%d", dev);
 	}
 }
 
@@ -79,9 +81,9 @@ V4L2Device::~V4L2Device()
 	if(initialised) {
 		VDclose();
 	}
-	if(videodevice) {
-		delete [] videodevice;
-		videodevice = NULL;
+	if(mVideoDevice) {
+		delete [] mVideoDevice;
+		mVideoDevice = NULL;
 	}
 
 	swReleaseImage(&m_iplImageRGB32);
@@ -92,6 +94,8 @@ V4L2Device::~V4L2Device()
 void V4L2Device::init() 
 {
 	initialised = false;
+	mGrabEnabled = false;
+
 	m_imageSize.width = m_imageSize.height = 0;
 	m_nChannels = 4;
 
@@ -106,7 +110,7 @@ void V4L2Device::init()
 	vd.fd = -1;
 	vd.frame = 0;
 	
-	videodevice = NULL;
+	mVideoDevice = NULL;
 	// params defaults
 	norm = VIDEO_MODE_PAL;
 	channel = 0;
@@ -115,6 +119,10 @@ void V4L2Device::init()
 	TVchannel = 0;
 
 	buffers = NULL;
+
+	mUncompressedJPEGBuffer = NULL;
+	mUncompressedJPEGWidth = mUncompressedJPEGHeight = 0;
+
 	m_iplImageY = m_iplImageRGB32 = NULL;
 
 	tBoxSize newSize;
@@ -131,19 +139,19 @@ void V4L2Device::init()
 	*/
 	int ret = VDopen(device, &newSize);
 	if(ret < 0) {
-		fprintf(stderr, "V4L2::%s:%d : VDOpen(%s, %dx%d) failed.\n",
-				__func__, __LINE__,  videodevice,
+		fprintf(stderr, "V4L2::%s:%d : VDOpen('%s', %dx%d) failed.\n",
+				__func__, __LINE__,  mVideoDevice,
 				(int)newSize.width, (int)newSize.height);
 		return;
 	}
 
-	fprintf(stderr, "V4L2::%s:%d : VDOpen(%s, %dx%d) successed.\n",
+	mVideoDevice = new char [strlen(device)+1];
+	strcpy(mVideoDevice, device);
+	fprintf(stderr, "V4L2::%s:%d : VDOpen('%s', %dx%d) successed.\n",
 			__func__, __LINE__,
 			device,
 			(int)newSize.width, (int)newSize.height);
 
-	videodevice = new char [strlen(device)+1];
-	strcpy(videodevice, device);
 }
 
 
@@ -188,13 +196,27 @@ CvSize V4L2Device::getImageSize()
 
 int V4L2Device::grab()
 {
+	if(!mGrabEnabled) {
+		fprintf(stderr, "[V4L2]::%s:%d : grab disabled => do not perform\n",
+				__func__, __LINE__);
+		usleep(100000);
+		return 0;
+	}
+
 	// Returns frame buffer adress
 	rawframebuffer = getFrameBuffer();
 
+	static int s_grab_err = 0;
 	if(!rawframebuffer)
 	{
-		fprintf(stderr, "[V4L2]::%s:%d : no acq !\n", __func__, __LINE__);
+		s_grab_err+=100;
+		fprintf(stderr, "\r[V4L2]::%s:%d : acq returned null buffer for %3d ms!", __func__, __LINE__,
+				s_grab_err);
+		fflush(stderr);
+		usleep(100000);
 		return -1;
+	} else {
+		s_grab_err = 0;
 	}
 
 	//fprintf(stderr, "[V4L2]::%s:%d : acq ok %p !\n", __func__, __LINE__, rawframebuffer);
@@ -272,9 +294,62 @@ t_video_properties V4L2Device::getVideoProperties()
 	return m_video_properties;
 }
 
+int V4L2Device::close_device()
+{
+	if(vd.fd > 0)
+	{
+		V4L2_printf("closing opened device fd=%d\n", vd.fd);
+		int ret = close(vd.fd);
+		int errnum = errno;
+		V4L2_printf("closing fd=%d returned %d with err=%d='%s'\n",
+					vd.fd,
+					ret, errnum, strerror(errnum)
+					);
+		return ret;
+	}
+
+	return 0;
+}
+
 int V4L2Device::setVideoProperties(t_video_properties props)
 {
-	/// \bug FIXME : implement here
+	/// \bug FIXME : implement all settings here
+	if(m_video_properties.frame_width != props.frame_width
+			|| m_video_properties.frame_height != props.frame_height
+			|| m_video_properties.fps != props.fps
+			) {
+		int w = (int)roundf(props.frame_width);
+		int h = (int)roundf(props.frame_height);
+		int fps = (int)roundf(props.fps);
+
+		vd.frame_rate = fps;
+		V4L2_printf("size changed : %dx%d "
+				"=> %dx%d @ %d fps \n",
+				m_video_properties.frame_width, m_video_properties.frame_height,
+				w, h, fps
+				); fflush(stderr);
+
+		V4L2_printf("================== stop_capturing()...\n");
+		stop_capturing();
+
+		V4L2_printf("================== close_device()...\n");
+		close_device();
+
+
+		V4L2_printf("================== open_device()...\n");
+		open_device();
+
+		V4L2_printf("================== init_device()...\n");
+		init_device(w, h);
+
+		// Init memory map
+		V4L2_printf("================== init_mmap()...\n");
+		init_mmap();
+
+		V4L2_printf("================== start_capturing()...\n");
+		start_capturing();
+	}
+
 	if(m_video_properties.auto_white_balance != props.auto_white_balance) {
 		setCameraControl(V4L2_CID_AUTO_WHITE_BALANCE, props.auto_white_balance);
 	}
@@ -323,6 +398,7 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 
 		setCameraControl( V4L2_CID_EXPOSURE_AUTO, props.auto_exposure);
 	}
+
 	if(m_video_properties.exposure != props.exposure) {
 		/* http://v4l2spec.bytesex.org/spec-single/v4l2.html
 
@@ -382,10 +458,18 @@ V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 
 IplImage * V4L2Device::readImageRGB32()
 {
-	if(!rawframebuffer) { return NULL; }
+	if(!rawframebuffer) {
+		swReleaseImage(&m_iplImageRGB32);
+		return NULL;
+	}
+
+	if(m_iplImageRGB32 && (m_iplImageRGB32->width != m_imageSize.width
+						   || m_iplImageRGB32->height != m_imageSize.height))
+	{
+		swReleaseImage(&m_iplImageRGB32);
+	}
 	if(!m_iplImageRGB32) {
-		m_iplImageRGB32 = swCreateImage(m_imageSize, IPL_DEPTH_8U,
-								   4);
+		m_iplImageRGB32 = swCreateImage(m_imageSize, IPL_DEPTH_8U, 4);
 	}
 
 	// Convert into BGR32
@@ -397,7 +481,10 @@ IplImage * V4L2Device::readImageRGB32()
 
 		return 0;
 	}
-//		fprintf(stderr, "%s:%d : convert2RGB32...\n", __func__, __LINE__);
+
+	V4L2_printf("convert2RGB32 in image : %dx%dx%d\n",
+				m_iplImageRGB32->width, m_iplImageRGB32->height, m_iplImageRGB32->nChannels
+				);
 	convert2RGB32(rawframebuffer, image);
 
 
@@ -407,6 +494,18 @@ IplImage * V4L2Device::readImageRGB32()
 IplImage * V4L2Device::readImageY()
 {
 	if(!rawframebuffer) { return NULL; }
+
+	if(!rawframebuffer) {
+		swReleaseImage(&m_iplImageRGB32);
+		return NULL;
+	}
+
+	if(m_iplImageY && (m_iplImageY->width != m_imageSize.width
+						   || m_iplImageY->height != m_imageSize.height))
+	{
+		swReleaseImage(&m_iplImageY);
+	}
+
 	if(!m_iplImageY) {
 		m_iplImageY = swCreateImage(m_imageSize, IPL_DEPTH_8U,
 								   1);
@@ -438,6 +537,36 @@ int V4L2Device::convert2RGB32(unsigned char * src, unsigned char * dest)
 	// Conversion RGB 32...certainement à compléter !
 	switch (m_capture_palette)
 	{
+	default:
+		V4L2_printf("Unsupported V4L1 pal %d for conversion to BGR21\n",
+					m_capture_palette
+					);
+		break;
+	case VIDEO_PALETTE_MJPEG: {
+
+		int retjpeg = jpeg_decode(&mUncompressedJPEGBuffer,
+								  src,
+								  &mUncompressedJPEGWidth, &mUncompressedJPEGHeight);
+		FILE * fdebug=fopen("/dev/shm/convertjpeg.jpg", "wb");
+		if(fdebug)
+		{
+			fwrite(src, 1, 8000, fdebug);
+			fclose(fdebug);
+		}
+		fdebug=fopen("/dev/shm/convertjpeg.pgm", "wb");
+		if(fdebug)
+		{
+			fprintf(fdebug, "P5\n%d %d\n255\n",
+					m_imageSize.width*4, m_imageSize.height
+					);
+			fwrite(mUncompressedJPEGBuffer,  m_imageSize.width*4, m_imageSize.height, fdebug);
+			fclose(fdebug);
+		}
+		V4L2_printf("VIDEO_PALETTE_MJPEG => ret=%d size=%dx%d\n",
+					retjpeg,
+					mUncompressedJPEGWidth, mUncompressedJPEGHeight);
+		memcpy(dest, mUncompressedJPEGBuffer, n * 4);
+		}break;
 	case VIDEO_PALETTE_RGB32:
 		/* cool... */
 		memcpy(dest, src, n * 4);
@@ -529,7 +658,8 @@ int V4L2Device::stopAcquisition()
   V4L2 Specific section
   *************************************************************************/
 
-int V4L2Device::init_mmap() {
+int V4L2Device::init_mmap()
+{
 	struct v4l2_requestbuffers req;
 	
 	CLEAR (req);
@@ -543,19 +673,19 @@ int V4L2Device::init_mmap() {
 		if (EINVAL == errnum) {
 			fprintf (stderr, "%s:%d : %s does not support "
 					 "memory mapping => exit\n",
-					 __func__, __LINE__, videodevice); fflush(stderr);
+					 __func__, __LINE__, mVideoDevice); fflush(stderr);
 			return -1;
 		} else {
 			fprintf (stderr, "%s:%d : %s does not support "
 					 "memory mapping => VIDIOC_REQBUFS\n",
-					 __func__, __LINE__, videodevice); fflush(stderr);
+					 __func__, __LINE__, mVideoDevice); fflush(stderr);
 			return -1;
 		}
 	}
 
 	if (req.count < 2) {
 		fprintf (stderr, "Insufficient buffer memory on %s\n",
-				 videodevice);
+				 mVideoDevice);
 		exit (EXIT_FAILURE);
 	}
 
@@ -575,8 +705,9 @@ int V4L2Device::init_mmap() {
 		buf.memory      = V4L2_MEMORY_MMAP;
 		buf.index       = n_buffers;
 
-		if (-1 == xioctl(vd.fd, VIDIOC_QUERYBUF, &buf))
-				errno_exit ("VIDIOC_QUERYBUF");
+		if (-1 == xioctl(vd.fd, VIDIOC_QUERYBUF, &buf)) {
+			errno_exit ("VIDIOC_QUERYBUF");
+		}
 
 		buffers[n_buffers].length = buf.length;
 		buffers[n_buffers].start = 
@@ -585,6 +716,7 @@ int V4L2Device::init_mmap() {
 					  PROT_READ | PROT_WRITE /* required */,
 					  MAP_SHARED /* recommended */,
 					  vd.fd, buf.m.offset);
+
 		fprintf(stderr, "\tV4L2::%s:%d : buffers[n_buffers=%u].start = %p length=%d\n", 
 					__func__, __LINE__, n_buffers, buffers[n_buffers].start, buffers[n_buffers].length); 
 		if (MAP_FAILED == buffers[n_buffers].start) {
@@ -600,7 +732,7 @@ int V4L2Device::start_capturing() {
 
 	/* set framerate */
 	struct v4l2_streamparm* setfps;  
-	setfps=(struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
+	setfps = (struct v4l2_streamparm *) calloc(1, sizeof(struct v4l2_streamparm));
 	
 	memset(setfps, 0, sizeof(struct v4l2_streamparm));
 	setfps->type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -608,11 +740,14 @@ int V4L2Device::start_capturing() {
 	setfps->parm.capture.timeperframe.numerator = 1;
 	setfps->parm.capture.timeperframe.denominator = vd.frame_rate;
 
+	V4L2_printf("Set FPS=%d\n", vd.frame_rate);
 	int ret = ioctl(vd.fd, VIDIOC_S_PARM, setfps); 
 	if(ret == -1) {
-		perror("Unable to set frame rate");
+		int errnum = errno;
+		V4L2_printf("Unable to set frame rate: err=%d='%s'\n",
+				errnum, strerror(errnum));
 	}
-	
+
 	ret = ioctl(vd.fd, VIDIOC_G_PARM, setfps); 
 	if(ret == 0) {
 		if (setfps->parm.capture.timeperframe.numerator != 1 ||
@@ -652,8 +787,8 @@ int V4L2Device::start_capturing() {
 		
 		if (-1 == xioctl(vd.fd, VIDIOC_QBUF, &buf)) {
 			int errnum = errno;
-			fprintf(stderr, "[V4L2]::%s:%d : error in xioctl(vd.fd, VIDIOC_QBUF, &buf) i=%d err=%d='%s'\n", 
-						__func__, __LINE__, i, errnum, strerror(errnum));
+			V4L2_printf("error in xioctl(vd.fd, VIDIOC_QBUF, &buf) i=%d err=%d='%s'\n",
+						i, errnum, strerror(errnum));
 		}
 	}
 	
@@ -663,9 +798,12 @@ int V4L2Device::start_capturing() {
 	
 	if (-1 == xioctl(vd.fd, VIDIOC_STREAMON, &type)) {
 		int errnum = errno;
-		fprintf(stderr, "[V4L2]::%s:%d : error in xioctl(vd.fd, VIDIOC_STREAMON, &buf) err=%d=%s\n", 
-						__func__, __LINE__, errnum, strerror(errnum));
+		V4L2_printf("error in xioctl(vd.fd, VIDIOC_STREAMON, &buf) err=%d=%s\n",
+					errnum, strerror(errnum));
 	}
+
+	mGrabEnabled = true;
+
 	return 0;
 }
 
@@ -687,30 +825,39 @@ int V4L2Device::changeSize(tBoxSize * newSize)
 		w = newSize->width;
 		h = newSize->height;
 	}
-	fprintf(stderr, "\t\t[V4L2]::%s:%d : capturing size is set to %dx%d.\n", __func__, __LINE__, w, h);
+	V4L2_printf("\t\t[V4L2]::%s:%d : capturing size is set to %dx%d.\n", __func__, __LINE__, w, h);
 	
 	if(w > MAXWIDTH || h > MAXHEIGHT) {
 		w = MAXWIDTH;
 		h = MAXHEIGHT;
-		fprintf(stderr, "\t\t[V4L2]::%s:%d : capturing size is set to %dx%d.\n", __func__, __LINE__, w, h);
+		V4L2_printf("\t\t[V4L2]::%s:%d : capturing size is set to %dx%d.\n", __func__, __LINE__, w, h);
 	} else if(w < MINWIDTH || h < MINHEIGHT) {
-			w = MINWIDTH;
-			h = MINHEIGHT;
-			fprintf(stderr, "\t\t[V4L2]::%s:%d : capturing size is set to %dx%d.\n", __func__, __LINE__, w, h);
-		}
+		w = MINWIDTH;
+		h = MINHEIGHT;
+		V4L2_printf("\t\t[V4L2]::%s:%d : capturing size is set to %dx%d.\n", __func__, __LINE__, w, h);
+	}
+
+	// init device with size
+	V4L2_printf("preferred size=%dx%d \n", w, h);
 	init_device(w,h);
 
+	w = m_video_properties.frame_width;
+	h = m_video_properties.frame_height;
+
+	V4L2_printf(" => effective size=%dx%d \n", w, h);
+	unsigned char first = 1;
+	if(buffers) {
+		first = 0;
+		stop_capturing();
+	}
 	// Init memory map
     init_mmap();
 	
-	fprintf(stderr, "[V4L2]::%s:%d: size=%dx%d \n", __func__, __LINE__, w, h);
+	V4L2_printf("size=%dx%d \n", w, h);
 	
 	video_width = w;
 	video_height = h;
 	video_area = video_width * video_height;
-
-	m_video_properties.frame_width = w;
-	m_video_properties.frame_height = h;
 
 	m_imageSize = cvSize(w,h);
 
@@ -718,11 +865,7 @@ int V4L2Device::changeSize(tBoxSize * newSize)
 	newSize->width  = w;
 	newSize->height = h;
 	
-	unsigned char first = 1;
-	if(buffers) {
-		first = 0;
-		stop_capturing();
-	}
+
 	
 	start_capturing();
 	
@@ -734,15 +877,19 @@ int V4L2Device::changeSize(tBoxSize * newSize)
 int V4L2Device::init_device(int w, int h)
 {
 	// From http://v4l2spec.bytesex.org/spec/a12020.htm
+	swReleaseImage(&m_iplImageY);
+	swReleaseImage(&m_iplImageRGB32);
+
+	V4L2_printf("Trying to init device with size=%dx%d\n", w, h);
+
 	struct v4l2_capability cap;
     struct v4l2_cropcap cropcap;
     struct v4l2_crop crop;
-    struct v4l2_format fmt;
-	
+
     if (-1 == xioctl(vd.fd, VIDIOC_QUERYCAP, &cap)) {
 		if (EINVAL == errno) {
 			fprintf (stderr, "V4L::%s:%d %s is no V4L2 device\n",__func__, __LINE__,
-				videodevice);
+				mVideoDevice);
 			exit (EXIT_FAILURE);
 		} else {
 			fprintf (stderr, "V4L2::%s:%d : xioctl(vd.fd=%d, VIDIOC_QUERYCAP, &cap) FAILED\n",
@@ -753,13 +900,13 @@ int V4L2Device::init_device(int w, int h)
 
 	if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
 		fprintf (stderr, "%s is no video capture device\n",
-			videodevice);
+			mVideoDevice);
 		exit (EXIT_FAILURE);
 	}
 
 	if (!(cap.capabilities & V4L2_CAP_STREAMING)) {
 		fprintf (stderr, "%s does not support streaming i/o\n",
-			videodevice);
+			mVideoDevice);
 		exit (EXIT_FAILURE);
 	}
 
@@ -789,97 +936,200 @@ int V4L2Device::init_device(int w, int h)
 
 	} else {
 		/* Errors ignored. */
-		fprintf(stderr, "V4L2::%s:%d :xioctl failed.\n", __func__, __LINE__);
+		V4L2_printf("xioctl failed.\n");
 	}
 
 
-	CLEAR (fmt);
-
-	fmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-	fmt.fmt.pix.width       = w; 
-	fmt.fmt.pix.height      = h;
-	fmt.fmt.pix.field       = V4L2_FIELD_ANY;//V4L2_FIELD_INTERLACED;
 
 	/*
 	#define v4l2_fourcc(a,b,c,d)\
         (((__u32)(a)<<0)|((__u32)(b)<<8)|((__u32)(c)<<16)|((__u32)(d)<<24))
 	*/
-	
+	struct v4l2_format fmtok;
+	CLEAR (fmtok);
+	struct v4l2_format fmtwork;
+	CLEAR (fmtwork);
+
 	int retry_format = 0;
-#define MAX_PIXELFORMATS 6
-	__u32 pixelformats[MAX_PIXELFORMATS] = {
+	__u32 pixelformats[] = {
 		V4L2_PIX_FMT_GREY,
 		V4L2_PIX_FMT_YUYV,
 		V4L2_PIX_FMT_YVU420,
 		V4L2_PIX_FMT_RGB24,
 		V4L2_PIX_FMT_RGB32 ,
-		V4L2_PIX_FMT_YUV420};
-	
-	
+		V4L2_PIX_FMT_YUV420,
+		V4L2_PIX_FMT_MJPEG,
+		0
+	};
+
+	V4L2_printf("Testing resolution %dx%d with several formats\n",
+				w, h);
+
+
+	int best_dist = -1;
+
 	bool format_ok = false;
-	while(!format_ok && retry_format<MAX_PIXELFORMATS) {
-		fmt.fmt.pix.pixelformat = pixelformats[retry_format];
-		
-		if (-1 == xioctl(vd.fd, VIDIOC_S_FMT, &fmt))
+	while(!format_ok && pixelformats[retry_format]!=0) {
+		struct v4l2_format curfmt;
+		CLEAR (curfmt);
+		curfmt.type                = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		curfmt.fmt.pix.width       = w;
+		curfmt.fmt.pix.height      = h;
+		curfmt.fmt.pix.field       = V4L2_FIELD_ANY;//V4L2_FIELD_INTERLACED;
+
+		curfmt.fmt.pix.pixelformat = pixelformats[retry_format];
+		char fourcc[5]="----";
+		memcpy(fourcc, &pixelformats[retry_format], 4);
+
+		if (-1 == xioctl(vd.fd, VIDIOC_S_FMT, &curfmt))
 		{
 			int errnum = errno;
-			fprintf(stderr, "[V4L2]::%s:%d : xioctl(vd.fd, VIDIOC_S_FMT, &fmt) FAILED !! err=%d=%s\n", 
-						__func__, __LINE__, errnum, strerror(errnum));
-			retry_format++;
+			V4L2_printf("\txioctl(vd.fd, VIDIOC_S_FMT, &fmt): "
+						"FAILED for %dx%d / %s !! err=%d=%s\n",
+						w, h,
+						fourcc,
+						errnum, strerror(errnum));
+
 		} else {
-			format_ok = true;
-			
-			char * FourCC = (char *)&fmt.fmt.pix.pixelformat;
-			
-			fprintf(stderr, "[V4L2]::%s:%d : xioctl(vd.fd, VIDIOC_S_FMT, &fmt) SUPPORTED %c%c%c%c with size : %d x %d !!!!\n", 
-					__func__, __LINE__,
-					FourCC[0], FourCC[1], FourCC[2], FourCC[3],
-					w,h);
-			m_nChannels = 4; // use 32bit output by default
-			switch(fmt.fmt.pix.pixelformat) {
-			default:
-				m_capture_palette = -1;
-				break;
-			case V4L2_PIX_FMT_GREY:
-				m_capture_palette = VIDEO_PALETTE_GREY;
-				m_nChannels = 1;
-				break;
-			case V4L2_PIX_FMT_YUYV:
-				m_capture_palette = VIDEO_PALETTE_YUYV;
-				break;
-			case V4L2_PIX_FMT_YVU420:
-			case V4L2_PIX_FMT_YUV420:
-				m_capture_palette = VIDEO_PALETTE_YUV420P;
-				break;
-			case V4L2_PIX_FMT_RGB24:
-				m_capture_palette = VIDEO_PALETTE_RGB24;
-				break;
-			case V4L2_PIX_FMT_RGB32:
-				m_capture_palette = VIDEO_PALETTE_RGB32;
-				break;
+
+			int distw = abs( (int)curfmt.fmt.pix.width - w);
+			int disth = abs( (int)curfmt.fmt.pix.height - h);
+
+			int dist = (distw > disth ? distw : disth);
+
+			char * FourCC = (char *)&curfmt.fmt.pix.pixelformat;
+
+			if(best_dist < 0 || dist < best_dist) {
+				fmtwork = curfmt;
+				best_dist = dist;
+				V4L2_printf("%dx%d => BEST size=%dx%d / FourCC=%c%c%c%c work !!\n",
+							w, h,
+							fmtwork.fmt.pix.width, fmtwork.fmt.pix.height,
+							FourCC[0], FourCC[1], FourCC[2], FourCC[3]);
+
+			}
+			else {
+				V4L2_printf("%dx%d => size=%dx%d / FourCC=%c%c%c%c work !!\n",
+							w, h,
+							curfmt.fmt.pix.width, curfmt.fmt.pix.height,
+							FourCC[0], FourCC[1], FourCC[2], FourCC[3]);
 			}
 
-			fprintf(stderr, "[V4L2]::%s:%d :  %c%c%c%c => palette V4L=%d!! !!\n", __func__, __LINE__,
-				FourCC[0], FourCC[1], FourCC[2], FourCC[3], m_capture_palette);
-			
-		}
-	}
-	/* Note VIDIOC_S_FMT may change width and height. */
+			format_ok = ((int)curfmt.fmt.pix.width == w && (int)curfmt.fmt.pix.height == h);
+			if(format_ok)
+			{
+				V4L2_printf("FOUND FINE PALETTE !!")
+				fmtok = curfmt;
 
+			}
+		}
+
+		retry_format++;
+	}
+
+	if(!format_ok) {
+		char * FourCC = (char *)&fmtwork.fmt.pix.pixelformat;
+		V4L2_printf("Preferred size could not work => using other "
+					"size=%dx%d / FourCC=%c%c%c%c work !!\n",
+			fmtwork.fmt.pix.width, fmtwork.fmt.pix.height,
+			FourCC[0], FourCC[1], FourCC[2], FourCC[3]);
+
+		m_video_properties.frame_width = fmtwork.fmt.pix.width;
+		m_video_properties.frame_height = fmtwork.fmt.pix.height;
+
+		fmtok = fmtwork;
+	} else {
+		// FINE !
+		char * FourCC = (char *)&fmtwork.fmt.pix.pixelformat;
+
+		V4L2_printf("Preferred size work => using "
+					"size=%dx%d / FourCC=%c%c%c%c work !!\n",
+			fmtok.fmt.pix.width, fmtok.fmt.pix.height,
+			FourCC[0], FourCC[1], FourCC[2], FourCC[3]);
+
+		m_video_properties.frame_width = fmtok.fmt.pix.width;
+		m_video_properties.frame_height = fmtok.fmt.pix.height;
+	}
+
+	/* Note VIDIOC_S_FMT may change width and height. */
+	V4L2_printf("=> size=%dx%d\n",
+			fmtok.fmt.pix.width, fmtok.fmt.pix.height);
+	if (-1 == xioctl(vd.fd, VIDIOC_S_FMT, &fmtok))
+	{
+		int errnum = errno;
+		char * FourCC = (char *)&fmtok.fmt.pix.pixelformat;
+		V4L2_printf("\txioctl(vd.fd, VIDIOC_S_FMT, &fmt): "
+					"FAILED for %dx%d / %c%c%c%c !! err=%d=%s\n",
+					w, h,
+					FourCC[0], FourCC[1], FourCC[2], FourCC[3],
+					errnum, strerror(errnum));
+
+	}
 	/* Buggy driver paranoia. */
-	int l_min = fmt.fmt.pix.width * 2;
-	if (fmt.fmt.pix.bytesperline < l_min)
-		fmt.fmt.pix.bytesperline = l_min;
-	l_min = fmt.fmt.pix.bytesperline * fmt.fmt.pix.height;
-	if (fmt.fmt.pix.sizeimage < l_min)
-		fmt.fmt.pix.sizeimage = l_min;
+	unsigned int l_min = fmtok.fmt.pix.width * 2;
+	if (fmtok.fmt.pix.bytesperline < l_min) {
+		fmtok.fmt.pix.bytesperline = l_min;
+	}
+	l_min = fmtok.fmt.pix.bytesperline * fmtok.fmt.pix.height;
+	if (fmtok.fmt.pix.sizeimage < l_min) {
+		fmtok.fmt.pix.sizeimage = l_min;
+	}
+
+
+
+	char * FourCC = (char *)&fmtok.fmt.pix.pixelformat;
+	memcpy(m_video_properties.fourcc, FourCC, 4*sizeof(char));
+
+	m_video_properties.fourcc_dble = fmtok.fmt.pix.pixelformat;
+
+	V4L2_printf("\txioctl(vd.fd, VIDIOC_S_FMT, &fmt) "
+			"SUPPORTED '%s'' with size : %d x %d !!!!\n",
+			m_video_properties.fourcc,
+			m_video_properties.frame_width, m_video_properties.frame_height);
+
+	m_nChannels = 4; // use 32bit output by default
+	switch(fmtok.fmt.pix.pixelformat) {
+	default:
+		m_capture_palette = -1;
+		break;
+	case V4L2_PIX_FMT_GREY:
+		m_capture_palette = VIDEO_PALETTE_GREY;
+		m_nChannels = 1;
+		break;
+	case V4L2_PIX_FMT_YUYV:
+		m_capture_palette = VIDEO_PALETTE_YUYV;
+		break;
+	case V4L2_PIX_FMT_YVU420:
+	case V4L2_PIX_FMT_YUV420:
+		m_capture_palette = VIDEO_PALETTE_YUV420P;
+		break;
+	case V4L2_PIX_FMT_RGB24:
+		m_capture_palette = VIDEO_PALETTE_RGB24;
+		break;
+	case V4L2_PIX_FMT_RGB32:
+		m_capture_palette = VIDEO_PALETTE_RGB32;
+		break;
+	case V4L2_PIX_FMT_MJPEG:
+		m_capture_palette = VIDEO_PALETTE_MJPEG;
+		V4L2_printf("Palette is MJPEG : use value=%d\n", m_capture_palette);
+		break;
+	}
+
+	m_video_properties.frame_width = fmtok.fmt.pix.width;
+	m_video_properties.frame_height = fmtok.fmt.pix.height;
+
+	V4L2_printf("=> size=%dx%d / FourCC=%c%c%c%c => palette V4L=%d!! !!\n",
+		m_video_properties.frame_width, m_video_properties.frame_height,
+		FourCC[0], FourCC[1], FourCC[2], FourCC[3], m_capture_palette);
+
+	m_imageSize = cvSize(fmtok.fmt.pix.width, fmtok.fmt.pix.height);
 
 	vd.window.x = 0;
 	vd.window.y = 0;
-	vd.window.width = fmt.fmt.pix.width;
-	vd.window.height = fmt.fmt.pix.height;
-	
-	
+	vd.window.width = fmtok.fmt.pix.width;
+	vd.window.height = fmtok.fmt.pix.height;
+
+
 	return 0;
 }
 
@@ -893,7 +1143,7 @@ int V4L2Device::getCompressedBuffer(unsigned char ** rawbuffer,
 	if(!l_rawbuffer) 
 	{
 		#ifndef PRODUCTION
-		fprintf(stderr, "[V4L2]::%s:%d : no acq !\n", __func__, __LINE__);
+		V4L2_printf("no acq !\n");
 		#endif
 		return -1;
 	}
@@ -922,7 +1172,7 @@ int V4L2Device::setnorm(char *n)
 
 
 char * V4L2Device::getDeviceName() { 
-	return videodevice; 
+	return mVideoDevice;
 }
 
 
@@ -960,42 +1210,37 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 	int q = 85;
 	int maxc;
 	
-	if(videodevice) 
-		delete [] videodevice;
-	videodevice = NULL;
-	
-	if(device == NULL){
-    	videodevice = new char [ strlen(DEFAULT_VIDEO_DEVICE) +1];
-		strcpy(videodevice, DEFAULT_VIDEO_DEVICE);
+	if(mVideoDevice) {
+		delete [] mVideoDevice;
+		mVideoDevice = NULL;
 	}
-	else {
-		videodevice = new char [ strlen(device) +1];
-		strcpy(videodevice, device);
+
+	if(device == NULL) {
+		mVideoDevice = new char [ strlen(DEFAULT_VIDEO_DEVICE) +1];
+		strcpy(mVideoDevice, DEFAULT_VIDEO_DEVICE);
+	} else {
+		mVideoDevice = new char [ strlen(device) +1];
+		strcpy(mVideoDevice, device);
 	}
 
 	// Open device (open_device())
 	struct stat st; 
-	
-	if (-1 == stat (videodevice, &st)) {
-		fprintf (stderr, "[V4L2]::%s:%d Cannot identify '%s': %d, %s\n", __func__, __LINE__, 
-			 videodevice, errno, strerror (errno));
-		exit (EXIT_FAILURE);
+	if (-1 == stat (mVideoDevice, &st)) {
+		fprintf (stderr, "[V4L2]::%s:%d Cannot find file '%s': %d, %s\n", __func__, __LINE__,
+			 mVideoDevice, errno, strerror (errno));
+		return -1;
 	}
 	
 	if (!S_ISCHR (st.st_mode)) {
-		fprintf (stderr, "[V4L2]::%s:%d : ERROR %s is no device\n",  __func__, __LINE__, videodevice);
-		exit (EXIT_FAILURE);
+		fprintf (stderr, "[V4L2]::%s:%d : ERROR '%s' is not a device\n",  __func__, __LINE__, mVideoDevice);
+		return -1;
 	}
 	
-	vd.fd = open(videodevice, O_RDWR /* required */ | O_NONBLOCK, 0);
-	
-	if (-1 == vd.fd) {
-		fprintf (stderr, "[V4L2]::%s:%d Cannot open '%s': %d, %s\n", __func__, __LINE__, 
-			 videodevice, errno, strerror (errno));
-		exit (EXIT_FAILURE);
-	}
-		
-	
+
+	// open device for the first time
+	open_device();
+
+	// then query its properties
 	struct v4l2_input       v4l2Input ; 
 		memset(&v4l2Input, 0, sizeof(struct v4l2_input));
 	struct v4l2_fmtdesc     v4l2Fmtdesc ;      // image formats	
@@ -1004,7 +1249,8 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 		memset(&v4l2Standard, 0, sizeof(struct v4l2_standard));
 	struct v4l2_format      v4l2Format;        // format use to set the device
 		memset(&v4l2Format, 0, sizeof(struct v4l2_format));
-	char * device_node = videodevice;
+	char device_node[512];
+	strcpy(device_node, mVideoDevice);
 
 	struct v4l2_frmsize_stepwise v4l2FrameSize;
 	memset(&v4l2FrameSize, 0, sizeof(struct v4l2_frmsize_stepwise));
@@ -1361,14 +1607,27 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 		}
 	}
 	
-	
-	
-	
 	// set acquisition size
 	changeSize(newSize);
 
 	initialised = true;
 //    echo();
+
+	return 0;
+}
+
+int V4L2Device::open_device() {
+	fprintf(stderr, "[V4L2]::%s:%d : open device '%s'\n", __func__, __LINE__,
+			mVideoDevice);
+
+	vd.fd = open(mVideoDevice, O_RDWR /* required */ | O_NONBLOCK, 0);
+
+	if (-1 == vd.fd) {
+		int errnum = errno;
+		fprintf (stderr, "[V4L2]::%s:%d Cannot open '%s': %d, %s\n", __func__, __LINE__,
+			 mVideoDevice, errnum, strerror (errnum));
+		return -1;
+	}
 
 	return 0;
 }
@@ -1386,12 +1645,9 @@ int V4L2Device::VDclose()
 	// Stop_capturing
 	stop_capturing();
 	
-	// uninit_device() and free mmap
-	for(unsigned int i = 0; i < n_buffers; ++i)
-		if (-1 == munmap (buffers[i].start, buffers[i].length))
-			errno_exit ("munmap");
-	
-	free(buffers);
+	close_device();
+
+
 	
 	return 1;
 }
@@ -1399,29 +1655,71 @@ int V4L2Device::VDclose()
 int V4L2Device::stop_capturing() {
 	unsigned int i;
 	enum v4l2_buf_type type;
+	mGrabEnabled = false;
 
-	for (i = 0; i < n_buffers; ++i) 
+	// clear acquisition stack
+	if(buffers) {
+		for (i = 0; i < n_buffers; ++i)
+		{
+			read_frame();
+		}
+	}
+
+	/*
+	for (i = 0; i < n_buffers; ++i)
 	{
 		struct v4l2_buffer buf;
-		
 		CLEAR (buf);
 		
 		buf.type        = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 		buf.memory      = V4L2_MEMORY_MMAP;
 		buf.index       = i;
 		
-		if (-1 == xioctl(vd.fd, VIDIOC_QBUF, &buf))
-			errno_exit ("VIDIOC_QBUF");
+		if (-1 == xioctl(vd.fd, VIDIOC_QBUF,
+						 &buf))
+		{
+			int errnum = errno;
+			fprintf(stderr, "[V4L2]::%s:%d : error in "
+					"xioctl(vd.fd, VIDIOC_QBUF, &buf) i=%d err=%d='%s'\n",
+					__func__, __LINE__, i,
+					errnum, strerror(errnum));
+		}
 	}
-                
-	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+*/
 
-	if (-1 == xioctl(vd.fd, VIDIOC_STREAMON, &type)) {
-		//errno_exit ("VIDIOC_STREAMON");
-		fprintf(stderr, "V4L2Device::%s:%d : error in VIDIOC_STREAMON\n", __func__, __LINE__);
+	// stop stream
+	type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	if (-1 == xioctl(vd.fd, VIDIOC_STREAMOFF, &type)) {
+
+		int errnum = errno;
+		fprintf(stderr, "V4L2Device::%s:%d : error in VIDIOC_STREAMOFF: err=%d='%s'\n", __func__, __LINE__,
+				errnum, strerror(errnum));
+		return -1;
 	}
+
+	if(buffers) {
+		// uninit_device() and free mmap
+		for(unsigned int i = 0; i < n_buffers; ++i) {
+			if (-1 == munmap (buffers[i].start, buffers[i].length)) {
+				int errnum = errno;
+				V4L2_printf("munmap ERROR for buf[i=%d] err=%d='%s'\n",
+							i, errnum, strerror(errnum));
+			}
+		}
+
+		free(buffers);
+		buffers = NULL;
+	}
+
+	if(mUncompressedJPEGBuffer) { // allocated in utils.c with calloc
+		free(mUncompressedJPEGBuffer);
+	}
+	mUncompressedJPEGBuffer = NULL;
+	mUncompressedJPEGWidth = mUncompressedJPEGHeight = 0;
+
 	return 0;
 }
+
 // starts video acquisition (public function)
 int V4L2Device::VDInitAll()
 {
@@ -1607,13 +1905,17 @@ int V4L2Device::getcapability(video_capability * dest)
 
 int V4L2Device::getpicture(video_picture * dest)
 {
-	if(!initialised)
+	if(!initialised) {
 		return -1;
+	}
+	if(!dest) {
+		return -1;
+	}
 
 	memset(dest, 0, sizeof(video_picture));
 	dest->brightness = getCameraControl(V4L2_CID_BRIGHTNESS);
 	dest->contrast = getCameraControl(V4L2_CID_CONTRAST);
-	fprintf(stderr, "[V4L2]::%s:%d : brightness=%d contrast=%d\n", __func__, __LINE__,
+	V4L2_printf("brightness=%d contrast=%d\n",
 			dest->brightness, dest->contrast);
 
 //	memcpy(dest, &(vd.picture), sizeof(video_picture));
@@ -1864,19 +2166,25 @@ int V4L2Device::setpalette(int pal)
 		return -1;
 
 	
-	if(ioctl(vd.fd, VIDIOCSPICT, &(vd.picture)) < 0)
+	if(ioctl(vd.fd, VIDIOCSPICT, &(vd.picture)) < 0) {
 		return -1;
-
+	}
 	m_capture_palette = pal;
 	vd.picture.palette = pal;
 	return 0;
 }
 
 
-unsigned char * V4L2Device::read_frame(void)
+unsigned char * V4L2Device::read_frame()
 {
-	struct v4l2_buffer buf;
-	
+	if(vd.fd <= 0) {
+		return NULL;
+	}
+	if(!buffers) {
+		return NULL;
+	}
+
+	struct v4l2_buffer buf;	
 	CLEAR (buf);
 
 	buf.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1892,8 +2200,12 @@ unsigned char * V4L2Device::read_frame(void)
 		
 			/* fall through */
 		
-		default:
-			perror ("VIDIOC_DQBUF");
+		default: {
+			int errnum = errno;
+			V4L2_printf("xioctl(fd=%d, VIDIOC_DQBUF) FAILED=> err=%d='%s'\n",
+						vd.fd,
+						errnum, strerror(errnum));
+		}
 		}
 		
 		return NULL;
@@ -1923,20 +2235,25 @@ unsigned char * V4L2Device::getFrameBuffer()
 	FD_SET (vd.fd, &fds);
 	
 	/* Timeout. */
-	tv.tv_sec = 2;
+	tv.tv_sec = 2; // 2secs
 	tv.tv_usec = 0;
 	
 	r = select(vd.fd + 1, &fds, NULL, NULL, &tv);
 	
 	if(-1 == r) {
-		if (EINTR == errno)
+		int errnum = errno;
+		if (EINTR == errnum) {
 			return NULL;
-		
-		errno_exit ("select");
+		}
+
+		fprintf(stderr, "[V4L2]::%s:%d : select error %d='%s'\n", __func__, __LINE__,
+				errnum, strerror(errnum) );
+
+		return NULL;
 	}
 	
 	if(0 == r) {
-		fprintf (stderr, "select timeout\n");
+		fprintf(stderr, "[V4L2]::%s:%d : select timeout\n", __func__, __LINE__);
 		//exit (EXIT_FAILURE);
 		return NULL;
 	}
@@ -2227,7 +2544,9 @@ int V4L2Device::setCameraControl(unsigned int controlId, int value)
 	clist[0].value = value;
 
 	//v4l2_ext_controls with list of v4l2_ext_control
-	struct v4l2_ext_controls ctrls = {0};
+	struct v4l2_ext_controls ctrls;
+	memset(&ctrls, 0, sizeof(struct v4l2_ext_controls));
+
 	ctrls.ctrl_class = controlId & 0xFFFF0000;
 	ctrls.count = 1;
 	ctrls.controls = clist;
@@ -2264,11 +2583,15 @@ int V4L2Device::getCameraControl(unsigned int controlId)
 {
 	//an array of v4l2_ext_control
 	struct v4l2_ext_control clist[1];
+	memset(&clist[0], 0, sizeof(struct v4l2_ext_control));
+
 	clist[0].id      = controlId;
 	clist[0].value = 0;
 
 	//v4l2_ext_controls with list of v4l2_ext_control
-	struct v4l2_ext_controls ctrls = {0};
+	struct v4l2_ext_controls ctrls;
+	memset(&ctrls, 0, sizeof(struct v4l2_ext_controls));
+
 	ctrls.ctrl_class = controlId & 0xFFFF0000;
 	ctrls.count = 1;
 	ctrls.controls = clist;

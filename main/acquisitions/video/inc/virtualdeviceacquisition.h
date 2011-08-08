@@ -39,8 +39,10 @@ typedef struct {
 	double pos_msec;		/*!< CV_CAP_PROP_POS_MSEC Film current position in milliseconds or video capture timestamp */
 	double pos_frames;		/*!< CV_CAP_PROP_POS_FRAMES 0-based index of the frame to be decoded/captured next */
 	double pos_avi_ratio;	/*!< CV_CAP_PROP_POS_AVI_RATIO Relative position of the video file (0 - start of the film, 1 - end of the film) */
-	double frame_width;		/*!< Frame width CV_CAP_PROP_FRAME_WIDTH Width of the frames in the video stream */
-	double frame_height;	/*!< Frame height CV_CAP_PROP_FRAME_HEIGHT Height of the frames in the video stream */
+
+	int frame_width;		/*!< Frame width CV_CAP_PROP_FRAME_WIDTH Width of the frames in the video stream */
+	int frame_height;	/*!< Frame height CV_CAP_PROP_FRAME_HEIGHT Height of the frames in the video stream */
+
 	double fps;				/*!< Frame rate CV_CAP_PROP_FPS Frame rate */
 	double fourcc_dble;		/*!< FourCC coding as double CV_CAP_PROP_FOURCC 4-character code of codec */
 	char   fourcc[5];		/*!< FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
@@ -84,7 +86,12 @@ typedef struct {
 
 } t_video_properties;
 
+/** @brief Print content of structure t_video_properties */
 void printVideoProperties(t_video_properties * props);
+
+#ifndef VIDEO_PALETTE_MJPEG
+#define VIDEO_PALETTE_MJPEG		254
+#endif
 
 typedef struct {
 	int id;

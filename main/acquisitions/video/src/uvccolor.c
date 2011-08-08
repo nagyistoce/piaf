@@ -23,12 +23,12 @@
 #include "uvccolor.h"
 
 static int *LutYr = NULL;
-static int *LutYg = NULL;;
-static int *LutYb = NULL;;
-static int *LutVr = NULL;;
-static int *LutVrY = NULL;;
-static int *LutUb = NULL;;
-static int *LutUbY = NULL;;
+static int *LutYg = NULL;
+static int *LutYb = NULL;
+static int *LutVr = NULL;
+static int *LutVrY = NULL;
+static int *LutUb = NULL;
+static int *LutUbY = NULL;
 static int *LutRv = NULL;
 static int *LutGu = NULL;
 static int *LutGv = NULL;

@@ -31,5 +31,27 @@
         <file>images/16x16/dialog-error-process.png</file>
         <file>images/16x16/dialog-error-read.png</file>
         <file>images/16x16/view-refresh.png</file>
+        <file>images/16x16/appointment-recurring.png</file>
+        <file>images/16x16/appointment-reminder.png</file>
+        <file>images/16x16/arrow-left.png</file>
+        <file>images/16x16/arrow-right.png</file>
+        <file>images/16x16/arrow-up.png</file>
+        <file>images/16x16/dialog-cancel.png</file>
+        <file>images/16x16/dialog-close.png</file>
+        <file>images/16x16/dialog-information.png</file>
+        <file>images/16x16/dialog-ok.png</file>
+        <file>images/16x16/dialog-warning.png</file>
+        <file>images/16x16/digikam.png</file>
+        <file>images/16x16/edit-clear-history.png</file>
+        <file>images/16x16/folder-open.png</file>
+        <file>images/16x16/task-complete.png</file>
+        <file>images/16x16/task-recurring.png</file>
+        <file>images/16x16/tool-animator.png</file>
+        <file>images/16x16/tools-wizard.png</file>
+        <file>images/16x16/transform-scale.png</file>
+        <file>images/16x16/user-away-extended.png</file>
+        <file>images/16x16/video-display.png</file>
+        <file>images/16x16/view-media-equalizer.png</file>
+        <file>images/16x16/window-duplicate.png</file>
     </qresource>
 </RCC>

@@ -1695,7 +1695,7 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 	size.width  = 320;
 	size.height = 240;
-	char txt[128]="", name[128]="";
+	char txt[512]="", name[256]="";
 
 	statusBar()->message(tr("Creating New Video Acquisition...."));
 
@@ -1756,8 +1756,8 @@ void WorkshopApp::slotOnNewVideoAcq()
 	int dev=0, failed =0;
 
 	int dev_idx_tab[10];
+	for(dev=0; dev<10; dev++) { dev_idx_tab[dev] = -1; }
 	int dev_idx_max = 5;
-
 
 	// Find available items
 #ifdef _LINUX // for Linux, use the V4L /sys or /proc virtual file system
@@ -1803,6 +1803,7 @@ void WorkshopApp::slotOnNewVideoAcq()
 	do {
 		found = false;
 		int dev_idx = dev_idx_tab[dev];
+
 #ifdef _LINUX // for Linux, use the V4L /sys or /proc virtual file system
 		sprintf(txt, "/sys/class/video4linux/video%d/name", dev_idx);
 		bool kern2_6 = true;
@@ -1893,7 +1894,7 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 		dev++;
 
-	} while(found || dev<dev_idx_max);
+	} while( (found || dev<dev_idx_max) && dev_idx_tab[dev]>=0);
 
 
 	// FIXME : add Axis IP cameras
