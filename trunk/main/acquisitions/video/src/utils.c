@@ -235,7 +235,7 @@ static int readtables(int till, int *isDHT)
 	    break;
 
 	case M_DRI:
-	printf("find DRI \n");
+		// printf("find DRI \n");
 	    l = getword();
 	    info.dri = getword();
 	    break;
@@ -275,8 +275,8 @@ static int dec_checkmarker(void)
 }
 
 
-int jpeg_decode(unsigned char **pic, unsigned char *buf, int *width,
-		int *height)
+int jpeg_decode(unsigned char **pic, unsigned char *buf,
+				int *width, int *height)
 {
     struct jpeg_decdata *decdata;
     int i, j, m, tac, tdc;
@@ -291,91 +291,91 @@ int jpeg_decode(unsigned char **pic, unsigned char *buf, int *width,
     decdata = (struct jpeg_decdata *) malloc(sizeof(struct jpeg_decdata));
     
     if (!decdata) {
-	err = -1;
-	goto error;
+		err = -1;
+		goto error;
     }
     if (buf == NULL) {
-	err = -1;
-	goto error;
+		err = -1;
+		goto error;
     }
     datap = buf;
     if (getbyte() != 0xff) {
-	err = ERR_NO_SOI;
-	goto error;
+		err = ERR_NO_SOI;
+		goto error;
     }
     if (getbyte() != M_SOI) {
-	err = ERR_NO_SOI;
-	goto error;
+		err = ERR_NO_SOI;
+		goto error;
     }
     if (readtables(M_SOF0, &isInitHuffman)) {
-	err = ERR_BAD_TABLES;
-	goto error;
+		err = ERR_BAD_TABLES;
+		goto error;
     }
     getword();
     i = getbyte();
     if (i != 8) {
-	err = ERR_NOT_8BIT;
-	goto error;
+		err = ERR_NOT_8BIT;
+		goto error;
     }
     intheight = getword();
     intwidth = getword();
     
     if ((intheight & 7) || (intwidth & 7)) {
-	err = ERR_BAD_WIDTH_OR_HEIGHT;
-	goto error;
+		err = ERR_BAD_WIDTH_OR_HEIGHT;
+		goto error;
     }
     info.nc = getbyte();
     if (info.nc > MAXCOMP) {
-	err = ERR_TOO_MANY_COMPPS;
-	goto error;
+		err = ERR_TOO_MANY_COMPPS;
+		goto error;
     }
     for (i = 0; i < info.nc; i++) {
-	int h, v;
-	comps[i].cid = getbyte();
-	comps[i].hv = getbyte();
-	v = comps[i].hv & 15;
-	h = comps[i].hv >> 4;
-	comps[i].tq = getbyte();
-	if (h > 3 || v > 3) {
-	    err = ERR_ILLEGAL_HV;
-	    goto error;
-	}
-	if (comps[i].tq > 3) {
-	    err = ERR_QUANT_TABLE_SELECTOR;
-	    goto error;
-	}
+		int h, v;
+		comps[i].cid = getbyte();
+		comps[i].hv = getbyte();
+		v = comps[i].hv & 15;
+		h = comps[i].hv >> 4;
+		comps[i].tq = getbyte();
+		if (h > 3 || v > 3) {
+			err = ERR_ILLEGAL_HV;
+			goto error;
+		}
+		if (comps[i].tq > 3) {
+			err = ERR_QUANT_TABLE_SELECTOR;
+			goto error;
+		}
     }
     if (readtables(M_SOS,&isInitHuffman)) {
-	err = ERR_BAD_TABLES;
-	goto error;
+		err = ERR_BAD_TABLES;
+		goto error;
     }
     getword();
     info.ns = getbyte();
     if (!info.ns){
-    printf("info ns %d/n",info.ns);
-	err = ERR_NOT_YCBCR_221111;
-	goto error;
+		printf("info ns %d/n",info.ns);
+		err = ERR_NOT_YCBCR_221111;
+		goto error;
     }
     for (i = 0; i < info.ns; i++) {
-	dscans[i].cid = getbyte();
-	tdc = getbyte();
-	tac = tdc & 15;
-	tdc >>= 4;
-	if (tdc > 1 || tac > 1) {
-	    err = ERR_QUANT_TABLE_SELECTOR;
-	    goto error;
-	}
-	for (j = 0; j < info.nc; j++)
-	    if (comps[j].cid == dscans[i].cid)
-		break;
-	if (j == info.nc) {
-	    err = ERR_UNKNOWN_CID_IN_SCAN;
-	    goto error;
-	}
-	dscans[i].hv = comps[j].hv;
-	dscans[i].tq = comps[j].tq;
-	dscans[i].hudc.dhuff = dec_huffdc + tdc;
-	dscans[i].huac.dhuff = dec_huffac + tac;
+		dscans[i].cid = getbyte();
+		tdc = getbyte();
+		tac = tdc & 15;
+		tdc >>= 4;
+		if (tdc > 1 || tac > 1) {
+			err = ERR_QUANT_TABLE_SELECTOR;
+			goto error;
+		}
+		for (j = 0; j < info.nc; j++)
+			if (comps[j].cid == dscans[i].cid)
+				break;
+		if (j == info.nc) {
+			err = ERR_UNKNOWN_CID_IN_SCAN;
+			goto error;
+		}
+		dscans[i].hv = comps[j].hv;
+		dscans[i].tq = comps[j].tq;
+		dscans[i].hudc.dhuff = dec_huffdc + tdc;
+		dscans[i].huac.dhuff = dec_huffac + tac;
     }
 
     i = getbyte();
@@ -385,77 +385,76 @@ int jpeg_decode(unsigned char **pic, unsigned char *buf, int *width,
     if (i != 0 || j != 63 || m != 0) {
     	printf("hmm FW error,not seq DCT ??\n");
     }
-   // printf("ext huffman table %d \n",isInitHuffman);
+	// printf("ext huffman table %d \n",isInitHuffman);
     if(!isInitHuffman) {
     	if(huffman_init() < 0)
-		return -ERR_BAD_TABLES;
+			return -ERR_BAD_TABLES;
 	}
-/*
+	/*
     if (dscans[0].cid != 1 || dscans[1].cid != 2 || dscans[2].cid != 3) {
-	err = ERR_NOT_YCBCR_221111;
-	goto error;
+ err = ERR_NOT_YCBCR_221111;
+ goto error;
     }
 
     if (dscans[1].hv != 0x11 || dscans[2].hv != 0x11) {
-	err = ERR_NOT_YCBCR_221111;
-	goto error;
+ err = ERR_NOT_YCBCR_221111;
+ goto error;
     }
 */    
     /* if internal width and external are not the same or heigth too 
        and pic not allocated realloc the good size and mark the change 
        need 1 macroblock line more ?? */
     if (intwidth != *width || intheight != *height || *pic == NULL) {
-	*width = intwidth;
-	*height = intheight;
-	// BytesperPixel 2 yuyv , 3 rgb24 
-	*pic =
-	    (unsigned char *) realloc((unsigned char *) *pic,
-				      (size_t) intwidth * (intheight +
-							   8) * 2);
+		*width = intwidth;
+		*height = intheight;
+		// BytesperPixel 2 yuyv , 3 rgb24
+		*pic = (unsigned char *) realloc((unsigned char *) *pic,
+										  (size_t) intwidth * (intheight +
+															   8) * 2);
     }
 
 
     switch (dscans[0].hv) {
     case 0x22: // 411
     	mb=6;
-	mcusx = *width >> 4;
-	mcusy = *height >> 4;
-	bpp=2;
-	xpitch = 16 * bpp;
-	pitch = *width * bpp; // YUYV out
-	ypitch = 16 * pitch;
-	convert = yuv420pto422;	
-	break;
+		mcusx = *width >> 4;
+		mcusy = *height >> 4;
+		bpp=2;
+		xpitch = 16 * bpp;
+		pitch = *width * bpp; // YUYV out
+		ypitch = 16 * pitch;
+		convert = yuv420pto422;
+		break;
     case 0x21: //422
-   // printf("find 422 %dx%d\n",*width,*height);
+		// printf("find 422 %dx%d\n",*width,*height);
     	mb=4;
-	mcusx = *width >> 4;
-	mcusy = *height >> 3;
-	bpp=2;	
-	xpitch = 16 * bpp;
-	pitch = *width * bpp; // YUYV out
-	ypitch = 8 * pitch;
-	convert = yuv422pto422;	
-	break;
+		mcusx = *width >> 4;
+		mcusy = *height >> 3;
+		bpp=2;
+		xpitch = 16 * bpp;
+		pitch = *width * bpp; // YUYV out
+		ypitch = 8 * pitch;
+		convert = yuv422pto422;
+		break;
     case 0x11: //444
-	mcusx = *width >> 3;
-	mcusy = *height >> 3;
-	bpp=2;
-	xpitch = 8 * bpp;
-	pitch = *width * bpp; // YUYV out
-	ypitch = 8 * pitch;
-	 if (info.ns==1) {
+		mcusx = *width >> 3;
+		mcusy = *height >> 3;
+		bpp=2;
+		xpitch = 8 * bpp;
+		pitch = *width * bpp; // YUYV out
+		ypitch = 8 * pitch;
+		if (info.ns==1) {
     		mb = 1;
-		convert = yuv400pto422;
-	} else {
-		mb=3;
-		convert = yuv444pto422;	
-	}
+			convert = yuv400pto422;
+		} else {
+			mb=3;
+			convert = yuv444pto422;
+		}
         break;
     default:
-	err = ERR_NOT_YCBCR_221111;
-	goto error;
-	break;
+		err = ERR_NOT_YCBCR_221111;
+		goto error;
+		break;
     }
 
     idctqtab(quant[dscans[0].tq], decdata->dquant[0]);
@@ -468,77 +467,77 @@ int jpeg_decode(unsigned char **pic, unsigned char *buf, int *width,
     dscans[1].next = 1;
     dscans[2].next = 0;	/* 4xx encoding */
     for (my = 0,y=0; my < mcusy; my++,y+=ypitch) {
-	for (mx = 0,x=0; mx < mcusx; mx++,x+=xpitch) {
-	    if (info.dri && !--info.nm)
-		if (dec_checkmarker()) {
-		    err = ERR_WRONG_MARKER;
-		    goto error;
+		for (mx = 0,x=0; mx < mcusx; mx++,x+=xpitch) {
+			if (info.dri && !--info.nm)
+				if (dec_checkmarker()) {
+					err = ERR_WRONG_MARKER;
+					goto error;
+				}
+			switch (mb){
+			case 6: {
+				decode_mcus(&in, decdata->dcts, mb, dscans, max);
+				idct(decdata->dcts, decdata->out, decdata->dquant[0],
+					 IFIX(128.5), max[0]);
+				idct(decdata->dcts + 64, decdata->out + 64,
+					 decdata->dquant[0], IFIX(128.5), max[1]);
+				idct(decdata->dcts + 128, decdata->out + 128,
+					 decdata->dquant[0], IFIX(128.5), max[2]);
+				idct(decdata->dcts + 192, decdata->out + 192,
+					 decdata->dquant[0], IFIX(128.5), max[3]);
+				idct(decdata->dcts + 256, decdata->out + 256,
+					 decdata->dquant[1], IFIX(0.5), max[4]);
+				idct(decdata->dcts + 320, decdata->out + 320,
+					 decdata->dquant[2], IFIX(0.5), max[5]);
+
+			} break;
+			case 4:
+			{
+				decode_mcus(&in, decdata->dcts, mb, dscans, max);
+				idct(decdata->dcts, decdata->out, decdata->dquant[0],
+					 IFIX(128.5), max[0]);
+				idct(decdata->dcts + 64, decdata->out + 64,
+					 decdata->dquant[0], IFIX(128.5), max[1]);
+				idct(decdata->dcts + 128, decdata->out + 256,
+					 decdata->dquant[1], IFIX(0.5), max[4]);
+				idct(decdata->dcts + 192, decdata->out + 320,
+					 decdata->dquant[2], IFIX(0.5), max[5]);
+
+			}
+				break;
+			case 3:
+				decode_mcus(&in, decdata->dcts, mb, dscans, max);
+				idct(decdata->dcts, decdata->out, decdata->dquant[0],
+					 IFIX(128.5), max[0]);
+				idct(decdata->dcts + 64, decdata->out + 256,
+					 decdata->dquant[1], IFIX(0.5), max[4]);
+				idct(decdata->dcts + 128, decdata->out + 320,
+					 decdata->dquant[2], IFIX(0.5), max[5]);
+
+
+				break;
+			case 1:
+				decode_mcus(&in, decdata->dcts, mb, dscans, max);
+				idct(decdata->dcts, decdata->out, decdata->dquant[0],
+					 IFIX(128.5), max[0]);
+
+				break;
+
+			} // switch enc411
+			convert(decdata->out,*pic+y+x,pitch);
 		}
-	switch (mb){
-	    case 6: {
-		decode_mcus(&in, decdata->dcts, mb, dscans, max);
-		idct(decdata->dcts, decdata->out, decdata->dquant[0],
-		     IFIX(128.5), max[0]);
-		idct(decdata->dcts + 64, decdata->out + 64,
-		     decdata->dquant[0], IFIX(128.5), max[1]);
-		idct(decdata->dcts + 128, decdata->out + 128,
-		     decdata->dquant[0], IFIX(128.5), max[2]);
-		idct(decdata->dcts + 192, decdata->out + 192,
-		     decdata->dquant[0], IFIX(128.5), max[3]);
-		idct(decdata->dcts + 256, decdata->out + 256,
-		     decdata->dquant[1], IFIX(0.5), max[4]);
-		idct(decdata->dcts + 320, decdata->out + 320,
-		     decdata->dquant[2], IFIX(0.5), max[5]);
-	  
-	    } break;
-	    case 4:
-	    {
-		decode_mcus(&in, decdata->dcts, mb, dscans, max);
-		idct(decdata->dcts, decdata->out, decdata->dquant[0],
-		     IFIX(128.5), max[0]);
-		idct(decdata->dcts + 64, decdata->out + 64,
-		     decdata->dquant[0], IFIX(128.5), max[1]);
-		idct(decdata->dcts + 128, decdata->out + 256,
-		     decdata->dquant[1], IFIX(0.5), max[4]);
-		idct(decdata->dcts + 192, decdata->out + 320,
-		     decdata->dquant[2], IFIX(0.5), max[5]);
-	   	   
-	    }
-	    break;
-	    case 3:
-	    	 decode_mcus(&in, decdata->dcts, mb, dscans, max);
-		idct(decdata->dcts, decdata->out, decdata->dquant[0],
-		     IFIX(128.5), max[0]);		     
-		idct(decdata->dcts + 64, decdata->out + 256,
-		     decdata->dquant[1], IFIX(0.5), max[4]);
-		idct(decdata->dcts + 128, decdata->out + 320,
-		     decdata->dquant[2], IFIX(0.5), max[5]);
-	    
-		         
-	    break;
-	    case 1:
-	    	 decode_mcus(&in, decdata->dcts, mb, dscans, max);
-		idct(decdata->dcts, decdata->out, decdata->dquant[0],
-		     IFIX(128.5), max[0]);
-		  
-	    break;
-	    
-	} // switch enc411
-	convert(decdata->out,*pic+y+x,pitch); 
-	}
     }
 
     m = dec_readmarker(&in);
     if (m != M_EOI) {
-	err = ERR_NO_EOI;
-	goto error;
+		err = ERR_NO_EOI;
+		goto error;
     }
     if (decdata)
-	free(decdata);
+		free(decdata);
     return 0;
-  error:
-    if (decdata)
-	free(decdata);
+	error:
+		if (decdata)
+	  free(decdata);
     return err;
 }
 

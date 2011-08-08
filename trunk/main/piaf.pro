@@ -21,7 +21,10 @@ unix: {
 	DEFINES += VERSION="`date +%Y%m%d`"
 	LIBS += -L/usr/local/lib
 }
-linux-g++: DEFINES += _LINUX
+
+linux-g++: {
+	DEFINES += _LINUX
+}
 
 linux-g++: {
 	DEFINES += _V4L2

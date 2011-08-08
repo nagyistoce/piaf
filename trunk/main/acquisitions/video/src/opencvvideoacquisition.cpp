@@ -394,7 +394,7 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 		}
 
 		fprintf(stderr, "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE  [%d] : "
-				"=> capture=%p / change properties to %gx%g\n",
+				"=> capture=%p / change properties to %dx%d\n",
 				__func__, __LINE__, m_idx_device,
 				m_capture,
 				props.frame_width, props.frame_height

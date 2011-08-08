@@ -17,6 +17,7 @@
 
 #include "vidacqsettingswindow.h"
 #include "ui_vidacqsettingswindow.h"
+#include <QMessageBox>
 
 VidAcqSettingsWindow::VidAcqSettingsWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -116,10 +117,20 @@ void VidAcqSettingsWindow::updateVideoProperties()
 			} \
 		}
 
+		str.sprintf("%g", m_video_properties.fps);
+		ui->fpsLabel->setText(str);
+		if((int)roundf(m_video_properties.fps) != ui->fpsSpinBox->value() ) {
+			str.sprintf("%g", m_video_properties.fps);
+			ui->fpsSpinBox->blockSignals(true);
+			ui->fpsSpinBox->setValue((int)roundf(m_video_properties.fps));
+			ui->fpsSpinBox->blockSignals(false);
+		}
+
 		// SIZE
 		CHANGE_COMBO_TEXT(ui->widthComboBox, m_video_properties.frame_width);
 		CHANGE_COMBO_TEXT(ui->heightComboBox, m_video_properties.frame_height);
-		str.sprintf("%d x %d", (int)m_video_properties.frame_width, (int) m_video_properties.frame_height);
+		str.sprintf("%d x %d", (int)m_video_properties.frame_width,
+					(int) m_video_properties.frame_height);
 		ui->sizeLabel->setText(str);
 
 		// BRIGHTNESS...
@@ -219,4 +230,32 @@ void VidAcqSettingsWindow::on_resetButton_clicked()
 	m_video_properties.saturation = 128;
 
 	sendVideoProperties();
+}
+
+/*********************************************************************/
+
+void VidAcqSettingsWindow::on_applySizeButton_clicked()
+{
+	int w, h;
+	bool okw, okh;
+	w = ui->widthComboBox->currentText().toInt(&okw, 10);
+	h = ui->heightComboBox->currentText().toInt(&okh, 10);
+
+	if(okw && okh)
+	{
+		m_video_properties.frame_width = w;
+		m_video_properties.frame_height = h;
+
+		m_video_properties.fps = ui->fpsSpinBox->value();
+
+		fprintf(stderr, "[VidAcqSettings]::%s:%d : %dx%d\n",
+				__func__, __LINE__,
+				w, h );
+
+		sendVideoProperties();
+	}
+	else
+	{
+		QMessageBox::critical(NULL, tr("Invalid size"), tr("Could not read image size in combos"));
+	}
 }

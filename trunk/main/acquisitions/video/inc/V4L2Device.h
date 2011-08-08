@@ -78,7 +78,7 @@ struct _v4l2device
 	pthread_mutex_t mutex;
 	int frame;
 	int frame_period_ms;
-	int frame_rate;
+	unsigned int frame_rate;
 	
 	int framestat[2];
 	
@@ -297,11 +297,19 @@ private:
 	int framestat[2];
 	int overlay;  */
     // end ref.
+
+	bool mGrabEnabled;	///< flag to enable grabbing in background thread
+
 	int StartGrab();
 	int StopGrab();
 	int GrabCheck(int pal);
 	int setGrabFormat(int pal);
 	
+	/** @brief Open device descriptor */
+	int open_device();
+	/** @brief Close device descriptor */
+	int close_device();
+
 	int v4l_open(char *name);
 	int v4l_close();
 
@@ -351,7 +359,7 @@ private:
 
 private:
 	void init();
-	char * videodevice;
+	char * mVideoDevice;
 	bool m_isPWC;
 	// ref effetv main.c	
 	bool hasFramerate;
@@ -362,6 +370,8 @@ private:
 	int norm;
 	int hastuner;
 	int m_copyscale;
+
+
 #ifdef USE_VLOOPBACK
     char *vloopbackfile;
 #endif
@@ -375,6 +385,9 @@ private:
 
 	int convert2RGB32(unsigned char * src, unsigned char * dest);
 	int convert2Y(unsigned char * src, unsigned char * dest);
+
+	unsigned char * mUncompressedJPEGBuffer;
+	int mUncompressedJPEGWidth, mUncompressedJPEGHeight;
 
 
 	int video_width;

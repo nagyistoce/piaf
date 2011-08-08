@@ -67,6 +67,8 @@ private slots:
 
 	void on_resetButton_clicked();	/*!< Reset device to piaf default */
 
+	void on_applySizeButton_clicked();
+
 private:
 
 	/** @brief Send current video props to device */
