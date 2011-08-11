@@ -1,0 +1,315 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>ImageInfoWidget</class>
+ <widget class="QWidget" name="ImageInfoWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>305</width>
+    <height>448</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>2</number>
+   </property>
+   <property name="rightMargin">
+    <number>2</number>
+   </property>
+   <item>
+    <widget class="QWidget" name="widget" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>1</number>
+      </property>
+      <property name="bottomMargin">
+       <number>1</number>
+      </property>
+      <item>
+       <widget class="QLabel" name="label">
+        <property name="toolTip">
+         <string>Score of picture : combination between sharpness and exposure</string>
+        </property>
+        <property name="text">
+         <string>Score:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="scoreButton0">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/flag-black.png</normaloff>:/icons/icons/16x16/flag-black.png</iconset>
+        </property>
+        <property name="shortcut">
+         <string>0</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_4">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="scoreButton1">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/star_off.png</normaloff>:/icons/icons/star_off.png</iconset>
+        </property>
+        <property name="shortcut">
+         <string>1</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="scoreButton2">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/star_off.png</normaloff>:/icons/icons/star_off.png</iconset>
+        </property>
+        <property name="shortcut">
+         <string>2</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="scoreButton3">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/star_off.png</normaloff>:/icons/icons/star_off.png</iconset>
+        </property>
+        <property name="shortcut">
+         <string>3</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="scoreButton4">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/star_off.png</normaloff>:/icons/icons/star_off.png</iconset>
+        </property>
+        <property name="shortcut">
+         <string>4</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="scoreButton5">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/star_off.png</normaloff>:/icons/icons/star_off.png</iconset>
+        </property>
+        <property name="shortcut">
+         <string>5</string>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_3">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="histoImageLabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>RGB histogram of picture</string>
+     </property>
+     <property name="text">
+      <string>RGBHisto</string>
+     </property>
+     <property name="scaledContents">
+      <bool>true</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="label_2">
+       <property name="toolTip">
+        <string>Histogram analysis score</string>
+       </property>
+       <property name="text">
+        <string>Expo:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QProgressBar" name="histoDial">
+       <property name="toolTip">
+        <string>Histogram analysis score</string>
+       </property>
+       <property name="value">
+        <number>24</number>
+       </property>
+       <property name="format">
+        <string>%p%</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="label_3">
+       <property name="toolTip">
+        <string>Sharpness analysis score</string>
+       </property>
+       <property name="text">
+        <string>Sharp:</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QProgressBar" name="sharpnessDial">
+       <property name="toolTip">
+        <string>Sharpness analysis score</string>
+       </property>
+       <property name="value">
+        <number>24</number>
+       </property>
+       <property name="format">
+        <string>Sharp:%p%</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item>
+    <widget class="QLabel" name="sharpnessImageLabel">
+     <property name="minimumSize">
+      <size>
+       <width>182</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Sharp block in image</string>
+     </property>
+     <property name="text">
+      <string>Sharpness</string>
+     </property>
+     <property name="scaledContents">
+      <bool>false</bool>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="hsvImageLabel">
+     <property name="minimumSize">
+      <size>
+       <width>182</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Hue, Saturation, Value histogram</string>
+     </property>
+     <property name="text">
+      <string>Colors Histo</string>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../ema.qrc"/>
+ </resources>
+ <connections/>
+</ui>
