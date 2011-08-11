@@ -151,6 +151,8 @@ init_videoIn(struct vdIn *vd, char *device, int width, int height, int fps,
     close(vd->fd);
     return -1;
 }
+
+
 int enum_controls(int vd) //struct vdIn *vd)
 {    
 	struct v4l2_queryctrl queryctrl;

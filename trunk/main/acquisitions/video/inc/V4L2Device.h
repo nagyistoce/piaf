@@ -58,10 +58,13 @@ typedef struct _t_v4l2_buffer {
 
 /** Video4Linux Device Structure
  */
-struct _v4l2device
+typedef struct _v4l2device
 {
 	int fd;
 	struct video_capability capability;
+	struct v4l2_cropcap cropcap;
+	struct v4l2_crop crop;
+
 	struct video_channel channel[10];
 	struct video_picture picture;
 	struct video_clip clip;
@@ -86,9 +89,8 @@ struct _v4l2device
 	float measured_period;
 	
 	int overlay;
-};
+} v4l2device ;
 
-typedef struct _v4l2device v4l2device;
 
 /** \brief low-level acquisition class for video4linux devices
 	Video4Linux device interface class. This object opens, commands, grab 

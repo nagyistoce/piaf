@@ -35,6 +35,10 @@ struct _v4ldevice
 	struct video_mmap mmap;
 	struct video_mbuf mbuf;
 	struct video_unit unit;
+
+	struct v4l2_cropcap cropcap;
+	struct v4l2_crop crop;
+
 	unsigned char *map;
 	pthread_mutex_t mutex;
 	int frame;

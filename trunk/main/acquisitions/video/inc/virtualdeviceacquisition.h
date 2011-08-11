@@ -58,7 +58,7 @@ typedef struct {
 	double saturation;		/*!< Saturation CV_CAP_PROP_SATURATION Saturation of the image (only for cameras) */
 	double hue;				/*!< Hue CV_CAP_PROP_HUE Hue of the image (only for cameras) */
 
-	u8 auto_gain;			/*!< Auto gain mode */
+	bool auto_gain;			/*!< Auto gain mode */
 	double gain;			/*!< Gain CV_CAP_PROP_GAIN Gain of the image (only for cameras) */
 
 	int auto_exposure;		/*!< Auto exposure mode:
@@ -72,12 +72,30 @@ typedef struct {
 								ref: http://v4l2spec.bytesex.org/spec-single/v4l2.html*/
 	double exposure;		/*!< CV_CAP_PROP_EXPOSURE Exposure (only for cameras) */
 
-	bool backlight;			/*!< Backlight compensation */
+	bool backlight;			/*!< Backlight compensation : V4L2_CID_BACKLIGHT */
+	int sharpness;			/*!< Sharpness accentuation : V4L2_CID_SHARPNESS */
+	int gamma;				/*!< Sharpness accentuation : V4L2_CID_GAMMA */
 
 	double convert_rgb;		/*!< CV_CAP_PROP_CONVERT_RGB Boolean flags indicating whether images should be converted to RGB */
 	int auto_white_balance;	///< Automatic white balance
 	bool do_white_balance;	///< Perform automatic white balance (will be set to 0 afterwards)
 	double white_balance;	/*!< CV_CAP_PROP_WHITE_BALANCE Currently unsupported */
+
+	// FOCUS
+	int auto_focus;			/*!< Auto-focus mode : 0=off (manuel), 1=on : V4L2_CID_FOCUS_AUTO */
+	int relative_focus;		/*!< Focus control using relative values : V4L2_CID_FOCUS_RELATIVE */
+	int absolute_focus;		/*!< Focus control using absolute values : V4L2_CID_FOCUS_ABSOLUTE */
+
+	// PTZ
+	int pan_reset;			///< V4L2_CID_PAN_RESET
+	int pan_relative;		///< V4L2_CID_PAN_RELATIVE
+	int pan_absolute;		///< V4L2_CID_PAN_ABSOLUTE
+	int tilt_reset;			///< V4L2_CID_TILT_RESET
+	int tilt_relative;		///< V4L2_CID_TILT_RELATIVE
+	int tilt_absolute;		///< V4L2_CID_TILT_ABSOLUTE
+	int zoom_relative;		///< V4L2_CID_ZOOM_RELATIVE
+	int zoom_absolute;		///< V4L2_CID_ZOOM_ABSOLUTE
+	int zoom_continuous;	///< V4L2_CID_ZOOM_CONTINUOUS
 
 	/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
 	– Property identifier. Can be one of the following:*/
