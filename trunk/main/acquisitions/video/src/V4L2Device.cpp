@@ -282,6 +282,8 @@ t_video_properties V4L2Device::updateVideoProperties()
 	m_video_properties.gain = getCameraControl(V4L2_CID_GAIN);
 	m_video_properties.auto_gain = getCameraControl(V4L2_CID_AUTOGAIN);
 
+	m_video_properties.backlight = (getCameraControl(V4L2_CID_BACKLIGHT_COMPENSATION)  > 0);
+
 	fprintf(stderr, "V4L2Device::%s:%d : props=\n", __func__, __LINE__);
 	printVideoProperties(&m_video_properties);
 
@@ -360,6 +362,9 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 
 	if(m_video_properties.auto_brightness != props.auto_brightness) {
 		setCameraControl(V4L2_CID_AUTOBRIGHTNESS, props.auto_brightness);
+	}
+	if(props.backlight != m_video_properties.backlight) {
+		setCameraControl(V4L2_CID_BACKLIGHT_COMPENSATION, props.backlight?1:0);
 	}
 
 	if(m_video_properties.brightness != props.brightness

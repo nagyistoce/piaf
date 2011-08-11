@@ -72,6 +72,8 @@ typedef struct {
 								ref: http://v4l2spec.bytesex.org/spec-single/v4l2.html*/
 	double exposure;		/*!< CV_CAP_PROP_EXPOSURE Exposure (only for cameras) */
 
+	bool backlight;			/*!< Backlight compensation */
+
 	double convert_rgb;		/*!< CV_CAP_PROP_CONVERT_RGB Boolean flags indicating whether images should be converted to RGB */
 	int auto_white_balance;	///< Automatic white balance
 	bool do_white_balance;	///< Perform automatic white balance (will be set to 0 afterwards)

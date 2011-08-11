@@ -44,7 +44,8 @@ protected:
 private slots:
 
 	/// Disconnection of device to prevent from continuing to use it
-	void on_mpVideoCaptureDoc_documentClosed(VideoCaptureDoc * doc);
+	void on_backLightCheckBox_toggled(bool checked);
+ void on_mpVideoCaptureDoc_documentClosed(VideoCaptureDoc * doc);
 
 	void on_exposureModeComboBox_currentIndexChanged(int index);
 

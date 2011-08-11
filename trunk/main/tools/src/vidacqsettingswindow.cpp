@@ -259,3 +259,9 @@ void VidAcqSettingsWindow::on_applySizeButton_clicked()
 		QMessageBox::critical(NULL, tr("Invalid size"), tr("Could not read image size in combos"));
 	}
 }
+
+void VidAcqSettingsWindow::on_backLightCheckBox_toggled(bool checked)
+{
+	m_video_properties.backlight = checked;
+	sendVideoProperties();
+}
