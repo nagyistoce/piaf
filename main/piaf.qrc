@@ -53,5 +53,7 @@
         <file>images/16x16/video-display.png</file>
         <file>images/16x16/view-media-equalizer.png</file>
         <file>images/16x16/window-duplicate.png</file>
+        <file>images/22x22/focus.png</file>
+        <file>images/22x22/transform-move.png</file>
     </qresource>
 </RCC>

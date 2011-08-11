@@ -94,7 +94,8 @@ void VidAcqSettingsWindow::updateVideoProperties()
 #define CHANGE_SLIDER(_slider,_label,_value)	\
 		if((_slider)->value() != (_value)) { \
 			str.sprintf("%d", (int)(_value)); \
-			(_label)->setText(str); \
+			QLabel * _labelptr = (_label); \
+			if(_labelptr) _labelptr->setText(str); \
 			(_slider)->blockSignals(true); \
 			(_slider)->setValue((int)(_value)); \
 			(_slider)->blockSignals(false); \
@@ -102,7 +103,8 @@ void VidAcqSettingsWindow::updateVideoProperties()
 #define CHANGE_COMBO_INDEX(_combo,_label,_value)	\
 		if((_combo)->currentItem() != (_value)) { \
 			str.sprintf("%d", (int)(_value)); \
-			(_label)->setText(str); \
+			QLabel * _labelptr = (_label); \
+			if(_labelptr) _labelptr->setText(str); \
 			(_combo)->blockSignals(true); \
 			(_combo)->setCurrentIndex((_value)); \
 			(_combo)->blockSignals(false); \
@@ -140,10 +142,19 @@ void VidAcqSettingsWindow::updateVideoProperties()
 		CHANGE_SLIDER(ui->contrastSlider, ui->contrastLabel, m_video_properties.contrast);
 		CHANGE_SLIDER(ui->hueSlider, ui->hueLabel, m_video_properties.hue);
 		CHANGE_SLIDER(ui->saturationSlider, ui->saturationLabel, m_video_properties.saturation);
+		CHANGE_SLIDER(ui->gammaSlider, ui->gammaLabel, m_video_properties.gamma);
+		CHANGE_SLIDER(ui->sharpnessSlider, ui->sharpnessLabel, m_video_properties.sharpness);
 
 		CHANGE_COMBO_INDEX(ui->wbModeComboBox, ui->wbModeLabel, m_video_properties.auto_white_balance);
 
 		CHANGE_SLIDER(ui->wbSlider, ui->wbLabel, m_video_properties.white_balance);
+
+		if(m_video_properties.backlight != ui->backLightCheckBox->isOn())
+		{
+			ui->backLightCheckBox->blockSignals(true);
+			ui->backLightCheckBox->setOn(m_video_properties.backlight);
+			ui->backLightCheckBox->blockSignals(false);
+		}
 
 		// Exposure values
 		CHANGE_SLIDER(ui->exposureSlider, ui->exposureLabel, m_video_properties.exposure);
@@ -151,6 +162,20 @@ void VidAcqSettingsWindow::updateVideoProperties()
 
 		CHANGE_COMBO_INDEX(ui->exposureModeComboBox, ui->exposureModeLabel, m_video_properties.auto_exposure);
 		CHANGE_COMBO_INDEX(ui->gainModeComboBox, ui->gainModeLabel, m_video_properties.auto_gain);
+
+		// FOCUS
+		CHANGE_COMBO_INDEX(ui->focusModeComboBox, ui->focusModeLabel, m_video_properties.auto_focus);
+		CHANGE_SLIDER(ui->relativeFocusSlider, ui->relativeFocusLabel, m_video_properties.relative_focus);
+		CHANGE_SLIDER(ui->absoluteFocusSlider, ui->absoluteFocusLabel, m_video_properties.absolute_focus);
+
+
+		// PTZ
+		CHANGE_SLIDER(ui->panAbsoluteSlider, NULL, m_video_properties.pan_absolute);
+		CHANGE_SLIDER(ui->panRelativeSlider, NULL, m_video_properties.pan_relative);
+		CHANGE_SLIDER(ui->tiltAbsoluteSlider, NULL, m_video_properties.tilt_absolute);
+		CHANGE_SLIDER(ui->tiltRelativeSlider, NULL, m_video_properties.tilt_relative);
+		CHANGE_SLIDER(ui->zoomAbsoluteSlider, NULL, m_video_properties.zoom_absolute);
+		CHANGE_SLIDER(ui->zoomRelativeSlider, NULL, m_video_properties.zoom_relative);
 
 	} else {
 		ui->centralwidget->setEnabled(false);
@@ -229,6 +254,12 @@ void VidAcqSettingsWindow::on_resetButton_clicked()
 	m_video_properties.brightness = 128;
 	m_video_properties.saturation = 128;
 
+
+	// Set focus
+	m_video_properties.auto_focus = false;
+	m_video_properties.absolute_focus = 0;
+
+
 	sendVideoProperties();
 }
 
@@ -264,4 +295,84 @@ void VidAcqSettingsWindow::on_backLightCheckBox_toggled(bool checked)
 {
 	m_video_properties.backlight = checked;
 	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_gammaSlider_valueChanged(int value)
+{
+	m_video_properties.gamma = value;
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_horizontalSlider_valueChanged(int value)
+{
+	m_video_properties.sharpness = value;
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_focusModeComboBox_currentIndexChanged(int index)
+{
+	m_video_properties.auto_focus = index;
+	sendVideoProperties();
+
+}
+
+void VidAcqSettingsWindow::on_relativeFocusSlider_valueChanged(int value)
+{
+	m_video_properties.relative_focus = value;
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_absoluteFocusSlider_valueChanged(int value)
+{
+	m_video_properties.absolute_focus = value;
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_panResetButton_clicked()
+{
+	m_video_properties.pan_reset = true;
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_tiltResetButton_clicked()
+{
+	m_video_properties.tilt_reset = true;
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_tiltRelativeSlider_valueChanged(int value)
+{
+	m_video_properties.tilt_relative = value;
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_tiltAbsoluteSlider_valueChanged(int value)
+{
+	m_video_properties.tilt_absolute = value;
+	sendVideoProperties();
+
+}
+
+void VidAcqSettingsWindow::on_panRelativeSlider_valueChanged(int value)
+{
+	m_video_properties.pan_relative = value;
+	sendVideoProperties();
+
+}
+
+void VidAcqSettingsWindow::on_panAbsoluteSlider_valueChanged(int value)
+{
+	m_video_properties.pan_absolute = value;
+	sendVideoProperties();
+
+}
+
+void VidAcqSettingsWindow::on_zoomRelativeSlider_valueChanged(int value)
+{
+
+}
+
+void VidAcqSettingsWindow::on_zoomAbsoluteSlider_valueChanged(int value)
+{
+
 }

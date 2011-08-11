@@ -52,8 +52,8 @@ static int xioctl(int fd, int request, void * arg)
 	
 	return r;
 }
-static void
-errno_exit                      (const char *           s)
+
+static void errno_exit(const char * s)
 {
 	fprintf (stderr, "%s error %d, %s\n",
 			 s, errno, strerror (errno));
@@ -273,6 +273,8 @@ t_video_properties V4L2Device::updateVideoProperties()
 	m_video_properties.contrast = getCameraControl(V4L2_CID_CONTRAST);
 	m_video_properties.saturation = getCameraControl(V4L2_CID_SATURATION);
 	m_video_properties.hue = getCameraControl(V4L2_CID_HUE);
+	m_video_properties.gamma = getCameraControl(V4L2_CID_GAMMA);
+	m_video_properties.sharpness = getCameraControl(V4L2_CID_SHARPNESS);
 
 	m_video_properties.auto_white_balance = getCameraControl(V4L2_CID_AUTO_WHITE_BALANCE);
 	m_video_properties.white_balance = getCameraControl(V4L2_CID_WHITE_BALANCE_TEMPERATURE);
@@ -281,14 +283,31 @@ t_video_properties V4L2Device::updateVideoProperties()
 	m_video_properties.auto_exposure = getCameraControl(V4L2_CID_EXPOSURE_AUTO);
 	m_video_properties.gain = getCameraControl(V4L2_CID_GAIN);
 	m_video_properties.auto_gain = getCameraControl(V4L2_CID_AUTOGAIN);
-
 	m_video_properties.backlight = (getCameraControl(V4L2_CID_BACKLIGHT_COMPENSATION)  > 0);
+
+	// FOCUS
+	m_video_properties.auto_focus = getCameraControl(V4L2_CID_FOCUS_AUTO);
+	m_video_properties.relative_focus = getCameraControl(V4L2_CID_FOCUS_RELATIVE);
+	m_video_properties.absolute_focus = getCameraControl(V4L2_CID_FOCUS_ABSOLUTE);
+
+	// PTZ
+	m_video_properties.pan_absolute = getCameraControl(V4L2_CID_PAN_ABSOLUTE);
+	m_video_properties.pan_relative = getCameraControl(V4L2_CID_PAN_RELATIVE);
+
+	m_video_properties.tilt_absolute = getCameraControl(V4L2_CID_PAN_ABSOLUTE);
+	m_video_properties.tilt_relative = getCameraControl(V4L2_CID_PAN_RELATIVE);
+
+	m_video_properties.zoom_absolute = getCameraControl(V4L2_CID_ZOOM_ABSOLUTE);
+	m_video_properties.zoom_relative = getCameraControl(V4L2_CID_ZOOM_RELATIVE);
+	m_video_properties.zoom_continuous = getCameraControl(V4L2_CID_ZOOM_CONTINUOUS);
 
 	fprintf(stderr, "V4L2Device::%s:%d : props=\n", __func__, __LINE__);
 	printVideoProperties(&m_video_properties);
 
 	return m_video_properties;
 }
+
+
 
 /** @brief Get video properties (not updated) */
 t_video_properties V4L2Device::getVideoProperties()
@@ -358,6 +377,12 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 	if(props.do_white_balance) {
 		setCameraControl(V4L2_CID_DO_WHITE_BALANCE, 1);
 		props.do_white_balance = false;
+	}
+	if(props.sharpness != m_video_properties.sharpness ) {
+		setCameraControl(V4L2_CID_SHARPNESS, props.sharpness);
+	}
+	if(props.gamma != m_video_properties.gamma ) {
+		setCameraControl(V4L2_CID_GAMMA, props.gamma);
 	}
 
 	if(m_video_properties.auto_brightness != props.auto_brightness) {
@@ -454,6 +479,54 @@ V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 		}
 	}
 
+
+	// FOCUS
+	if(m_video_properties.auto_focus != props.auto_focus) {
+		setCameraControl(V4L2_CID_FOCUS_AUTO, props.auto_focus);
+	}
+	if(m_video_properties.relative_focus != props.relative_focus) {
+		setCameraControl(V4L2_CID_FOCUS_RELATIVE, props.relative_focus);
+	}
+	if(m_video_properties.absolute_focus != props.absolute_focus) {
+		setCameraControl(V4L2_CID_FOCUS_ABSOLUTE, props.absolute_focus);
+	}
+
+	// PTZ
+	// reset
+	if(m_video_properties.pan_reset != props.pan_reset) {
+		setCameraControl(V4L2_CID_PAN_RESET, props.pan_reset);
+		props.pan_reset = 0;
+	}
+	if(m_video_properties.tilt_reset != props.tilt_reset) {
+		setCameraControl(V4L2_CID_TILT_RESET, props.tilt_reset);
+		props.tilt_reset = 0;
+	}
+	// relative
+	if(m_video_properties.pan_relative != props.pan_relative) {
+		setCameraControl(V4L2_CID_PAN_RELATIVE, props.pan_relative);
+	}
+	if(m_video_properties.tilt_relative != props.tilt_relative) {
+		setCameraControl(V4L2_CID_TILT_RELATIVE, props.tilt_relative);
+	}
+	// absolute
+	if(m_video_properties.pan_absolute != props.pan_absolute) {
+		setCameraControl(V4L2_CID_PAN_ABSOLUTE, props.pan_absolute);
+	}
+	if(m_video_properties.tilt_absolute != props.tilt_absolute) {
+		setCameraControl(V4L2_CID_TILT_ABSOLUTE, props.tilt_absolute);
+	}
+
+	// zoom
+	if(m_video_properties.zoom_absolute != props.zoom_absolute) {
+		setCameraControl(V4L2_CID_ZOOM_ABSOLUTE, props.zoom_absolute);
+	}
+	if(m_video_properties.zoom_relative != props.zoom_relative) {
+		setCameraControl(V4L2_CID_ZOOM_RELATIVE, props.zoom_relative);
+	}
+	if(m_video_properties.zoom_continuous != props.zoom_continuous) {
+		setCameraControl(V4L2_CID_ZOOM_CONTINUOUS, props.zoom_continuous);
+	}
+
 	fprintf(stderr, "V4L2Device::%s:%d : props=\n", __func__, __LINE__);
 	m_video_properties = props;
 	printVideoProperties(&m_video_properties);
@@ -487,9 +560,11 @@ IplImage * V4L2Device::readImageRGB32()
 		return 0;
 	}
 
-	V4L2_printf("convert2RGB32 in image : %dx%dx%d\n",
+	if(g_debug_V4L2Device) {
+		V4L2_printf("convert2RGB32 in image : %dx%dx%d\n",
 				m_iplImageRGB32->width, m_iplImageRGB32->height, m_iplImageRGB32->nChannels
 				);
+	}
 	convert2RGB32(rawframebuffer, image);
 
 
@@ -776,7 +851,7 @@ int V4L2Device::start_capturing() {
 	
 	
 	
-	
+	// LAUNCH CAPTURE QUERIES
 	
 	unsigned int i;
 	enum v4l2_buf_type type;
@@ -811,6 +886,8 @@ int V4L2Device::start_capturing() {
 
 	return 0;
 }
+
+
 
 #define MAXWIDTH 2536
 #define MAXHEIGHT 1485
@@ -885,13 +962,10 @@ int V4L2Device::init_device(int w, int h)
 	swReleaseImage(&m_iplImageY);
 	swReleaseImage(&m_iplImageRGB32);
 
+	struct v4l2_capability cap;
 	V4L2_printf("Trying to init device with size=%dx%d\n", w, h);
 
-	struct v4l2_capability cap;
-    struct v4l2_cropcap cropcap;
-    struct v4l2_crop crop;
-
-    if (-1 == xioctl(vd.fd, VIDIOC_QUERYCAP, &cap)) {
+	if (-1 == xioctl(vd.fd, VIDIOC_QUERYCAP, &cap)) {
 		if (EINVAL == errno) {
 			fprintf (stderr, "V4L::%s:%d %s is no V4L2 device\n",__func__, __LINE__,
 				mVideoDevice);
@@ -903,6 +977,7 @@ int V4L2Device::init_device(int w, int h)
 		}
 	}
 
+//        if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
 	if (!(cap.capabilities & V4L2_CAP_VIDEO_CAPTURE)) {
 		fprintf (stderr, "%s is no video capture device\n",
 			mVideoDevice);
@@ -916,16 +991,16 @@ int V4L2Device::init_device(int w, int h)
 	}
 
 	/* Select video input, video standard and tune here. */
-	CLEAR (cropcap);
+	CLEAR (vd.cropcap);
 	
-	cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	vd.cropcap.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
 	
-	if (0 == xioctl(vd.fd, VIDIOC_CROPCAP, &cropcap))
+	if (0 == xioctl(vd.fd, VIDIOC_CROPCAP, &vd.cropcap))
 	{
-		crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
-        crop.c = cropcap.defrect; /* reset to default */
+		vd.crop.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+		vd.crop.c = vd.cropcap.defrect; /* reset to default */
 		
-        if (-1 == xioctl(vd.fd, VIDIOC_S_CROP, &crop)) {
+		if (-1 == xioctl(vd.fd, VIDIOC_S_CROP, &vd.crop)) {
 			int err_num = errno;
 			switch (err_num) {
 			case EINVAL:
@@ -1088,7 +1163,7 @@ int V4L2Device::init_device(int w, int h)
 	m_video_properties.fourcc_dble = fmtok.fmt.pix.pixelformat;
 
 	V4L2_printf("\txioctl(vd.fd, VIDIOC_S_FMT, &fmt) "
-			"SUPPORTED '%s'' with size : %d x %d !!!!\n",
+			"SUPPORTS '%s'' with size : %d x %d !!!!\n",
 			m_video_properties.fourcc,
 			m_video_properties.frame_width, m_video_properties.frame_height);
 
@@ -1125,7 +1200,7 @@ int V4L2Device::init_device(int w, int h)
 
 	V4L2_printf("=> size=%dx%d / FourCC=%c%c%c%c => palette V4L=%d!! !!\n",
 		m_video_properties.frame_width, m_video_properties.frame_height,
-		FourCC[0], FourCC[1], FourCC[2], FourCC[3], m_capture_palette);
+		FourCC[0], FourCC[1], FourCC[2], FourCC[3], m_capture_palette );
 
 	m_imageSize = cvSize(fmtok.fmt.pix.width, fmtok.fmt.pix.height);
 
@@ -2231,7 +2306,6 @@ unsigned char * V4L2Device::read_frame()
 unsigned char * V4L2Device::getFrameBuffer()
 {
 	//fprintf(stderr,"START --> V4L2Device::getFrameBuffer()!!\n");
-	
 	fd_set fds;
 	struct timeval tv;
 	int r;

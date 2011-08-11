@@ -70,6 +70,32 @@ private slots:
 
 	void on_applySizeButton_clicked();
 
+	void on_gammaSlider_valueChanged(int value);
+
+	void on_horizontalSlider_valueChanged(int value);
+
+	void on_focusModeComboBox_currentIndexChanged(int index);
+
+	void on_relativeFocusSlider_valueChanged(int value);
+
+	void on_absoluteFocusSlider_valueChanged(int value);
+
+	void on_panResetButton_clicked();
+
+	void on_tiltResetButton_clicked();
+
+	void on_tiltRelativeSlider_valueChanged(int value);
+
+	void on_tiltAbsoluteSlider_valueChanged(int value);
+
+	void on_panRelativeSlider_valueChanged(int value);
+
+	void on_panAbsoluteSlider_valueChanged(int value);
+
+	void on_zoomRelativeSlider_valueChanged(int value);
+
+	void on_zoomAbsoluteSlider_valueChanged(int value);
+
 private:
 
 	/** @brief Send current video props to device */
