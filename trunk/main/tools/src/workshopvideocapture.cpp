@@ -204,28 +204,29 @@ void WorkshopVideoCaptureView::setToolbar()
 
 	// ------------- DEVICE SECTION
 	bDevice = new QPushButton(hBox);
-	if(pixIcon.load("IconDeviceMenu.xpm"))
+	if(pixIcon.load("IconDeviceParams.png"))
 		bDevice->setPixmap(pixIcon);
 	else
 		bDevice->setText(tr("Device"));
 	bDevice->setFlat(true);
-	bDevice->setToggleButton(true);
+	bDevice->setToggleButton(false);
+	connect(bDevice, SIGNAL(clicked()), this, SLOT(slotDeviceSize()));
 
-	deviceMenu = new Q3PopupMenu(bDevice, "popupMenu_Device");
+//	deviceMenu = new Q3PopupMenu(bDevice, "popupMenu_Device");
 
-	pixIcon = QPixmap("IconDeviceSize.xpm");
-	actDevEdit = new QAction(pixIcon, tr("Acquisition size"), QString(""), this, "acq");
-	actDevEdit->addTo(deviceMenu);
-	connect(actDevEdit, SIGNAL(activated()), this, SLOT(slotDeviceSize()));
-	deviceMenu->connectItem( 0, actDevEdit, SLOT(activated()) );
+//	pixIcon = QPixmap("IconDeviceSize.xpm");
+//	actDevEdit = new QAction(pixIcon, tr("Acquisition size"), QString(""), this, "acq");
+//	actDevEdit->addTo(deviceMenu);
+//	connect(actDevEdit, SIGNAL(activated()), this, SLOT(slotDeviceSize()));
+//	deviceMenu->connectItem( 0, actDevEdit, SLOT(activated()) );
 
-	pixIcon = QPixmap("IconDeviceParams.png");
-	actDevParams = new QAction(pixIcon, tr("Image settings"), QString(""), this, "device");
-	actDevParams->addTo(deviceMenu);
-	connect(actDevParams, SIGNAL(activated()), this, SLOT(slotDeviceParams()));
-	deviceMenu->connectItem( 0, actDevParams, SLOT(activated()) );
-	bDevice->setPopup(deviceMenu);
-
+//	pixIcon = QPixmap("IconDeviceParams.png");
+//	actDevParams = new QAction(pixIcon, tr("Image settings"), QString(""), this, "device");
+//	actDevParams->addTo(deviceMenu);
+//	connect(actDevParams, SIGNAL(activated()), this, SLOT(slotDeviceParams()));
+//	deviceMenu->connectItem( 0, actDevParams, SLOT(activated()) );
+//	bDevice->setPopup(deviceMenu);
+//	actDevParams = NULL;
 
 
 
