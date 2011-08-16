@@ -299,11 +299,11 @@ void WorkshopApp::loadOnStart() {
 				// split
 				QStringList lst( QStringList::split( "\t", str ) );
 				QStringList::Iterator itCmd = lst.begin();
-				QString cmd = *itCmd;
+				QString cmd = (*itCmd);
 				if(cmd.contains("\n"))
 					cmd.truncate(cmd.length()-1);
 
-				if(!cmd.isNull()) {
+				if(!cmd.isNull() && itCmd!=lst.end()) {
 					itCmd++;
 					QString val = *itCmd;
 					if(!val.isNull()) {
