@@ -100,7 +100,7 @@ private slots:
 
 	void on_colorFxComboBox_currentIndexChanged(int index);
 
-	void on_comboBox_currentIndexChanged(int index);
+	void on_colorKillerComboBox_currentIndexChanged(int index);
 
 	void on_jpegQualityHorizontalSlider_valueChanged(int value);
 
