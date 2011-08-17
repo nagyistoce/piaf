@@ -27,7 +27,27 @@
 #define EXIT_ON_ERROR fprintf(stderr,"%s (%s:%d) : EXIT - FATAL ERROR !!!!!!!!!!!!!\n",__func__,__FILE__,__LINE__);fflush(stderr);exit(0);
 #define DEBUG_ALL(s) fprintf(stderr, "DEBUG_MSG %s (%s l.%d) '%s'\n",__func__,__FILE__,__LINE__, (s));
 #define PRINT_FIXME fprintf(stderr, "%s : %s:%d FIXME\n", __FILE__, __func__, __LINE__);
-
+#ifndef DEBUG_MSG
+#define DEBUG_MSG(...) { \
+							struct timeval l_nowtv; gettimeofday(&l_nowtv, NULL); \
+							time_t l_raw = l_nowtv.tv_sec; \
+							struct tm l_timeinfo; \
+							if(localtime(&l_raw)) { \
+								memcpy(&l_timeinfo, localtime(&l_raw), sizeof(struct tm)); \
+								fprintf(stderr, "%04d-%02d-%02d %02d:%02d:%02d.%02d\t[%s] %s:%d DEBUG: \t", \
+									(int)(l_timeinfo.tm_year + 1900), (int)(l_timeinfo.tm_mon + 1), (int)(l_timeinfo.tm_mday), \
+									(int)(l_timeinfo.tm_hour), (int)(l_timeinfo.tm_min), (int)(l_timeinfo.tm_sec), \
+									(int)(l_nowtv.tv_usec/10000),  \
+									__FILE__, __func__, __LINE__); \
+							} else { \
+								fprintf(stderr, "%04d.%02ds\t[%s] %s:%d DEBUG: \t", \
+										(int)(l_nowtv.tv_sec%1000),  \
+										(int)(l_nowtv.tv_usec/10000),  \
+										__FILE__, __func__, __LINE__); \
+							} \
+							fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); fflush(stderr); \
+						}
+#endif
 // MEMORY ALLOCATION MACROS
 #define CPP_DELETE(buf) {if((buf)) delete (buf); (buf)=NULL;}
 #define CPP_DELETE_ARRAY(buf) {if((buf)) delete [] (buf); (buf)=NULL;}

@@ -74,6 +74,7 @@ SOURCES += src/main.cpp \
     tools/src/workshopimagetool.cpp \
     tools/src/videoplayertool.cpp \
     acquisitions/video/src/v4lutils.c \
+	acquisitions/video/src/jdatasrc.c \
 	acquisitions/video/src/FileVideoAcquisition.cpp \
     acquisitions/video/src/videocapture.cpp \
     acquisitions/video/src/swvideodetector.cpp \

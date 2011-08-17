@@ -384,12 +384,21 @@ private:
 	int TVchannel;
 	int channel; // = input for example 0 for tuner, 1 for SVHS...
 	u8 *rawframebuffer;///< Address of lastly acquired buffer
+	int mRawBufferUsedSize; ///< used size in raw buffer (for JPEG)
 
 	int convert2RGB32(unsigned char * src, unsigned char * dest);
 	int convert2Y(unsigned char * src, unsigned char * dest);
 
+	/// Input jpeg buffer, directly from device (no huffman)
 	unsigned char * mUncompressedJPEGBuffer;
+	int mUncompressedJPEGBufferSize;
 	int mUncompressedJPEGWidth, mUncompressedJPEGHeight;
+
+	/// Fullm jpeg buffer for decompression
+	unsigned char * mRawJPEGbuffer;
+	int mRawJPEGbufferSize;
+
+	IplImage * mUncompImage;///< Image for uncompressing in RGB24
 
 
 	int video_width;
