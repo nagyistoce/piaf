@@ -22,6 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 #include <QToolTip>
+#include <QFileInfo>
 
 #include "thumbimagewidget.h"
 #include "ui_thumbimagewidget.h"
@@ -61,6 +62,9 @@ void ThumbImageWidget::setImageFile(const QString & imagePath,
 			img?img->height : -1,
 			img?img->nChannels : -1,
 			score);
+
+	QFileInfo fi(imagePath);
+	m_ui->titleLabel->setText(fi.baseName());
 
 	QPixmap l_displayImage;// local only
 	m_imagePath = "";

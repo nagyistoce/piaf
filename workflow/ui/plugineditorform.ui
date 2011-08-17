@@ -1,0 +1,251 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PluginEditorForm</class>
+ <widget class="QWidget" name="PluginEditorForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>346</width>
+    <height>443</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTreeWidget" name="availablePluginsTreeWidget">
+     <column>
+      <property name="text">
+       <string>Available plugins</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>nb func</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item>
+    <widget class="QGroupBox" name="groupBox_2">
+     <property name="title">
+      <string>Loaded plugins</string>
+     </property>
+     <layout class="QGridLayout" name="gridLayout">
+      <property name="leftMargin">
+       <number>0</number>
+      </property>
+      <property name="rightMargin">
+       <number>0</number>
+      </property>
+      <property name="bottomMargin">
+       <number>0</number>
+      </property>
+      <property name="verticalSpacing">
+       <number>2</number>
+      </property>
+      <item row="1" column="0">
+       <widget class="QPushButton" name="paramsButton">
+        <property name="toolTip">
+         <string>Edit plugin's parameters</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/view-media-equalizer.png</normaloff>:/icons/icons/16x16/view-media-equalizer.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="activateButton">
+        <property name="toolTip">
+         <string>Activate/disactivate button</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/edit-delete.png</normaloff>:/icons/icons/16x16/edit-delete.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0">
+       <widget class="QPushButton" name="timeButton">
+        <property name="toolTip">
+         <string>Show time histogram</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/chronometer.png</normaloff>:/icons/icons/16x16/chronometer.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QPushButton" name="upButton">
+        <property name="toolTip">
+         <string>Move the selected plugin up</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/arrow-up.png</normaloff>:/icons/icons/16x16/arrow-up.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <widget class="QPushButton" name="downButton">
+        <property name="toolTip">
+         <string>Move the selected plugin down</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/arrow-down.png</normaloff>:/icons/icons/16x16/arrow-down.png</iconset>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0" colspan="2">
+       <widget class="QWidget" name="widget" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout">
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>2</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>2</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="loadButton">
+           <property name="toolTip">
+            <string>Load a sequence of plugins</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../ema.qrc">
+             <normaloff>:/icons/icons/16x16/document-open-folder.png</normaloff>:/icons/icons/16x16/document-open-folder.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="saveButton">
+           <property name="toolTip">
+            <string>Save current sequence</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../main/piaf.qrc">
+             <normaloff>:/images/22x22/document-save.png</normaloff>:/images/22x22/document-save.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="appendPluginButton">
+           <property name="toolTip">
+            <string>Load selected plugin/function</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../main/piaf.qrc">
+             <normaloff>:/images/22x22/list-add.png</normaloff>:/images/22x22/list-add.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="removePluginButton">
+           <property name="statusTip">
+            <string>Remove selected loaded plugin</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../main/piaf.qrc">
+             <normaloff>:/images/22x22/list-remove.png</normaloff>:/images/22x22/list-remove.png</iconset>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item row="1" column="1" rowspan="6">
+       <widget class="QTreeWidget" name="selectedPluginsTreeWidget">
+        <property name="toolTip">
+         <string>Loaded plugins, processed from top to bottom</string>
+        </property>
+        <column>
+         <property name="text">
+          <string>Loaded filters</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Active</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>View</string>
+         </property>
+        </column>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../ema.qrc"/>
+  <include location="../../main/piaf.qrc"/>
+ </resources>
+ <connections/>
+</ui>

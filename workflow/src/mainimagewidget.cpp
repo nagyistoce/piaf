@@ -147,6 +147,8 @@ fprintf(stderr, "MainImageWidget::%s:%d : crop %d,%d  sc=%d\n",
 
 	m_zoom_scale = scale;
 	m_ui->globalImageLabel->setPixmap(QPixmap::fromImage(m_displayImage));
+
+	emit signalCropRect(m_cropRect);
 }
 
 void MainImageWidget::on_globalImageLabel_signalMousePressEvent(QMouseEvent * e) {
@@ -219,6 +221,8 @@ void MainImageWidget::on_globalImageLabel_signalMouseReleaseEvent(QMouseEvent * 
 
 void MainImageWidget::on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * e) {
 	if(!e) return;
+	if(e->buttons() != Qt::LeftButton) return;
+
 	int dx = e->pos().x() - m_lastClick.x();
 	int dy = e->pos().y() - m_lastClick.y();
 

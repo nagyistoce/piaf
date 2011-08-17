@@ -98,7 +98,6 @@ void NavImageWidget::setImageFile(const QString & imagePath)
 	m_ui->globalImageLabel->setPixmap( m_displayImage );
 
 	on_zoomFitButton_clicked();
-
 }
 
 void  NavImageWidget::zoomOn(int x, int y, int scale) {
@@ -143,16 +142,20 @@ void NavImageWidget::on_globalImageLabel_signalMouseReleaseEvent(QMouseEvent * e
 
 void NavImageWidget::on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * e) {
 	if(!e) return;
-	int x = e->pos().x(), y =  e->pos().y();
-	int glob_w = m_ui->globalImageLabel->width();
-	int glob_h = m_ui->globalImageLabel->height();
-	int disp_w = m_displayImage.width();
-	int disp_h = m_displayImage.height();
+	if(e->buttons()==Qt::LeftButton) {
+		int x = e->pos().x(), y =  e->pos().y();
+		int glob_w = m_ui->globalImageLabel->width();
+		int glob_h = m_ui->globalImageLabel->height();
+		int disp_w = m_displayImage.width();
+		int disp_h = m_displayImage.height();
 
-	x = (x - (glob_w - disp_w)/2) * m_fullRect.width() / disp_w;
-	y = (y - (glob_h - disp_h)/2) * m_fullRect.height() / disp_h;
+		if(disp_w<=0 || disp_h<=0) { return; }
 
-	emit signalZoomOn(x, y, m_zoom_scale);
+		x = (x - (glob_w - disp_w)/2) * m_fullRect.width() / disp_w;
+		y = (y - (glob_h - disp_h)/2) * m_fullRect.height() / disp_h;
+
+		emit signalZoomOn(x, y, m_zoom_scale);
+	}
 }
 
 void NavImageWidget::on_globalImageLabel_signalWheelEvent( QWheelEvent * e )

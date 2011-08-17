@@ -29,25 +29,79 @@
 
 #include <QtGui/QMainWindow>
 #include <QtGui/QTreeWidgetItem>
+#include <QWorkspace>
+#include <QSettings>
+
+typedef struct _t_file {
+	QString name;
+	QString fullPath;
+	QTreeWidgetItem * treeViewItem;
+} t_file;
+
+class EmaMainWindow;
+
+/** \brief Directory tree */
+class DirectoryTreeWidgetItem : QTreeWidgetItem
+{
+//	Q_OBJECT
+	friend class EmaMainWindow;
+public:
+	DirectoryTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, QString path);
+	DirectoryTreeWidgetItem(QTreeWidget * treeWidgetParent, QString path);
+	~DirectoryTreeWidgetItem();
+
+	/** \brief Expand contents: read directory contents and display it */
+	void expand();
+	/** \brief collapse contents: collapse directory and clear data */
+	void collapse();
+
+	bool isFile() { return mIsFile; }
+	QStringList getFileList();
+protected:
+	void init(); ///< init internal data and fill nb files
+	QString name;
+	QString fullPath;
+	int nb_files;
+	bool mIsFile;///< true if the item is a file
+	QTreeWidgetItem * subItem;///< fake item to see the content
+private:
+
+	QList<DirectoryTreeWidgetItem *> subDirsList;
+	QList<t_file *> filesList;
+
+
+};
+
 
 namespace Ui
 {
 	class EmaMainWindow;
 }
 
+/** \brief Main window for workflow app
 
+
+*/
 class EmaMainWindow : public QMainWindow
 {
 	Q_OBJECT
+
 
 public:
 	EmaMainWindow(QWidget *parent = 0);
 	~EmaMainWindow();
 
-
 private:
 
 	Ui::EmaMainWindow *ui;
+
+	void saveSettings();
+	void loadSettings();
+#define PIAFWKFL_SETTINGS	"piaf-workflow"
+	QSettings mSettings;
+
+	/// List of input directories
+	QList<DirectoryTreeWidgetItem *> mDirectoryList;
 
 	/// Opened image paths
 	QStringList m_imageList;
@@ -57,6 +111,8 @@ private:
 	// Thumbnails sorter
 	int m_sorter_nbitems_per_row;
 
+	/** @brief append a directory to managed directories */
+	DirectoryTreeWidgetItem * appendDirectoryToLibrary(QString path, QTreeWidgetItem * itemParent = NULL);
 
 	/** @brief append a list of files to displayed files */
 	void appendFileList(QStringList list);
@@ -69,12 +125,15 @@ private:
 
 private:
 	QTimer m_timer;
+	QWorkspace * pWorkspace;
 
 public slots:
 	void on_thumbImage_clicked(QString fileName);
 	void on_thumbImage_selected(QString);
 private slots:
-	void on_filesShowCheckBox_stateChanged(int);
+	void on_filesTreeWidget_itemExpanded(QTreeWidgetItem* item);
+	void on_workspaceButton_clicked();
+	 void on_filesShowCheckBox_stateChanged(int);
 	void on_filesLoadButton_clicked();
 	void on_filesClearButton_clicked();
 	void on_zoomx2Button_clicked();
@@ -95,6 +154,12 @@ private slots:
 	//
 	void on_globalNavImageWidget_signalZoomOn(int, int, int);
 
+
+	// MAIN MENU ACTION
+	void on_actionQuit_activated();
+	void on_actionEdit_plugins_activated();
+	void on_actionBatch_processor_activated();
+	void on_actionConvert_images_to_AVI_activated();
 	void on_actionAbout_activated();
 
 	void on_appendNewPictureThumb(const QString & );

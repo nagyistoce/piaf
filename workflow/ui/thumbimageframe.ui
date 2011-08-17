@@ -6,14 +6,14 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>104</width>
-    <height>120</height>
+    <width>86</width>
+    <height>91</height>
    </rect>
   </property>
   <property name="maximumSize">
    <size>
     <width>120</width>
-    <height>120</height>
+    <height>119</height>
    </size>
   </property>
   <property name="windowTitle">
@@ -25,23 +25,36 @@
   <property name="frameShadow">
    <enum>QFrame::Raised</enum>
   </property>
-  <layout class="QGridLayout" name="gridLayout">
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>0</number>
+   </property>
    <property name="leftMargin">
     <number>2</number>
    </property>
    <property name="topMargin">
-    <number>1</number>
+    <number>0</number>
    </property>
    <property name="rightMargin">
     <number>2</number>
    </property>
    <property name="bottomMargin">
-    <number>1</number>
+    <number>0</number>
    </property>
-   <property name="spacing">
-    <number>2</number>
-   </property>
-   <item row="0" column="0">
+   <item>
+    <widget class="QLabel" name="nameLabel">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="text">
+      <string>-</string>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QImageDisplay" name="globalImageLabel">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
@@ -51,14 +64,14 @@
      </property>
      <property name="minimumSize">
       <size>
-       <width>82</width>
-       <height>82</height>
+       <width>80</width>
+       <height>60</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
        <width>82</width>
-       <height>82</height>
+       <height>62</height>
       </size>
      </property>
      <property name="mouseTracking">
@@ -78,8 +91,13 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="0">
+   <item>
     <widget class="QLabel" name="starsLabel">
+     <property name="font">
+      <font>
+       <pointsize>8</pointsize>
+      </font>
+     </property>
      <property name="text">
       <string/>
      </property>

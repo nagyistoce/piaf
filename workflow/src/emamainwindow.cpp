@@ -39,6 +39,14 @@
 #include <QFileDialog>
 #include <QSplashScreen>
 
+// External tools which open new windows
+// Piaf Dialogs
+#include "piafconfigurationdialog.h"
+//#include "pluginlistdialog.h"
+#include "plugineditdialog.h"
+#include "batchfiltersmainwindow.h"
+#include "imagetoavidialog.h"
+
 
 int g_EMAMW_debug_mode = EMALOG_DEBUG;
 
@@ -52,7 +60,8 @@ int g_EMAMW_debug_mode = EMALOG_DEBUG;
 
 
 EmaMainWindow::EmaMainWindow(QWidget *parent)
-	: QMainWindow(parent), ui(new Ui::EmaMainWindow)
+	: QMainWindow(parent), ui(new Ui::EmaMainWindow),
+	mSettings( PIAFWKFL_SETTINGS )
 {
 	ui->setupUi(this);
 	ui->loadProgressBar->hide();
@@ -65,12 +74,41 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 			SLOT(on_gridWidget_signal_resizeEvent(QResizeEvent *)));
 
 	// For the moment, collections are not implemented
-	ui->collecShowCheckBox->setChecked(false);
+	//ui->collecShowCheckBox->setChecked(false);
+	pWorkspace = new QWorkspace(ui->workshopFrame);
+
+	loadSettings();
 }
 
 EmaMainWindow::~EmaMainWindow()
 {
+	saveSettings();
 	delete ui;
+}
+
+void EmaMainWindow::loadSettings()
+{
+	int size = mSettings.beginReadArray("folders");
+	for (int i = 0; i < size; ++i) {
+		mSettings.setArrayIndex(i);
+		mDirectoryList.append( appendDirectoryToLibrary(mSettings.value("path").toString(), NULL) );
+	}
+	mSettings.endArray();
+}
+
+void EmaMainWindow::saveSettings()
+{
+	EMAMW_printf(EMALOG_DEBUG, "Saving settings...");
+	// Save list of files
+	mSettings.beginWriteArray("folders");
+	for (int i = 0; i < mDirectoryList.size(); ++i) {
+		mSettings.setArrayIndex(i);
+		mSettings.setValue("path", mDirectoryList.at(i)->fullPath);
+		EMAMW_printf(EMALOG_DEBUG, "\tadded directory '%s'",
+					 mDirectoryList.at(i)->fullPath.toAscii().data());
+		//settings.setValue("password", list.at(i).password);
+	}
+	mSettings.endArray();
 }
 
 void EmaMainWindow::on_appendNewPictureThumb(const QString & filename) {
@@ -83,15 +121,54 @@ void EmaMainWindow::on_gridButton_clicked() {
 	ui->stackedWidget->setCurrentIndex(1);
 }
 
+void EmaMainWindow::on_workspaceButton_clicked()
+{
+	ui->stackedWidget->setCurrentIndex(2);
+}
+
+
 void EmaMainWindow::on_imgButton_clicked() {
 	//
 	ui->stackedWidget->setCurrentIndex(0);
 }
 
 
-QSplashScreen * g_splash = NULL;
 
-void EmaMainWindow::on_actionAbout_activated() {
+
+
+
+
+
+QSplashScreen * g_splash = NULL;
+void EmaMainWindow::on_actionQuit_activated()
+{
+	exit(0);
+}
+
+void EmaMainWindow::on_actionEdit_plugins_activated()
+{
+	PluginEditDialog * pluginDialog = new PluginEditDialog(NULL);
+	pluginDialog->show();
+}
+
+void EmaMainWindow::on_actionBatch_processor_activated()
+{
+	BatchFiltersMainWindow * batchProc = new BatchFiltersMainWindow();
+	batchProc->show();
+}
+
+void EmaMainWindow::on_actionConvert_images_to_AVI_activated()
+{
+	ImageToAVIDialog * pconvertDialog = new ImageToAVIDialog();
+
+	connect(pconvertDialog, SIGNAL(signalNewMovie(QString)),
+			this, SLOT(on_pconvertDialog_signalNewMovie(QString)));
+
+	pconvertDialog->show();
+}
+
+void EmaMainWindow::on_actionAbout_activated()
+{
 	QPixmap pix(":/icons/icons/ema-splash.png");
 	if(g_splash) {
 		g_splash->setPixmap(pix);
@@ -170,12 +247,206 @@ void EmaMainWindow::on_filesClearButton_clicked() {
 
 void EmaMainWindow::on_filesLoadButton_clicked()
 {
-	QStringList list =  QFileDialog::getOpenFileNames(this,
-					 tr("Open Image"),
-					 "", //"/home/cseyve",
-					 tr("Images (*.png *.p*m *.xpm *.jp* *.tif* *.bmp *.cr2"
-						"*.PNG *.P*M *.XPM *.JP* *.TIF* *.BMP *.CR2)"));
-	appendFileList(list);
+	QString dir =  QFileDialog::getExistingDirectory(this,
+					 tr("Add existing directory"),
+					 "");
+	DirectoryTreeWidgetItem * new_dir = appendDirectoryToLibrary(dir);
+	fprintf(stderr, "EmaMW::%s:%d : added new_dir=%p = { item = %p }\n",
+			__func__, __LINE__, new_dir, new_dir);
+	mDirectoryList.append( new_dir );
+//	appendFileList(list);
+}
+
+
+void scanDirectory(QString path, int * p_nb_files)
+{
+	QFileInfo fidir(path);
+	if(fidir.isFile()) return;
+
+	fprintf(stderr, "EmaMW::%s:%d: scanning path '%s' (total for the moment = %d)\n",
+			__func__, __LINE__, path.toAscii().data(), *p_nb_files);
+
+	QDir dir(path);
+	int nb_files = 0;
+	QFileInfoList fiList = dir.entryInfoList();
+	QFileInfoList::iterator it;
+	for(it = fiList.begin(); it != fiList.end(); ++it)
+	{
+		QFileInfo fi = (*it);
+		if(fi.isFile())
+		{
+			nb_files++;
+		}
+		else if(fi.isDir() && fi.absoluteFilePath().length() > path.length())
+		{
+			fprintf(stderr, "\tEmaMW::%s:%d: scanning path '%s' (total for the moment = %d)\n",
+					__func__, __LINE__, fi.absoluteFilePath().toAscii().data(), *p_nb_files);
+
+			// scan recursively
+			scanDirectory(fi.absoluteFilePath(), p_nb_files);
+		}
+	}
+
+	*p_nb_files = *p_nb_files + nb_files;
+
+
+}
+
+
+void EmaMainWindow::on_filesTreeWidget_itemExpanded(QTreeWidgetItem * item)
+{
+	if(!item) return;
+
+	fprintf(stderr, "EmaMW::%s:%d : expanded %p !\n", __func__, __LINE__, item);
+	DirectoryTreeWidgetItem * curdir = (DirectoryTreeWidgetItem*)item;
+
+	// add sub items
+	fprintf(stderr, "EmaMW::%s:%d : EXPAND THIS TREE '%s' !\n",
+					__func__, __LINE__,
+					curdir->fullPath.toAscii().data());
+
+	curdir->expand();
+}
+QStringList directoryFileScan(QString fullPath)
+{
+	QStringList fileList;
+	QDir dir(fullPath);
+	QFileInfoList fiList = dir.entryInfoList();
+	QFileInfoList::iterator it;
+	for(it = fiList.begin(); it != fiList.end(); ++it)
+	{
+		QFileInfo fi = (*it);
+		if(fi.isFile() && fi.absoluteFilePath().length() > fullPath.length())
+		{
+			fileList.append( fi.absoluteFilePath() );
+		}
+		else if(fi.isDir() && fi.absoluteFilePath().length() > fullPath.length())
+		{
+			fileList.append( directoryFileScan(fi.absoluteFilePath() ));
+		}
+	}
+
+	return fileList;
+}
+
+QStringList DirectoryTreeWidgetItem::getFileList()
+{
+	QStringList fileList;
+
+	fileList.append(directoryFileScan(fullPath));
+
+	return fileList;
+}
+
+void DirectoryTreeWidgetItem::expand()
+{
+	QDir dir(fullPath);
+	QFileInfoList fiList = dir.entryInfoList();
+	QFileInfoList::iterator it;
+	for(it = fiList.begin(); it != fiList.end(); ++it)
+	{
+		QFileInfo fi = (*it);
+		if(fi.isFile() && fi.absoluteFilePath().length() > fullPath.length())
+		{
+			fprintf(stderr, "\tEmaMW::%s:%d: adding FILE '%s'\n",
+					__func__, __LINE__, fi.absoluteFilePath().toAscii().data());
+
+
+			// Add item for file
+			t_file * new_file = new t_file;
+			new_file->name = fi.baseName();
+			new_file->fullPath = fi.absoluteFilePath();
+
+			QStringList columns; columns << new_file->name;
+
+			new_file->treeViewItem = new QTreeWidgetItem(
+					this,
+					columns);
+		}
+		else if(fi.isDir() && fi.absoluteFilePath().length() > fullPath.length())
+		{
+			fprintf(stderr, "\tEmaMW::%s:%d: adding subdir '%s'\n",
+					__func__, __LINE__, fi.absoluteFilePath().toAscii().data());
+
+			subDirsList.append(
+					new DirectoryTreeWidgetItem(this,
+							fi.absoluteFilePath())
+					);
+		}
+	}
+
+	// delete fake "waiting" item
+	if(subItem) {
+		removeChild( subItem );
+		delete subItem;
+		subItem = NULL;
+	}
+
+}
+
+DirectoryTreeWidgetItem::DirectoryTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, QString path)
+	: QTreeWidgetItem(treeWidgetItemParent),
+	fullPath(path), nb_files(0)
+{
+	init();
+}
+
+DirectoryTreeWidgetItem::DirectoryTreeWidgetItem(QTreeWidget * treeWidgetParent, QString path)
+	: QTreeWidgetItem(treeWidgetParent),
+	fullPath(path), nb_files(0)
+{
+	init();
+}
+
+DirectoryTreeWidgetItem::~DirectoryTreeWidgetItem()
+{
+
+}
+
+void DirectoryTreeWidgetItem::init()
+{
+	QFileInfo fi(fullPath);
+	name = fi.baseName();
+	setText(0, fi.completeBaseName());
+	subItem = NULL;
+
+	if(fi.isDir()) {
+		nb_files = 0;
+		scanDirectory(fullPath, &nb_files);
+
+
+		setText(1, QString::number(nb_files));
+
+		if(nb_files > 0) {
+			// Add fake sub item "waiting"
+			QStringList columns;
+			columns.clear();
+			columns << "...";
+
+			subItem = new QTreeWidgetItem(this, columns);
+		}
+		mIsFile = false;
+	}
+	else if(fi.isFile())
+	{
+		mIsFile = true;
+	}
+}
+
+DirectoryTreeWidgetItem * EmaMainWindow::appendDirectoryToLibrary(QString path,
+																  QTreeWidgetItem * itemParent)
+{
+	QFileInfo fi(path);
+	if(!fi.exists()) { return NULL; }
+
+	DirectoryTreeWidgetItem * new_dir ;
+	if(!itemParent) {
+		new_dir = new DirectoryTreeWidgetItem(ui->filesTreeWidget, path);
+	} else {
+		new_dir = new DirectoryTreeWidgetItem(itemParent, path);
+	}
+
+	return new_dir;
 }
 
 void EmaMainWindow::appendFileList(QStringList list) {
@@ -345,9 +616,15 @@ void EmaMainWindow::on_filesTreeWidget_itemDoubleClicked (
 		QTreeWidgetItem * item, int /*unused column */) {
 	if(!item) return;
 
+	DirectoryTreeWidgetItem * curdir = (DirectoryTreeWidgetItem *)item;
 	// read image file
-	QString fileName = item->text(0); // col 0 has the full path
-	on_thumbImage_clicked( fileName );
+	if(curdir->isFile()) {
+		QString fileName = curdir->fullPath; // col 0 has the full path
+		on_thumbImage_clicked( fileName );
+	} else {
+		// Add all its content recursively
+		appendFileList(curdir->getFileList());
+	}
 
 }
 
@@ -356,24 +633,22 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 
 	t_image_info_struct * pinfo = emaMngr()->getInfo(fileName);
 
-	if(!pinfo) {
+	if(!pinfo)
+	{
 		EMAMW_printf(EMALOG_TRACE, "Image file '%s' is NOT YET  managed",
 					 fileName.toUtf8().data())
 	} else {
 		// image is already managed
-		EMAMW_printf(EMALOG_TRACE, "Image file '%s' is now managed", fileName.toUtf8().data())
+		EMAMW_printf(EMALOG_TRACE, "Image file '%s' is now managed",
+					 fileName.toUtf8().data());
 
 		// Append to managed pictures
 		m_imageList.append(fileName);
 
+		ui->nbFilesLabel->setText(QString::number(m_imageList.count()));
+
 		// append to file display list
 		QFileInfo fi(fileName);
-		//filesTreeWidget
-
-		QTreeWidgetItem * newtreeItem = new QTreeWidgetItem(
-				ui->filesTreeWidget );
-		newtreeItem->setText(0, fileName);
-		newtreeItem->setText(1, fi.fileName());
 
 		// And remove it from files being waited for
 		// m_appendFileList.remove(fileName);
@@ -476,6 +751,7 @@ void EmaMainWindow::on_globalNavImageWidget_signalZoomOn(int x, int y, int scale
 	ui->mainImageWidget->zoomOn(x,y,scale);
 	ui->stackedWidget->setCurrentIndex(0);
 }
+
 
 
 
