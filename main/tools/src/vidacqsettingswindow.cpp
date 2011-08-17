@@ -46,10 +46,6 @@ void VidAcqSettingsWindow::changeEvent(QEvent *e)
     }
 }
 
-void VidAcqSettingsWindow::on_brightnessSlider_valueChanged(int value)
-{
-
-}
 
 void VidAcqSettingsWindow::setVideoCaptureDoc(VideoCaptureDoc * pdoc)
 {
@@ -203,6 +199,16 @@ void VidAcqSettingsWindow::on_gainSlider_valueChanged(int value)
 	m_video_properties.gain = value;
 	sendVideoProperties();
 }
+
+void VidAcqSettingsWindow::on_brightnessSlider_valueChanged(int value)
+{
+
+	m_video_properties.brightness = value;
+	sendVideoProperties();
+	fprintf(stderr, "VidAcqSettings::%s:%d : changed brightness to %d\n",
+			__func__, __LINE__, m_video_properties.brightness);fflush(stderr);
+}
+
 
 /* BRIGHTNESS, CONTRAST .... */
 void VidAcqSettingsWindow::on_brightnessModeComboBox_currentIndexChanged(int index)
@@ -397,7 +403,7 @@ void VidAcqSettingsWindow::on_colorFxComboBox_currentIndexChanged(int index)
 	sendVideoProperties();
 }
 
-void VidAcqSettingsWindow::on_comboBox_currentIndexChanged(int index)
+void VidAcqSettingsWindow::on_colorKillerComboBox_currentIndexChanged(int index)
 {
 	m_video_properties.color_killer = index;
 	sendVideoProperties();
@@ -406,5 +412,8 @@ void VidAcqSettingsWindow::on_comboBox_currentIndexChanged(int index)
 void VidAcqSettingsWindow::on_jpegQualityHorizontalSlider_valueChanged(int value)
 {
 	m_video_properties.jpeg_quality = value;
-	sendVideoProperties();
+	fprintf(stderr, "VidAcqSettings::%s:%d : changed quality to %d\n",
+			__func__, __LINE__, m_video_properties.jpeg_quality);fflush(stderr);
+
+	//sendVideoProperties();
 }

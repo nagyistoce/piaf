@@ -54,13 +54,13 @@ typedef struct {
 	int auto_brightness;	/*!< Auto-Brightness mode
 
 								 */
-	double brightness;		/*!< Brightness CV_CAP_PROP_BRIGHTNESS Brightness of the image (only for cameras) */
-	double contrast;		/*!< Contrast CV_CAP_PROP_CONTRAST Contrast of the image (only for cameras) */
-	double saturation;		/*!< Saturation CV_CAP_PROP_SATURATION Saturation of the image (only for cameras) */
-	double hue;				/*!< Hue CV_CAP_PROP_HUE Hue of the image (only for cameras) */
+	int brightness;		/*!< Brightness CV_CAP_PROP_BRIGHTNESS Brightness of the image (only for cameras) */
+	int contrast;		/*!< Contrast CV_CAP_PROP_CONTRAST Contrast of the image (only for cameras) */
+	int saturation;		/*!< Saturation CV_CAP_PROP_SATURATION Saturation of the image (only for cameras) */
+	int hue;				/*!< Hue CV_CAP_PROP_HUE Hue of the image (only for cameras) */
 
 	bool auto_gain;			/*!< Auto gain mode */
-	double gain;			/*!< Gain CV_CAP_PROP_GAIN Gain of the image (only for cameras) */
+	int gain;			/*!< Gain CV_CAP_PROP_GAIN Gain of the image (only for cameras) */
 
 	int auto_exposure;		/*!< Auto exposure mode:
 								 Enables automatic adjustments of the exposure time and/or iris aperture. The effect of manual changes of the exposure time or iris aperture while these features are enabled is undefined, drivers should ignore such requests. Possible values are:

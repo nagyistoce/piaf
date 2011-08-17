@@ -399,11 +399,14 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 		start_capturing();
 	}
 
+	V4L2_printf("JPEG compression changed ? quality:%d -> %d",
+			  m_video_properties.jpeg_quality, props.jpeg_quality);
 	if(m_video_properties.jpeg_quality != props.jpeg_quality)
 	{
 		V4L2_printf("JPEG compression changed : quality:%d -> %d",
 				  m_video_properties.jpeg_quality, props.jpeg_quality);
 		struct v4l2_jpegcompression jpgcomp;
+
 		if( -1 == xioctl(vd.fd, VIDIOC_G_JPEGCOMP, &jpgcomp) )
 		{
 			V4L2_printf("ERROR: could not read the  MJPEG/MJPG compression struct");
