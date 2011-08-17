@@ -68,6 +68,9 @@ private slots:
 
 private:
 	Ui::MainImageWidget *m_ui;
+signals:
+	/// Signal to tell where the crop window is located
+	void signalCropRect(QRect);
 };
 
 #endif // MAINIMAGEWIDGET_H

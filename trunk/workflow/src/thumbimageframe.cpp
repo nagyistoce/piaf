@@ -26,6 +26,7 @@
 #include "thumbimageframe.h"
 #include "ui_thumbimageframe.h"
 #include <QToolTip>
+#include <QFileInfo>
 
 ThumbImageFrame::ThumbImageFrame(QWidget *parent) :
 	QFrame(parent),
@@ -62,6 +63,9 @@ void ThumbImageFrame::setImageFile(const QString & imagePath,
 			img?img->height : -1,
 			img?img->nChannels : -1,
 			score);
+
+	QFileInfo fi(imagePath);
+	m_ui->nameLabel->setText(fi.baseName());
 
 	QPixmap l_displayImage;// local only
 	m_imagePath = "";
