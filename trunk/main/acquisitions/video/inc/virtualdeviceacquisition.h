@@ -42,6 +42,7 @@ typedef struct {
 
 	int frame_width;		/*!< Frame width CV_CAP_PROP_FRAME_WIDTH Width of the frames in the video stream */
 	int frame_height;	/*!< Frame height CV_CAP_PROP_FRAME_HEIGHT Height of the frames in the video stream */
+	int jpeg_quality;		/*!< JPEG compression quality (-1=unsupported )*/
 
 	double fps;				/*!< Frame rate CV_CAP_PROP_FPS Frame rate */
 	double fourcc_dble;		/*!< FourCC coding as double CV_CAP_PROP_FOURCC 4-character code of codec */
@@ -75,6 +76,22 @@ typedef struct {
 	bool backlight;			/*!< Backlight compensation : V4L2_CID_BACKLIGHT */
 	int sharpness;			/*!< Sharpness accentuation : V4L2_CID_SHARPNESS */
 	int gamma;				/*!< Sharpness accentuation : V4L2_CID_GAMMA */
+
+	int power_line_frequency;	/*!< Power line frequence compensation :
+		V4L2_CID_POWER_LINE_FREQUENCY_DISABLED  = 0,
+		V4L2_CID_POWER_LINE_FREQUENCY_50HZ      = 1,
+		V4L2_CID_POWER_LINE_FREQUENCY_60HZ      = 2,
+
+		  */
+	int color_fx;				/*!< Color special effect : V4L2_CID_COLORFX
+									enum v4l2_colorfx {
+											V4L2_COLORFX_NONE       = 0,
+											V4L2_COLORFX_BW         = 1,
+											V4L2_COLORFX_SEPIA      = 2,
+									}; */
+	int color_killer;			/*!< Color killer effect V4L2_CID_COLOR_KILLER
+
+								  */
 
 	double convert_rgb;		/*!< CV_CAP_PROP_CONVERT_RGB Boolean flags indicating whether images should be converted to RGB */
 	int auto_white_balance;	///< Automatic white balance

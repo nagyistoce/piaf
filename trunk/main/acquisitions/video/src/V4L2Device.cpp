@@ -18,6 +18,7 @@
 #include "V4L2Device.h"
 #include "videocapture.h"
 #include "VirtualDevice.h"
+#include "piaf-common.h"
 
 // additionnal libraries for memory/device control
 #include <assert.h>
@@ -37,6 +38,9 @@ extern "C" {
 #include "v4l2uvc.h"
 #include "utils.h"
 }
+
+#include "huffman.h"
+
 
 #define g_debug_V4L2Device	0
 #define V4L2_printf(...)	{fprintf(stderr,"[V4L2 '%s']::%s:%d: ",mVideoDevice,__func__,__LINE__);fprintf(stderr,__VA_ARGS__);fflush(stderr);}
@@ -85,7 +89,15 @@ V4L2Device::~V4L2Device()
 		delete [] mVideoDevice;
 		mVideoDevice = NULL;
 	}
-
+	if(mRawJPEGbuffer) {
+		delete [] mRawJPEGbuffer;
+		mRawJPEGbuffer = NULL;
+	}
+	if(mUncompressedJPEGBuffer) {
+		delete [] mUncompressedJPEGBuffer;
+		mUncompressedJPEGBuffer = NULL;
+	}
+	swReleaseImage(&mUncompImage);
 	swReleaseImage(&m_iplImageRGB32);
 	swReleaseImage(&m_iplImageY);
 }
@@ -95,13 +107,15 @@ void V4L2Device::init()
 {
 	initialised = false;
 	mGrabEnabled = false;
-
+	mRawJPEGbuffer = NULL;
+	mRawJPEGbufferSize = 0;
 	m_imageSize.width = m_imageSize.height = 0;
 	m_nChannels = 4;
 
 	memset(&m_video_properties, 0, sizeof(t_video_properties));
 
 	rawframebuffer = NULL;
+	mUncompImage = NULL;
 
 	m_isPWC = false;
 	// vd.fd = -1 until is done correctly...
@@ -232,6 +246,17 @@ t_video_properties V4L2Device::updateVideoProperties()
 		return m_video_properties;
 	}
 
+	struct v4l2_jpegcompression jpgcomp;
+	if( -1 == xioctl(vd.fd, VIDIOC_G_JPEGCOMP, &jpgcomp) )
+	{
+		V4L2_printf("ERROR: could not read the  MJPEG/MJPG compression struct");
+		m_video_properties.jpeg_quality = -1;
+	}
+	else {
+		m_video_properties.jpeg_quality = jpgcomp.quality;
+	}
+
+
 	video_picture pic;
 	getpicture(&pic);
 #define VIDEOPICTURE_SCALE	1.
@@ -284,6 +309,9 @@ t_video_properties V4L2Device::updateVideoProperties()
 	m_video_properties.gain = getCameraControl(V4L2_CID_GAIN);
 	m_video_properties.auto_gain = getCameraControl(V4L2_CID_AUTOGAIN);
 	m_video_properties.backlight = (getCameraControl(V4L2_CID_BACKLIGHT_COMPENSATION)  > 0);
+	m_video_properties.power_line_frequency = getCameraControl(V4L2_CID_POWER_LINE_FREQUENCY);
+	m_video_properties.color_fx = getCameraControl(V4L2_CID_COLORFX);
+	m_video_properties.color_killer = getCameraControl(V4L2_CID_COLOR_KILLER);
 
 	// FOCUS
 	m_video_properties.auto_focus = getCameraControl(V4L2_CID_FOCUS_AUTO);
@@ -371,6 +399,28 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 		start_capturing();
 	}
 
+	if(m_video_properties.jpeg_quality != props.jpeg_quality)
+	{
+		V4L2_printf("JPEG compression changed : quality:%d -> %d",
+				  m_video_properties.jpeg_quality, props.jpeg_quality);
+		struct v4l2_jpegcompression jpgcomp;
+		if( -1 == xioctl(vd.fd, VIDIOC_G_JPEGCOMP, &jpgcomp) )
+		{
+			V4L2_printf("ERROR: could not read the  MJPEG/MJPG compression struct");
+			m_video_properties.jpeg_quality = -1;
+		}
+		else
+		{
+			m_video_properties.jpeg_quality = jpgcomp.quality;
+			jpgcomp.quality = props.jpeg_quality;
+			if( -1 == xioctl(vd.fd, VIDIOC_S_JPEGCOMP, &jpgcomp) )
+			{
+				V4L2_printf("ERROR: could not change the  MJPEG/MJPG compression struct");
+				m_video_properties.jpeg_quality = -1;
+			}
+		}
+	}
+
 	if(m_video_properties.auto_white_balance != props.auto_white_balance) {
 		setCameraControl(V4L2_CID_AUTO_WHITE_BALANCE, props.auto_white_balance);
 	}
@@ -391,6 +441,7 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 	if(props.backlight != m_video_properties.backlight) {
 		setCameraControl(V4L2_CID_BACKLIGHT_COMPENSATION, props.backlight?1:0);
 	}
+
 
 	if(m_video_properties.brightness != props.brightness
 			|| m_video_properties.contrast != props.contrast
@@ -479,6 +530,15 @@ V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 		}
 	}
 
+	if(m_video_properties.power_line_frequency != props.power_line_frequency) {
+		setCameraControl(V4L2_CID_POWER_LINE_FREQUENCY, props.power_line_frequency);
+	}
+	if(props.color_fx != m_video_properties.color_fx) {
+		setCameraControl(V4L2_CID_COLORFX, props.color_fx);
+	}
+	if(props.color_killer != m_video_properties.color_killer) {
+		setCameraControl(V4L2_CID_COLOR_KILLER, props.color_killer);
+	}
 
 	// FOCUS
 	if(m_video_properties.auto_focus != props.auto_focus) {
@@ -560,13 +620,18 @@ IplImage * V4L2Device::readImageRGB32()
 		return 0;
 	}
 
-	if(g_debug_V4L2Device) {
+	if(g_debug_V4L2Device)
+	{
 		V4L2_printf("convert2RGB32 in image : %dx%dx%d\n",
 				m_iplImageRGB32->width, m_iplImageRGB32->height, m_iplImageRGB32->nChannels
 				);
 	}
 	convert2RGB32(rawframebuffer, image);
 
+//	V4L2_printf("convert2RGB32 in image : %dx%dx%d\n",
+//			m_iplImageRGB32->width, m_iplImageRGB32->height, m_iplImageRGB32->nChannels
+//			);
+//	cvSaveImage("/dev/shm/piaf-iplImageRGB32.jpg", m_iplImageRGB32);
 
 	return m_iplImageRGB32;
 }
@@ -605,6 +670,10 @@ IplImage * V4L2Device::readImageY()
 	return m_iplImageY;
 }
 
+extern "C" {
+extern int read_JPEG_memory(unsigned char * buffer, int nbytes,
+							unsigned char * imageOut, int * pwidth, int * pheight, int *pdepth);
+}
 
 int V4L2Device::convert2RGB32(unsigned char * src, unsigned char * dest)
 {
@@ -623,29 +692,114 @@ int V4L2Device::convert2RGB32(unsigned char * src, unsigned char * dest)
 					);
 		break;
 	case VIDEO_PALETTE_MJPEG: {
+		if(mRawBufferUsedSize + DHT_SIZE > mRawJPEGbufferSize)
+		{
+			int oldsize = mRawJPEGbufferSize;
+			mRawJPEGbufferSize = mRawBufferUsedSize * 5/4 + DHT_SIZE;
+			V4L2_printf("Resize mRawJPEGbuffer: %d => %d bytes",
+						oldsize, mRawJPEGbufferSize);
+			delete [] (mRawJPEGbuffer);
+			mRawJPEGbuffer = NULL;
+		}
 
-		int retjpeg = jpeg_decode(&mUncompressedJPEGBuffer,
-								  src,
-								  &mUncompressedJPEGWidth, &mUncompressedJPEGHeight);
-		FILE * fdebug=fopen("/dev/shm/convertjpeg.jpg", "wb");
-		if(fdebug)
+		if(!mRawJPEGbuffer)
 		{
-			fwrite(src, 1, 8000, fdebug);
-			fclose(fdebug);
+			mRawJPEGbuffer = new unsigned char [ mRawJPEGbufferSize ];
+			memset(mRawJPEGbuffer, 0, sizeof(unsigned char) *mRawJPEGbufferSize);
 		}
-		fdebug=fopen("/dev/shm/convertjpeg.pgm", "wb");
-		if(fdebug)
+
+
+		/* On raw data from device, the image is composed by :
+		  - a JPEG jeader, delimited by 0xFFC0
+		  - the DCT compressed data
+		  but no Huffman table
+
+		  We need to recompose a native full JPEG buffer :
+		  - we copy the raw JPEG header
+		  - we add the Huffman table
+		  - we add compressed data
+		  */
+		unsigned char *ptdeb, ///< JPEG header pointer
+				*ptcur; ///< iterator to find JPEG data
+		ptdeb = ptcur = (unsigned char *)rawframebuffer;
+
+		while (((ptcur[0] << 8) | ptcur[1]) != 0xffc0
+			   && ptcur < (unsigned char *)(rawframebuffer + mRawBufferUsedSize)) // magic numbers of luvcview, search the size of the header
 		{
-			fprintf(fdebug, "P5\n%d %d\n255\n",
-					m_imageSize.width*4, m_imageSize.height
-					);
-			fwrite(mUncompressedJPEGBuffer,  m_imageSize.width*4, m_imageSize.height, fdebug);
-			fclose(fdebug);
+			ptcur++;
+			//DEBUG_MSG("ptcur[0] << 8  %c\t ptcur[1]  %c\tptcur  %p\n",ptcur[0] << 8, ptcur[0], ptcur);
 		}
-		V4L2_printf("VIDEO_PALETTE_MJPEG => ret=%d size=%dx%d\n",
-					retjpeg,
-					mUncompressedJPEGWidth, mUncompressedJPEGHeight);
-		memcpy(dest, mUncompressedJPEGBuffer, n * 4);
+
+		if(ptcur >= (unsigned char *)(rawframebuffer + mRawBufferUsedSize))
+		{
+			DEBUG_MSG("Read error JPG\n");
+			return -1;
+		}
+		int sizein = ptcur - ptdeb;
+
+		// copy header at the start of the buffer
+		memcpy(mRawJPEGbuffer, rawframebuffer,  sizeof(unsigned char) * sizein);
+		// then add the huffman table
+		memcpy(mRawJPEGbuffer + sizein, dht_data, sizeof(unsigned char) * DHT_SIZE);
+		// then add the JPG data
+		memcpy(mRawJPEGbuffer + sizein + DHT_SIZE, ptcur, mRawBufferUsedSize-sizein);
+
+
+
+		int jpegsize = mRawBufferUsedSize + DHT_SIZE;
+//		FILE * fdebug=fopen("/dev/shm/piaf-rawjpeg.jpg", "wb");
+//		if(fdebug)
+//		{
+//			fwrite(mRawJPEGbuffer, 1, jpegsize, fdebug);
+//			fclose(fdebug);
+//		}
+
+
+
+		bool retry = false;
+		do {
+			retry = false;
+			if(!mUncompImage) {
+				// first read image size
+				int imw=0, imh=0, imd=0;
+				int retjpeg = read_JPEG_memory(mRawJPEGbuffer, jpegsize,
+								 NULL, &imw, &imh, &imd);
+				if(imw >0 && imh>0)
+				{
+					V4L2_printf("Allocate %dx%dx%d image for JPEG uncompression",
+								imw, imh, imd);
+					mUncompImage = swCreateImage(cvSize(imw, imh), IPL_DEPTH_8U, imd);
+				}
+			}
+
+			if(mUncompImage) {
+				int imw=mUncompImage->width, imh=mUncompImage->height, imd=mUncompImage->nChannels;
+				int retjpeg = read_JPEG_memory(mRawJPEGbuffer, jpegsize,
+								 (unsigned char *)mUncompImage->imageData,
+								 &imw, &imh, &imd
+								 );
+				if(imw!=mUncompImage->width || imh!=mUncompImage->height || imd!=mUncompImage->nChannels)
+				{
+					retry = true;
+					swReleaseImage(& mUncompImage); // size changed
+					swReleaseImage(&m_iplImageRGB32);
+				}
+				else if(retjpeg > 0) {
+	//				V4L2_printf("retjpeg=%d", retjpeg);
+	//				cvSaveImage("/dev/shm/piaf-uncompjpeg.ppm", mUncompImage);
+					if(m_iplImageRGB32
+							&& (m_iplImageRGB32->width != mUncompImage->width
+								|| m_iplImageRGB32->height != mUncompImage->height)) {
+						swReleaseImage(&m_iplImageRGB32);
+					}
+					if(!m_iplImageRGB32) {
+						m_iplImageRGB32 = swCreateImage(cvGetSize(mUncompImage), IPL_DEPTH_8U, 4);
+					}
+					cvCvtColor(mUncompImage, m_iplImageRGB32, CV_RGB2BGRA);
+				}
+			}
+		}while(retry);
+
 		}break;
 	case VIDEO_PALETTE_RGB32:
 		/* cool... */
@@ -722,6 +876,114 @@ int V4L2Device::convert2Y(unsigned char * src, unsigned char * dest)
 	case VIDEO_PALETTE_YUV420P:
 		// Base format with Philips webcams (at least the PCVC 740K = ToUCam PRO)
 		memcpy(dest, src, m_imageSize.width * m_imageSize.height);
+		break;
+
+
+	case VIDEO_PALETTE_MJPEG:
+		if(mRawBufferUsedSize + DHT_SIZE > mRawJPEGbufferSize)
+		{
+			int oldsize = mRawJPEGbufferSize;
+			mRawJPEGbufferSize = mRawBufferUsedSize * 5/4 + DHT_SIZE;
+			V4L2_printf("Resize mRawJPEGbuffer: %d => %d bytes",
+						oldsize, mRawJPEGbufferSize);
+			delete [] (mRawJPEGbuffer);
+			mRawJPEGbuffer = NULL;
+		}
+
+		if(!mRawJPEGbuffer)
+		{
+			mRawJPEGbuffer = new unsigned char [ mRawJPEGbufferSize ];
+			memset(mRawJPEGbuffer, 0, sizeof(unsigned char) *mRawJPEGbufferSize);
+		}
+
+
+		/* On raw data from device, the image is composed by :
+		  - a JPEG jeader, delimited by 0xFFC0
+		  - the DCT compressed data
+		  but no Huffman table
+
+		  We need to recompose a native full JPEG buffer :
+		  - we copy the raw JPEG header
+		  - we add the Huffman table
+		  - we add compressed data
+		  */
+		unsigned char *ptdeb, ///< JPEG header pointer
+				*ptcur; ///< iterator to find JPEG data
+		ptdeb = ptcur = (unsigned char *)rawframebuffer;
+
+		while (((ptcur[0] << 8) | ptcur[1]) != 0xffc0
+			   && ptcur < (unsigned char *)(rawframebuffer + mRawBufferUsedSize)) // magic numbers of luvcview, search the size of the header
+		{
+			ptcur++;
+			//DEBUG_MSG("ptcur[0] << 8  %c\t ptcur[1]  %c\tptcur  %p\n",ptcur[0] << 8, ptcur[0], ptcur);
+		}
+
+		if(ptcur >= (unsigned char *)(rawframebuffer + mRawBufferUsedSize))
+		{
+			DEBUG_MSG("Read error JPG\n");
+			return -1;
+		}
+		int sizein = ptcur - ptdeb;
+
+		// copy header at the start of the buffer
+		memcpy(mRawJPEGbuffer, rawframebuffer,  sizeof(unsigned char) * sizein);
+		// then add the huffman table
+		memcpy(mRawJPEGbuffer + sizein, dht_data, sizeof(unsigned char) * DHT_SIZE);
+		// then add the JPG data
+		memcpy(mRawJPEGbuffer + sizein + DHT_SIZE, ptcur, mRawBufferUsedSize-sizein);
+
+
+
+		int jpegsize = mRawBufferUsedSize + DHT_SIZE;
+//		FILE * fdebug=fopen("/dev/shm/piaf-rawjpeg.jpg", "wb");
+//		if(fdebug)
+//		{
+//			fwrite(mRawJPEGbuffer, 1, jpegsize, fdebug);
+//			fclose(fdebug);
+//		}
+		bool retry = false;
+		do {
+			retry = false;
+			if(!mUncompImage) {
+				// first read image size
+				int imw=0, imh=0, imd=0;
+				int retjpeg = read_JPEG_memory(mRawJPEGbuffer, jpegsize,
+								 NULL, &imw, &imh, &imd);
+				if(imw >0 && imh>0)
+				{
+					V4L2_printf("Allocate %dx%dx%d image for JPEG uncompression",
+								imw, imh, imd);
+					mUncompImage = swCreateImage(cvSize(imw, imh), IPL_DEPTH_8U, imd);
+				}
+			}
+
+			if(mUncompImage) {
+				int imw=mUncompImage->width, imh=mUncompImage->height, imd=mUncompImage->nChannels;
+				int retjpeg = read_JPEG_memory(mRawJPEGbuffer, jpegsize,
+								 (unsigned char *)mUncompImage->imageData,
+								 &imw, &imh, &imd
+								 );
+				if(imw!=mUncompImage->width || imh!=mUncompImage->height || imd!=mUncompImage->nChannels)
+				{
+					retry = true;
+					swReleaseImage(& mUncompImage); // size changed
+					swReleaseImage(&m_iplImageY);
+				}
+				else if(retjpeg > 0) {
+	//				V4L2_printf("retjpeg=%d", retjpeg);
+	//				cvSaveImage("/dev/shm/piaf-uncompjpeg.ppm", mUncompImage);
+					if(m_iplImageY
+							&& (m_iplImageY->width != mUncompImage->width
+								|| m_iplImageY->height != mUncompImage->height)) {
+						swReleaseImage(&m_iplImageY);
+					}
+					if(!m_iplImageY) {
+						m_iplImageY = swCreateImage(cvGetSize(mUncompImage), IPL_DEPTH_8U, 1);
+					}
+					cvCvtColor(mUncompImage, m_iplImageY, CV_RGB2GRAY);
+				}
+			}
+		}while(retry);
 		break;
 	}
 
@@ -2299,7 +2561,7 @@ unsigned char * V4L2Device::read_frame()
 	if (-1 == xioctl(vd.fd, VIDIOC_QBUF, &buf)) {
 		errno_exit ("VIDIOC_QBUF");
 	}
-	
+	mRawBufferUsedSize = buf.bytesused;
 	return retbuf;
 }
 

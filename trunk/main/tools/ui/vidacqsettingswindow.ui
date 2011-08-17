@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>454</width>
-    <height>398</height>
+    <width>484</width>
+    <height>401</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,17 +15,17 @@
   </property>
   <property name="windowIcon">
    <iconset resource="../../piaf.qrc">
-    <normaloff>:/images/16x16/configure.png</normaloff>:/images/16x16/configure.png</iconset>
+    <normaloff>:/images/16x16/view-media-equalizer.png</normaloff>:/images/16x16/view-media-equalizer.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
      <widget class="QTabWidget" name="tabWidget">
       <property name="statusTip">
-       <string/>
+       <string>Special effects</string>
       </property>
       <property name="currentIndex">
-       <number>4</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="icon">
@@ -159,33 +159,6 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="0">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Mode</string>
-             </property>
-            </widget>
-           </item>
-           <item row="4" column="1" colspan="9">
-            <widget class="QComboBox" name="formatComboBox">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="statusTip">
-              <string>Format mode: YUV, MJPEG...</string>
-             </property>
-             <item>
-              <property name="text">
-               <string>YUYV</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>MJPG</string>
-              </property>
-             </item>
-            </widget>
-           </item>
            <item row="3" column="1" colspan="2">
             <widget class="QSpinBox" name="fpsSpinBox">
              <property name="sizePolicy">
@@ -308,6 +281,57 @@
              </property>
             </widget>
            </item>
+           <item row="5" column="2">
+            <widget class="QSlider" name="jpegQualityHorizontalSlider">
+             <property name="minimum">
+              <number>-1</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QComboBox" name="formatComboBox">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="statusTip">
+              <string>Format mode: YUV, MJPEG...</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>YUYV</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>MJPG</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Mode</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="4">
+            <widget class="QLabel" name="jpegQualityLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_23">
+             <property name="text">
+              <string>Compression</string>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
@@ -346,7 +370,7 @@
          <normaloff>:/images/16x16/digikam.png</normaloff>:/images/16x16/digikam.png</iconset>
        </attribute>
        <attribute name="title">
-        <string>Exposure</string>
+        <string>Expo</string>
        </attribute>
        <attribute name="toolTip">
         <string>Exposure control: exposure mode + gain</string>
@@ -468,6 +492,39 @@
             <widget class="QCheckBox" name="backLightCheckBox">
              <property name="text">
               <string>Backlight compensation</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="2">
+            <widget class="QComboBox" name="powerLineComboBox">
+             <item>
+              <property name="text">
+               <string>Disabled</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>50 Hz</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>60 Hz</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="5" column="0">
+            <widget class="QLabel" name="label_17">
+             <property name="text">
+              <string>Power-line:</string>
+             </property>
+            </widget>
+           </item>
+           <item row="5" column="3">
+            <widget class="QLabel" name="powerLineLabel">
+             <property name="text">
+              <string>-</string>
              </property>
             </widget>
            </item>
@@ -629,23 +686,6 @@
              </property>
             </widget>
            </item>
-           <item row="8" column="2">
-            <widget class="QComboBox" name="wbModeComboBox">
-             <property name="statusTip">
-              <string>White balance mode</string>
-             </property>
-             <item>
-              <property name="text">
-               <string>Manual</string>
-              </property>
-             </item>
-             <item>
-              <property name="text">
-               <string>Auto</string>
-              </property>
-             </item>
-            </widget>
-           </item>
            <item row="6" column="2">
             <widget class="QComboBox" name="hueModeComboBox">
              <item>
@@ -688,27 +728,16 @@
              </property>
             </widget>
            </item>
-           <item row="8" column="0">
+           <item row="7" column="0" rowspan="2">
             <widget class="QLabel" name="label_8">
              <property name="statusTip">
               <string>White balance</string>
              </property>
              <property name="text">
-              <string>WB</string>
+              <string>White Balance</string>
              </property>
-            </widget>
-           </item>
-           <item row="8" column="3">
-            <widget class="QPushButton" name="wbDoButton">
-             <property name="statusTip">
-              <string>Perform white balance evaluation and hold if manual</string>
-             </property>
-             <property name="text">
-              <string/>
-             </property>
-             <property name="icon">
-              <iconset resource="../../piaf.qrc">
-               <normaloff>:/images/16x16/view-refresh.png</normaloff>:/images/16x16/view-refresh.png</iconset>
+             <property name="wordWrap">
+              <bool>true</bool>
              </property>
             </widget>
            </item>
@@ -763,11 +792,136 @@
              </property>
             </widget>
            </item>
+           <item row="7" column="4">
+            <widget class="QComboBox" name="wbModeComboBox">
+             <property name="statusTip">
+              <string>White balance mode</string>
+             </property>
+             <item>
+              <property name="text">
+               <string>Manual</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Auto</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="7" column="2">
+            <widget class="QPushButton" name="wbDoButton">
+             <property name="statusTip">
+              <string>Perform white balance evaluation and hold if manual</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../../piaf.qrc">
+               <normaloff>:/images/16x16/view-refresh.png</normaloff>:/images/16x16/view-refresh.png</iconset>
+             </property>
+            </widget>
+           </item>
           </layout>
          </widget>
         </item>
         <item>
          <spacer name="verticalSpacer_3">
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+          <property name="sizeHint" stdset="0">
+           <size>
+            <width>20</width>
+            <height>40</height>
+           </size>
+          </property>
+         </spacer>
+        </item>
+       </layout>
+      </widget>
+      <widget class="QWidget" name="tab_6">
+       <attribute name="icon">
+        <iconset resource="../../piaf.qrc">
+         <normaloff>:/images/22x22/view-gray.png</normaloff>:/images/22x22/view-gray.png</iconset>
+       </attribute>
+       <attribute name="title">
+        <string>fX</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_5">
+        <item>
+         <widget class="QGroupBox" name="groupBox">
+          <property name="title">
+           <string>Special effects</string>
+          </property>
+          <layout class="QGridLayout" name="gridLayout_6">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_18">
+             <property name="text">
+              <string>Color Fx</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="colorFxComboBox">
+             <item>
+              <property name="text">
+               <string>None</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>B&amp;W</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Sepia</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="colorFxLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_22">
+             <property name="text">
+              <string>Color killer</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QComboBox" name="colorKillerComboBox">
+             <item>
+              <property name="text">
+               <string>Off</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>On</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="colorKillerLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <spacer name="verticalSpacer_5">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
           </property>
@@ -789,78 +943,87 @@
        <attribute name="title">
         <string>Focus</string>
        </attribute>
-       <layout class="QGridLayout" name="gridLayout_4">
-        <item row="0" column="0">
-         <widget class="QLabel" name="label_14">
-          <property name="text">
-           <string>Focus</string>
+       <layout class="QVBoxLayout" name="verticalLayout_6">
+        <item>
+         <widget class="QGroupBox" name="groupBox_3">
+          <property name="title">
+           <string>Focussing control</string>
           </property>
+          <layout class="QGridLayout" name="gridLayout_8">
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_14">
+             <property name="text">
+              <string>Focus</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="1">
+            <widget class="QComboBox" name="focusModeComboBox">
+             <item>
+              <property name="text">
+               <string>Manual</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>Auto</string>
+              </property>
+             </item>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <widget class="QLabel" name="focusModeLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label_15">
+             <property name="text">
+              <string>Relative focus</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QSlider" name="relativeFocusSlider">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2">
+            <widget class="QLabel" name="relativeFocusLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_16">
+             <property name="text">
+              <string>Absolute focus</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QSlider" name="absoluteFocusSlider">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="2">
+            <widget class="QLabel" name="absoluteFocusLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
-        <item row="0" column="1" colspan="2">
-         <widget class="QComboBox" name="focusModeComboBox">
-          <item>
-           <property name="text">
-            <string>Manual</string>
-           </property>
-          </item>
-          <item>
-           <property name="text">
-            <string>Auto</string>
-           </property>
-          </item>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QLabel" name="label_15">
-          <property name="text">
-           <string>Relative focus</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1" colspan="2">
-         <widget class="QSlider" name="relativeFocusSlider">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3">
-         <widget class="QLabel" name="relativeFocusLabel">
-          <property name="text">
-           <string>-</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="0">
-         <widget class="QLabel" name="label_16">
-          <property name="text">
-           <string>Absolute focus</string>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1" colspan="2">
-         <widget class="QSlider" name="absoluteFocusSlider">
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="3">
-         <widget class="QLabel" name="absoluteFocusLabel">
-          <property name="text">
-           <string>-</string>
-          </property>
-         </widget>
-        </item>
-        <item row="0" column="3">
-         <widget class="QLabel" name="focusModeLabel">
-          <property name="text">
-           <string>-</string>
-          </property>
-         </widget>
-        </item>
-        <item row="3" column="0">
+        <item>
          <spacer name="verticalSpacer_4">
           <property name="orientation">
            <enum>Qt::Vertical</enum>
@@ -884,142 +1047,151 @@
         <string>PTZ</string>
        </attribute>
        <layout class="QGridLayout" name="gridLayout_5">
-        <item row="0" column="1">
-         <widget class="QPushButton" name="panResetButton">
-          <property name="text">
-           <string>Reset pan</string>
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Pan-Tilt-Zoom control</string>
           </property>
-         </widget>
-        </item>
-        <item row="0" column="4">
-         <widget class="QPushButton" name="tiltResetButton">
-          <property name="text">
-           <string>Reset tilt</string>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="0">
-         <widget class="QSlider" name="tiltRelativeSlider">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>100</height>
-           </size>
-          </property>
-          <property name="statusTip">
-           <string>Relative tilt control</string>
-          </property>
-          <property name="minimum">
-           <number>-99</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="1">
-         <widget class="QLabel" name="label_19">
-          <property name="text">
-           <string>Relative</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="3">
-         <widget class="QSlider" name="tiltAbsoluteSlider">
-          <property name="maximumSize">
-           <size>
-            <width>16777215</width>
-            <height>100</height>
-           </size>
-          </property>
-          <property name="statusTip">
-           <string>Absolute tilt control</string>
-          </property>
-          <property name="minimum">
-           <number>-99</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="4">
-         <widget class="QLabel" name="label_20">
-          <property name="text">
-           <string>Absolute</string>
-          </property>
-          <property name="alignment">
-           <set>Qt::AlignCenter</set>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="1">
-         <widget class="QSlider" name="panRelativeSlider">
-          <property name="statusTip">
-           <string>Relative pan control</string>
-          </property>
-          <property name="minimum">
-           <number>-99</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="2" column="4">
-         <widget class="QSlider" name="panAbsoluteSlider">
-          <property name="statusTip">
-           <string>Absolute pan control</string>
-          </property>
-          <property name="minimum">
-           <number>-99</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="1" column="2" rowspan="4">
-         <widget class="Line" name="line">
-          <property name="orientation">
-           <enum>Qt::Vertical</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="1">
-         <widget class="QSlider" name="zoomRelativeSlider">
-          <property name="statusTip">
-           <string>Relative zoom control</string>
-          </property>
-          <property name="minimum">
-           <number>-99</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="4">
-         <widget class="QSlider" name="zoomAbsoluteSlider">
-          <property name="statusTip">
-           <string>Absolute zoom control</string>
-          </property>
-          <property name="minimum">
-           <number>0</number>
-          </property>
-          <property name="orientation">
-           <enum>Qt::Horizontal</enum>
-          </property>
-         </widget>
-        </item>
-        <item row="4" column="0">
-         <widget class="QLabel" name="label_21">
-          <property name="text">
-           <string>Zoom</string>
-          </property>
+          <layout class="QGridLayout" name="gridLayout_7">
+           <item row="0" column="1">
+            <widget class="QPushButton" name="panResetButton">
+             <property name="text">
+              <string>Reset pan</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QPushButton" name="tiltResetButton">
+             <property name="text">
+              <string>Reset tilt</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QSlider" name="tiltRelativeSlider">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>100</height>
+              </size>
+             </property>
+             <property name="statusTip">
+              <string>Relative tilt control</string>
+             </property>
+             <property name="minimum">
+              <number>-99</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="1">
+            <widget class="QLabel" name="label_19">
+             <property name="text">
+              <string>Relative</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="2" rowspan="3">
+            <widget class="Line" name="line">
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="3">
+            <widget class="QSlider" name="tiltAbsoluteSlider">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>100</height>
+              </size>
+             </property>
+             <property name="statusTip">
+              <string>Absolute tilt control</string>
+             </property>
+             <property name="minimum">
+              <number>-99</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Vertical</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="4">
+            <widget class="QLabel" name="label_20">
+             <property name="text">
+              <string>Absolute</string>
+             </property>
+             <property name="alignment">
+              <set>Qt::AlignCenter</set>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QSlider" name="panRelativeSlider">
+             <property name="statusTip">
+              <string>Relative pan control</string>
+             </property>
+             <property name="minimum">
+              <number>-99</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="4">
+            <widget class="QSlider" name="panAbsoluteSlider">
+             <property name="statusTip">
+              <string>Absolute pan control</string>
+             </property>
+             <property name="minimum">
+              <number>-99</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="0">
+            <widget class="QLabel" name="label_21">
+             <property name="text">
+              <string>Zoom</string>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="1">
+            <widget class="QSlider" name="zoomRelativeSlider">
+             <property name="statusTip">
+              <string>Relative zoom control</string>
+             </property>
+             <property name="minimum">
+              <number>-99</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="3" column="4">
+            <widget class="QSlider" name="zoomAbsoluteSlider">
+             <property name="statusTip">
+              <string>Absolute zoom control</string>
+             </property>
+             <property name="minimum">
+              <number>0</number>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
        </layout>

@@ -26,6 +26,8 @@ VidAcqSettingsWindow::VidAcqSettingsWindow(QWidget *parent) :
 	mpVideoCaptureDoc = NULL;
 	memset(&m_video_properties, 0, sizeof(t_video_properties));
     ui->setupUi(this);
+
+	ui->tabWidget->setCurrentIndex(0);
 }
 
 VidAcqSettingsWindow::~VidAcqSettingsWindow()
@@ -127,6 +129,7 @@ void VidAcqSettingsWindow::updateVideoProperties()
 			ui->fpsSpinBox->setValue((int)roundf(m_video_properties.fps));
 			ui->fpsSpinBox->blockSignals(false);
 		}
+		CHANGE_SLIDER(ui->jpegQualityHorizontalSlider, ui->jpegQualityLabel, m_video_properties.jpeg_quality);
 
 		// SIZE
 		CHANGE_COMBO_TEXT(ui->widthComboBox, m_video_properties.frame_width);
@@ -162,6 +165,9 @@ void VidAcqSettingsWindow::updateVideoProperties()
 
 		CHANGE_COMBO_INDEX(ui->exposureModeComboBox, ui->exposureModeLabel, m_video_properties.auto_exposure);
 		CHANGE_COMBO_INDEX(ui->gainModeComboBox, ui->gainModeLabel, m_video_properties.auto_gain);
+		CHANGE_COMBO_INDEX(ui->powerLineComboBox, ui->powerLineLabel, m_video_properties.power_line_frequency);
+		CHANGE_COMBO_INDEX(ui->colorFxComboBox, ui->colorFxLabel, m_video_properties.color_fx);
+		CHANGE_COMBO_INDEX(ui->colorKillerComboBox, ui->colorKillerLabel, m_video_properties.color_killer);
 
 		// FOCUS
 		CHANGE_COMBO_INDEX(ui->focusModeComboBox, ui->focusModeLabel, m_video_properties.auto_focus);
@@ -369,10 +375,36 @@ void VidAcqSettingsWindow::on_panAbsoluteSlider_valueChanged(int value)
 
 void VidAcqSettingsWindow::on_zoomRelativeSlider_valueChanged(int value)
 {
-
+	m_video_properties.zoom_relative = value;
+	sendVideoProperties();
 }
 
 void VidAcqSettingsWindow::on_zoomAbsoluteSlider_valueChanged(int value)
 {
+	m_video_properties.zoom_absolute = value;
+	sendVideoProperties();
+}
 
+void VidAcqSettingsWindow::on_powerLineComboBox_currentIndexChanged(int index)
+{
+	m_video_properties.power_line_frequency = index;
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_colorFxComboBox_currentIndexChanged(int index)
+{
+	m_video_properties.color_fx = index;
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_comboBox_currentIndexChanged(int index)
+{
+	m_video_properties.color_killer = index;
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_jpegQualityHorizontalSlider_valueChanged(int value)
+{
+	m_video_properties.jpeg_quality = value;
+	sendVideoProperties();
 }

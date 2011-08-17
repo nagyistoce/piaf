@@ -96,6 +96,14 @@ private slots:
 
 	void on_zoomAbsoluteSlider_valueChanged(int value);
 
+	void on_powerLineComboBox_currentIndexChanged(int index);
+
+	void on_colorFxComboBox_currentIndexChanged(int index);
+
+	void on_comboBox_currentIndexChanged(int index);
+
+	void on_jpegQualityHorizontalSlider_valueChanged(int value);
+
 private:
 
 	/** @brief Send current video props to device */

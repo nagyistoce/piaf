@@ -414,6 +414,8 @@ int VideoCaptureDoc::waitForImage()
 					swReleaseImage(&imageRGBA);
 					imageRGBA = swCreateImage(cvGetSize(imageIn), IPL_DEPTH_8U,
 											  imageIn->nChannels == 1 ? 1 : 4 );
+					// update input size to force display change
+					imageSize = cvGetSize(imageRGBA);
 				}
 
 				swConvert(imageIn, imageRGBA);
