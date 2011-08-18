@@ -58,10 +58,13 @@ private:
 
 	/** @brief Zoom on a part of input image at a specified scale */
 	void zoomOn(int x, int y, int scale);
-	int m_zoom_scale;
+	int m_zoom_scale; ///< zoom factor
+	QPoint m_last_zoom; ///< last zoom position in original image size reference
 	QPoint m_lastClick;
 
 private slots:
+	void on_zoomSlider_sliderReleased();
+	void on_zoomSlider_sliderMoved(int position);
 	void on_zoomx2Button_released();
 	void on_zoomx1Button_released();
 	void on_zoomFitButton_clicked();

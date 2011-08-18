@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>329</width>
-    <height>50</height>
+    <width>413</width>
+    <height>34</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -20,26 +20,32 @@
    <string>Form</string>
   </property>
   <layout class="QHBoxLayout" name="horizontalLayout">
+   <property name="spacing">
+    <number>1</number>
+   </property>
+   <property name="topMargin">
+    <number>1</number>
+   </property>
+   <property name="bottomMargin">
+    <number>1</number>
+   </property>
    <item>
-    <widget class="QLabel" name="filterLabel">
-     <property name="minimumSize">
-      <size>
-       <width>22</width>
-       <height>0</height>
-      </size>
+    <widget class="QLabel" name="label_2">
+     <property name="toolTip">
+      <string>Quick collection</string>
      </property>
      <property name="text">
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="../ema.qrc">:/icons/icons/16x16/view-filter.png</pixmap>
+      <pixmap resource="../ema.qrc">:/icons/icons/16x16/insert-image.png</pixmap>
      </property>
     </widget>
    </item>
    <item>
     <widget class="QToolButton" name="addCriterionButton">
      <property name="toolTip">
-      <string>Add this criterion</string>
+      <string>Add selected files to quick collection</string>
      </property>
      <property name="text">
       <string/>
@@ -53,7 +59,7 @@
    <item>
     <widget class="QToolButton" name="excludeCriterionButton">
      <property name="toolTip">
-      <string>Exclude this criterion</string>
+      <string>Remove selected files from quick collection</string>
      </property>
      <property name="text">
       <string/>
@@ -61,6 +67,26 @@
      <property name="icon">
       <iconset resource="../ema.qrc">
        <normaloff>:/icons/icons/16x16/list-remove.png</normaloff>:/icons/icons/16x16/list-remove.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Vertical</enum>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="label">
+     <property name="toolTip">
+      <string>Grid view</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="../ema.qrc">:/icons/icons/22x22/view-list-icons.png</pixmap>
      </property>
     </widget>
    </item>
@@ -92,6 +118,25 @@
     </spacer>
    </item>
    <item>
+    <widget class="QLabel" name="filterLabel">
+     <property name="minimumSize">
+      <size>
+       <width>22</width>
+       <height>0</height>
+      </size>
+     </property>
+     <property name="toolTip">
+      <string>Quick collection</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap resource="../ema.qrc">:/icons/icons/16x16/view-filter.png</pixmap>
+     </property>
+    </widget>
+   </item>
+   <item>
     <widget class="QComboBox" name="criterionComboBox">
      <property name="toolTip">
       <string>Sorting filters</string>
@@ -103,7 +148,32 @@
      </item>
      <item>
       <property name="text">
-       <string>By focus</string>
+       <string>No stars</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>&gt;=1 star</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>&gt;= 2 stars</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>&gt;= 3 stars</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>&gt;=4 stars</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>&gt;= 5 stars</string>
       </property>
      </item>
     </widget>
