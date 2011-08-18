@@ -84,8 +84,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>206</width>
-              <height>445</height>
+              <width>210</width>
+              <height>439</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -111,8 +111,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>206</width>
-                  <height>358</height>
+                  <width>210</width>
+                  <height>346</height>
                  </rect>
                 </property>
                 <attribute name="label">
@@ -225,8 +225,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>206</width>
-                  <height>347</height>
+                  <width>210</width>
+                  <height>346</height>
                  </rect>
                 </property>
                 <attribute name="label">
@@ -332,8 +332,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>206</width>
-                  <height>347</height>
+                  <width>210</width>
+                  <height>346</height>
                  </rect>
                 </property>
                 <attribute name="label">
@@ -599,12 +599,9 @@
           </layout>
          </item>
          <item>
-          <widget class="FilterManagerForm" name="filterManagerForm" native="true"/>
-         </item>
-         <item>
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_mainImage">
             <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -637,14 +634,26 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>98</width>
-                  <height>28</height>
+                  <width>543</width>
+                  <height>405</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
-                 <property name="margin">
+                 <property name="leftMargin">
                   <number>1</number>
                  </property>
+                 <property name="topMargin">
+                  <number>9</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>1</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>1</number>
+                 </property>
+                 <item>
+                  <widget class="FilterManagerForm" name="filterManagerForm" native="true"/>
+                 </item>
                  <item>
                   <widget class="QWidget" name="gridWidget" native="true">
                    <property name="sizePolicy">
@@ -925,8 +934,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>215</width>
-               <height>439</height>
+               <width>223</width>
+               <height>440</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1105,8 +1114,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1012</width>
-             <height>174</height>
+             <width>1010</width>
+             <height>169</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1141,7 +1150,7 @@
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>23</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1159,7 +1168,7 @@
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string>View</string>
     </property>
    </widget>
    <widget class="QMenu" name="menuTools">
@@ -1222,6 +1231,9 @@
    <property name="text">
     <string>Batch processor</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionEdit_plugins">
    <property name="icon">
@@ -1231,6 +1243,9 @@
    <property name="text">
     <string>Edit plugins</string>
    </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
   </action>
   <action name="actionQuit">
    <property name="icon">
@@ -1239,6 +1254,9 @@
    </property>
    <property name="text">
     <string>Quit</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
    </property>
   </action>
  </widget>

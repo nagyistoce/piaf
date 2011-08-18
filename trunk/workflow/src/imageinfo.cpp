@@ -354,8 +354,6 @@ int ImageInfo::loadFile(char * filename) {
 	// LOAD IMAGE METADATA
 	readMetadata(filename);
 
-
-
 	// LOAD IMAGE PIXMAP
 	m_originalImage = cvLoadImage(filename);
 	if(!m_originalImage) {
@@ -454,6 +452,7 @@ int ImageInfo::loadFile(char * filename) {
 	processRGB();
 
 	// process color analysis
+#ifndef PIAFWORKFLOW
 	processHSV();
 
 	// then sharpness
@@ -462,6 +461,7 @@ int ImageInfo::loadFile(char * filename) {
 			m_grayImage->width, m_grayImage->height);fflush(stderr);
 	}
 	processSharpness();
+
 
 	if(g_debug_ImageInfo) {
 		fprintf(stderr, "ImageInfo::%s:%d : process done (gray=%dx%d)\n", __func__, __LINE__,
@@ -480,7 +480,7 @@ int ImageInfo::loadFile(char * filename) {
 	m_image_info_struct.score = sharpness_score
 								* histo_score
 								* 100.f ; // in percent finally
-
+#endif
 	// Activate the validation flag
 	m_image_info_struct.valid = 1;
 
