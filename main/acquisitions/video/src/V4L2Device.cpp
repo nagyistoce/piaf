@@ -442,7 +442,7 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 		setCameraControl(V4L2_CID_AUTOBRIGHTNESS, props.auto_brightness);
 	}
 	if(props.backlight != m_video_properties.backlight) {
-		setCameraControl(V4L2_CID_BACKLIGHT_COMPENSATION, props.backlight?1:0);
+		setCameraControl(V4L2_CID_BACKLIGHT_COMPENSATION, props.backlight);
 	}
 
 
@@ -1379,6 +1379,8 @@ int V4L2Device::init_device(int w, int h)
 			fmtwork.fmt.pix.width, fmtwork.fmt.pix.height,
 			FourCC[0], FourCC[1], FourCC[2], FourCC[3]);
 
+		strncpy(m_video_properties.fourcc, FourCC, 4);
+		m_video_properties.fourcc[4] = '\0';
 		m_video_properties.frame_width = fmtwork.fmt.pix.width;
 		m_video_properties.frame_height = fmtwork.fmt.pix.height;
 
@@ -1391,6 +1393,8 @@ int V4L2Device::init_device(int w, int h)
 					"size=%dx%d / FourCC=%c%c%c%c work !!\n",
 			fmtok.fmt.pix.width, fmtok.fmt.pix.height,
 			FourCC[0], FourCC[1], FourCC[2], FourCC[3]);
+		strncpy(m_video_properties.fourcc, FourCC, 4);
+		m_video_properties.fourcc[4] = '\0';
 
 		m_video_properties.frame_width = fmtok.fmt.pix.width;
 		m_video_properties.frame_height = fmtok.fmt.pix.height;
@@ -1424,6 +1428,7 @@ int V4L2Device::init_device(int w, int h)
 
 	char * FourCC = (char *)&fmtok.fmt.pix.pixelformat;
 	memcpy(m_video_properties.fourcc, FourCC, 4*sizeof(char));
+	m_video_properties.fourcc[4] = '\0';
 
 	m_video_properties.fourcc_dble = fmtok.fmt.pix.pixelformat;
 

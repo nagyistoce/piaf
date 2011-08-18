@@ -73,7 +73,7 @@ typedef struct {
 								ref: http://v4l2spec.bytesex.org/spec-single/v4l2.html*/
 	double exposure;		/*!< CV_CAP_PROP_EXPOSURE Exposure (only for cameras) */
 
-	bool backlight;			/*!< Backlight compensation : V4L2_CID_BACKLIGHT */
+	int backlight;			/*!< Backlight compensation : V4L2_CID_BACKLIGHT */
 	int sharpness;			/*!< Sharpness accentuation : V4L2_CID_SHARPNESS */
 	int gamma;				/*!< Sharpness accentuation : V4L2_CID_GAMMA */
 

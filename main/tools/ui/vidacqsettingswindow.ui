@@ -25,7 +25,7 @@
        <string>Special effects</string>
       </property>
       <property name="currentIndex">
-       <number>3</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="icon">
@@ -496,13 +496,6 @@
              </property>
             </widget>
            </item>
-           <item row="4" column="2">
-            <widget class="QCheckBox" name="backLightCheckBox">
-             <property name="text">
-              <string>Backlight compensation</string>
-             </property>
-            </widget>
-           </item>
            <item row="5" column="2">
             <widget class="QComboBox" name="powerLineComboBox">
              <item>
@@ -531,6 +524,30 @@
            </item>
            <item row="5" column="3">
             <widget class="QLabel" name="powerLineLabel">
+             <property name="text">
+              <string>-</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="0">
+            <widget class="QLabel" name="label_24">
+             <property name="text">
+              <string>Backlight</string>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="2">
+            <widget class="QSlider" name="backlightSlider">
+             <property name="toolTip">
+              <string>Backlight compensation</string>
+             </property>
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+            </widget>
+           </item>
+           <item row="4" column="3">
+            <widget class="QLabel" name="backlightLabel">
              <property name="text">
               <string>-</string>
              </property>
