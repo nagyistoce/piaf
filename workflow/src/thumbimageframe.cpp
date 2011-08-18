@@ -166,7 +166,7 @@ void ThumbImageFrame::setSelected(bool selected)
 	{
 		setStyleSheet("background-color: rgb(230, 230, 230);");
 	} else {
-		setStyleSheet("background-color: rgb(23, 23, 23);");
+		setStyleSheet("background-color: rgb(128, 128, 128);");
 	}
 	update();
 }
