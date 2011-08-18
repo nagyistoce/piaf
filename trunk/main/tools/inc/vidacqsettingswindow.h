@@ -44,8 +44,7 @@ protected:
 private slots:
 
 	/// Disconnection of device to prevent from continuing to use it
-	void on_backLightCheckBox_toggled(bool checked);
- void on_mpVideoCaptureDoc_documentClosed(VideoCaptureDoc * doc);
+	void on_mpVideoCaptureDoc_documentClosed(VideoCaptureDoc * doc);
 
 	void on_exposureModeComboBox_currentIndexChanged(int index);
 
@@ -72,7 +71,7 @@ private slots:
 
 	void on_gammaSlider_valueChanged(int value);
 
-	void on_horizontalSlider_valueChanged(int value);
+	void on_sharpnessSlider_valueChanged(int value);
 
 	void on_focusModeComboBox_currentIndexChanged(int index);
 
@@ -103,6 +102,8 @@ private slots:
 	void on_colorKillerComboBox_currentIndexChanged(int index);
 
 	void on_jpegQualityHorizontalSlider_valueChanged(int value);
+
+	void on_backlightSlider_valueChanged(int value);
 
 private:
 

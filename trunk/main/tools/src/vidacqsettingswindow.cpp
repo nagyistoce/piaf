@@ -147,13 +147,7 @@ void VidAcqSettingsWindow::updateVideoProperties()
 		CHANGE_COMBO_INDEX(ui->wbModeComboBox, ui->wbModeLabel, m_video_properties.auto_white_balance);
 
 		CHANGE_SLIDER(ui->wbSlider, ui->wbLabel, m_video_properties.white_balance);
-
-		if(m_video_properties.backlight != ui->backLightCheckBox->isOn())
-		{
-			ui->backLightCheckBox->blockSignals(true);
-			ui->backLightCheckBox->setOn(m_video_properties.backlight);
-			ui->backLightCheckBox->blockSignals(false);
-		}
+		CHANGE_SLIDER(ui->backlightSlider, ui->backlightLabel, m_video_properties.backlight);
 
 		// Exposure values
 		CHANGE_SLIDER(ui->exposureSlider, ui->exposureLabel, m_video_properties.exposure);
@@ -204,9 +198,9 @@ void VidAcqSettingsWindow::on_brightnessSlider_valueChanged(int value)
 {
 
 	m_video_properties.brightness = value;
-	sendVideoProperties();
 	fprintf(stderr, "VidAcqSettings::%s:%d : changed brightness to %d\n",
-			__func__, __LINE__, m_video_properties.brightness);fflush(stderr);
+			__func__, __LINE__, m_video_properties.brightness); fflush(stderr);
+	sendVideoProperties();
 }
 
 
@@ -303,11 +297,6 @@ void VidAcqSettingsWindow::on_applySizeButton_clicked()
 	}
 }
 
-void VidAcqSettingsWindow::on_backLightCheckBox_toggled(bool checked)
-{
-	m_video_properties.backlight = checked;
-	sendVideoProperties();
-}
 
 void VidAcqSettingsWindow::on_gammaSlider_valueChanged(int value)
 {
@@ -315,7 +304,7 @@ void VidAcqSettingsWindow::on_gammaSlider_valueChanged(int value)
 	sendVideoProperties();
 }
 
-void VidAcqSettingsWindow::on_horizontalSlider_valueChanged(int value)
+void VidAcqSettingsWindow::on_sharpnessSlider_valueChanged(int value)
 {
 	m_video_properties.sharpness = value;
 	sendVideoProperties();
@@ -325,7 +314,6 @@ void VidAcqSettingsWindow::on_focusModeComboBox_currentIndexChanged(int index)
 {
 	m_video_properties.auto_focus = index;
 	sendVideoProperties();
-
 }
 
 void VidAcqSettingsWindow::on_relativeFocusSlider_valueChanged(int value)
@@ -415,5 +403,11 @@ void VidAcqSettingsWindow::on_jpegQualityHorizontalSlider_valueChanged(int value
 	fprintf(stderr, "VidAcqSettings::%s:%d : changed quality to %d\n",
 			__func__, __LINE__, m_video_properties.jpeg_quality);fflush(stderr);
 
-	//sendVideoProperties();
+	sendVideoProperties();
+}
+
+void VidAcqSettingsWindow::on_backlightSlider_valueChanged(int value)
+{
+	m_video_properties.backlight = value;
+	sendVideoProperties();
 }
