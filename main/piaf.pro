@@ -2,6 +2,7 @@
 # Author : Christophe Seyve - cseyve@free.fr
 
 TARGET = piaf
+
 VERSION = "`date +%Y%m%d`"
 
 CONFIG += qt \

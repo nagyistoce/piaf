@@ -1,4 +1,4 @@
-#include "inc/plugineditdialog.h"
+#include "plugineditdialog.h"
 #include "ui_plugineditdialog.h"
 #include <QFileDialog>
 #include <QStringList>

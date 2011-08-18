@@ -2188,11 +2188,13 @@ int SwFilter::destroy() {
 	}
 	return 1;
 }
+
 // signal handling
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
 
+#ifndef PIAFWORKFLOW
 SwSignalHandler SigHandler;
 
 int registerChildSig(int pid, SwFilter * filter)
@@ -2225,6 +2227,7 @@ void sigusr1(int pid)
 {
 	fprintf(stderr, "Received signal SIGUSR1 = %d\n", pid);
 }
+#endif // PIAFWORKFLOW
 
 
 // when pipe is broken
