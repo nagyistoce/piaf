@@ -42,13 +42,18 @@ public:
 	/** @brief Set the image */
 	void setImageFile(const QString &  imagePath, IplImage * img = NULL, int score = -1);
 
+	/** @brief set the selected flag */
+	void setSelected(bool selected);
+
+	/** @brief tell if the frame is selected */
+	bool isSelected() { return mSelected; }
 protected:
 	virtual void changeEvent(QEvent *e);
 
 private:
 	QString m_imagePath;
 	Ui::ThumbImageFrame *m_ui;
-
+	bool mSelected; ///< user selection flag
 private slots:
 	void on_globalImageLabel_signalMousePressEvent(QMouseEvent * e);
 	void on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * e);

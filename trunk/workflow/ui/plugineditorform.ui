@@ -14,8 +14,23 @@
    <string>Form</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>1</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>1</number>
+   </property>
    <item>
     <widget class="QTreeWidget" name="availablePluginsTreeWidget">
+     <attribute name="headerMinimumSectionSize">
+      <number>50</number>
+     </attribute>
      <column>
       <property name="text">
        <string>Available plugins</string>
@@ -23,16 +38,26 @@
      </column>
      <column>
       <property name="text">
-       <string>nb func</string>
+       <string>Params</string>
       </property>
      </column>
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
+    <widget class="QLabel" name="label">
+     <property name="font">
+      <font>
+       <weight>75</weight>
+       <bold>true</bold>
+      </font>
+     </property>
+     <property name="text">
       <string>Loaded plugins</string>
      </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="widget_2" native="true">
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>0</number>
@@ -43,7 +68,7 @@
       <property name="bottomMargin">
        <number>0</number>
       </property>
-      <property name="verticalSpacing">
+      <property name="spacing">
        <number>2</number>
       </property>
       <item row="1" column="0">
@@ -220,6 +245,21 @@
        <widget class="QTreeWidget" name="selectedPluginsTreeWidget">
         <property name="toolTip">
          <string>Loaded plugins, processed from top to bottom</string>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+        <property name="uniformRowHeights">
+         <bool>true</bool>
+        </property>
+        <property name="allColumnsShowFocus">
+         <bool>true</bool>
+        </property>
+        <property name="wordWrap">
+         <bool>true</bool>
         </property>
         <column>
          <property name="text">

@@ -33,6 +33,7 @@ ThumbImageFrame::ThumbImageFrame(QWidget *parent) :
 	m_ui(new Ui::ThumbImageFrame)
 {
 	m_ui->setupUi(this);
+	setSelected( false );
 }
 
 ThumbImageFrame::~ThumbImageFrame()
@@ -156,7 +157,23 @@ void ThumbImageFrame::mouseDoubleClickEvent ( QMouseEvent * event ) {
 void ThumbImageFrame::mouseMoveEvent ( QMouseEvent * event ) {
 	emit signal_mouseMoveEvent ( event );
 }
+/* set the selected flag */
+void ThumbImageFrame::setSelected(bool selected)
+{
+	mSelected = selected;
+	// Toggle state
+	if(mSelected)
+	{
+		setStyleSheet("background-color: rgb(230, 230, 230);");
+	} else {
+		setStyleSheet("background-color: rgb(23, 23, 23);");
+	}
+	update();
+}
+
 void ThumbImageFrame::mousePressEvent ( QMouseEvent * event ) {
+	setSelected( !mSelected );
+
 	emit signal_mousePressEvent ( event );
 }
 void ThumbImageFrame::mouseReleaseEvent ( QMouseEvent * event ) {
