@@ -1,80 +1,120 @@
-<ui version="4.0" >
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
  <class>NavImageWidget</class>
- <widget class="QWidget" name="NavImageWidget" >
-  <property name="geometry" >
+ <widget class="QWidget" name="NavImageWidget">
+  <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>208</width>
-    <height>243</height>
+    <width>260</width>
+    <height>252</height>
    </rect>
   </property>
-  <property name="windowTitle" >
+  <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QVBoxLayout" name="verticalLayout" >
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>2</number>
+   </property>
+   <property name="leftMargin">
+    <number>1</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>1</number>
+   </property>
    <item>
-    <layout class="QHBoxLayout" name="horizontalLayout_2" >
-     <property name="spacing" >
-      <number>1</number>
+    <widget class="QWidget" name="zoomButtonsWidget" native="true">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
      </property>
-     <property name="sizeConstraint" >
-      <enum>QLayout::SetDefaultConstraint</enum>
-     </property>
-     <item>
-      <widget class="QPushButton" name="zoomFitButton" >
-       <property name="toolTip" >
-        <string>Fit zoom size to window</string>
-       </property>
-       <property name="text" >
-        <string>Fit</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="zoomx1Button" >
-       <property name="toolTip" >
-        <string>Use scale 1:1 (100%)</string>
-       </property>
-       <property name="text" >
-        <string>1:1</string>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="zoomx2Button" >
-       <property name="toolTip" >
-        <string>Use scale 2:1 (200%)</string>
-       </property>
-       <property name="text" >
-        <string>2:1</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="spacing">
+       <number>1</number>
+      </property>
+      <property name="sizeConstraint">
+       <enum>QLayout::SetDefaultConstraint</enum>
+      </property>
+      <property name="topMargin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="zoomFitButton">
+        <property name="toolTip">
+         <string>Fit zoom size to window</string>
+        </property>
+        <property name="text">
+         <string>Fit</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="zoomx1Button">
+        <property name="toolTip">
+         <string>Use scale 1:1 (100%)</string>
+        </property>
+        <property name="text">
+         <string>1:1</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="zoomx2Button">
+        <property name="toolTip">
+         <string>Use scale 2:1 (200%)</string>
+        </property>
+        <property name="text">
+         <string>2:1</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
    </item>
    <item>
-    <widget class="QImageDisplay" name="globalImageLabel" >
-     <property name="minimumSize" >
+    <widget class="QImageDisplay" name="globalImageLabel">
+     <property name="minimumSize">
       <size>
        <width>200</width>
        <height>200</height>
       </size>
      </property>
-     <property name="toolTip" >
+     <property name="toolTip">
       <string>Navigation image</string>
      </property>
-     <property name="styleSheet" >
-      <string notr="true" >background-color: rgb(93, 93, 93);</string>
+     <property name="styleSheet">
+      <string notr="true">background-color: rgb(93, 93, 93);</string>
      </property>
-     <property name="frameShape" >
+     <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>
      </property>
-     <property name="text" >
+     <property name="text">
       <string>Image</string>
      </property>
-     <property name="alignment" >
+     <property name="alignment">
       <set>Qt::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QSlider" name="zoomSlider">
+     <property name="toolTip">
+      <string>Change zoom factor in main image display</string>
+     </property>
+     <property name="maximum">
+      <number>100</number>
+     </property>
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
     </widget>
    </item>
@@ -84,7 +124,7 @@
   <customwidget>
    <class>QImageDisplay</class>
    <extends>QLabel</extends>
-   <header location="global" >qimagedisplay.h</header>
+   <header location="global">qimagedisplay.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

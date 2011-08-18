@@ -125,6 +125,7 @@ void NavImageWidget::on_globalImageLabel_signalMousePressEvent(QMouseEvent * e) 
 		m_zoom_scale = 1;
 	}
 
+	m_lastClick = e->pos();
 	int x = e->pos().x(), y =  e->pos().y();
 	int glob_w = m_ui->globalImageLabel->width();
 	int glob_h = m_ui->globalImageLabel->height();
@@ -133,6 +134,7 @@ void NavImageWidget::on_globalImageLabel_signalMousePressEvent(QMouseEvent * e) 
 
 	x = (x - (glob_w - disp_w)/2) * m_fullRect.width() / disp_w;
 	y = (y - (glob_h - disp_h)/2) * m_fullRect.height() / disp_h;
+	m_last_zoom = QPoint(x,y);
 
 	emit signalZoomOn(x, y, m_zoom_scale);
 }
@@ -153,6 +155,7 @@ void NavImageWidget::on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * e) {
 
 		x = (x - (glob_w - disp_w)/2) * m_fullRect.width() / disp_w;
 		y = (y - (glob_h - disp_h)/2) * m_fullRect.height() / disp_h;
+		m_last_zoom = QPoint(x,y);
 
 		emit signalZoomOn(x, y, m_zoom_scale);
 	}
@@ -166,6 +169,8 @@ void NavImageWidget::on_globalImageLabel_signalWheelEvent( QWheelEvent * e )
 	m_zoom_scale += numSteps;
 
 	int x = e->pos().x(), y =  e->pos().y();
+	m_lastClick = e->pos();
+
 	int glob_w = m_ui->globalImageLabel->width();
 	int glob_h = m_ui->globalImageLabel->height();
 	int disp_w = m_displayImage.width();
@@ -174,5 +179,17 @@ void NavImageWidget::on_globalImageLabel_signalWheelEvent( QWheelEvent * e )
 	x = (x - (glob_w - disp_w)/2) * m_fullRect.width() / disp_w;
 	y = (y - (glob_h - disp_h)/2) * m_fullRect.height() / disp_h;
 
+	m_last_zoom = QPoint(x,y);
+
 	emit signalZoomOn(x, y, m_zoom_scale);
+}
+
+void NavImageWidget::on_zoomSlider_sliderMoved(int position)
+{
+
+}
+
+void NavImageWidget::on_zoomSlider_sliderReleased()
+{
+
 }
