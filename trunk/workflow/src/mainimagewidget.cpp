@@ -46,6 +46,7 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	m_mouse_has_moved = false;
 	mpFilterSequencer = NULL;
 	m_ui->setupUi(this);
+	m_ui->globalImageLabel->switchToSmartZoomMode(true);
 }
 
 MainImageWidget::~MainImageWidget()
@@ -87,11 +88,12 @@ void MainImageWidget::slotUpdateImage()
 		image.depth = m_fullImage.depth() / 8;
 		image.buffer_size = image.width * image.height * image.depth;
 
-		image.buffer = m_fullImage.bits(); // Buffer
+		m_displayImage = m_fullImage.copy();
+		image.buffer = m_displayImage.bits(); // Buffer
 
 		mpFilterSequencer->processImage(&image);
 		// refresh display
-		m_ui->globalImageLabel->setRefImage(&m_fullImage);
+		m_ui->globalImageLabel->setRefImage(&m_displayImage);
 	}
 
 }
@@ -104,12 +106,12 @@ void MainImageWidget::setImageFile(const QString & imagePath,
 	//		imagePath);
 
 	m_fullImage.load(imagePath);
+	m_displayImage = m_fullImage.copy();
 	m_ui->globalImageLabel->setRefImage(&m_fullImage);
 
 	m_mouse_has_moved = false;
 	m_lastClick	= QPoint(-1, -1);
 
-	zoomOn(0,0, 0);
 
 	if(!m_fullImage.isNull()) {
 		char info[512];
@@ -133,28 +135,33 @@ void MainImageWidget::setImageFile(const QString & imagePath,
 		QString strInfo(info);
 		m_ui->globalImageLabel->setToolTip(strInfo);
 	}
+
+	slotUpdateImage();
 }
 
 void  MainImageWidget::zoomOn(int x, int y, int scale) {
 	if(m_fullImage.isNull()) { return; }
 
 
+	m_ui->globalImageLabel->setZoomParams(x,y, scale);
 
-	int wdisp = m_ui->globalImageLabel->width()-2;
-	int hdisp = m_ui->globalImageLabel->height()-2;
+//	int wdisp = m_ui->globalImageLabel->width()-2;
+//	int hdisp = m_ui->globalImageLabel->height()-2;
 
-	int x_crop = (scale>0? x - wdisp/(scale*2) : 0);
-	if(x_crop<0) x_crop = 0;
-	else if(x_crop>m_fullImage.width() - wdisp) x_crop = m_fullImage.width() - wdisp;
-	int y_crop = (scale>0? y - hdisp/(scale*2) : 0);
-	if(y_crop<0) y_crop = 0;
-	else if(y_crop>m_fullImage.height() - hdisp) y_crop = m_fullImage.height() - hdisp;
+//	int x_crop = (scale>0? x - wdisp/(scale*2) : 0);
+//	if(x_crop<0) x_crop = 0;
+//	else if(x_crop>m_fullImage.width() - wdisp) x_crop = m_fullImage.width() - wdisp;
+//	int y_crop = (scale>0? y - hdisp/(scale*2) : 0);
+//	if(y_crop<0) y_crop = 0;
+//	else if(y_crop>m_fullImage.height() - hdisp) y_crop = m_fullImage.height() - hdisp;
 
-	cropAbsolute(x_crop, y_crop, scale);
+//	cropAbsolute(x_crop, y_crop, scale);
 }
 
 void MainImageWidget::cropAbsolute(int x_crop, int y_crop, int scale)
 {
+	return; // FIXME
+
 	int wdisp = m_ui->globalImageLabel->width()-2;
 	int hdisp = m_ui->globalImageLabel->height()-2;
 fprintf(stderr, "MainImageWidget::%s:%d : crop %d,%d  sc=%d\n",

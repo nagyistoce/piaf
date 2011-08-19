@@ -36,11 +36,6 @@
        <string>Available plugins</string>
       </property>
      </column>
-     <column>
-      <property name="text">
-       <string>Params</string>
-      </property>
-     </column>
     </widget>
    </item>
    <item>
