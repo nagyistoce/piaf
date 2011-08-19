@@ -22,6 +22,7 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
+#include "piaf-common.h"
 
 #include "metadatawidget.h"
 #include "ui_metadatawidget.h"
@@ -67,9 +68,10 @@ void MetadataWidget::setImageInfo(t_image_info_struct * p_image_info_struct)
 	if(!p_image_info_struct) return;
 	QString displayStr;
 
-	displayStr.sprintf("%s", p_image_info_struct->model);
-	m_ui->makerLineEdit->setText(displayStr);
-//	strcpy(m_image_info_struct.maker, displayStr.ascii());
+	DEBUG_MSG("p_image_info_struct=%p / FIXME : disabled", p_image_info_struct);
+return;// FIXME
+	DEBUG_MSG("model='%s'", p_image_info_struct->model.toAscii().data());
+	m_ui->makerLineEdit->setText(p_image_info_struct->model);
 
 	// Orientation
 	//exifMaker = exifData["Exif.Image.Orientation"]; str = exifMaker.toString();
@@ -80,15 +82,10 @@ void MetadataWidget::setImageInfo(t_image_info_struct * p_image_info_struct)
 
 	// DateTime
 	//exifMaker = exifData["Exif.Photo.DateTimeOriginal"]; str = exifMaker.toString();
-	//displayStr = QString::fromStdString(str);
-	//
-	displayStr.sprintf("%s", p_image_info_struct->datetime);
-	//strcpy(m_image_info_struct.datetime, displayStr.ascii());
-	m_ui->dateLineEdit->setText(displayStr);
+	m_ui->dateLineEdit->setText( p_image_info_struct->datetime );
 
 	// Focal
 	//exifMaker = exifData["Exif.Photo.FocalLengthIn35mmFilm"]; str = exifMaker.toString();
-	//displayStr = QString::fromStdString(str);
 	if(p_image_info_struct->focal_mm > 0) {
 		//exifMaker = exifData["Exif.Photo.FocalLength"]; str = exifMaker.toString();
 		//	displayStr.sprintf("%d", (int)p_image_info_struct->orientation);displayStr = QString::fromStdString(str);
@@ -128,6 +125,6 @@ void MetadataWidget::setImageInfo(t_image_info_struct * p_image_info_struct)
 	displayStr.sprintf("%d", p_image_info_struct->ISO);
 //		displayStr = rational(displayStr);
 //	m_image_info_struct.ISO = (int)rational_to_float(displayStr);
-		m_ui->isoLineEdit->setText(displayStr);
+	m_ui->isoLineEdit->setText(displayStr);
 }
 

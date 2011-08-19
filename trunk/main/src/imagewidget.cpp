@@ -246,6 +246,8 @@ QPoint ImageWidget::displayToOriginal(int x, int y)
 void ImageWidget::zoomOn( int xCenterOnDisp, int yCenterOnDisp,
 						  float zoominc )
 {
+	if(!dImage) return;
+
 	fprintf(stderr, "ImageWidget::%s:%d : mZoomFitFactor=%g => center=%d,%d inc=%g\n",
 			__func__,__LINE__,
 			mZoomFitFactor, xCenterOnDisp, yCenterOnDisp, zoominc);

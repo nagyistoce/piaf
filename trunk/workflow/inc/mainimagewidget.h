@@ -31,18 +31,26 @@ namespace Ui {
 	class MainImageWidget;
 }
 
+class FilterSequencer;
+
+/** @brief Main image display with toolbars for : image control */
+
 class MainImageWidget : public QWidget {
 	Q_OBJECT
 	Q_DISABLE_COPY(MainImageWidget)
 public:
 	explicit MainImageWidget(QWidget *parent = 0);
 	virtual ~MainImageWidget();
+
 	/** @brief Set the background image */
 	void setImageFile(const QString &  imagePath, t_image_info_struct * pinfo = NULL);
 	/** @brief Zoom on a part of input image at a specified scale */
 	void zoomOn(int unscaled_x, int unscaled_y, int scale);
 	/** @brief crop absolute part of image for display */
 	void cropAbsolute(int crop_x, int crop_, int scale);
+
+	/** @brief Set pointer to filter sequencer */
+	void setFilterSequencer(FilterSequencer *);
 
 protected:
 	virtual void changeEvent(QEvent *e);
@@ -51,6 +59,7 @@ protected:
 	QImage m_fullImage;
 	QImage m_displayImage;
 
+	FilterSequencer * mpFilterSequencer;
 	int m_zoom_scale;
 	QPoint m_lastClick;
 	QRect m_cropRect;
@@ -66,6 +75,7 @@ private slots:
 
 	void on_actionZoomIn_activated( );
 
+	void slotUpdateImage();
 private:
 	Ui::MainImageWidget *m_ui;
 signals:

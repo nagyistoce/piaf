@@ -47,6 +47,11 @@
 #include "batchfiltersmainwindow.h"
 #include "imagetoavidialog.h"
 
+#include "imagewidget.h"
+
+// FIXME
+#include "workshopimagetool.h"
+
 
 int g_EMAMW_debug_mode = EMALOG_DEBUG;
 
@@ -78,6 +83,21 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	pWorkspace = new QWorkspace(ui->workshopFrame);
 
 	loadSettings();
+
+	mWorkImage.load(":icons/ema-splash.png");
+	pWorkshopImage = new WorkshopImage(mWorkImage, "work image");
+	pWorkshopImageTool = new WorkshopImageTool(pWorkshopImage, ui->workshopImageToolFrame,
+		true /* show snapshot button */,
+		false,
+		"default",
+		Qt::WA_DeleteOnClose
+		);
+	ui->workshopImageToolFrame->layout()->addWidget(pWorkshopImageTool->display());
+	pWorkshopImageTool->display()->show();
+
+	ui->mainImageWidget->setFilterSequencer(
+		ui->pluginManagerForm->createFilterSequencer()
+	);
 }
 
 EmaMainWindow::~EmaMainWindow()
@@ -263,8 +283,8 @@ void scanDirectory(QString path, int * p_nb_files)
 	QFileInfo fidir(path);
 	if(fidir.isFile()) return;
 
-	fprintf(stderr, "EmaMW::%s:%d: scanning path '%s' (total for the moment = %d)\n",
-			__func__, __LINE__, path.toAscii().data(), *p_nb_files);
+	EMAMW_printf(EMALOG_TRACE, "scanning path '%s' (total for the moment = %d)\n",
+			path.toAscii().data(), *p_nb_files);
 
 	QDir dir(path);
 	int nb_files = 0;
@@ -279,8 +299,8 @@ void scanDirectory(QString path, int * p_nb_files)
 		}
 		else if(fi.isDir() && fi.absoluteFilePath().length() > path.length())
 		{
-			fprintf(stderr, "\tEmaMW::%s:%d: scanning path '%s' (total for the moment = %d)\n",
-					__func__, __LINE__, fi.absoluteFilePath().toAscii().data(), *p_nb_files);
+			EMAMW_printf(EMALOG_TRACE, "\tscanning path '%s' (total for the moment = %d)\n",
+					fi.absoluteFilePath().toAscii().data(), *p_nb_files);
 
 			// scan recursively
 			scanDirectory(fi.absoluteFilePath(), p_nb_files);
@@ -348,8 +368,8 @@ void DirectoryTreeWidgetItem::expand()
 		QFileInfo fi = (*it);
 		if(fi.isFile() && fi.absoluteFilePath().length() > fullPath.length())
 		{
-			fprintf(stderr, "\tEmaMW::%s:%d: adding FILE '%s'\n",
-					__func__, __LINE__, fi.absoluteFilePath().toAscii().data());
+			EMAMW_printf(EMALOG_TRACE, "\tadding FILE '%s'\n",
+					fi.absoluteFilePath().toAscii().data());
 
 
 			// Add item for file
@@ -365,8 +385,8 @@ void DirectoryTreeWidgetItem::expand()
 		}
 		else if(fi.isDir() && fi.absoluteFilePath().length() > fullPath.length())
 		{
-			fprintf(stderr, "\tEmaMW::%s:%d: adding subdir '%s'\n",
-					__func__, __LINE__, fi.absoluteFilePath().toAscii().data());
+			EMAMW_printf(EMALOG_TRACE, "adding subdir '%s'\n",
+					fi.absoluteFilePath().toAscii().data());
 
 			subDirsList.append(
 					new DirectoryTreeWidgetItem(this,
@@ -639,8 +659,8 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 					 fileName.toUtf8().data())
 	} else {
 		// image is already managed
-		EMAMW_printf(EMALOG_TRACE, "Image file '%s' is now managed",
-					 fileName.toUtf8().data());
+		EMAMW_printf(EMALOG_TRACE, "Image file '%s' is now managed pinfo=%p",
+					 fileName.toUtf8().data(), pinfo);
 
 		// Append to managed pictures
 		m_imageList.append(fileName);
@@ -659,9 +679,9 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 				//ui->imageScrollArea);
 				ui->scrollAreaWidgetContents );
 
+		ui->scrollAreaWidgetContents->layout()->addWidget(newThumb);
 		newThumb->setImageFile(fileName, pinfo->thumbImage.iplImage);
 
-		ui->scrollAreaWidgetContents->layout()->addWidget(newThumb);
 
 		newThumb->update();
 
@@ -732,8 +752,14 @@ void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 		ui->globalNavImageWidget->setImageFile(fileName);
 		t_image_info_struct * pinfo = emaMngr()->getInfo(fileName);
 
+		mWorkImage.load(fileName);
+		//ui->mainImageWidget->setRefImage(&mWorkImage);
+
 		ui->mainImageWidget->setImageFile(fileName, pinfo);
 
+		pWorkshopImage->load(fileName);
+		pWorkshopImageTool->setWorkshopImage(pWorkshopImage);
+		//pWorkshopImageTool->iupdate();
 
 		if(!pinfo) {
 			EMAMW_printf(EMALOG_WARNING, "File '%s' is not managed : reload and process file info\n", fileName.toUtf8().data())

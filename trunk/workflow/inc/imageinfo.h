@@ -41,6 +41,7 @@
 #define EMALOG_ERROR	-3
 
 #include <QImage>
+#include <QString>
 #include "imgutils.h"
 
 /** @breif Convert an OpenCV IplIMage to a QImage */
@@ -61,16 +62,15 @@ void uncompressCachedImage(t_cached_image *);
 
 /** @brief Useful information for sorting pictures*/
 typedef struct {
-	char filepath[MAX_PATH_LEN*2];	/*! Full path of image file */
+	QString filepath;	/*! Full path of image file */
 
 	unsigned char valid;		/*! Valid info flag */
 
 	// EXIF TAGS
-	char maker[MAX_EXIF_LEN];	/*! Company which produces this camera */
-	char model[MAX_EXIF_LEN];	/*! Model of this camera */
+	QString  maker;	/*! Company which produces this camera */
+	QString model;	/*! Model of this camera */
 
-	char datetime[MAX_EXIF_LEN];	/*! Date/time of the shot */
-
+	QString datetime;	/*! Date/time of the shot */
 
 	char orientation;			/*! Image orientation : 0 for horizontal (landscape), 1 for vertical (portrait) */
 	float focal_mm;				/*! Real focal in mm */
@@ -82,32 +82,33 @@ typedef struct {
 	// IPTC TAGS
 // Ref: /usr/share/doc/libexiv2-doc/html/tags-iptc.html
 //0x005a 	90 	Iptc.Application2.City 	String 	No 	No 	0 	32 	Identifies city of object data origin according to guidelines established by the provider.
-	char iptc_city[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
+	QString iptc_city[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
 //0x005c 	92 	Iptc.Application2.SubLocation 	String 	No 	No 	0 	32 	Identifies the location within a city from which the object data originates
-	char iptc_sublocation[MAX_EXIF_LEN];		/*! IPTC Province/State name, field Iptc.Application2.Provincestate */
+	QString iptc_sublocation[MAX_EXIF_LEN];		/*! IPTC Province/State name, field Iptc.Application2.Provincestate */
 //0x005f 	95 	Iptc.Application2.ProvinceState 	String 	No 	No 	0 	32 	Identifies Province/State of origin according to guidelines established by the provider.
-	char iptc_provincestate[MAX_EXIF_LEN];		/*! IPTC Province/State name, field Iptc.Application2.Provincestate */
+	QString iptc_provincestate[MAX_EXIF_LEN];		/*! IPTC Province/State name, field Iptc.Application2.Provincestate */
 //0x0064 	100 	Iptc.Application2.CountryCode 	String 	No 	No 	3 	3 	Indicates the code of the country/primary location where the intellectual property of the object data was created
-	char iptc_countrycode[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
+	QString iptc_countrycode[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
 //0x0065 	101 	Iptc.Application2.CountryName 	String 	No 	No 	0 	64 	Provides full
-	char iptc_countryname[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
+	QString iptc_countryname[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
 
 	// Image processing data
 	bool grayscaled;
 	float sharpness_score;			/*! Sharpness factor in [0..100] */
 	float histo_score;
 
-	t_cached_image thumbImage;	/*! Thumb image for faster display */
+	t_cached_image thumbImage;		/*! Thumb image for faster display */
 	IplImage * sharpnessImage;		/*! Sharpness image for faster display */
 	IplImage * hsvImage;			/*! HSV histogram image for faster display */
 
-	float log_histogram[3][256];	/*! Log histogram */
+	float * log_histogram[3];	/*! Log histogram */
 
 	// Image judgement
 	float score;			/*! Final score factor in [0..100] */
 
 } t_image_info_struct;
 
+void clearImageInfoStruct(t_image_info_struct * pinfo);
 
 
 /** @brief Image processing analyse class
@@ -117,7 +118,7 @@ public:
 	ImageInfo();
 	~ImageInfo();
 	/** @brief Load input image */
-	int loadFile(char * filename);
+	int loadFile(QString filename);
 
 	/** @brief Return colored histogram */
 	IplImage * getHistogram() { return m_HistoImage; };
@@ -136,7 +137,7 @@ private:
 	void purge();
 
 	/** @brief Read EXIF and IPTC metadata in image file */
-	int readMetadata(char * filename);
+	int readMetadata(QString filename);
 
 	/** @brief Structure containing every image information needed for sorting */
 	t_image_info_struct m_image_info_struct;

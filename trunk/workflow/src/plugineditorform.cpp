@@ -25,6 +25,9 @@
 
 #include "inc/plugineditorform.h"
 #include "ui_plugineditorform.h"
+
+#include "piaf-common.h"
+
 #include <QMessageBox>
 #include <QFileDialog>
 
@@ -63,6 +66,8 @@ PluginEditorForm::PluginEditorForm(QWidget *parent) :
 	// Load available plugins
 	mFilterSequencer.loadFilters();
 	mpFilterSequencer = NULL;
+	mOwnFilterSequencer = false;
+
 
 	// Display the list of available filters
 	QList<PiafFilter *> availList = mFilterSequencer.getAvailableFilters();
@@ -94,17 +99,28 @@ PluginEditorForm::PluginEditorForm(QWidget *parent) :
 
 
 /* Change sequencer */
-void PluginEditorForm::setSequencer(FilterSequencer * seq)
+void PluginEditorForm::setFilterSequencer(FilterSequencer * seq)
 {
 	if(mpFilterSequencer) {
 		disconnect(mpFilterSequencer);
+		if(mOwnFilterSequencer) {
+			delete mpFilterSequencer;
+			mpFilterSequencer = NULL;
+		}
 	}
 	mpFilterSequencer = seq;
+	mOwnFilterSequencer = false;
 	// connect refresh slot
 	if(mpFilterSequencer) {
 		connect(mpFilterSequencer, SIGNAL(selectedFilterChanged()), this,
 				SLOT(on_filterSequencer_selectedFilterChanged()));
 	}
+}
+
+FilterSequencer * PluginEditorForm::createFilterSequencer() {
+	setFilterSequencer(new FilterSequencer());
+	mOwnFilterSequencer = true;
+	return mpFilterSequencer;
 }
 
 PluginEditorForm::~PluginEditorForm()
@@ -380,7 +396,8 @@ void PluginEditorForm::on_appendPluginButton_clicked()
 	if(!item) { return; }
 	if(!mpFilterSequencer) {
 		fprintf(stderr, "[PluginEditForm]::%s:%d: creating FilterSequencer...\n", __func__, __LINE__);
-		setSequencer( new FilterSequencer() );
+
+		createFilterSequencer();
 	}
 
 	// Add this item
@@ -421,6 +438,8 @@ void PluginEditorForm::on_saveButton_clicked()
 
 void PluginEditorForm::on_removePluginButton_clicked()
 {
+	if(ui->selectedPluginsTreeWidget->selectedItems().isEmpty()) return;
+
 	LoadedPluginTreeWidgetItem * item =
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
 	if(!item) {
@@ -432,10 +451,13 @@ void PluginEditorForm::on_removePluginButton_clicked()
 
 void PluginEditorForm::on_paramsButton_clicked()
 {
+	if(ui->selectedPluginsTreeWidget->selectedItems().isEmpty()) return;
 	LoadedPluginTreeWidgetItem * item =
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
 	if(!item) { return; }
-//	mpFilterSequencer->edit(item->getFilter());
+	if(!mpFilterSequencer) { return; }
+
+	//	mpFilterSequencer->edit(item->getFilter());
 
 }
 

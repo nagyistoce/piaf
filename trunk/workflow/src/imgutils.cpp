@@ -29,7 +29,7 @@
 #define IMGUTILS_CPP
 
 #include "imgutils.h"
-
+#include <errno.h>
 
 
 FILE * logfile = stderr;
@@ -1998,7 +1998,8 @@ void tmEraseRegion(
 
 extern int saveIplImageAsTIFF(IplImage* img,  const char * outfilename, char * compressionarg);
 
-IplImage * tmLoadImage(const char *filename, int * dpi) {
+IplImage * tmLoadImage(const char *filename, int * dpi)
+{
 	IplImage * originalImage = NULL;
 	/*if(strcasestr(filename, ".tif")) {
 		originalImage  =
@@ -2027,10 +2028,12 @@ void tmSaveImage(const char * filename, IplImage * src) {
 		// Save header
 		FILE * f = fopen(filename, "wb");
 		if(!f) {
-			fprintf(logfile, "imgutils : %s:%d : cannot open file '%s' for writing !\n",
-				__func__, __LINE__, filename);
+			int errnum = errno;
+			fprintf(logfile, "imgutils : %s:%d : cannot open file '%s' for writing ! err=%d=%s\n",
+				__func__, __LINE__, filename, errnum, strerror(errnum));
 			return;
 		}
+
 		fprintf(logfile, "imgutils : %s:%d : saving file '%s' as PNM...\n",
 				__func__, __LINE__, filename);
 
@@ -2162,52 +2165,62 @@ void tmHSV2RGB(float H, float S, float V,
 }
 
 
-IplImage * drawHistogram(float histo[3][256], bool grayscaled) {
+IplImage * drawHistogram(float ** histo /*[3][256]*/, bool grayscaled)
+{
+	if(!histo) { return NULL; }
+
 
 	IplImage * m_HistoImage =
 			tmCreateImage(cvSize(256, 100), IPL_DEPTH_8U,
 						  grayscaled ? 1 : 3);
 	IplImage * histo_plane[3] = {NULL, NULL, NULL};
+
 	// Compute RGB histogram
 	int nChannels = (grayscaled ? 1 : 3 );
 
-	for(int rgb=0; rgb<nChannels; rgb++)  {
-		histo_plane[rgb] = tmCreateImage(cvSize(256, 100), IPL_DEPTH_8U, 1);
+	for(int rgb=0; rgb<nChannels; rgb++) {
+		if(histo[rgb]) {
+			histo_plane[rgb] = tmCreateImage(cvSize(256, 100), IPL_DEPTH_8U, 1);
+		}
 	}
-
 	float hmax = 0.f;
 	for(int rgb=0; rgb<nChannels; rgb++)  {
-		for(int h=0; h<256; h++) {
-			if(histo[rgb][h]>hmax)
-				hmax = histo[rgb][h];
+		if(histo[rgb]) {
+			for(int h=0; h<256; h++) {
+				if(histo[rgb][h]>hmax) {
+					hmax = histo[rgb][h];
+				}
+			}
 		}
 	}
 
 	float divlogmax = 100.f / ((float)hmax) ;
-	for(int rgb=0; rgb<nChannels ; rgb++)  {
-		cvZero(histo_plane[rgb]);
+	for(int rgb=0; rgb<nChannels ; rgb++) {
+		if(histo[rgb]) {
+			cvZero(histo_plane[rgb]);
 
-		for(int h = 0; h< 256; h++) {
-			if(histo[rgb][h]) {
-				int val = 100 - (int)(histo[rgb][h] * divlogmax);
+			for(int h = 0; h< 256; h++) {
+				if(histo[rgb][h]) {
+					int val = 100 - (int)(histo[rgb][h] * divlogmax);
 
-				if(val < 100) {
-					cvLine(histo_plane[rgb], cvPoint(h, 100),
-						   cvPoint(h, val),
-						   cvScalarAll(192), 1);
-					cvLine(histo_plane[rgb], cvPoint(h, val),
-						   cvPoint(h, val),
-						   cvScalarAll(255), 1);
+					if(val < 100) {
+						cvLine(histo_plane[rgb], cvPoint(h, 100),
+							   cvPoint(h, val),
+							   cvScalarAll(192), 1);
+						cvLine(histo_plane[rgb], cvPoint(h, val),
+							   cvPoint(h, val),
+							   cvScalarAll(255), 1);
+					}
 				}
 			}
 		}
 	}
 	// Mix R,G,B planes
-	if(!grayscaled)
+	if(!grayscaled) {
 		cvCvtPlaneToPix( histo_plane[0], histo_plane[1], histo_plane[2], 0, m_HistoImage );
-	else
+	} else {
 		cvCopy(histo_plane[0], m_HistoImage);
-
+	}
 
 	for(int rgb=0; rgb<nChannels; rgb++)  {
 		tmReleaseImage(&histo_plane[rgb]);

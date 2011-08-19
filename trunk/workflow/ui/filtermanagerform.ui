@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>413</width>
-    <height>34</height>
+    <width>516</width>
+    <height>36</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -35,7 +35,7 @@
       <string>Quick collection</string>
      </property>
      <property name="text">
-      <string/>
+      <string>Quick collec</string>
      </property>
      <property name="pixmap">
       <pixmap resource="../ema.qrc">:/icons/icons/16x16/insert-image.png</pixmap>
@@ -78,12 +78,25 @@
     </widget>
    </item>
    <item>
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item>
     <widget class="QLabel" name="label">
      <property name="toolTip">
       <string>Grid view</string>
      </property>
      <property name="text">
-      <string/>
+      <string>Collections</string>
      </property>
      <property name="pixmap">
       <pixmap resource="../ema.qrc">:/icons/icons/22x22/view-list-icons.png</pixmap>
@@ -91,7 +104,21 @@
     </widget>
    </item>
    <item>
-    <widget class="QToolButton" name="removeCriterionButton">
+    <widget class="QToolButton" name="addToCurrentCollectionButton">
+     <property name="toolTip">
+      <string>Add selected files to quick collection</string>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="icon">
+      <iconset resource="../ema.qrc">
+       <normaloff>:/icons/icons/16x16/list-add.png</normaloff>:/icons/icons/16x16/list-add.png</iconset>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QToolButton" name="removeFromCurrentButton">
      <property name="toolTip">
       <string>Remove this criterion</string>
      </property>
@@ -100,7 +127,7 @@
      </property>
      <property name="icon">
       <iconset resource="../ema.qrc">
-       <normaloff>:/icons/icons/16x16/trash-empty.png</normaloff>:/icons/icons/16x16/trash-empty.png</iconset>
+       <normaloff>:/icons/icons/16x16/list-remove.png</normaloff>:/icons/icons/16x16/list-remove.png</iconset>
      </property>
     </widget>
    </item>

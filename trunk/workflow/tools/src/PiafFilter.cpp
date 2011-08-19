@@ -21,20 +21,23 @@
 
 //#include "workshoptool.h"
 #include <SwTypes.h>
+#include <sys/time.h>
 
 
-// Qt includes
-#include <qlabel.h>
-#include <q3vbox.h>
-#include <qlayout.h>
-#include <q3filedialog.h>
-#include <qmessagebox.h>
-#include <qtooltip.h>
-//Added by qt3to4:
-#include <Q3GridLayout>
-#include <QPixmap>
-#include <QCloseEvent>
-#include <QTimer>
+//// Qt includes
+//#include <qlabel.h>
+//#include <q3vbox.h>
+//#include <qlayout.h>
+//#include <q3filedialog.h>
+//#include <qmessagebox.h>
+//#include <qtooltip.h>
+////Added by qt3to4:
+//#include <Q3GridLayout>
+//#include <QPixmap>
+//#include <QCloseEvent>
+//#include <QTimer>
+
+#include <QMessageBox>
 
 // standard includes
 #include <stdio.h>

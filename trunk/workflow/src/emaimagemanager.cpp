@@ -96,27 +96,52 @@ int EmaImageManager::appendFileList(QStringList list) {
 
 t_image_info_struct * EmaImageManager::getInfo(QString filename)
 {
+
+	m_managedFileListMutex.lock();
 	if(!m_managedFileList.contains(filename)) {
 		EMAIM_printf(EMALOG_TRACE, "File '%s' not found", filename.toUtf8().data());
+		m_managedFileListMutex.unlock();
 		return NULL;
 	}
+
 	// Fill with managed
 	int idx = m_managedFileList.indexOf(filename);
 	if(idx < 0) {
-		EMAIM_printf(EMALOG_TRACE, "File '%s' not found", filename.toUtf8().data())
+		EMAIM_printf(EMALOG_TRACE, "File '%s' not found", filename.toUtf8().data());
+		m_managedFileListMutex.unlock();
 		return NULL;
 	}
+	m_managedInfoMutex.lock();
 
 	t_image_info_struct * pinfo = m_managedInfo.at(idx);
-	if(!pinfo) return NULL;
-
-	// Security : check filename
-	if(!filename.contains(pinfo->filepath)) {
-		EMAIM_printf(EMALOG_TRACE, "File '%s' mismatches pinfo ('%s')",
-					 filename.toUtf8().data(),
-					 pinfo->filepath)
+	if(!pinfo) {
+		m_managedInfoMutex.unlock();
+		m_managedFileListMutex.unlock();
 		return NULL;
 	}
+	if(!pinfo->valid) {
+		m_managedInfoMutex.unlock();
+		m_managedFileListMutex.unlock();
+		return NULL;
+	}
+
+	EMAIM_printf(EMALOG_DEBUG, "File '%s' matches ?",
+				 filename.toAscii().data());
+	EMAIM_printf(EMALOG_DEBUG, " pinfo=%p (file='%s')",
+				 pinfo, pinfo->filepath.toAscii().data());
+
+	// Security : check filename
+	if(filename.compare(pinfo->filepath) != 0) {
+		EMAIM_printf(EMALOG_TRACE, "File '%s' mismatches pinfo ('%s')",
+					 filename.toUtf8().data(),
+					 pinfo->filepath.toUtf8().data())
+		m_managedInfoMutex.unlock();
+		m_managedFileListMutex.unlock();
+		return NULL;
+	}
+
+	m_managedInfoMutex.unlock();
+	m_managedFileListMutex.unlock();
 
 	return pinfo ;
 }
@@ -125,14 +150,18 @@ int EmaImageManager::appendFile(QString filename) {
 
 	m_progress = 0;
 
+	m_managedFileListMutex.lock();
 	// if not already managed
 	if(m_managedFileList.contains(filename)) {
 		EMAIM_printf(EMALOG_DEBUG, "Already managed : '%s'", filename.toUtf8().data());
+		m_managedFileListMutex.unlock();
 		return 0;
 	}
 
 	// Process image
 	m_appendFileList.append(filename);
+	m_managedFileListMutex.unlock();
+
 	// Unlock thread
 	mutex.lock();
 	waitCond.wakeAll();
@@ -145,13 +174,16 @@ int EmaImageManager::appendFile(QString filename) {
 int EmaImageManager::removeFile(QString filename) {
 	m_progress = 0;
 
+	m_managedFileListMutex.lock();
 	// if not already managed
 	if(!m_managedFileList.contains(filename)) {
 		EMAIM_printf(EMALOG_DEBUG, "Unknown / not managed : '%s'", filename.toUtf8().data());
+		m_managedFileListMutex.unlock();
 		return 0;
 	}
 
 	m_removeFileList.append(filename);
+	m_managedFileListMutex.unlock();
 
 	// Unlock thread
 	mutex.lock();
@@ -196,7 +228,7 @@ void EmaImageManager::run() {
 				EMAIM_printf(EMALOG_DEBUG, "\tAdding file '%s'...", fileName.toUtf8().data())
 
 				// Process info extraction
-				m_imgProc.loadFile((char *)fileName.toUtf8().data());
+				m_imgProc.loadFile(fileName);
 
 				// Create a new storage
 				t_image_info_struct l_info = m_imgProc.getImageInfo();
@@ -217,8 +249,14 @@ void EmaImageManager::run() {
 //					new_info->histogram
 
 					// append to managed list
+					m_managedFileListMutex.lock();
 					m_managedFileList.append(fileName);
+					m_managedFileListMutex.unlock();
+
+					m_managedInfoMutex.lock();
 					m_managedInfo.append(new_info);
+					m_managedInfoMutex.unlock();
+
 				}
 
 				cur++;

@@ -327,7 +327,7 @@ void tmCloseImage(IplImage * src, IplImage * dst, IplImage * tmp, int iterations
 void tmOpenImage(IplImage * src, IplImage * dst, IplImage * tmp, int iterations);
 
 /** @brief Draw a histogram image from histogram */
-IplImage * drawHistogram(float histo[3][256], bool grayscaled);
+IplImage * drawHistogram(float ** histo, bool grayscaled);
 
 #define FILM_UNDEFINED	0
 #define FILM_NEGATIVE	1

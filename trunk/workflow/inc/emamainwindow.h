@@ -32,6 +32,9 @@
 #include <QWorkspace>
 #include <QSettings>
 
+#include "workshopimagetool.h"
+
+
 typedef struct _t_file {
 	QString name;
 	QString fullPath;
@@ -126,7 +129,10 @@ private:
 private:
 	QTimer m_timer;
 	QWorkspace * pWorkspace;
+	QImage mWorkImage;
 
+	WorkshopImage * pWorkshopImage;
+	WorkshopImageTool * pWorkshopImageTool;
 public slots:
 	void on_thumbImage_clicked(QString fileName);
 	void on_thumbImage_selected(QString);
