@@ -46,7 +46,7 @@ AvailablePluginTreeWidgetItem::AvailablePluginTreeWidgetItem(
 
 	// Set columns
 	setText(0, QString(mpFilter->getFunction(mIndexFunction).name));
-	setText(1, QString::number(mpFilter->getFunction(mIndexFunction).nb_params));
+	//setText(1, QString::number(mpFilter->getFunction(mIndexFunction).nb_params));
 }
 
 AvailablePluginTreeWidgetItem::~AvailablePluginTreeWidgetItem()
@@ -81,7 +81,7 @@ PluginEditorForm::PluginEditorForm(QWidget *parent) :
 				  filter->nbfunctions());
 
 		QStringList cols;
-		cols << QString(filter->subcategory);
+		cols << QString(filter->subcategory );
 
 		QTreeWidgetItem * rootItem = new QTreeWidgetItem(ui->availablePluginsTreeWidget, cols);
 

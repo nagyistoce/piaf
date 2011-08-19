@@ -104,7 +104,7 @@
                 <string>Live stream devices</string>
                </property>
                <property name="currentIndex">
-                <number>1</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="page">
                 <property name="geometry">
@@ -168,6 +168,9 @@
                      <property name="shortcut">
                       <string>Ctrl+O</string>
                      </property>
+                     <property name="flat">
+                      <bool>true</bool>
+                     </property>
                     </widget>
                    </item>
                    <item>
@@ -187,6 +190,9 @@
                        <width>16</width>
                        <height>16</height>
                       </size>
+                     </property>
+                     <property name="flat">
+                      <bool>true</bool>
                      </property>
                     </widget>
                    </item>
@@ -278,6 +284,9 @@
                         <height>16</height>
                        </size>
                       </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
                      </widget>
                     </item>
                     <item>
@@ -297,6 +306,9 @@
                         <width>16</width>
                         <height>16</height>
                        </size>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
                       </property>
                      </widget>
                     </item>
