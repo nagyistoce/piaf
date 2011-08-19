@@ -28,6 +28,8 @@
 #define DEBUG_ALL(s) fprintf(stderr, "DEBUG_MSG %s (%s l.%d) '%s'\n",__func__,__FILE__,__LINE__, (s));
 #define PRINT_FIXME fprintf(stderr, "%s : %s:%d FIXME\n", __FILE__, __func__, __LINE__);
 #ifndef DEBUG_MSG
+#include <sys/time.h>
+
 #define DEBUG_MSG(...) { \
 							struct timeval l_nowtv; gettimeofday(&l_nowtv, NULL); \
 							time_t l_raw = l_nowtv.tv_sec; \

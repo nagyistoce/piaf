@@ -32,6 +32,8 @@
 #include <QtCore/QList>
 #include <QtCore/QStringList>
 
+#include <QMutex>
+
 #include "imageinfo.h"
 
 class EmaImageManager : public QThread
@@ -99,11 +101,13 @@ public:
 private:
 	/** @brief Known information about images */
 	QList<t_image_info_struct *> m_managedInfo;
+	QMutex m_managedInfoMutex;
 	/** @brief Known images files list
 		Files added to m_appendFileList are moved to m_managedFileList
 		Files added to m_removeFileList are removed from m_managedFileList
 	*/
 	QStringList m_managedFileList;
+	QMutex m_managedFileListMutex;
 
 	/** @brief Image processing class to extract info about image */
 	ImageInfo m_imgProc;

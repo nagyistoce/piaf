@@ -94,7 +94,9 @@ public:
 	void setWorkspace(QWorkspace * wsp);
 
 	/** @brief Change sequencer */
-	void setSequencer(FilterSequencer *);
+	void setFilterSequencer(FilterSequencer *);
+	/** @brief Create its own sequencer */
+	FilterSequencer * createFilterSequencer();
 protected:
     void changeEvent(QEvent *e);
 
@@ -113,7 +115,7 @@ private:
 
 	/// Current active sequencer for processing filters
 	FilterSequencer * mpFilterSequencer;
-
+	bool mOwnFilterSequencer;
 	/// Sequencer for listing available filters
 	FilterSequencer mFilterSequencer;
 

@@ -56,14 +56,23 @@ void ThumbImageFrame::changeEvent(QEvent *e)
 void ThumbImageFrame::setImageFile(const QString & imagePath,
 								   IplImage * img, int score )
 {
-	fprintf(stderr, "ThumbImageFrame::%s:%d ('%s', img=%p %dx%dx%d, score=%d)\n",
-			__func__, __LINE__,
-			imagePath.toUtf8().data(),
-			img,
-			img?img->width : -1,
-			img?img->height : -1,
-			img?img->nChannels : -1,
-			score);
+	fprintf(stderr, "ThumbImageFrame::%s:%d this=%p ('%s', img=%p",
+			__func__, __LINE__, this,
+			imagePath.toUtf8().data(), img); fflush(stderr);
+	if(img) {
+		fprintf(stderr, ", img=%p %dx%dx%d, score=%d)\n",
+				img,
+				img?img->width : -1,
+				img?img->height : -1,
+				img?img->nChannels : -1,
+				score);
+	}
+	else
+	{
+		fprintf(stderr, ")");
+	}
+
+	fflush(stderr);
 
 	QFileInfo fi(imagePath);
 	m_ui->nameLabel->setText(fi.baseName());
@@ -139,7 +148,7 @@ void ThumbImageFrame::on_globalImageLabel_signalMousePressEvent(QMouseEvent * ) 
 	emit signalThumbClicked(m_imagePath);
 }
 void ThumbImageFrame::on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * ) {
-	emit signalThumbSelected(m_imagePath);
+	//emit signalThumbSelected(m_imagePath);
 }
 
 
@@ -164,9 +173,10 @@ void ThumbImageFrame::setSelected(bool selected)
 	// Toggle state
 	if(mSelected)
 	{
-		setStyleSheet("background-color: rgb(230, 230, 230);");
+		setStyleSheet("background-color: rgb(220, 230, 255);");
 	} else {
-		setStyleSheet("background-color: rgb(128, 128, 128);");
+//		setStyleSheet();
+		setStyleSheet("background-color: rgba(128, 128, 128, 0);");
 	}
 	update();
 }

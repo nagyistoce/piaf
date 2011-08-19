@@ -39,7 +39,7 @@
 #include <iomanip>
 #include <cassert>
 
-u8 g_debug_ImageInfo = 0; //EMALOG_DEBUG;
+u8 g_debug_ImageInfo = EMALOG_DEBUG;
 
 /******************************************************************************/
 ImageInfo::ImageInfo() {
@@ -49,24 +49,84 @@ ImageInfo::~ImageInfo() {
 	purge();
 }
 
+void clearImageInfoStruct(t_image_info_struct * pinfo)
+{
+	pinfo->valid = 0;
+
+//			// EXIF TAGS
+//			QString  maker;	/*! Company which produces this camera */
+//			QString model;	/*! Model of this camera */
+
+//			QString datetime;	/*! Date/time of the shot */
+
+	pinfo->orientation = 0;			/*! Image orientation : 0 for horizontal (landscape), 1 for vertical (portrait) */
+	pinfo->focal_mm = 				/*! Real focal in mm */
+			pinfo->focal_eq135_mm =		/*! 135mm equivalent focal in mm (if available) */
+			pinfo->aperture =				/*! F Number */
+			pinfo->speed_s = 0.f;				/*! Speed = shutter opening time in seconds */
+	pinfo->ISO = 0;					/*! ISO Sensitivity */
+
+//			// IPTC TAGS
+//		// Ref: /usr/share/doc/libexiv2-doc/html/tags-iptc.html
+//		//0x005a 	90 	Iptc.Application2.City 	String 	No 	No 	0 	32 	Identifies city of object data origin according to guidelines established by the provider.
+//			QString iptc_city[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
+//		//0x005c 	92 	Iptc.Application2.SubLocation 	String 	No 	No 	0 	32 	Identifies the location within a city from which the object data originates
+//			QString iptc_sublocation[MAX_EXIF_LEN];		/*! IPTC Province/State name, field Iptc.Application2.Provincestate */
+//		//0x005f 	95 	Iptc.Application2.ProvinceState 	String 	No 	No 	0 	32 	Identifies Province/State of origin according to guidelines established by the provider.
+//			QString iptc_provincestate[MAX_EXIF_LEN];		/*! IPTC Province/State name, field Iptc.Application2.Provincestate */
+//		//0x0064 	100 	Iptc.Application2.CountryCode 	String 	No 	No 	3 	3 	Indicates the code of the country/primary location where the intellectual property of the object data was created
+//			QString iptc_countrycode[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
+//		//0x0065 	101 	Iptc.Application2.CountryName 	String 	No 	No 	0 	64 	Provides full
+//			QString iptc_countryname[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
+
+	// Image processing data
+	pinfo->grayscaled = 0;
+	pinfo->sharpness_score =			/*! Sharpness factor in [0..100] */
+			pinfo->histo_score = pinfo->score = 0.f;
+
+	memset(&pinfo->thumbImage, 0, sizeof(t_cached_image)); // this struct is only C
+	pinfo->sharpnessImage =		/*! Sharpness image for faster display */
+			pinfo->hsvImage = NULL;			/*! HSV histogram image for faster display */
+
+	//		float * log_histogram[3];	/*! Log histogram */
+	memset(pinfo->log_histogram, 0, 3*sizeof(float *));
+
+}
+
+
+
 void ImageInfo::init() {
 	m_originalImage = NULL;
 
 	m_thumbImage = m_scaledImage = m_grayImage = m_HSHistoImage =
 	m_HistoImage = m_ColorHistoImage =
 	hsvImage = hsvOutImage = h_plane = s_plane = NULL;
-	for(int rgb=0; rgb<4; rgb++)
+	for(int rgb=0; rgb<4; rgb++) {
 		rgb_plane[rgb] = 0;
+	}
 
-	memset(&m_image_info_struct, 0, sizeof(t_image_info_struct ));
+	clearImageInfoStruct(&m_image_info_struct);
 
 	m_sharp32fImage = m_sobelImage = NULL;
-
 	m_sharpnessImage = NULL;
 }
 
 void ImageInfo::purge() {
-	memset(&m_image_info_struct, 0, sizeof(t_image_info_struct ));
+	fprintf(stderr, "ImageInfo::%s:%d : delete this=%p\n",
+			__func__, __LINE__, this);
+	for(int h=0; h<3; h++) {
+		if(m_image_info_struct.log_histogram[h])
+		{
+			delete [] m_image_info_struct.log_histogram[h];
+			m_image_info_struct.log_histogram[h] = NULL;
+		}
+	}
+
+	// the image themselves will be deleted in purgeScaled
+	m_image_info_struct.thumbImage.iplImage =
+			m_image_info_struct.sharpnessImage =
+			m_image_info_struct.hsvImage = NULL;			/*! HSV histogram image for faster display */
+
 	tmReleaseImage(&m_originalImage);
 	tmReleaseImage(&m_HistoImage); // Delete only at the end, because it's always the same size
 	tmReleaseImage(&hsvOutImage);
@@ -150,6 +210,7 @@ void compressCachedImage(t_cached_image * img) {
 	//
 	image.save(&buffer, "JPEG", 90);
 
+	/*
 	// Copy into buffer
 	img->compressed_size = ba.size();
 	img->compressed = new u8 [ ba.size() ];
@@ -163,7 +224,7 @@ void compressCachedImage(t_cached_image * img) {
 	if(f) {
 		fwrite(img->compressed, 1, img->compressed_size, f);
 		fclose(f);
-	}
+	}*/
 }
 
 /* Uncompress JPEG buffer to raw IplImage */
@@ -174,6 +235,7 @@ void uncompressCachedImage(t_cached_image * img) {
 
 
 void ImageInfo::purgeScaled() {
+	fprintf(stderr, "ImageInfo::%s:%d : purging %p\n", __func__, __LINE__, this);
 	// purge info data
 	if(m_scaledImage == m_grayImage) {
 		m_grayImage = NULL;
@@ -183,8 +245,9 @@ void ImageInfo::purgeScaled() {
 
 	tmReleaseImage(&m_scaledImage);
 	tmReleaseImage(&m_thumbImage);
-	for(int rgb=0; rgb<4; rgb++)
+	for(int rgb=0; rgb<4; rgb++) {
 		tmReleaseImage(&rgb_plane[rgb]);
+	}
 
 	tmReleaseImage(&m_sharpnessImage);
 	tmReleaseImage(&m_sharp32fImage);
@@ -197,12 +260,10 @@ void ImageInfo::purgeScaled() {
 	tmReleaseImage(&m_ColorHistoImage);
 }
 
-int ImageInfo::readMetadata(char * filename) {
+int ImageInfo::readMetadata(QString filename) {
 	// Read metadata
-	memset(&m_image_info_struct, 0, sizeof(t_image_info_struct ));
-
 	try {
-		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open( filename );
+		Exiv2::Image::AutoPtr image = Exiv2::ImageFactory::open( filename.toStdString() );
 		assert(image.get() != 0);
 		image->readMetadata();
 
@@ -218,18 +279,14 @@ int ImageInfo::readMetadata(char * filename) {
 
 		Exiv2::Exifdatum& exifMaker = exifData["Exif.Image.Make"];
 		std::string str = exifMaker.toString();
-		displayStr = QString::fromStdString(str);
-		strncpy(m_image_info_struct.maker, displayStr.toUtf8().data(), MAX_EXIF_LEN);
+		m_image_info_struct.maker = QString::fromStdString(str);
 
 		exifMaker = exifData["Exif.Image.Model"];str = exifMaker.toString();
-		displayStr = QString::fromStdString(str);
-		strncpy(m_image_info_struct.model, displayStr.toUtf8().data(), MAX_EXIF_LEN);
+		m_image_info_struct.model = QString::fromStdString(str);
 
 		// DateTime
 		exifMaker = exifData["Exif.Photo.DateTimeOriginal"]; str = exifMaker.toString();
-		displayStr = QString::fromStdString(str);
-		strncpy(m_image_info_struct.datetime, displayStr.toUtf8().data(), MAX_EXIF_LEN);
-
+		m_image_info_struct.datetime = QString::fromStdString(str);
 
 		// Orientation
 		exifMaker = exifData["Exif.Image.Orientation"]; str = exifMaker.toString();
@@ -257,10 +314,11 @@ int ImageInfo::readMetadata(char * filename) {
 			displayStr += QString("eq. 35mm");
 		}
 		if(g_debug_ImageInfo) {
-			fprintf(stderr, "Focal : '%s' => %g s %g 35mm\n",
-				displayStr.toUtf8().data(),
-				m_image_info_struct.focal_mm,
-				m_image_info_struct.focal_eq135_mm);
+			fprintf(stderr, "\t[ImageInfo %p]::%s:%d: Focal : '%s' => %g s %g 35mm\n",
+					this, __func__, __LINE__,
+					displayStr.toUtf8().data(),
+					m_image_info_struct.focal_mm,
+					m_image_info_struct.focal_eq135_mm);
 		}
 
 		// Aperture
@@ -275,8 +333,9 @@ int ImageInfo::readMetadata(char * filename) {
 		displayStr = QString::fromStdString(str);
 		m_image_info_struct.speed_s = rational_to_float(displayStr);
 		if(g_debug_ImageInfo) {
-			fprintf(stderr, "Exposure time : '%s' => %g s\n",
-				displayStr.toUtf8().data(), m_image_info_struct.speed_s);
+			fprintf(stderr, "\t[ImageInfo %p]::%s:%d: Exposure time : '%s' => %g s\n",
+					this, __func__, __LINE__,
+					displayStr.toUtf8().data(), m_image_info_struct.speed_s);
 		}
 
 		// ISO
@@ -314,8 +373,13 @@ int ImageInfo::readMetadata(char * filename) {
 		// IPTC - IPTC - IPTC - IPTC - IPTC - IPTC - IPTC - IPTC - IPTC -
 		Exiv2::IptcData &iptcData = image->iptcData();
 		if (iptcData.empty()) {
-			std::string error(filename);
+			std::string error(filename.toAscii().data());
 			error += ": No IPTC data found in the file";
+			if(g_debug_ImageInfo) {
+				fprintf(stderr, "\t[ImageInfo %p]::%s:%d: No IPTC data found in the file: '%s' => throw error\n",
+						this, __func__, __LINE__,
+						filename.toAscii().data() );
+			}
 			throw Exiv2::Error(1, error);
 		}
 
@@ -337,16 +401,17 @@ int ImageInfo::readMetadata(char * filename) {
 	}
 	catch (Exiv2::AnyError& e) {
 		std::cout << "Caught Exiv2 exception '" << e << "'\n";
-		fprintf(stderr, "ImageInfo::%s:%d : ERROR : caught exception => return 0 (no metadata);\n",
-				__func__, __LINE__); fflush(stderr);
+		fprintf(stderr, "ImageInfo %p::%s:%d : ERROR : caught exception => return 0 (no metadata);\n",
+				this, __func__, __LINE__); fflush(stderr);
 		return 0;
 	}
 
-	fprintf(stderr, "ImageInfo::%s:%d : ERROR : return 0;\n", __func__, __LINE__);
+	fprintf(stderr, "ImageInfo %p::%s:%d : FINE : return 0;\n", this, __func__, __LINE__);
 
 	return 0;
 }
-int ImageInfo::loadFile(char * filename) {
+
+int ImageInfo::loadFile(QString filename) {
 	m_image_info_struct.valid = 0;
 	tmReleaseImage(&m_originalImage);
 
@@ -355,24 +420,25 @@ int ImageInfo::loadFile(char * filename) {
 	readMetadata(filename);
 
 	// LOAD IMAGE PIXMAP
-	m_originalImage = cvLoadImage(filename);
+	m_originalImage = cvLoadImage(filename.toUtf8().data());
 	if(!m_originalImage) {
 		fprintf(stderr, "ImageInfo::%s:%d: cannot load image '%s' (with openCV)\n",
-				__func__, __LINE__, filename);
+				__func__, __LINE__, filename.toAscii().data());
 		return -1;
 	}
-	strcpy(m_image_info_struct.filepath, filename );
+	m_image_info_struct.filepath = QString( filename );
 
 	if(g_debug_ImageInfo) {
-		fprintf(stderr, "ImageInfo::%s:%d : loaded %dx%d x %d\n", __func__, __LINE__,
-			m_originalImage->width, m_originalImage->height,
-			m_originalImage->nChannels );
+		fprintf(stderr, "\tImageInfo::%s:%d : loaded '%s' : %dx%d x %d\n", __func__, __LINE__,
+				filename.toAscii().data(),
+				m_originalImage->width, m_originalImage->height,
+				m_originalImage->nChannels );
 	}
 	m_image_info_struct.grayscaled = (m_originalImage->depth == 1);
 
 	m_originalImage = tmAddBorder4x(m_originalImage); // it will purge originalImage
 	if(g_debug_ImageInfo) {
-		fprintf(stderr, "ImageInfo::%s:%d => pitchedx4: %dx%d x %d\n", __func__, __LINE__,
+		fprintf(stderr, "\tImageInfo::%s:%d => pitchedx4: %dx%d x %d\n", __func__, __LINE__,
 			m_originalImage->width, m_originalImage->height,
 			m_originalImage->nChannels );
 	}
@@ -439,12 +505,12 @@ int ImageInfo::loadFile(char * filename) {
 	compressCachedImage(&m_image_info_struct.thumbImage);
 
 	if(g_debug_ImageInfo) {
-		fprintf(stderr, "ImageInfo::%s:%d : scaled to %dx%d\n", __func__, __LINE__,
+		fprintf(stderr, "\tImageInfo::%s:%d : scaled to %dx%d\n", __func__, __LINE__,
 			m_scaledImage->width, m_scaledImage->height);
-		fprintf(stderr, "ImageInfo::%s:%d : thumb %dx%d\n", __func__, __LINE__,
+		fprintf(stderr, "\tImageInfo::%s:%d : thumb %dx%d\n", __func__, __LINE__,
 			m_thumbImage->width, m_thumbImage->height);
 
-		fprintf(stderr, "\nImageInfo::%s:%d : processHSV(m_scaledImage=%dx%d)\n", __func__, __LINE__,
+		fprintf(stderr, "\tImageInfo::%s:%d : processRGB(m_scaledImage=%dx%d)...\n", __func__, __LINE__,
 			m_scaledImage->width, m_scaledImage->height);fflush(stderr);
 	}
 
@@ -457,14 +523,13 @@ int ImageInfo::loadFile(char * filename) {
 
 	// then sharpness
 	if(g_debug_ImageInfo) {
-		fprintf(stderr, "ImageInfo::%s:%d : processSharpness(gray=%dx%d)\n", __func__, __LINE__,
+		fprintf(stderr, "\tImageInfo::%s:%d : processSharpness(gray=%dx%d)\n", __func__, __LINE__,
 			m_grayImage->width, m_grayImage->height);fflush(stderr);
 	}
 	processSharpness();
 
-
 	if(g_debug_ImageInfo) {
-		fprintf(stderr, "ImageInfo::%s:%d : process done (gray=%dx%d)\n", __func__, __LINE__,
+		fprintf(stderr, "\tImageInfo::%s:%d : process done (gray=%dx%d)\n", __func__, __LINE__,
 			m_grayImage->width, m_grayImage->height);fflush(stderr);
 	}
 
@@ -480,7 +545,12 @@ int ImageInfo::loadFile(char * filename) {
 	m_image_info_struct.score = sharpness_score
 								* histo_score
 								* 100.f ; // in percent finally
+#else
+	m_image_info_struct.sharpnessImage = NULL;
+	m_image_info_struct.hsvImage = NULL;
+	m_image_info_struct.score = -1;
 #endif
+
 	// Activate the validation flag
 	m_image_info_struct.valid = 1;
 
@@ -658,6 +728,10 @@ int ImageInfo::processRGB() {
 		}
 
 		// Store in info structure
+		if(!m_image_info_struct.log_histogram[rgb]) {
+			m_image_info_struct.log_histogram[rgb] = new float [256];
+		}
+
 		for(int h=0; h<256; h++) {
 			if(grayHisto[rgb][h]>hmax) {
 				hmax = grayHisto[rgb][h] ; }

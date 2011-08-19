@@ -30,8 +30,8 @@
 
 #include "SwPluginCore.h"
 
-#define DEBUG_MSG(...)	{ \
-			fprintf(stderr, "[%s] %s:%d: ", __FILE__, __func__, __LINE__); \
+#define PIAFFILTER_MSG(...)	{ \
+			fprintf(stderr, "PIAFFILER  %s:%d: ", __FILE__, __func__, __LINE__); \
 			fprintf(stderr, __VA_ARGS__); fprintf(stderr,"\n"); \
 			}
 

@@ -52,7 +52,10 @@ void QImageDisplay::mouseReleaseEvent(QMouseEvent * e)
 void QImageDisplay::mouseMoveEvent(QMouseEvent * e)
 {
 	if(g_debug_QImageDisplay) {
-		fprintf(stderr, "QImageDisplay::%s:%d : e=%p\n", __func__, __LINE__, e);
+		fprintf(stderr, "QImageDisplay::%s:%d : e=%p : %d,%d\n", __func__, __LINE__, e,
+				e?e->pos().x():-1,
+				e?e->pos().y():-1
+				);
 	}
 	emit signalMouseMoveEvent(e);
 }

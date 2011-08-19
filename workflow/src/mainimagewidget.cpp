@@ -24,6 +24,10 @@
 #include "mainimagewidget.h"
 #include "ui_mainimagewidget.h"
 
+#include "PiafFilter.h"
+
+#include <QMouseEvent>
+
 int g_EMAMainImgW_debug_mode = EMALOG_DEBUG;
 
 #define EMAMIW_printf(a,...)  { \
@@ -40,6 +44,7 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	m_ui(new Ui::MainImageWidget)
 {
 	m_mouse_has_moved = false;
+	mpFilterSequencer = NULL;
 	m_ui->setupUi(this);
 }
 
@@ -59,6 +64,37 @@ void MainImageWidget::changeEvent(QEvent *e)
 		break;
 	}
 }
+void MainImageWidget::setFilterSequencer(FilterSequencer * pFS)
+{
+	if(mpFilterSequencer)
+	{
+		mpFilterSequencer->disconnect();
+	}
+	mpFilterSequencer = pFS;
+
+	// update !
+	connect(mpFilterSequencer, SIGNAL(selectedFilterChanged()), this, SLOT(slotUpdateImage()));
+
+}
+void MainImageWidget::slotUpdateImage()
+{
+	fprintf(stderr, "MainImageWidget::%s:%d update !!\n", __func__, __LINE__);
+	if(mpFilterSequencer) {
+		swImageStruct image;
+		memset(&image, 0, sizeof(swImageStruct));
+		image.width = (int)m_fullImage.width();
+		image.height = (int)m_fullImage.height();
+		image.depth = m_fullImage.depth() / 8;
+		image.buffer_size = image.width * image.height * image.depth;
+
+		image.buffer = m_fullImage.bits(); // Buffer
+
+		mpFilterSequencer->processImage(&image);
+		// refresh display
+		m_ui->globalImageLabel->setRefImage(&m_fullImage);
+	}
+
+}
 
 void MainImageWidget::setImageFile(const QString & imagePath,
 								   t_image_info_struct * pinfo )
@@ -68,6 +104,8 @@ void MainImageWidget::setImageFile(const QString & imagePath,
 	//		imagePath);
 
 	m_fullImage.load(imagePath);
+	m_ui->globalImageLabel->setRefImage(&m_fullImage);
+
 	m_mouse_has_moved = false;
 	m_lastClick	= QPoint(-1, -1);
 
@@ -88,7 +126,7 @@ void MainImageWidget::setImageFile(const QString & imagePath,
 					m_fullImage.height(),
 					m_fullImage.depth()/8,
 					pinfo->ISO,
-					pinfo->datetime
+					pinfo->datetime.toAscii().data()
 					);
 
 		}
@@ -146,7 +184,8 @@ fprintf(stderr, "MainImageWidget::%s:%d : crop %d,%d  sc=%d\n",
 	}
 
 	m_zoom_scale = scale;
-	m_ui->globalImageLabel->setPixmap(QPixmap::fromImage(m_displayImage));
+//	m_ui->globalImageLabel->setRefImage(&m_fullImage);
+			//Pixmap(QPixmap::fromImage(m_displayImage));
 
 	emit signalCropRect(m_cropRect);
 }
