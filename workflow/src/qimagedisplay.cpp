@@ -26,7 +26,7 @@
 #include <qevent.h>
 #include <stdio.h>
 
-unsigned char g_debug_QImageDisplay = 1;
+unsigned char g_debug_QImageDisplay = 0;
 
 QImageDisplay::QImageDisplay(QWidget * l_parent)
 	: QLabel(l_parent) {
@@ -58,6 +58,12 @@ void QImageDisplay::mouseMoveEvent(QMouseEvent * e)
 				);
 	}
 	emit signalMouseMoveEvent(e);
+}
+void QImageDisplay::focusInEvent ( QFocusEvent * event )
+{
+	if(g_debug_QImageDisplay) {
+		fprintf(stderr, "QImageDisplay::%s:%d : e=%p\n", __func__, __LINE__, event);
+	}
 }
 
 void QImageDisplay::wheelEvent(QWheelEvent * e)

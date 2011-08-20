@@ -19,6 +19,7 @@
 #define IMAGEWIDGET_H
 
 #include <QWidget>
+#include <QKeyEvent>
 
 // Color modes (palette for 8bit colors)
 #define COLORMODE_GREY 					0
@@ -46,6 +47,7 @@ public:
 	}
 
 	QImage * getQImage() { return dImage; };
+	/** @brief Set pointer to reference image */
 	void setRefImage(QImage *pIm);
 
 	void setZoomFit(bool on)
@@ -60,10 +62,10 @@ public:
 	/** @brief Switch to smart zooming mode */
 	void switchToSmartZoomMode(bool on = true);
 
-	/** @brief Change zoom centered to a point with a zoom increment */
+	/** @brief Change zoom centered to a point on display with a zoom increment */
 	void zoomOn(int xCenter, int yCenter, float zoominc);
 
-	/** @brief Change zoom centered to a point with a zoom increment */
+	/** @brief Change zoom factor centered to a point on display with a zoom increment */
 	void zoomOn(QPoint ptCenter, float zoominc) {
 		zoomOn(ptCenter.x(), ptCenter.y(), zoominc);
 	}
@@ -71,6 +73,7 @@ public:
 	/** @brief Set zoom scale and origin of zooming */
 	void setZoomParams(int xO, int yO, int scale);
 
+	/** @brief Overloaded paintEvent */
 	void paintEvent( QPaintEvent * );
 
 	/** @brief Change color display mode for 8bit images */
@@ -82,6 +85,9 @@ public:
 		m_overlayRect = overlayRect;
 		m_overlayColor = col;
 	}
+
+	/** @brief Get position of zoom center in original image reference */
+	QPoint getZoomCenter() { return QPoint(xZoomCenter, yZoomCenter); }
 signals:
 
 
@@ -116,6 +122,7 @@ signals:
 	void signalWheelEvent ( QWheelEvent * event );
 
 protected:
+	virtual void keyPressEvent ( QKeyEvent * event );
 	virtual void mousePressEvent(QMouseEvent *e);
 	virtual void mouseReleaseEvent(QMouseEvent *e);
 	virtual void mouseMoveEvent(QMouseEvent *e);
@@ -125,6 +132,9 @@ private:
 	QImage *dImage;
 	int xOrigine;
 	int yOrigine;
+	// zoom center in original image
+	int xZoomCenter, yZoomCenter;
+
 	int ZoomScale;			///< Integer zoom scale : 1 = 1:1 : 2=2:1 ; 0=1:2 ...
 	int m_colorMode;
 	bool mZoomFit;			///< Fit zoom to size (not integer zoom factor). Default= true

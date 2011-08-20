@@ -34,7 +34,131 @@
     </widget>
    </item>
    <item>
-    <widget class="QWidget" name="widget" native="true">
+    <widget class="QWidget" name="movieToolbarWidget" native="true">
+     <layout class="QHBoxLayout" name="horizontalLayout_2">
+      <property name="topMargin">
+       <number>1</number>
+      </property>
+      <property name="bottomMargin">
+       <number>1</number>
+      </property>
+      <item>
+       <widget class="QPushButton" name="goFirstButton">
+        <property name="toolTip">
+         <string>Go to first image</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/media-seek-backward.png</normaloff>:/icons/icons/16x16/media-seek-backward.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="goPrevButton">
+        <property name="toolTip">
+         <string>Go to previous image</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/media-skip-backward.png</normaloff>:/icons/icons/16x16/media-skip-backward.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="playButton">
+        <property name="toolTip">
+         <string>Play/pause</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/media-playback-start.png</normaloff>:/icons/icons/16x16/media-playback-start.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="goNextButton">
+        <property name="toolTip">
+         <string>Go to next image</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/media-skip-forward.png</normaloff>:/icons/icons/16x16/media-skip-forward.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="goLastButton">
+        <property name="toolTip">
+         <string>Go to last image</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/media-seek-forward.png</normaloff>:/icons/icons/16x16/media-seek-forward.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item>
+       <widget class="QPushButton" name="bookmarksButton">
+        <property name="toolTip">
+         <string>Bookmarks menu</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/bookmark-toolbar.png</normaloff>:/icons/icons/16x16/bookmark-toolbar.png</iconset>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QWidget" name="imageToolbarWidget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="topMargin">
        <number>1</number>
@@ -44,6 +168,9 @@
       </property>
       <item>
        <widget class="QPushButton" name="zoomButton">
+        <property name="toolTip">
+         <string>Mouse controls viewing</string>
+        </property>
         <property name="text">
          <string/>
         </property>
@@ -52,6 +179,9 @@
           <normaloff>:/icons/icons/16x16/zoom-in.png</normaloff>:/icons/icons/16x16/zoom-in.png</iconset>
         </property>
         <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="checked">
          <bool>true</bool>
         </property>
         <property name="flat">
@@ -116,17 +246,41 @@
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
+       <widget class="QLabel" name="infoLabel">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
+        <property name="toolTip">
+         <string>Multipurpose information label</string>
         </property>
-       </spacer>
+        <property name="text">
+         <string>--</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="goPrevButton_5">
+        <property name="toolTip">
+         <string>Go to previous image</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/media-record.png</normaloff>
+          <normalon>:/icons/icons/16x16/media-playback-stop.png</normalon>:/icons/icons/16x16/media-record.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="snapButton">
