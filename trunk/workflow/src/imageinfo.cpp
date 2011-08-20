@@ -46,8 +46,40 @@ ImageInfo::ImageInfo() {
 	init();
 }
 ImageInfo::~ImageInfo() {
-	purge();
+
+	fprintf(stderr, "ImageInfo::%s:%d : delete this=%p\n",
+			__func__, __LINE__, this);
+	for(int h=0; h<3; h++) {
+		if(m_image_info_struct.log_histogram[h])
+		{
+			delete [] m_image_info_struct.log_histogram[h];
+			m_image_info_struct.log_histogram[h] = NULL;
+		}
+	}
+
+	purgeThumbs();
+	purge(); // delete images (should be already done)
+
 }
+void ImageInfo::purgeThumbs() {
+	// the image themselves will be deleted in purgeScaled
+	m_image_info_struct.thumbImage.iplImage =
+			m_image_info_struct.sharpnessImage =
+			m_image_info_struct.hsvImage = NULL;			/*! HSV histogram image for faster display */
+	tmReleaseImage(&m_thumbImage);
+	tmReleaseImage(&m_sharpnessImage);
+	tmReleaseImage(&m_ColorHistoImage);
+
+}
+
+void ImageInfo::purge() {
+
+	tmReleaseImage(&m_originalImage);
+	tmReleaseImage(&m_HistoImage); // Delete only at the end, because it's always the same size
+	tmReleaseImage(&hsvOutImage);
+	purgeScaled();
+}
+
 
 void clearImageInfoStruct(t_image_info_struct * pinfo)
 {
@@ -102,36 +134,14 @@ void ImageInfo::init() {
 	m_HistoImage = m_ColorHistoImage =
 	hsvImage = hsvOutImage = h_plane = s_plane = NULL;
 	for(int rgb=0; rgb<4; rgb++) {
-		rgb_plane[rgb] = 0;
+		m_rgb_plane[rgb] = NULL;
 	}
 
-	clearImageInfoStruct(&m_image_info_struct);
 
 	m_sharp32fImage = m_sobelImage = NULL;
 	m_sharpnessImage = NULL;
 }
 
-void ImageInfo::purge() {
-	fprintf(stderr, "ImageInfo::%s:%d : delete this=%p\n",
-			__func__, __LINE__, this);
-	for(int h=0; h<3; h++) {
-		if(m_image_info_struct.log_histogram[h])
-		{
-			delete [] m_image_info_struct.log_histogram[h];
-			m_image_info_struct.log_histogram[h] = NULL;
-		}
-	}
-
-	// the image themselves will be deleted in purgeScaled
-	m_image_info_struct.thumbImage.iplImage =
-			m_image_info_struct.sharpnessImage =
-			m_image_info_struct.hsvImage = NULL;			/*! HSV histogram image for faster display */
-
-	tmReleaseImage(&m_originalImage);
-	tmReleaseImage(&m_HistoImage); // Delete only at the end, because it's always the same size
-	tmReleaseImage(&hsvOutImage);
-	purgeScaled();
-}
 
 QString rational(const QString & str) {
 	if(!(str.contains("/"))) return str;
@@ -235,7 +245,7 @@ void uncompressCachedImage(t_cached_image * img) {
 
 
 void ImageInfo::purgeScaled() {
-	fprintf(stderr, "ImageInfo::%s:%d : purging %p\n", __func__, __LINE__, this);
+	fprintf(stderr, "ImageInfo::%s:%d : purging scaled for this=%p\n", __func__, __LINE__, this);
 	// purge info data
 	if(m_scaledImage == m_grayImage) {
 		m_grayImage = NULL;
@@ -244,20 +254,18 @@ void ImageInfo::purgeScaled() {
 	}
 
 	tmReleaseImage(&m_scaledImage);
-	tmReleaseImage(&m_thumbImage);
 	for(int rgb=0; rgb<4; rgb++) {
-		tmReleaseImage(&rgb_plane[rgb]);
+		tmReleaseImage(&m_rgb_plane[rgb]);
 	}
 
-	tmReleaseImage(&m_sharpnessImage);
 	tmReleaseImage(&m_sharp32fImage);
 	tmReleaseImage(&m_sobelImage);
 	tmReleaseImage(&m_HSHistoImage);
+
 	tmReleaseImage(&m_HistoImage);
 	tmReleaseImage(&hsvImage);
 	tmReleaseImage(&h_plane);
 	tmReleaseImage(&s_plane);
-	tmReleaseImage(&m_ColorHistoImage);
 }
 
 int ImageInfo::readMetadata(QString filename) {
@@ -415,6 +423,8 @@ int ImageInfo::loadFile(QString filename) {
 	m_image_info_struct.valid = 0;
 	tmReleaseImage(&m_originalImage);
 
+	clearImageInfoStruct(&m_image_info_struct);
+
 
 	// LOAD IMAGE METADATA
 	readMetadata(filename);
@@ -464,6 +474,8 @@ int ImageInfo::loadFile(QString filename) {
 
 	if(m_scaledImage
 	   && (m_scaledImage->width != sc_w || m_scaledImage->height != sc_h)) {
+		fprintf(stderr, "ImageInfo::%s:%d : this=%p size changed => purge scaled\n",
+				__func__, __LINE__, this);
 		// purge scaled images
 		purgeScaled();
 	}
@@ -517,8 +529,8 @@ int ImageInfo::loadFile(QString filename) {
 	// process RGB histogram
 	processRGB();
 
-	// process color analysis
 #ifndef PIAFWORKFLOW
+	// process color analysis
 	processHSV();
 
 	// then sharpness
@@ -581,11 +593,12 @@ The values are then converted to the destination data type:
   */
 
 
-	if(!hsvImage)
+	if(!hsvImage) {
 		hsvImage = tmCreateImage(
 			cvSize(m_scaledImage->width, m_scaledImage->height),
 			IPL_DEPTH_8U,
 			m_scaledImage->nChannels);
+	}
 	if(m_scaledImage->nChannels == 3) {
 		//cvCvtColor(m_scaledImage, hsvImage, CV_RGB2HSV);
 		cvCvtColor(m_scaledImage, hsvImage, CV_BGR2HSV);
@@ -703,26 +716,29 @@ The values are then converted to the destination data type:
 int ImageInfo::processRGB() {
 
 	// Compute RGB histogram
-	for(int rgb=0; rgb<m_scaledImage->nChannels; rgb++)  {
-		rgb_plane[rgb] = tmCreateImage(cvGetSize(m_scaledImage),
-									   IPL_DEPTH_8U, 1);
+	for(int rgb=0; rgb<m_scaledImage->nChannels; rgb++) {
+		if(!m_rgb_plane[rgb]){
+			m_rgb_plane[rgb] = tmCreateImage(cvGetSize(m_scaledImage),
+											 IPL_DEPTH_8U, 1);
+		}
 	}
 
-	if(m_scaledImage->nChannels >= 3)
-		cvCvtPixToPlane( m_scaledImage, rgb_plane[0], rgb_plane[1], rgb_plane[2], 0 );
-	else
-		cvCopy(	m_scaledImage, rgb_plane[0]);
-
+	if(m_scaledImage->nChannels >= 3) {
+		cvCvtPixToPlane( m_scaledImage, m_rgb_plane[0], m_rgb_plane[1], m_rgb_plane[2], 0 );
+	} else {
+		cvCopy(	m_scaledImage, m_rgb_plane[0]);
+	}
 
 	u32 histo_score = 0;
 	u32 hmax = 0;
 	u32 grayHisto[3][256];
 	for(int rgb=0; rgb<m_scaledImage->nChannels; rgb++)  {
 		memset(grayHisto[rgb], 0, sizeof(u32)*256);
-		for(int r=0; r<rgb_plane[rgb]->height; r++) {
-			u8 * grayline = (u8 *)(rgb_plane[rgb]->imageData + r*rgb_plane[rgb]->widthStep);
+		for(int r=0; r<m_rgb_plane[rgb]->height; r++)
+		{
+			u8 * grayline = (u8 *)(m_rgb_plane[rgb]->imageData + r*m_rgb_plane[rgb]->widthStep);
 
-			for(int c = 0; c<rgb_plane[rgb]->width; c++) {
+			for(int c = 0; c<m_rgb_plane[rgb]->width; c++) {
 				grayHisto[rgb][ grayline[c] ]++;
 			}
 		}
@@ -730,6 +746,7 @@ int ImageInfo::processRGB() {
 		// Store in info structure
 		if(!m_image_info_struct.log_histogram[rgb]) {
 			m_image_info_struct.log_histogram[rgb] = new float [256];
+			memset(m_image_info_struct.log_histogram[rgb], 0, sizeof(float)*256);
 		}
 
 		for(int h=0; h<256; h++) {

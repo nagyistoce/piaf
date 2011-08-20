@@ -129,6 +129,8 @@ public:
 	/** @brief Get structure containing every image information needed for sorting */
 	t_image_info_struct getImageInfo() { return m_image_info_struct; };
 
+	/** @brief purge temporary thumbs */
+	void purgeThumbs();
 
 private:
 	/** @brief Initialization function */
@@ -168,7 +170,7 @@ private:
 	IplImage * s_plane;
 
 	/** @brief Scaled & RGB version of original image, RGBA planes array */
-	IplImage * rgb_plane[4];
+	IplImage * m_rgb_plane[4];
 
 	/** @brief Sharpness image */
 	IplImage * m_sharpnessImage;
