@@ -38,6 +38,7 @@ public:
 	QImageDisplay(QWidget * l_parent = NULL);
 
 private:
+	void	focusInEvent ( QFocusEvent * event );
 	void mouseReleaseEvent(QMouseEvent * e);
 	void mousePressEvent(QMouseEvent * e);
 	void mouseMoveEvent(QMouseEvent * e);

@@ -429,6 +429,7 @@ void DirectoryTreeWidgetItem::init()
 	name = fi.baseName();
 	setText(0, fi.completeBaseName());
 	subItem = NULL;
+	mIsFile = false;
 
 	if(fi.isDir()) {
 		nb_files = 0;
@@ -445,7 +446,6 @@ void DirectoryTreeWidgetItem::init()
 
 			subItem = new QTreeWidgetItem(this, columns);
 		}
-		mIsFile = false;
 	}
 	else if(fi.isFile())
 	{

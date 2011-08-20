@@ -47,6 +47,8 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	mpFilterSequencer = NULL;
 	m_ui->setupUi(this);
 	m_ui->globalImageLabel->switchToSmartZoomMode(true);
+	m_ui->globalImageLabel->grabKeyboard ();
+
 }
 
 MainImageWidget::~MainImageWidget()
@@ -110,32 +112,38 @@ void MainImageWidget::setImageFile(QString imagePath,
 
 	m_fullImage.load(imagePath);
 	m_displayImage = m_fullImage.copy();
-	m_ui->globalImageLabel->setRefImage(&m_fullImage);
+
+	m_ui->globalImageLabel->setRefImage(&m_displayImage);
 
 	m_mouse_has_moved = false;
 	m_lastClick	= QPoint(-1, -1);
 
 
 	if(!m_fullImage.isNull()) {
-		char info[512];
+		QString strInfo;
 		if(!pinfo) {
-			sprintf(info, "%s\n%d x %d x %d\n",
+			strInfo.sprintf( "%s\n%d x %d x %d\n",
 					imagePath.toUtf8().data(),
 					m_fullImage.width(),
 					m_fullImage.height(),
 					m_fullImage.depth()/8);
 		} else {
-			sprintf(info, "%s\n%d x %d x %d\n%d ISO\n%s",
+//			sprintf(info, "%s\n%d x %d x %d\n%d ISO\n%s",
+//					imagePath.toUtf8().data(),
+//					m_fullImage.width(),
+//					m_fullImage.height(),
+//					m_fullImage.depth()/8,
+//					pinfo->ISO,
+//					pinfo->datetime.toAscii().data()
+//					);
+			strInfo.sprintf("%s\n%d x %d x %d\n%d ISO",
 					imagePath.toUtf8().data(),
 					m_fullImage.width(),
 					m_fullImage.height(),
 					m_fullImage.depth()/8,
-					pinfo->ISO,
-					pinfo->datetime.toAscii().data()
+					pinfo->ISO
 					);
-
 		}
-		QString strInfo(info);
 		m_ui->globalImageLabel->setToolTip(strInfo);
 	}
 
@@ -297,6 +305,7 @@ void MainImageWidget::on_globalImageLabel_signalWheelEvent( QWheelEvent * e )
 
 	zoomOn(e->x(), e->y(), m_zoom_scale);
 }
+
 void MainImageWidget::on_actionZoomIn_activated( ) {
 	fprintf(stderr, "MainImageW::%s:%d : zoom=%d",
 			__func__, __LINE__, m_zoom_scale);
@@ -304,4 +313,12 @@ void MainImageWidget::on_actionZoomIn_activated( ) {
 
 	zoomOn(width()/2, height()/2, m_zoom_scale);
 
+}
+
+void MainImageWidget::on_zoomButton_toggled(bool checked)
+{
+	if(checked)
+	{
+		m_ui->globalImageLabel->switchToSmartZoomMode(true);
+	}
 }
