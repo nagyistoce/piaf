@@ -30,10 +30,11 @@
 
 #include "imgutils.h"
 #include <errno.h>
+#include <sys/time.h>
 
 
 FILE * logfile = stderr;
-
+u8 g_debug_alloc = 0;
 u8 g_debug_imgverbose = 0;
 
 int tmByteDepth(IplImage * iplImage) {
@@ -137,16 +138,116 @@ void tmPrintProperties(IplImage * img) {
 
 }
 
-/* Create an IplImage width OpenCV's cvCreateImage and clear buffer */
-IplImage * tmCreateImage(CvSize size, int depth, int channels) {
 
-	/*
-	fprintf(stderr, "[utils] %s:%d : creating IplImage : %dx%d x depth=%d x channels=%d\n",
+/** @brief Tracking of RAM usage */
+typedef struct {
+	IplImage * img_ptr;
+	struct timeval tv;
+	int ram_size;
+	char file[32];
+	char func[32];
+	int line;
+} t_iplimage_usage;
+
+static t_iplimage_usage * g_iplimg_usage_tab = NULL;
+static int g_max_iplimg_usage = 0;
+static int g_iplimg_usage_total_ram = 0;
+
+IplImage * subCloneImage(const char * file, const char * func, int line,
+						 IplImage * img) {
+	if(!img) { return NULL; }
+
+	IplImage * clone = subCreateImage(file, func, line,
+									  cvGetSize(img), img->depth, img->nChannels);
+	if(clone)
+	{
+		cvCopy(img, clone);
+	}
+
+	return clone;
+}
+
+
+/* Create an IplImage width OpenCV's cvCreateImage and clear buffer */
+IplImage * subCreateImage(const char * file, const char * func, int line,
+						 CvSize size, int depth, int channels)
+{
+	int usage_space = -1;
+	if(!g_iplimg_usage_tab ) {
+		g_max_iplimg_usage = 50;
+		g_iplimg_usage_tab = new t_iplimage_usage [ g_max_iplimg_usage ];
+		memset(g_iplimg_usage_tab, 0, sizeof(t_iplimage_usage) * g_max_iplimg_usage );
+		usage_space = 0;
+	} else {
+		for(int sp=0; usage_space<0
+			&& sp<g_max_iplimg_usage
+			&& usage_space<0; sp++) {
+
+			if(g_iplimg_usage_tab[sp].img_ptr == NULL ) {
+				usage_space = sp;
+			}
+		}
+
+		if(usage_space < 0) {
+			// there was no more space => resize the
+			int old_max_iplimg_usage = g_max_iplimg_usage ;
+			t_iplimage_usage * old_iplimg_usage_tab = g_iplimg_usage_tab;
+			g_max_iplimg_usage += 10;
+
+			fprintf(stderr, "[utils] %s:%d : no more space => "
+					"resize array %d => %d\n"
+					"\t Still allocated : \n",
+					__func__, __LINE__,
+					old_max_iplimg_usage, g_max_iplimg_usage );
+			for(int sp=0; sp<old_max_iplimg_usage; sp++) {
+				if(g_iplimg_usage_tab[sp].img_ptr != NULL ) {
+					if(g_debug_alloc) {
+						fprintf(stderr, "\t[%d]\t%dx%dx%d @ [%s] %s:%d\n",
+							sp,
+							g_iplimg_usage_tab[sp].img_ptr->width,
+							g_iplimg_usage_tab[sp].img_ptr->height,
+							g_iplimg_usage_tab[sp].img_ptr->nChannels,
+							g_iplimg_usage_tab[sp].file,
+							g_iplimg_usage_tab[sp].func,
+							g_iplimg_usage_tab[sp].line
+							);
+					}
+				}
+			}
+
+
+			// Allocate new tab and copy old into new
+			g_iplimg_usage_tab = new t_iplimage_usage [ g_max_iplimg_usage ];
+
+			memset(g_iplimg_usage_tab, 0, sizeof(t_iplimage_usage)*g_max_iplimg_usage );
+			memcpy(g_iplimg_usage_tab, old_iplimg_usage_tab, sizeof(t_iplimage_usage)*old_max_iplimg_usage );
+
+			usage_space = old_max_iplimg_usage; // last old is new first available
+
+			delete [] old_iplimg_usage_tab;
+		}
+	}
+
+
+	if(g_debug_alloc) {
+		fprintf(stderr, "[utils] %s:%d : creating IplImage : %dx%d x depth=%d x channels=%d\n",
 			__func__, __LINE__,
 			size.width, size.height, depth, channels);
-	*/
+	}
 	IplImage * img = cvCreateImage(size, depth, channels);
 	if(img) {
+		g_iplimg_usage_tab[usage_space].img_ptr = img;
+		g_iplimg_usage_total_ram += img->widthStep * img->height;
+		g_iplimg_usage_tab[usage_space].ram_size = img->widthStep * img->height;
+
+
+		strncpy(g_iplimg_usage_tab[usage_space].file, file, 31);
+		g_iplimg_usage_tab[usage_space].file[31]='\0';
+		strncpy(g_iplimg_usage_tab[usage_space].func, func, 31);
+		g_iplimg_usage_tab[usage_space].func[31]='\0';
+		g_iplimg_usage_tab[usage_space].line = line;
+		gettimeofday(&g_iplimg_usage_tab[usage_space].tv, NULL);
+
 		if(!(img->imageData)) {
 			fprintf(stderr, "[utils] %s:%d : ERROR : img->imageData=NULL while "
 				"creating IplImage => %dx%d x depth=%d x channels=%d\n",
@@ -171,11 +272,71 @@ IplImage * tmCreateImage(CvSize size, int depth, int channels) {
 }
 
 /** @brief Release an image and clear pointer */
-void tmReleaseImage(IplImage ** img) {
+void subReleaseImage(const char * file, const char * func, int line,
+					 IplImage ** img) {
 	if(!img) return;
 	if(!(*img) ) return;
+
+	int found = -1;
+	for(int i = 0; found<0 && i<g_max_iplimg_usage; i++) {
+		if(g_iplimg_usage_tab[i].img_ptr == *img) {
+			found = i;
+			if(g_debug_alloc) {
+				fprintf(stderr, "[imgutils] %s:%d clear img [%d] %dx%dx%d "
+					"allocated at [%s] %s:%d\n",
+					__func__, __LINE__, i,
+					(*img)->width, (*img)->height, (*img)->nChannels,
+					g_iplimg_usage_tab[i].file, g_iplimg_usage_tab[i].func, g_iplimg_usage_tab[i].line);
+			}
+			memset(&g_iplimg_usage_tab[i], 0, sizeof(t_iplimage_usage));
+
+			g_iplimg_usage_total_ram -= (*img)->widthStep * (*img)->height;
+		}
+	}
+
+	if(found<0) {
+		fprintf(stderr, "[imgutils] %s:%d : could not find where image has been allocated ! %dx%dx%d",
+				__func__, __LINE__,
+				(*img)->width, (*img)->height, (*img)->nChannels );
+	}
+
+	if( !(*img)->imageData ) return;
 	cvReleaseImage(img);
 	*img = NULL;
+}
+
+
+/** @brief print the list of allocated IplImage */
+void tmPrintIplImages() {
+	fprintf(stderr, "[imgutils] %s:%d : total RAM used : %d B = %G MB : \n",
+			__func__, __LINE__,
+			g_iplimg_usage_total_ram, (float)g_iplimg_usage_total_ram/(1024.f*1024.f)
+			);
+	for(int i = 0; i<g_max_iplimg_usage; i++) {
+		if(g_iplimg_usage_tab[i].img_ptr) {
+			char filefull[1024];
+			strcpy(filefull, g_iplimg_usage_tab[i].file);
+			// find last /
+			char * slash = filefull, * lastslash = filefull;
+			do
+			{
+				slash = strstr(slash, "/");
+				if(slash) {
+					slash++;
+					lastslash = slash;
+				}
+			}
+			while(slash);
+
+			fprintf(stderr, "\t%p : %d x %d x %d ch x %d bytes from %s %s:%d @ %03d.%02d\n",
+					g_iplimg_usage_tab[i].img_ptr,
+					g_iplimg_usage_tab[i].img_ptr->width, g_iplimg_usage_tab[i].img_ptr->height,
+					g_iplimg_usage_tab[i].img_ptr->nChannels, tmByteDepth(g_iplimg_usage_tab[i].img_ptr),
+					lastslash, g_iplimg_usage_tab[i].func, g_iplimg_usage_tab[i].line,
+					(int)g_iplimg_usage_tab[i].tv.tv_sec%1000,(int)g_iplimg_usage_tab[i].tv.tv_usec/10000
+					);
+		}
+	}
 }
 
 /** process a dilatation around the dust */

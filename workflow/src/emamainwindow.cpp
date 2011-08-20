@@ -131,7 +131,7 @@ void EmaMainWindow::saveSettings()
 	mSettings.endArray();
 }
 
-void EmaMainWindow::on_appendNewPictureThumb(const QString & filename) {
+void EmaMainWindow::on_appendNewPictureThumb(QString filename) {
 	// update progress
 	appendThumbImage(filename);
 }
@@ -704,6 +704,10 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 	//	ThumbImageWidget * newThumb2 = new ThumbImageWidget(ui->gridWidget);
 		newThumb2->setImageFile(fileName, pinfo->thumbImage.iplImage,
 								pinfo->score);
+
+		// now delete thumb ?
+		// FIXME
+		//tmReleaseImage(&pinfo->thumbImage.iplImage);
 
 		QGridLayout * grid_layout = (QGridLayout *)ui->gridWidget->layout();
 		grid_layout->addWidget( newThumb2, row, col );

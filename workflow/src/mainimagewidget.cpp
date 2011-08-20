@@ -98,12 +98,15 @@ void MainImageWidget::slotUpdateImage()
 
 }
 
-void MainImageWidget::setImageFile(const QString & imagePath,
+void MainImageWidget::setImageFile(QString imagePath,
 								   t_image_info_struct * pinfo )
 {
-	// "NavImageWidget::%s:%d ('%s')\n",
-	//		__func__, __LINE__,
-	//		imagePath);
+	// print allocated images
+	tmPrintIplImages();
+
+	fprintf(stderr, "NavImageWidget::%s:%d ('%s')\n",
+			__func__, __LINE__,
+			imagePath.toAscii().data());
 
 	m_fullImage.load(imagePath);
 	m_displayImage = m_fullImage.copy();

@@ -239,11 +239,11 @@ void EmaImageManager::run() {
 
 
 					// Copy thumb
-					new_info->thumbImage.iplImage = tmClone(l_info.thumbImage.iplImage);
+					new_info->thumbImage.iplImage = tmCloneImage(l_info.thumbImage.iplImage);
 					// Copy HSV histo
-					new_info->hsvImage = tmClone(l_info.hsvImage);
+					new_info->hsvImage = tmCloneImage(l_info.hsvImage);
 					// Copy sharpness
-					new_info->sharpnessImage = tmClone(l_info.sharpnessImage);
+					new_info->sharpnessImage = tmCloneImage(l_info.sharpnessImage);
 
 					// Copy RGB histo
 //					new_info->histogram
@@ -257,6 +257,9 @@ void EmaImageManager::run() {
 					m_managedInfo.append(new_info);
 					m_managedInfoMutex.unlock();
 
+					// purge info thumbs, which are not used anymore
+					// (in piaf)
+					m_imgProc.purgeThumbs();
 				}
 
 				cur++;

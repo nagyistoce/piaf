@@ -168,7 +168,7 @@ private slots:
 	void on_actionConvert_images_to_AVI_activated();
 	void on_actionAbout_activated();
 
-	void on_appendNewPictureThumb(const QString & );
+	void on_appendNewPictureThumb( QString  );
 
 	void on_filesTreeWidget_itemClicked ( QTreeWidgetItem * item, int column );
 	void on_filesTreeWidget_itemDoubleClicked ( QTreeWidgetItem * item, int column );
