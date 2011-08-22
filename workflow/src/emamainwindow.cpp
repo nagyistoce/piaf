@@ -706,8 +706,8 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 								pinfo->score);
 
 		// now delete thumb ?
-		// FIXME
-		//tmReleaseImage(&pinfo->thumbImage.iplImage);
+		// FIXME : check if there is no side effect of this deletion
+		tmReleaseImage(&pinfo->thumbImage.iplImage);
 
 		QGridLayout * grid_layout = (QGridLayout *)ui->gridWidget->layout();
 		grid_layout->addWidget( newThumb2, row, col );

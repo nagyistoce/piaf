@@ -257,9 +257,6 @@ void EmaImageManager::run() {
 					m_managedInfo.append(new_info);
 					m_managedInfoMutex.unlock();
 
-					// purge info thumbs, which are not used anymore
-					// (in piaf)
-					m_imgProc.purgeThumbs();
 				}
 
 				cur++;
