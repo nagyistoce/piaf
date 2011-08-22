@@ -105,6 +105,7 @@ void ThumbImageFrame::setImageFile(const QString & imagePath,
 	QPixmap fullImage;
 	if( img ) {
 		QImage qImg = iplImageToQImage(img);
+
 		fullImage = QPixmap::fromImage( qImg );
 		fprintf(stderr, "ThumbImageFrame::%s:%d : load '%s' : "
 				"iplImageToQImage(%dx%d) => qImg=%dx%d => pixmap=%dx%d\n",
