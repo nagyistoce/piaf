@@ -16,6 +16,7 @@
  ***************************************************************************/
 
 #include "imagewidget.h"
+#include "piaf-common.h"
 #include <stdio.h>
 #include <QPainter>
 
@@ -25,6 +26,7 @@
 //Added by qt3to4:
 #include <QPixmap>
 #include <QPaintEvent>
+#include <QBitmap>
 
 unsigned char RthermicBlack2Red(int p) {
 	int dp = p-170;
@@ -69,7 +71,7 @@ unsigned char BthermicBlue2Red(int p) {
 	return B;
 }
 
-bool g_debug_Imagewidget = false;
+bool g_debug_ImageWidget = false;
 
 
 ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
@@ -85,7 +87,8 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 	ZoomScale = 1;
 	m_colorMode = 0;
 
-	grabKeyboard ();
+	mEditMode = EDITMODE_NONE;
+
 }
 
 void ImageWidget::setRefImage(QImage *pIm)
@@ -121,12 +124,54 @@ void ImageWidget::setZoomParams(int xO, int yO, int scale) {
 	}
 	ZoomScale = scale;
 //		mZoomFit = false;
+	clipSmartZooming();
 	update();
 }
 
+int ImageWidget::setEditMode(int mode)
+{
+	if(mode > EDITMODE_MAX) {
+		return mEditMode;
+	}
+
+	mEditMode = mode;
+
+	switch(mEditMode) {
+	default:
+		setCursor(Qt::ArrowCursor);
+		break;
+
+	case EDITMODE_ZOOM:
+		setCursor(Qt::OpenHandCursor);//Qt::CrossCursor);
+		break;
+
+	case EDITMODE_PICKER: {
+		chdir(BASE_DIRECTORY "images/pixmaps");
+		QCursor zoomCursor = QCursor( QBitmap( "CursorPicker.bmp", 0),
+									  QBitmap( "CursorPickerMask.bmp", 0),
+									  1, 20);
+		setCursor(zoomCursor);
+		}break;
+
+	case EDITMODE_ROIS:
+		setCursor(Qt::CrossCursor);
+		break;
+	}
+
+	// add a fake QRect
+//	QRect * rect = new QRect(10,10, 100, 100);
+//	mROIList.append(rect);
+//	mSelectedROI = rect;
+	mSelectedROI = NULL;
 
 
-void ImageWidget::setColorMode(int mode) {
+	update();
+
+	return mEditMode;
+}
+
+void ImageWidget::setColorMode(int mode)
+{
 	if(mode <= COLORMODE_MAX )
 		m_colorMode = mode;
 	else
@@ -181,14 +226,16 @@ void ImageWidget::setColorMode(int mode) {
 #define KEY_ZOOM_INC	0.2f
 void ImageWidget::keyPressEvent ( QKeyEvent * event )
 {
-	fprintf(stderr, "ImageWidget::%s:%d : received event=%p\n", __func__, __LINE__, event);
+	fprintf(stderr, "ImageWidget %p::%s:%d : received event=%p\n",
+			this, __func__, __LINE__, event);
 	if(event)
 	{
 		QString key = event->text();
-		if(g_debug_Imagewidget) {
+		//if(g_debug_Imagewidget)
+		{
 			fprintf(stderr, "ImageWidget::%s:%d : received event=%p='%s'\n", __func__, __LINE__,
 				event,
-				event->text().toAscii().data());
+				event->text().toUtf8().data());
 		}
 
 		if(key.compare("+")==0)
@@ -212,44 +259,129 @@ void ImageWidget::keyPressEvent ( QKeyEvent * event )
 			mZoomFitFactor = -1.;
 			update();
 		}
+		else if(key.compare("1")==0)
+		{
+			fprintf(stderr, "ImageWidget::%s:%d : zoom 1:1 !\n",
+					__func__, __LINE__);
+			//mZoomFitFactor = 1.;
+			setZoomParams(xZoomCenter, yZoomCenter, 1);
+			update();
+		}
+
 	}
 }
 
 void ImageWidget::mousePressEvent(QMouseEvent *e) {
-	emit mousePressed(e); // Forward signal
 	if(e->button() == Qt::LeftButton) {
-		if(mZoomFit) {
+		switch(mEditMode)
+		{
+		default:
+		case EDITMODE_NONE:
+			emit mousePressed(e); // Forward signal
+			break;
+		case EDITMODE_ZOOM:
+			if(mZoomFit) {
+				xMouseMoveStart = e->pos().x();
+				yMouseMoveStart = e->pos().y();
+				xOriginMoveStart = xOrigine;
+				yOriginMoveStart = yOrigine;
+			}
+			break;
+		case EDITMODE_ROIS: {
 			xMouseMoveStart = e->pos().x();
 			yMouseMoveStart = e->pos().y();
 			xOriginMoveStart = xOrigine;
 			yOriginMoveStart = yOrigine;
+			QRect * prect = new QRect(displayToImage(QRect(xMouseMoveStart, yMouseMoveStart,
+													 e->pos().x()-xMouseMoveStart,
+													 e->pos().y()-yMouseMoveStart))
+									  );
+			mROIList.append(prect);
+			mSelectedROI = prect; }
+			break;
+		case EDITMODE_PICKER: {
+			QPoint pt = displayToImage(e->pos());
+			QRgb colorRGB = dImage->pixel(pt);
+			int colorGrey = qGray(colorRGB);
+
+			emit signalPicker(colorRGB, colorGrey, pt);
+			}
+			break;
 		}
 	}
 }
 
 
 void ImageWidget::mouseReleaseEvent(QMouseEvent *e){
-	emit mouseReleased(e);
 	if(e->button() == Qt::LeftButton) {
-		if(mZoomFit) {
-			xMouseMoveStart = -1;
+		xMouseMoveStart = -1;
+		switch(mEditMode)
+		{
+		default:
+			emit mouseReleased(e);
+			break;
+		case EDITMODE_ZOOM:
+			if(mZoomFit) {
+				xMouseMoveStart = e->pos().x();
+				yMouseMoveStart = e->pos().y();
+				xOriginMoveStart = xOrigine;
+				yOriginMoveStart = yOrigine;
+			}
+			break;
+		case EDITMODE_ROIS: // nothing to do, rect is defined in move event
+			break;
+		case EDITMODE_PICKER:
+			break;
 		}
 	}
 }
 
 void ImageWidget::mouseMoveEvent(QMouseEvent *e){
-	emit mouseMoved(e);
-	if(!mZoomFit) { return; }
 
-	if(xMouseMoveStart<0) { return; } // not clicked
 
-	// dx,dy is the move in pixel on display
-	int dx = e->pos().x() - xMouseMoveStart ;
-	int dy = e->pos().y() - yMouseMoveStart ;
-	xOrigine = xOriginMoveStart - dx / mZoomFitFactor;
-	yOrigine = yOriginMoveStart - dy / mZoomFitFactor;
-	clipSmartZooming();
-	update();
+
+	switch(mEditMode)
+	{
+	default:
+	case EDITMODE_NONE:
+		if(!mZoomFit) { return; }
+		if(xMouseMoveStart<0) { return; } // not clicked
+		emit mouseMoved(e);
+		break;
+	case EDITMODE_ZOOM: {
+		if(!mZoomFit) { return; }
+		if(xMouseMoveStart<0) { return; } // not clicked
+		// dx,dy is the move in pixel on display
+		int dx = e->pos().x() - xMouseMoveStart ;
+		int dy = e->pos().y() - yMouseMoveStart ;
+
+		xOrigine = xOriginMoveStart - dx / mZoomFitFactor;
+		yOrigine = yOriginMoveStart - dy / mZoomFitFactor;
+
+		clipSmartZooming();
+		update();
+
+		}break;
+	case EDITMODE_ROIS:
+		if(!mSelectedROI){
+		} else {
+			*mSelectedROI = displayToImage(QRect(xMouseMoveStart, yMouseMoveStart,
+												 e->pos().x()-xMouseMoveStart,
+												 e->pos().y()-yMouseMoveStart));
+		}
+		update();
+		break;
+	case EDITMODE_PICKER: {
+		QPoint pt = displayToImage(e->pos());
+		QRgb colorRGB = dImage->pixel(pt);
+		int colorGrey = qGray(colorRGB);
+
+		emit signalPicker(colorRGB, colorGrey, pt);
+		}
+		break;
+
+	}
+
 }
 
 
@@ -274,6 +406,10 @@ void ImageWidget::clipSmartZooming()
 	// update xZoomCenter
 	xZoomCenter = xOrigine + width/2 ;
 	yZoomCenter = yOrigine + height/2 ;
+
+	QRect cropRect = displayToImage(QRect(0,0, size().width(), size().height()));
+	emit signalZoomRect(cropRect);
+
 }
 
 QPoint ImageWidget::displayToOriginal(int x, int y)
@@ -290,8 +426,8 @@ void ImageWidget::zoomOn( int xCenterOnDisp, int yCenterOnDisp,
 {
 	if(!dImage) return;
 
-	fprintf(stderr, "ImageWidget::%s:%d : mZoomFitFactor=%g image=%dx%d => center=%d,%d inc=%g\n",
-			__func__,__LINE__,
+	fprintf(stderr, "ImageWidget %p::%s:%d : mZoomFitFactor=%g image=%dx%d => center=%d,%d inc=%g\n",
+			this, __func__,__LINE__,
 			mZoomFitFactor,
 			dImage->width(), dImage->height(),
 			xCenterOnDisp, yCenterOnDisp, zoominc);
@@ -435,11 +571,13 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 		// Use double-buffering
 		cr = e->rect();
 	}
-	fprintf(stderr, "ImageWidget::%s:%d : dImage=%dx%d size=%dx%d => cr=%dx%d fit=%c\n",
-			__func__, __LINE__,
-			dImage->width(), dImage->height(),
-			size().width(), size().height(),
-			cr.width(), cr.height(), mZoomFit ? 'T':'F');
+	if(g_debug_ImageWidget) {
+		fprintf(stderr, "ImageWidget %p::%s:%d : dImage=%dx%d size=%dx%d => cr=%dx%d fit=%c\n",
+				this, __func__, __LINE__,
+				dImage->width(), dImage->height(),
+				size().width(), size().height(),
+				cr.width(), cr.height(), mZoomFit ? 'T':'F');
+	}
 
 	QPixmap pix( cr.size() );
 	pix.fill( this, cr.topLeft() );
@@ -450,8 +588,8 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 		int wdisp = size().width()-2;
 		int hdisp = size().height()-2;
 		if(mZoomFitFactor<0.) {
-//			mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
-//									   (float)hdisp / (float)dImage->height() );
+			mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
+									   (float)hdisp / (float)dImage->height() );
 
 			m_displayImage = dImage->scaled(size(), Qt::KeepAspectRatio,
 											Qt::SmoothTransformation ).copy(cr);
@@ -486,6 +624,34 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 			p.drawImage(0,0, *dImage);
 	}
 
+	//#define EDITMODE_ZOOM	0
+	//#define EDITMODE_PICKER	1
+	//#define EDITMODE_ROIS	2
+	if(mEditMode == EDITMODE_ROIS)
+	{
+		QList<QRect *>::iterator it;
+		if(!mROIList.isEmpty()) {
+			p.setPen(QPen(QColor(qRgb(64,128,64))));
+
+			for(it = mROIList.begin(); it!=mROIList.end(); ++it)
+			{
+				QRect * prect = (*it);
+				if(prect)
+				{
+					// Draw rect
+					QRect drawRect = imageToDisplay(*prect);
+					p.drawRect(drawRect);
+				}
+			}
+		}
+
+		if(mSelectedROI) {
+			QRect drawRect = imageToDisplay(*mSelectedROI);
+			p.setPen(QPen(QColor(qRgb(0,255,0))));
+			p.drawRect(drawRect);
+		}
+	}
+
 
 	if(m_overlayRect.width()>0) {
 		p.setPen(m_overlayColor);
@@ -496,3 +662,86 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 	p.end();
 	bitBlt( this, cr.topLeft(), &pix );
 }
+
+
+
+
+
+
+
+
+/** @brief Convert a rect from image reference to display */
+QRect ImageWidget::imageToDisplay(QRect img_rect)
+{
+	QRect display_rect;
+	display_rect = QRect((img_rect.x()- xOrigine) * mZoomFitFactor ,
+						 (img_rect.y()- yOrigine) * mZoomFitFactor ,
+						 img_rect.width() * mZoomFitFactor ,
+						 img_rect.height() * mZoomFitFactor
+						 );
+	fprintf(stderr, "ImgWidget::%s:%d : zs=%g img=%d,%d+%dx%d => %d,%d+%dx%d\n",
+			__func__, __LINE__,
+			mZoomFitFactor,
+			img_rect.x(),img_rect.y(), img_rect.width(), img_rect.height(),
+			display_rect.x(),display_rect.y(), display_rect.width(), display_rect.height()
+			);
+	return display_rect;
+}
+
+/** @brief Convert a rect from display reference to image */
+QRect ImageWidget::displayToImage(QRect display_rect)
+{
+	QRect img_rect;
+	img_rect = QRect(xOrigine + (float)display_rect.x()/mZoomFitFactor,
+					 yOrigine + (float)display_rect.y()/mZoomFitFactor,
+					 (float)display_rect.width() /mZoomFitFactor,
+					 (float)display_rect.height() /mZoomFitFactor
+					 );
+	fprintf(stderr, "ImgWidget::%s:%d : sc=%g O=%d,%d disp=%d,%d+%dx%d => img=%d,%d+%dx%d\n",
+			__func__, __LINE__,
+			mZoomFitFactor, xOrigine, yOrigine,
+			display_rect.x(),display_rect.y(), display_rect.width(), display_rect.height(),
+			img_rect.x(),img_rect.y(), img_rect.width(), img_rect.height()
+			);
+
+	return img_rect;
+}
+
+/** @brief Convert a point from image reference to display */
+QPoint ImageWidget::imageToDisplay(QPoint img_pt)
+{
+	QPoint display_pt;
+	display_pt = QPoint((img_pt.x()- xOrigine) * mZoomFitFactor ,
+						(img_pt.y()- yOrigine) * mZoomFitFactor
+						 );
+	fprintf(stderr, "ImgWidget::%s:%d : zs=%g img=%d,%d => disp=%d,%d\n",
+			__func__, __LINE__,
+			mZoomFitFactor,
+			img_pt.x(),img_pt.y(),
+			display_pt.x(), display_pt.y()
+			);
+	return display_pt;
+}
+
+/** @brief Convert a point from display reference to image */
+QPoint ImageWidget::displayToImage(QPoint display_pt)
+{
+	QPoint img_pt;
+	img_pt = QPoint(xOrigine + (float)display_pt.x()/mZoomFitFactor,
+					 yOrigine + (float)display_pt.y()/mZoomFitFactor);
+//	fprintf(stderr, "ImgWidget::%s:%d : disp=%d,%d => img=%d,%d\n",
+//			__func__, __LINE__,
+//			display_pt.x(), display_pt.y(),
+//			img_pt.x(), img_pt.y()
+//			);
+	return img_pt;
+}
+
+
+
+
+
+
+
+
+

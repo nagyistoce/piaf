@@ -222,8 +222,8 @@ void FilterSequencer::unloadAllAvailable()
 			PiafFilter * filter = (*it);
 			if(filter != lastF) {
 //#ifdef __SWPLUGIN_MANAGER__
-				fprintf(stderr, "Deleting filter '%s'[%d]='%s' from available filterColl...\n",
-					filter->exec_name, filter->indexFunction, filter->funcList[filter->indexFunction].name);
+				fprintf(stderr, "Deleting filter '%s' from available filterColl...\n",
+					filter->exec_name);
 					fflush(stderr);
 ///#endif
 				lastF = filter;
@@ -232,8 +232,6 @@ void FilterSequencer::unloadAllAvailable()
 		}
 	}
 
-	// clear frame struct
-	swFreeFrame(&frame);
 }
 
 
@@ -1536,6 +1534,8 @@ void PiafFilter::loadBinary(char * filename)
 	swAllocateFrame(&frame, 1024);
 
 	if(!loadChildProcess()) {
+		fprintf(stderr, "[PiafFilter]::%s:%d : could not load process '%s'. Return.\n",
+				__func__, __LINE__, exec_name);
 		return;
 	}
 
@@ -1818,7 +1818,15 @@ int PiafFilter::loadChildProcess()
 	}
 	else
 	{
+		struct timeval tv1, tv2;
+		gettimeofday(&tv1, NULL);
 		childpid = fork();
+		gettimeofday(&tv2, NULL);
+		fprintf(stderr, "PiafFilter::%s:%d : FORK: %03d.%03d / %03d.%03d\n",
+				__func__, __LINE__,
+				(int)tv1.tv_sec%1000, (int)tv1.tv_usec/1000,
+				(int)tv2.tv_sec%1000, (int)tv2.tv_usec/1000
+				);
 
 		switch(childpid)
 		{

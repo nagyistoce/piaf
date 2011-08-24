@@ -27,15 +27,67 @@
     <number>1</number>
    </property>
    <item>
-    <widget class="QTreeWidget" name="availablePluginsTreeWidget">
-     <attribute name="headerMinimumSectionSize">
-      <number>50</number>
-     </attribute>
-     <column>
-      <property name="text">
-       <string>Available plugins</string>
-      </property>
-     </column>
+    <widget class="QStackedWidget" name="stackedWidget">
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <widget class="QWidget" name="pagePlugins">
+      <layout class="QVBoxLayout" name="verticalLayout_3">
+       <property name="margin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="QTreeWidget" name="availablePluginsTreeWidget">
+         <attribute name="headerMinimumSectionSize">
+          <number>50</number>
+         </attribute>
+         <column>
+          <property name="text">
+           <string>Available plugins</string>
+          </property>
+         </column>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pageEditParams">
+      <layout class="QVBoxLayout" name="verticalLayout_4">
+       <item>
+        <widget class="QScrollArea" name="scrollArea">
+         <property name="widgetResizable">
+          <bool>true</bool>
+         </property>
+         <widget class="QWidget" name="scrollAreaWidgetContents">
+          <property name="geometry">
+           <rect>
+            <x>0</x>
+            <y>0</y>
+            <width>326</width>
+            <height>148</height>
+           </rect>
+          </property>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="pageHisto">
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="margin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="TimeHistogramWidget" name="timeHistoWidget" native="true">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>80</height>
+          </size>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
     </widget>
    </item>
    <item>
@@ -80,7 +132,7 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="7" column="0">
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -93,7 +145,7 @@
         </property>
        </spacer>
       </item>
-      <item row="2" column="0">
+      <item row="3" column="0">
        <widget class="QPushButton" name="activateButton">
         <property name="toolTip">
          <string>Activate/disactivate button</string>
@@ -107,21 +159,7 @@
         </property>
        </widget>
       </item>
-      <item row="3" column="0">
-       <widget class="QPushButton" name="timeButton">
-        <property name="toolTip">
-         <string>Show time histogram</string>
-        </property>
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../ema.qrc">
-          <normaloff>:/icons/icons/16x16/chronometer.png</normaloff>:/icons/icons/16x16/chronometer.png</iconset>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
+      <item row="5" column="0">
        <widget class="QPushButton" name="upButton">
         <property name="toolTip">
          <string>Move the selected plugin up</string>
@@ -135,7 +173,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="6" column="0">
        <widget class="QPushButton" name="downButton">
         <property name="toolTip">
          <string>Move the selected plugin down</string>
@@ -164,6 +202,30 @@
          <property name="bottomMargin">
           <number>2</number>
          </property>
+         <item>
+          <widget class="QPushButton" name="pluginsButton">
+           <property name="enabled">
+            <bool>true</bool>
+           </property>
+           <property name="toolTip">
+            <string>Show list of available plugins</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../ema.qrc">
+             <normaloff>:/icons/icons/22x22/preferences-plugin.png</normaloff>:/icons/icons/22x22/preferences-plugin.png</iconset>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
          <item>
           <widget class="QPushButton" name="loadButton">
            <property name="toolTip">
@@ -236,7 +298,7 @@
         </layout>
        </widget>
       </item>
-      <item row="1" column="1" rowspan="6">
+      <item row="1" column="1" rowspan="7">
        <widget class="QTreeWidget" name="selectedPluginsTreeWidget">
         <property name="toolTip">
          <string>Loaded plugins, processed from top to bottom</string>
@@ -273,11 +335,33 @@
         </column>
        </widget>
       </item>
+      <item row="2" column="0">
+       <widget class="QPushButton" name="timeButton">
+        <property name="toolTip">
+         <string>Show time histogram</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/icons/16x16/chronometer.png</normaloff>:/icons/icons/16x16/chronometer.png</iconset>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>TimeHistogramWidget</class>
+   <extends>QWidget</extends>
+   <header>timehistogramwidget.h</header>
+   <container>1</container>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../ema.qrc"/>
   <include location="../../main/piaf.qrc"/>

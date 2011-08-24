@@ -22,15 +22,12 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="margin">
-     <number>1</number>
-    </property>
     <item>
-     <widget class="QSplitter" name="splitter">
+     <widget class="QSplitter" name="splitter_2">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QSplitter" name="splitter_2">
+      <widget class="QSplitter" name="splitter">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -85,7 +82,7 @@
               <x>0</x>
               <y>0</y>
               <width>206</width>
-              <height>445</height>
+              <height>434</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -112,7 +109,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>206</width>
-                  <height>355</height>
+                  <height>344</height>
                  </rect>
                 </property>
                 <attribute name="icon">
@@ -200,6 +197,9 @@
                  </item>
                  <item>
                   <widget class="QTreeWidget" name="filesTreeWidget">
+                   <property name="contextMenuPolicy">
+                    <enum>Qt::CustomContextMenu</enum>
+                   </property>
                    <property name="toolTip">
                     <string>Managed file list</string>
                    </property>
@@ -227,7 +227,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>206</width>
-                  <height>355</height>
+                  <height>344</height>
                  </rect>
                 </property>
                 <attribute name="icon">
@@ -335,7 +335,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>206</width>
-                  <height>355</height>
+                  <height>344</height>
                  </rect>
                 </property>
                 <attribute name="icon">
@@ -368,6 +368,29 @@
                      <number>0</number>
                     </property>
                     <item>
+                     <widget class="QPushButton" name="pushButton">
+                      <property name="toolTip">
+                       <string>Refresh list of scannable devices</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../ema.qrc">
+                        <normaloff>:/icons/icons/16x16/view-refresh.png</normaloff>:/icons/icons/16x16/view-refresh.png</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>16</width>
+                        <height>16</height>
+                       </size>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
                      <spacer name="horizontalSpacer_4">
                       <property name="orientation">
                        <enum>Qt::Horizontal</enum>
@@ -383,7 +406,7 @@
                     <item>
                      <widget class="QPushButton" name="deviceAddButton">
                       <property name="toolTip">
-                       <string>Create a new collection</string>
+                       <string>Create a new device (for devices not automatically listed)</string>
                       </property>
                       <property name="text">
                        <string/>
@@ -392,12 +415,21 @@
                        <iconset resource="../ema.qrc">
                         <normaloff>:/icons/icons/16x16/list-add.png</normaloff>:/icons/icons/16x16/list-add.png</iconset>
                       </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>16</width>
+                        <height>16</height>
+                       </size>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
                      </widget>
                     </item>
                     <item>
                      <widget class="QPushButton" name="deviceClearButton">
                       <property name="toolTip">
-                       <string>Clear the list of collections</string>
+                       <string>Remove the selected device form list</string>
                       </property>
                       <property name="text">
                        <string/>
@@ -405,6 +437,15 @@
                       <property name="icon">
                        <iconset resource="../ema.qrc">
                         <normaloff>:/icons/icons/16x16/list-remove.png</normaloff>:/icons/icons/16x16/list-remove.png</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>16</width>
+                        <height>16</height>
+                       </size>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
                       </property>
                      </widget>
                     </item>
@@ -426,6 +467,16 @@
                      <string>Status</string>
                     </property>
                    </column>
+                   <item>
+                    <property name="text">
+                     <string>V4L2</string>
+                    </property>
+                   </item>
+                   <item>
+                    <property name="text">
+                     <string>OpenCV</string>
+                    </property>
+                   </item>
                   </widget>
                  </item>
                 </layout>
@@ -438,7 +489,7 @@
          </item>
         </layout>
        </widget>
-       <widget class="QGroupBox" name="mainGroupBox">
+       <widget class="QWidget" name="mainWidget" native="true">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
           <horstretch>0</horstretch>
@@ -456,12 +507,6 @@
           <width>400</width>
           <height>0</height>
          </size>
-        </property>
-        <property name="title">
-         <string>Workspace</string>
-        </property>
-        <property name="checkable">
-         <bool>false</bool>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_10">
          <property name="spacing">
@@ -589,7 +634,7 @@
          <item>
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="currentIndex">
-            <number>1</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="page_mainImage">
             <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -622,8 +667,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>549</width>
-                  <height>425</height>
+                  <width>492</width>
+                  <height>432</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -656,6 +701,9 @@
            </widget>
            <widget class="QWidget" name="page_workspace">
             <layout class="QVBoxLayout" name="verticalLayout_13">
+             <property name="margin">
+              <number>1</number>
+             </property>
              <item>
               <widget class="QFrame" name="workshopFrame">
                <property name="frameShape">
@@ -664,17 +712,6 @@
                <property name="frameShadow">
                 <enum>QFrame::Raised</enum>
                </property>
-              </widget>
-             </item>
-             <item>
-              <widget class="QFrame" name="workshopImageToolFrame">
-               <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Raised</enum>
-               </property>
-               <layout class="QVBoxLayout" name="verticalLayout_16"/>
               </widget>
              </item>
             </layout>
@@ -783,67 +820,6 @@
            </widget>
           </item>
           <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_15">
-            <item>
-             <widget class="QComboBox" name="comboBox_2">
-              <item>
-               <property name="text">
-                <string>Camera</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="searchButton_2">
-              <property name="maximumSize">
-               <size>
-                <width>24</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="toolTip">
-               <string>Exclude this criterion</string>
-              </property>
-              <property name="text">
-               <string>X</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
-           <layout class="QHBoxLayout" name="horizontalLayout_18">
-            <item>
-             <widget class="QComboBox" name="comboBox_3">
-              <item>
-               <property name="text">
-                <string>Aperture</string>
-               </property>
-              </item>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="searchButton_4">
-              <property name="maximumSize">
-               <size>
-                <width>24</width>
-                <height>16777215</height>
-               </size>
-              </property>
-              <property name="text">
-               <string>X</string>
-              </property>
-              <property name="checkable">
-               <bool>true</bool>
-              </property>
-             </widget>
-            </item>
-           </layout>
-          </item>
-          <item>
            <widget class="MetadataWidget" name="exifScrollArea" native="true"/>
           </item>
           <item>
@@ -914,8 +890,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>215</width>
-               <height>439</height>
+               <width>264</width>
+               <height>444</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -939,14 +915,19 @@
                 <property name="frameShadow">
                  <enum>QFrame::Raised</enum>
                 </property>
+                <layout class="QVBoxLayout" name="verticalLayout_16">
+                 <property name="margin">
+                  <number>0</number>
+                 </property>
+                 <item>
+                  <widget class="PluginEditorForm" name="pluginManagerForm" native="true"/>
+                 </item>
+                </layout>
                </widget>
               </item>
              </layout>
             </widget>
            </widget>
-          </item>
-          <item>
-           <widget class="PluginEditorForm" name="pluginManagerForm" native="true"/>
           </item>
          </layout>
         </widget>
@@ -1094,8 +1075,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1012</width>
-             <height>174</height>
+             <width>996</width>
+             <height>169</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1182,7 +1163,7 @@
      <normaloff>:/icons/icons/16x16/help-about.png</normaloff>:/icons/icons/16x16/help-about.png</iconset>
    </property>
    <property name="text">
-    <string>About Ema</string>
+    <string>About Piaf workflow</string>
    </property>
    <property name="toolTip">
     <string>About Piaf Workflow</string>

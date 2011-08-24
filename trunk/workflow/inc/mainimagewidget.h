@@ -79,12 +79,26 @@ private slots:
 	void on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * e);
 	void on_globalImageLabel_signalWheelEvent( QWheelEvent * e );
 
+	void on_globalImageLabel_signalPicker(QRgb colorRGB, int colorGrey, QPoint pt);
+	void on_globalImageLabel_signalZoomRect(QRect cropRect) { emit signalZoomRect(cropRect); }
+
 	void slotUpdateImage();
+
 private:
 	Ui::MainImageWidget *m_ui;
+
 signals:
 	/// Signal to tell where the crop window is located
 	void signalCropRect(QRect);
+
+	/** @brief Viewed region has been updated
+		@param coordinates of rect in original image reference
+	 */
+	void signalZoomRect(QRect cropRect);
+
+	/** @brief The greyscale mode has been toggled */
+	void signalGreyscaleToggled(bool);
+
 };
 
 #endif // MAINIMAGEWIDGET_H

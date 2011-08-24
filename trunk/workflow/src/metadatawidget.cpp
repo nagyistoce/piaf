@@ -68,9 +68,8 @@ void MetadataWidget::setImageInfo(t_image_info_struct * p_image_info_struct)
 	if(!p_image_info_struct) return;
 	QString displayStr;
 
-	DEBUG_MSG("p_image_info_struct=%p / FIXME : disabled", p_image_info_struct);
-return;// FIXME
-	DEBUG_MSG("model='%s'", p_image_info_struct->model.toAscii().data());
+//	DEBUG_MSG("p_image_info_struct=%p / FIXME : disabled", p_image_info_struct);
+//	DEBUG_MSG("model='%s'", p_image_info_struct->model.toAscii().data());
 	m_ui->makerLineEdit->setText(p_image_info_struct->model);
 
 	// Orientation
