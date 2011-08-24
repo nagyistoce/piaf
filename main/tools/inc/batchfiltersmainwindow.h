@@ -30,6 +30,7 @@
 #include <QSettings>
 
 #include "SwFilters.h"
+#include "timehistogramwidget.h"
 #include "swvideodetector.h"
 
 namespace Ui {
@@ -71,19 +72,6 @@ typedef struct {
 	bool view_image;					///< periodically display image when processing
 	QString sequence_name;				///< name of sequence file
 } t_batch_options;
-
-/** \brief Processing time statistics
-*/
-typedef struct {
-	int nb_iter;
-	unsigned int * histogram;
-	int max_histogram;	///< nb of items in max_histogram array
-	float time_scale;	///< time scale : item us to index in array
-	int index_max;		///< index of histogram max
-	unsigned int value_max;
-	int overflow_count; ///< nb of overflow count
-	double overflow_cumul_us; ///< Cumul of overflow times
-} t_time_histogram;
 
 
 /** \brief Threaded batch processing

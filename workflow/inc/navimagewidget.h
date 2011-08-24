@@ -45,6 +45,10 @@ public:
 	void setImageFile(const QString &  imagePath);
 	/** @brief Set the main display crop size  */
 	void setMainDisplaySize(int x, int h);
+
+	/** @brief Set the zoom position */
+	void setZoomRect(QRect cropRect);
+
 protected:
 	virtual void changeEvent(QEvent *e);
 

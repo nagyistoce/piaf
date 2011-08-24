@@ -85,15 +85,17 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	loadSettings();
 
 	mWorkImage.load(":icons/ema-splash.png");
-	pWorkshopImage = new WorkshopImage(mWorkImage, "work image");
-	pWorkshopImageTool = new WorkshopImageTool(pWorkshopImage, ui->workshopImageToolFrame,
-		true /* show snapshot button */,
-		false,
-		"default",
-		Qt::WA_DeleteOnClose
-		);
-	ui->workshopImageToolFrame->layout()->addWidget(pWorkshopImageTool->display());
-	pWorkshopImageTool->display()->show();
+//	pWorkshopImage = new WorkshopImage(mWorkImage, "work image");
+//	pWorkshopImageTool = new WorkshopImageTool(pWorkshopImage, ui->workshopImageToolFrame,
+//		true /* show snapshot button */,
+//		false,
+//		"default",
+//		Qt::WA_DeleteOnClose
+//		);
+//	ui->workshopImageToolFrame->layout()->addWidget(pWorkshopImageTool->display());
+//	pWorkshopImageTool->display()->show();
+	pWorkshopImage = NULL;
+	pWorkshopImageTool = NULL;
 
 	ui->mainImageWidget->setFilterSequencer(
 		ui->pluginManagerForm->createFilterSequencer()
@@ -730,6 +732,7 @@ void EmaMainWindow::on_mainGroupBox_resizeEvent(QResizeEvent * e) {
 }
 
 
+
 void EmaMainWindow::on_thumbImage_selected(QString fileName)
 {
 	QFileInfo fi(fileName);
@@ -747,7 +750,10 @@ void EmaMainWindow::on_thumbImage_selected(QString fileName)
 }
 
 
-
+void EmaMainWindow::on_mainImageWidget_signalZoomRect(QRect cropRect)
+{
+	ui->globalNavImageWidget->setZoomRect(cropRect);
+}
 
 void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 {
@@ -761,9 +767,12 @@ void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 
 		ui->mainImageWidget->setImageFile(fileName, pinfo);
 
-		pWorkshopImage->load(fileName);
-		pWorkshopImageTool->setWorkshopImage(pWorkshopImage);
-		//pWorkshopImageTool->iupdate();
+		if(pWorkshopImage) {
+			pWorkshopImage->load(fileName); }
+		if(pWorkshopImageTool) {
+			pWorkshopImageTool->setWorkshopImage(pWorkshopImage);
+			//pWorkshopImageTool->update();
+		}
 
 		if(!pinfo) {
 			EMAMW_printf(EMALOG_WARNING, "File '%s' is not managed : reload and process file info\n", fileName.toUtf8().data())

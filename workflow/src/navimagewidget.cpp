@@ -89,12 +89,13 @@ void NavImageWidget::setImageFile(const QString & imagePath)
 	else {
 		int wdisp = m_ui->globalImageLabel->width()-2;
 		int hdisp = m_ui->globalImageLabel->height()-2;
+
 		m_fullRect = QRect(0, 0, fullImage.width(), fullImage.height());
 
 		m_inputImage = m_displayImage = fullImage.scaled( wdisp, hdisp,
 								Qt::KeepAspectRatio );
-
 	}
+
 	m_ui->globalImageLabel->setPixmap( m_displayImage );
 
 	on_zoomFitButton_clicked();
@@ -193,3 +194,12 @@ void NavImageWidget::on_zoomSlider_sliderReleased()
 {
 
 }
+
+/* Set the zoom position */
+void NavImageWidget::setZoomRect(QRect cropRect)
+{
+	m_displayRect = cropRect;
+	update();
+}
+
+

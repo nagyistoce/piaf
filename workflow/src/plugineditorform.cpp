@@ -96,6 +96,8 @@ PluginEditorForm::PluginEditorForm(QWidget *parent) :
 	}
 	mFilterSequencer.unloadAllAvailable();
 
+	// show plugins by default
+	on_pluginsButton_clicked();
 }
 
 
@@ -452,6 +454,9 @@ void PluginEditorForm::on_removePluginButton_clicked()
 
 void PluginEditorForm::on_paramsButton_clicked()
 {
+	ui->stackedWidget->setCurrentIndex(1);
+	ui->appendPluginButton->setEnabled(false);
+
 	if(ui->selectedPluginsTreeWidget->selectedItems().isEmpty()) return;
 	LoadedPluginTreeWidgetItem * item =
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
@@ -470,9 +475,16 @@ void PluginEditorForm::on_activateButton_clicked()
 	mpFilterSequencer->toggleFilterDisableFlag(item->getFilter());
 }
 
+void PluginEditorForm::on_pluginsButton_clicked()
+{
+	ui->stackedWidget->setCurrentIndex(0);
+	ui->appendPluginButton->setEnabled(true);
+}
+
 void PluginEditorForm::on_timeButton_clicked()
 {
-
+	ui->stackedWidget->setCurrentIndex(2);
+	ui->appendPluginButton->setEnabled(false);
 }
 
 void PluginEditorForm::on_upButton_clicked()
@@ -500,3 +512,4 @@ void PluginEditorForm::on_selectedPluginsTreeWidget_itemDoubleClicked(QTreeWidge
 	mpFilterSequencer->setFinal(loaded->getFilter());
 
 }
+

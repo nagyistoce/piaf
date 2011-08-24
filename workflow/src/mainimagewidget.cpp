@@ -207,6 +207,21 @@ void MainImageWidget::cropAbsolute(int x_crop, int y_crop, int scale)
 //	emit signalCropRect(m_cropRect);
 }
 
+void MainImageWidget::on_globalImageLabel_signalPicker(QRgb colorRGB, int colorGrey, QPoint pt)
+{
+	QString str;
+	str.sprintf("%d,%d : (%d,%d,%d) g=%d",
+				pt.x(), pt.y(), qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB), colorGrey);
+	m_ui->infoLabel->setText(str);
+	str.sprintf("background-color: rgb(%d,%d,%d);\n"
+				"color: rgb(%d,%d,%d);\n"
+								,
+								qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB),
+								(128+qRed(colorRGB))%255, (128+qGreen(colorRGB))%255, (128+qBlue(colorRGB))%255
+				);
+	m_ui->infoLabel->setStyleSheet(str);
+}
+
 void MainImageWidget::on_globalImageLabel_signalMousePressEvent(QMouseEvent * e) {
 	int x = e->pos().x(), y =  e->pos().y();
 
@@ -307,6 +322,8 @@ void MainImageWidget::on_zoomButton_toggled(bool checked)
 {
 	if(checked)
 	{
+		m_ui->infoLabel->setStyleSheet("");
+		m_ui->infoLabel->setText(tr("Zoom/move"));
 		m_ui->globalImageLabel->setEditMode(EDITMODE_ZOOM);
 	}
 }
@@ -325,6 +342,7 @@ void MainImageWidget::on_pickerButton_toggled(bool checked)
 void MainImageWidget::on_roiButton_toggled(bool checked)
 {
 	if(checked) {
+		m_ui->infoLabel->setStyleSheet("");
 		m_ui->infoLabel->setText(tr("Edit ROIs"));
 		m_ui->globalImageLabel->setEditMode(EDITMODE_ROIS);
 	}

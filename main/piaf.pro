@@ -86,6 +86,7 @@ SOURCES += src/main.cpp \
     acquisitions/video/src/virtualdeviceacquisition.cpp \
 	acquisitions/video/src/opencvvideoacquisition.cpp \
     src/plugineditdialog.cpp \
+	tools/src/timehistogramwidget.cpp \
     tools/src/batchfiltersmainwindow.cpp \
 	tools/src/vidacqsettingswindow.cpp \
 	src/imagewidget.cpp
@@ -160,7 +161,8 @@ HEADERS += inc/workshop.h \
 	acquisitions/video/inc/virtualdeviceacquisition.h \
     acquisitions/video/inc/opencvvideoacquisition.h \
     inc/plugineditdialog.h \
-    tools/inc/batchfiltersmainwindow.h \
+	tools/inc/timehistogramwidget.h \
+	tools/inc/batchfiltersmainwindow.h \
 	tools/inc/vidacqsettingswindow.h \
 	inc/piaf-settings.h \
 	inc/nolinux_videodev.h \
@@ -262,6 +264,7 @@ FORMS += tools/ui/swtoolmainwindow.ui \
 		tools/ui/imagetoavidialog.ui \
 		tools/ui/moviebookmarkform.ui \
     ui/plugineditdialog.ui \
+	tools/ui/timehistogramwidget.ui \
 	tools/ui/batchfiltersmainwindow.ui \
 	tools/ui/vidacqsettingswindow.ui
 

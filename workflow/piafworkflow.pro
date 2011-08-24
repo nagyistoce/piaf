@@ -57,7 +57,8 @@ SOURCES += tools/src/PiafFilter.cpp \
     src/metadatawidget.cpp \
     src/emaimagemanager.cpp \
 	src/filtermanagerform.cpp \
-    src/plugineditorform.cpp
+    src/plugineditorform.cpp \
+    ../main/tools/src/timehistogramwidget.cpp
 
 HEADERS += tools/inc/PiafFilter.h \
 	inc/navimagewidget.h \
@@ -74,7 +75,8 @@ HEADERS += tools/inc/PiafFilter.h \
     inc/metadatawidget.h \
     inc/emaimagemanager.h \
 	inc/filtermanagerform.h \
-    inc/plugineditorform.h
+    inc/plugineditorform.h \
+    ../main/tools/inc/timehistogramwidget.h
 
 FORMS += ui/navimagewidget.ui \
     ui/thumbimagewidget.ui \
@@ -86,7 +88,8 @@ FORMS += ui/navimagewidget.ui \
     ui/exifdisplayscrollarea.ui \
     ui/metadatawidget.ui \
 	ui/filtermanagerform.ui \
-    ui/plugineditorform.ui
+    ui/plugineditorform.ui \
+    ../main/tools/ui/timehistogramwidget.ui
 
 INCLUDEPATH += tools/inc
 INCLUDEPATH += ../main/tools/inc
