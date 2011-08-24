@@ -60,25 +60,24 @@ protected:
 	QImage m_displayImage;
 
 	FilterSequencer * mpFilterSequencer;
-	int m_zoom_scale;
-	QPoint m_lastClick;
-	QRect m_cropRect;
-	QRect m_lastCrop;
+/// \bug obsolete zooming variable, now inside ImageWidget
+//	int m_zoom_scale;
+//	QPoint m_lastClick;
+//	QRect m_cropRect;
+//	QRect m_lastCrop;
 
-	bool m_mouse_has_moved;
+	//bool m_mouse_has_moved;
 private slots:
 	// Zoom options
 	void on_roiButton_toggled(bool checked);
- void on_pickerButton_toggled(bool checked);
- void on_grayscaleButton_toggled(bool checked);
- void on_zoomButton_toggled(bool checked);
+	void on_pickerButton_toggled(bool checked);
+	void on_grayscaleButton_toggled(bool checked);
+	void on_zoomButton_toggled(bool checked);
 
 	void on_globalImageLabel_signalMousePressEvent(QMouseEvent * e);
 	void on_globalImageLabel_signalMouseReleaseEvent(QMouseEvent * e);
 	void on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * e);
 	void on_globalImageLabel_signalWheelEvent( QWheelEvent * e );
-
-	void on_actionZoomIn_activated( );
 
 	void slotUpdateImage();
 private:

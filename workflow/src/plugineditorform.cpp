@@ -94,6 +94,7 @@ PluginEditorForm::PluginEditorForm(QWidget *parent) :
 											   );
 		}
 	}
+	mFilterSequencer.unloadAllAvailable();
 
 }
 
@@ -281,7 +282,7 @@ void PluginEditorForm::updateSelectedView()
 					__func__, __LINE__,
 					mpFilterSequencer->getPluginSequenceFile());
 			// unload previously loaded filters
-			mpFilterSequencer->unloadAll();
+			mpFilterSequencer->unloadAllLoaded();
 			// reload same file
 			mpFilterSequencer->loadSequence(mpFilterSequencer->getPluginSequenceFile());
 		}
@@ -325,7 +326,7 @@ void PluginEditorForm::purge()
 	fprintf(stderr, "PluginEditorForm::%s:%d DELETE PluginEditorForm\n", __func__, __LINE__);
 
 	if(mpFilterSequencer) {
-		mpFilterSequencer->unloadAll();
+		delete mpFilterSequencer;
 	}
 
 	ui->selectedPluginsTreeWidget->clear();

@@ -464,11 +464,17 @@
          <bool>false</bool>
         </property>
         <layout class="QVBoxLayout" name="verticalLayout_10">
+         <property name="spacing">
+          <number>2</number>
+         </property>
          <property name="margin">
           <number>2</number>
          </property>
          <item>
           <layout class="QHBoxLayout" name="mainDisplayHorizontalLayout">
+           <property name="spacing">
+            <number>6</number>
+           </property>
            <property name="sizeConstraint">
             <enum>QLayout::SetFixedSize</enum>
            </property>
@@ -554,22 +560,14 @@
               <iconset resource="../ema.qrc">
                <normaloff>:/icons/icons/16x16/view-list-tree.png</normaloff>:/icons/icons/16x16/view-list-tree.png</iconset>
              </property>
+             <property name="iconSize">
+              <size>
+               <width>22</width>
+               <height>22</height>
+              </size>
+             </property>
              <property name="flat">
               <bool>true</bool>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="Line" name="line_4">
-             <property name="orientation">
-              <enum>Qt::Vertical</enum>
-             </property>
-            </widget>
-           </item>
-           <item>
-            <widget class="QLabel" name="filtersLabel">
-             <property name="text">
-              <string>Filters: </string>
              </property>
             </widget>
            </item>
@@ -585,22 +583,6 @@
               </size>
              </property>
             </spacer>
-           </item>
-           <item>
-            <widget class="QListWidget" name="listWidget">
-             <property name="sizePolicy">
-              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
-               <horstretch>0</horstretch>
-               <verstretch>0</verstretch>
-              </sizepolicy>
-             </property>
-             <property name="maximumSize">
-              <size>
-               <width>16777215</width>
-               <height>40</height>
-              </size>
-             </property>
-            </widget>
            </item>
           </layout>
          </item>
@@ -641,7 +623,7 @@
                   <x>0</x>
                   <y>0</y>
                   <width>549</width>
-                  <height>413</height>
+                  <height>425</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
