@@ -48,6 +48,7 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	m_ui->setupUi(this);
 	m_ui->globalImageLabel->switchToSmartZoomMode(true);
 	m_ui->globalImageLabel->grabKeyboard ();
+	m_ui->globalImageLabel->setEditMode(EDITMODE_ZOOM);
 
 }
 
@@ -224,38 +225,39 @@ void MainImageWidget::on_globalImageLabel_signalMousePressEvent(QMouseEvent * e)
 
 	m_mouse_has_moved = false;
 
-	if(m_zoom_scale == 0) // toggle view to zoom 1:1
-	{
-		m_zoom_scale = 1;
-		m_mouse_has_moved = true;
-		float fx = e->pos().x() - (width()-m_displayImage.width())/2
-				   , fy =  e->pos().y() - (height()-m_displayImage.height())/2;
+//	if(mEditMode == EDITMODE_NONE) {
+//		if(m_zoom_scale == 0) // toggle view to zoom 1:1
+//		{
+//			m_zoom_scale = 1;
+//			m_mouse_has_moved = true;
+//			float fx = e->pos().x() - (width()-m_displayImage.width())/2
+//					   , fy =  e->pos().y() - (height()-m_displayImage.height())/2;
 
-		fx *= (float)m_fullImage.width() / (float)m_displayImage.width();
-		fy *= (float)m_fullImage.height() / (float)m_displayImage.height();
+//			fx *= (float)m_fullImage.width() / (float)m_displayImage.width();
+//			fy *= (float)m_fullImage.height() / (float)m_displayImage.height();
 
-		EMAMIW_printf(EMALOG_DEBUG, "click=%d,%d => in full=%g,%g"
-					  "/ display img=%dx%d / orig=%dx%d",
-					  x, y,
-					  fx, fy,
-					  m_displayImage.width(), m_displayImage.height(),
-					  m_fullImage.width(), m_fullImage.height()
-					  );
+//			EMAMIW_printf(EMALOG_DEBUG, "click=%d,%d => in full=%g,%g"
+//						  "/ display img=%dx%d / orig=%dx%d",
+//						  x, y,
+//						  fx, fy,
+//						  m_displayImage.width(), m_displayImage.height(),
+//						  m_fullImage.width(), m_fullImage.height()
+//						  );
 
-		x = (int)roundf(fx);
-		y = (int)roundf(fy);
-		m_lastClick = QPoint( x, y );
+//			x = (int)roundf(fx);
+//			y = (int)roundf(fy);
+//			m_lastClick = QPoint( x, y );
 
-		zoomOn(x, y, m_zoom_scale);
-	}
-	else {
+//			zoomOn(x, y, m_zoom_scale);
+//		}
+//	} else if(mEditMode == EDITMODE_ZOOM) {
 
-		if(!m_mouse_has_moved)
-		{
-			m_lastClick = e->pos();
-			m_lastCrop = m_cropRect;
-		}
-	}
+//		if(!m_mouse_has_moved)
+//		{
+//			m_lastClick = e->pos();
+//			m_lastCrop = m_cropRect;
+//		}
+//	}
 }
 
 void MainImageWidget::on_globalImageLabel_signalMouseReleaseEvent(QMouseEvent * e) {
@@ -319,6 +321,34 @@ void MainImageWidget::on_zoomButton_toggled(bool checked)
 {
 	if(checked)
 	{
-		m_ui->globalImageLabel->switchToSmartZoomMode(true);
+		m_ui->globalImageLabel->setEditMode(EDITMODE_ZOOM);
+	}
+}
+
+
+
+void MainImageWidget::on_pickerButton_toggled(bool checked)
+{
+	if(checked) {
+		m_ui->infoLabel->setText(tr("Picker"));
+		m_ui->globalImageLabel->setEditMode(EDITMODE_PICKER);
+	}
+
+}
+
+void MainImageWidget::on_roiButton_toggled(bool checked)
+{
+	if(checked) {
+		m_ui->infoLabel->setText(tr("Edit ROIs"));
+		m_ui->globalImageLabel->setEditMode(EDITMODE_ROIS);
+	}
+}
+
+void MainImageWidget::on_grayscaleButton_toggled(bool checked)
+{
+	if(checked) {
+		m_ui->infoLabel->setText(tr("Grayscale"));
+	} else {
+		m_ui->infoLabel->setText(tr("Color"));
 	}
 }

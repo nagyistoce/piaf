@@ -68,7 +68,10 @@ protected:
 	bool m_mouse_has_moved;
 private slots:
 	// Zoom options
-	void on_zoomButton_toggled(bool checked);
+	void on_roiButton_toggled(bool checked);
+ void on_pickerButton_toggled(bool checked);
+ void on_grayscaleButton_toggled(bool checked);
+ void on_zoomButton_toggled(bool checked);
 
 	void on_globalImageLabel_signalMousePressEvent(QMouseEvent * e);
 	void on_globalImageLabel_signalMouseReleaseEvent(QMouseEvent * e);

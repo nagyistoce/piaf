@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>400</width>
-    <height>300</height>
+    <width>444</width>
+    <height>305</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -36,10 +36,10 @@
    <item>
     <widget class="QWidget" name="movieToolbarWidget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout_2">
-      <property name="topMargin">
+      <property name="spacing">
        <number>1</number>
       </property>
-      <property name="bottomMargin">
+      <property name="margin">
        <number>1</number>
       </property>
       <item>
@@ -53,6 +53,12 @@
         <property name="icon">
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/media-seek-backward.png</normaloff>:/icons/icons/16x16/media-seek-backward.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -71,6 +77,12 @@
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/media-skip-backward.png</normaloff>:/icons/icons/16x16/media-skip-backward.png</iconset>
         </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
         <property name="flat">
          <bool>true</bool>
         </property>
@@ -87,6 +99,12 @@
         <property name="icon">
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/media-playback-start.png</normaloff>:/icons/icons/16x16/media-playback-start.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -105,6 +123,12 @@
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/media-skip-forward.png</normaloff>:/icons/icons/16x16/media-skip-forward.png</iconset>
         </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
         <property name="flat">
          <bool>true</bool>
         </property>
@@ -122,23 +146,63 @@
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/media-seek-forward.png</normaloff>:/icons/icons/16x16/media-seek-forward.png</iconset>
         </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
         <property name="flat">
          <bool>true</bool>
         </property>
        </widget>
       </item>
       <item>
-       <spacer name="horizontalSpacer">
+       <widget class="QComboBox" name="speedComboBox">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <item>
+         <property name="text">
+          <string>1/4x</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1/2x</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>1x</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>2x</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>4x</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>8x</string>
+         </property>
+        </item>
+       </widget>
+      </item>
+      <item>
+       <widget class="QSlider" name="horizontalSlider">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
+       </widget>
       </item>
       <item>
        <widget class="QPushButton" name="bookmarksButton">
@@ -152,6 +216,12 @@
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/bookmark-toolbar.png</normaloff>:/icons/icons/16x16/bookmark-toolbar.png</iconset>
         </property>
+        <property name="iconSize">
+         <size>
+          <width>22</width>
+          <height>22</height>
+         </size>
+        </property>
        </widget>
       </item>
      </layout>
@@ -160,12 +230,40 @@
    <item>
     <widget class="QWidget" name="imageToolbarWidget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
-      <property name="topMargin">
+      <property name="spacing">
        <number>1</number>
       </property>
-      <property name="bottomMargin">
+      <property name="margin">
        <number>1</number>
       </property>
+      <item>
+       <widget class="QPushButton" name="grayscaleButton">
+        <property name="toolTip">
+         <string>Use grayscale input instead of color</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../main/piaf.qrc">
+          <normaloff>:/images/22x22/view-color.png</normaloff>
+          <normalon>:/images/22x22/view-gray.png</normalon>:/images/22x22/view-color.png</iconset>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="Line" name="line_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+       </widget>
+      </item>
       <item>
        <widget class="QPushButton" name="zoomButton">
         <property name="toolTip">
@@ -257,14 +355,21 @@
          <string>Multipurpose information label</string>
         </property>
         <property name="text">
-         <string>--</string>
+         <string>-</string>
         </property>
        </widget>
       </item>
       <item>
-       <widget class="QPushButton" name="goPrevButton_5">
+       <widget class="Line" name="line_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="recordButton">
         <property name="toolTip">
-         <string>Go to previous image</string>
+         <string>Record output</string>
         </property>
         <property name="text">
          <string/>
@@ -347,6 +452,7 @@
  </customwidgets>
  <resources>
   <include location="../ema.qrc"/>
+  <include location="../../main/piaf.qrc"/>
  </resources>
  <connections/>
  <buttongroups>
