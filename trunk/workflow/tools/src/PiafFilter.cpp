@@ -194,25 +194,21 @@ void FilterSequencer::init() {
 	idEditPlugin = 0;
 	idViewPlugin = 0;
 
-
-
-
 	lockProcess = false;
 	mNoWarning = false;
 	mAutoReloadSequence = false; // do not reload plugins when user need to confirm or make modifications
 
 	imageTmp = NULL;
-
-	loadFilters();
 }
 
 void FilterSequencer::purge() {
 	fprintf(stderr, "FilterSequencer::%s:%d DELETE FilterSequencer\n", __func__, __LINE__);
 
-	unloadAll();
+	unloadAllAvailable();
+	unloadAllLoaded();
 }
 
-void FilterSequencer::unloadAll()
+void FilterSequencer::unloadAllAvailable()
 {
 	DEBUG_MSG("unloading all filters...");
 
@@ -231,9 +227,7 @@ void FilterSequencer::unloadAll()
 					fflush(stderr);
 ///#endif
 				lastF = filter;
-
-				DELETE_FILTER(filter)
-
+				filter->unloadChildProcess();
 			}
 		}
 	}
@@ -291,6 +285,7 @@ PiafFilter *  FilterSequencer::addFilter(PiafFilter * newFilter, int id)
 	// start process
 	newFilter->loadChildProcess();
 	newFilter->setEnabled(true);
+	setFinal(newFilter);
 
 	return newFilter;
 }
@@ -501,6 +496,7 @@ int FilterSequencer::loadFilter(char *filename)
 			false /* kill process after loading properties */);
 	connect(newFilter, SIGNAL(signalDied(int)), this, SLOT(slotFilterDied(int)));
 
+
 	mAvailableFiltersList.append(newFilter);
 	return 1;
 }
@@ -552,7 +548,7 @@ void FilterSequencer::setFinal(PiafFilter * filter)
 	emit selectedFilterChanged();
 }
 
-void FilterSequencer::unloadAllFilters()
+void FilterSequencer::unloadAllLoaded()
 {
 	if(g_debug_FilterSequencer) {
 		fprintf(stderr, "FilterSequencer::%s:%d: unloading all plugins...\n", __func__,__LINE__);
@@ -1469,7 +1465,8 @@ int FilterSequencer::processImage(swImageStruct * image)
 					__func__, __LINE__,
 					getPluginSequenceFile());
 			// unload previously loaded filters
-			unloadAll();
+			unloadAllLoaded();
+
 			// reload same file
 			loadSequence(getPluginSequenceFile());
 		}

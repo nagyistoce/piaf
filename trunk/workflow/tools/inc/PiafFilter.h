@@ -212,8 +212,8 @@ public:
 	FilterSequencer();
 	~FilterSequencer();
 
-	/** @brief Unload all loaded filters FIXME: there is a duplicate: unloadAll() */
-	void unloadAllFilters();
+	/** @brief Unload all loaded filters */
+	void unloadAllLoaded();
 
 	/** @brief Append a filter to loaded filters list and return newly created one */
 	PiafFilter * addFilter(PiafFilter * filter);
@@ -319,8 +319,8 @@ protected:
 	int idViewPlugin;	///< index of viewed plugin
 
 public:
-	/// Unload loaded plugins from background thread => will not update display
-	void unloadAll();
+	/// Unload plugins processes used for creating the available list from background thread => will not update display
+	void unloadAllAvailable();
 
 	/// Delete all selected plugins (unload all plugin processus)
 	void deleteAll();
