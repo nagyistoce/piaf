@@ -81,6 +81,40 @@ namespace Ui
 	class EmaMainWindow;
 }
 
+/** @brief File known in collection */
+typedef struct {
+	QString fullpath;	///< Full path to file
+	QString filename;	///< basename
+	int type;			///< Type: movie, image
+	struct _t_collection * pCollection; ///< Reverse pointer to its collection
+} t_collection_file;
+
+/** @brief Collection storage */
+typedef struct _t_collection {
+	QString title;
+	QString comment;
+	QList<t_collection_file *> filesList;	///< List of full path to their images
+	QList<struct _t_collection *> subCollectionsList;
+} t_collection;
+
+typedef struct {
+	QString node;
+} t_device;
+
+/** @brief Workflow interface settings storage */
+typedef struct {
+	/// List of input directories
+	QStringList mDirectoryList;
+
+	/// list of collections
+	QList<t_collection> mCollectionList;
+
+	/// List of devices
+	QList<t_device> mDevicesList;
+
+} t_workflow_settings ;
+
+
 /** \brief Main window for workflow app
 
 
@@ -101,8 +135,9 @@ private:
 	void saveSettings();
 	void loadSettings();
 #define PIAFWKFL_SETTINGS	"piaf-workflow"
-	QSettings mSettings;
+	QSettings mSettings;	///< Qt Settings object for piaf workflow
 
+	t_workflow_settings m_workflow_settings;
 	/// List of input directories
 	QList<DirectoryTreeWidgetItem *> mDirectoryList;
 

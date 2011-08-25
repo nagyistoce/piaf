@@ -348,15 +348,6 @@ QImage iplImageToQImage(IplImage * iplImage) {
 	return qImage;
 }
 
-/*
-t_image_info_struct ImageInfoWidget::getImageInfo() {
-	t_image_info_struct l_info;
-	memset(&l_info, 0, sizeof(t_image_info_struct));
-	if(m_imgProc) {
-		l_info = m_imgProc->getImageInfo();
-	}
-	return l_info;
-}*/
 
 
 /* Set the background image */

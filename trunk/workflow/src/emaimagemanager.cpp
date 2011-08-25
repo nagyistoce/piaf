@@ -233,15 +233,14 @@ void EmaImageManager::run() {
 				// Create a new storage
 				t_image_info_struct l_info = m_imgProc.getImageInfo();
 				if(l_info.valid) {
-					t_image_info_struct * new_info = new t_image_info_struct;
-
-					memcpy(new_info, &l_info, sizeof(t_image_info_struct));
-
+					t_image_info_struct * new_info = new t_image_info_struct(l_info);
 
 					// Copy thumb
 					new_info->thumbImage.iplImage = tmCloneImage(l_info.thumbImage.iplImage);
+
 					// Copy HSV histo
 					new_info->hsvImage = tmCloneImage(l_info.hsvImage);
+
 					// Copy sharpness
 					new_info->sharpnessImage = tmCloneImage(l_info.sharpnessImage);
 
