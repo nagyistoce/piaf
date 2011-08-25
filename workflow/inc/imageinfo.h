@@ -42,6 +42,8 @@
 
 #include <QImage>
 #include <QString>
+#include <QStringList>
+
 #include "imgutils.h"
 
 /** @breif Convert an OpenCV IplIMage to a QImage */
@@ -60,14 +62,16 @@ void compressCachedImage(t_cached_image *);
 void uncompressCachedImage(t_cached_image *);
 
 
-/** @brief Useful information for sorting pictures*/
+/** @brief Useful information about a picture: EXIF, kerywords...
+
+*/
 typedef struct {
 	QString filepath;	/*! Full path of image file */
 
 	unsigned char valid;		/*! Valid info flag */
 
 	// EXIF TAGS
-	QString  maker;	/*! Company which produces this camera */
+	QString maker;	/*! Company which produces this camera */
 	QString model;	/*! Model of this camera */
 
 	QString datetime;	/*! Date/time of the shot */
@@ -82,15 +86,18 @@ typedef struct {
 	// IPTC TAGS
 // Ref: /usr/share/doc/libexiv2-doc/html/tags-iptc.html
 //0x005a 	90 	Iptc.Application2.City 	String 	No 	No 	0 	32 	Identifies city of object data origin according to guidelines established by the provider.
-	QString iptc_city[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
+	QString iptc_city;		/*! IPTC City name, field Iptc.Application2.City */
 //0x005c 	92 	Iptc.Application2.SubLocation 	String 	No 	No 	0 	32 	Identifies the location within a city from which the object data originates
-	QString iptc_sublocation[MAX_EXIF_LEN];		/*! IPTC Province/State name, field Iptc.Application2.Provincestate */
+	QString iptc_sublocation;		/*! IPTC Province/State name, field Iptc.Application2.Provincestate */
 //0x005f 	95 	Iptc.Application2.ProvinceState 	String 	No 	No 	0 	32 	Identifies Province/State of origin according to guidelines established by the provider.
-	QString iptc_provincestate[MAX_EXIF_LEN];		/*! IPTC Province/State name, field Iptc.Application2.Provincestate */
+	QString iptc_provincestate;		/*! IPTC Province/State name, field Iptc.Application2.Provincestate */
 //0x0064 	100 	Iptc.Application2.CountryCode 	String 	No 	No 	3 	3 	Indicates the code of the country/primary location where the intellectual property of the object data was created
-	QString iptc_countrycode[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
+	QString iptc_countrycode;		/*! IPTC City name, field Iptc.Application2.City */
 //0x0065 	101 	Iptc.Application2.CountryName 	String 	No 	No 	0 	64 	Provides full
-	QString iptc_countryname[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
+	QString iptc_countryname;		/*! IPTC City name, field Iptc.Application2.City */
+
+	// ---- Custom tags ----
+	QStringList keywords;			/*! User's custom keywords */
 
 	// Image processing data
 	bool grayscaled;
@@ -108,6 +115,7 @@ typedef struct {
 
 } t_image_info_struct;
 
+/** @brief Empty image struct cleanly (it contains objects) */
 void clearImageInfoStruct(t_image_info_struct * pinfo);
 
 
