@@ -108,6 +108,15 @@ public:
 	/// Gets definitive image size. You should do that to verify that your selected image size is supported by device.
 	CvSize getImageSize();
 
+	/** @brief Get video properties (not updated) */
+	t_video_properties getVideoProperties() { updateVideoProperties(); return m_video_properties; }
+
+	/** @brief Update and return video properties */
+	t_video_properties updateVideoProperties();
+
+	/** @brief Set video properties (not updated) */
+	int setVideoProperties(t_video_properties props);
+
 	/// change acquisition size
 	int changeAcqParams(tBoxSize newSize, int channel);
 	
@@ -182,7 +191,7 @@ public:
 
 
 	/** @brief Get last movie position */
-	t_movie_pos getMoviePosition() { return m_movie_pos; };
+	t_movie_pos getMoviePosition() { return m_movie_pos; }
 
 	/** Return file size in bytes */
 	unsigned long long getFileSize() { return m_fileSize; }
@@ -229,6 +238,8 @@ private:
 	void fill_buffer();
 
 private:
+	/// Main video properties
+	t_video_properties m_video_properties;
 	/// Video file name
 	char m_videoFileName[MAX_PATH_LEN];
 

@@ -113,7 +113,9 @@ void EmaMainWindow::loadSettings()
 	int size = mSettings.beginReadArray("folders");
 	for (int i = 0; i < size; ++i) {
 		mSettings.setArrayIndex(i);
-		mDirectoryList.append( appendDirectoryToLibrary(mSettings.value("path").toString(), NULL) );
+		QString path = mSettings.value("path").toString();
+
+		mDirectoryList.append( appendDirectoryToLibrary(path));
 	}
 	mSettings.endArray();
 }
@@ -121,19 +123,23 @@ void EmaMainWindow::loadSettings()
 void EmaMainWindow::saveSettings()
 {
 	EMAMW_printf(EMALOG_DEBUG, "Saving settings...");
+
 	// Save list of files
 	mSettings.beginWriteArray("folders");
-	for (int i = 0; i < mDirectoryList.size(); ++i) {
+	for (int i = 0; i < m_workflow_settings.directoryList.size(); ++i) {
 		mSettings.setArrayIndex(i);
-		mSettings.setValue("path", mDirectoryList.at(i)->fullPath);
+		mSettings.setValue("path", m_workflow_settings.directoryList.at(i));
 		EMAMW_printf(EMALOG_DEBUG, "\tadded directory '%s'",
-					 mDirectoryList.at(i)->fullPath.toAscii().data());
+					 m_workflow_settings.directoryList.at(i).toAscii().data());
 		//settings.setValue("password", list.at(i).password);
 	}
+
 	mSettings.endArray();
+
 }
 
-void EmaMainWindow::on_appendNewPictureThumb(QString filename) {
+void EmaMainWindow::on_appendNewPictureThumb(QString filename)
+{
 	// update progress
 	appendThumbImage(filename);
 }
@@ -460,6 +466,8 @@ DirectoryTreeWidgetItem * EmaMainWindow::appendDirectoryToLibrary(QString path,
 {
 	QFileInfo fi(path);
 	if(!fi.exists()) { return NULL; }
+
+	m_workflow_settings.directoryList.append(path);
 
 	DirectoryTreeWidgetItem * new_dir ;
 	if(!itemParent) {

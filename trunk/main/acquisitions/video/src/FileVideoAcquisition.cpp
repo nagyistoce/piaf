@@ -133,6 +133,8 @@ int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 	float lfps = 25.f;
 	fprintf(stderr, "FileVA::%s:%d : OPENING VIDEO FILE '%s'............\n", __func__, __LINE__, aDevice);
 
+	memset(&m_video_properties, 0, sizeof(t_video_properties));
+
 	if(m_inbuff)
 	{
 		fprintf(stderr, "FileVA::%s:%d : purging old file...\n", __func__, __LINE__);
@@ -420,6 +422,16 @@ void FileVideoAcquisition::slotRewindMovie()
 	// read first frame
 	long theSize;
 	readImageBuffer(&theSize);
+}
+
+t_video_properties FileVideoAcquisition::updateVideoProperties()
+{
+	m_video_properties.fps = m_fps;
+	m_video_properties.frame_width = mImageSize.width;
+	m_video_properties.frame_height = mImageSize.height;
+
+	m_video_properties.frame_count = playFrame;
+	return m_video_properties;
 }
 
 void FileVideoAcquisition::setAbsoluteFrame(int frame)
