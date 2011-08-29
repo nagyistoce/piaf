@@ -4,7 +4,12 @@
 TEMPLATE = app
 
 # Use lowercase name for Linux
+linux-g++: {
 TARGET = piafworkflow
+} else {
+TARGET=PiafWorkflow
+}
+
 CONFIG += debug
 
 DEFINES += PIAFWORKFLOW
@@ -13,9 +18,9 @@ unix::DEFINES += VERSION_YY="`date +%Y`" \
     VERSION_MM="`date +%m | sed 's/0//'`" \
     VERSION_DD="`date +%d | sed 's/0//'`" \
     __LINUX__
-win32:DEFINES += VERSION_YY="2010" \
-	VERSION_MM="03" \
-	VERSION_DD="13"
+win32:DEFINES += VERSION_YY="2011" \
+	VERSION_MM="08" \
+	VERSION_DD="29"
 
 # icon
 # reference : file:///usr/share/qt4/doc/html/appicon.html
