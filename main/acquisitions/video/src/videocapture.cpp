@@ -27,6 +27,7 @@
 // application specific includes
 #include "swvideodetector.h"
 #include "videocapture.h"
+#include "piaf-common.h"
 
 #include "opencvvideoacquisition.h"
 #ifdef _V4L2
@@ -352,16 +353,19 @@ bool VideoCaptureDoc::openDocument(const QString &filename, const char * /*forma
 
 	QFile f( filename );
 	if ( !f.open( QIODevice::ReadOnly ) )
+	{
+		PIAF_MSG(SWLOG_ERROR, "cannot open file '%s'", filename.toAscii().data());
 		return false;
-  /////////////////////////////////////////////////
-  // TODO: Add your document opening code here
-  /////////////////////////////////////////////////
+	}
+	/////////////////////////////////////////////////
+	// TODO: Add your document opening code here
+	/////////////////////////////////////////////////
 	f.close();
 
-  modified=false;
-  m_filename=filename;
-	m_title=QFileInfo(f).fileName();
-  return true;
+	modified = false;
+	m_filename = filename;
+	m_title = QFileInfo(f).fileName();
+	return true;
 }
 
 bool VideoCaptureDoc::saveDocument(const QString &filename, const char * /*format =0*/)

@@ -45,6 +45,7 @@
 #include <QStringList>
 
 #include "imgutils.h"
+#include "FileVideoAcquisition.h"
 
 /** @breif Convert an OpenCV IplIMage to a QImage */
 QImage iplImageToQImage(IplImage * iplImage);
@@ -76,6 +77,12 @@ typedef struct {
 
 	QString datetime;	/*! Date/time of the shot */
 
+	int width, height;
+	int nChannels;	///< Depth of images
+	bool isMovie;	///< Flag for movie
+
+	/************************ IMAGE *********************/
+
 	char orientation;			/*! Image orientation : 0 for horizontal (landscape), 1 for vertical (portrait) */
 	float focal_mm;				/*! Real focal in mm */
 	float focal_eq135_mm;		/*! 135mm equivalent focal in mm (if available) */
@@ -96,6 +103,12 @@ typedef struct {
 //0x0065 	101 	Iptc.Application2.CountryName 	String 	No 	No 	0 	64 	Provides full
 	QString iptc_countryname;		/*! IPTC City name, field Iptc.Application2.City */
 
+	/****************************** MOVIE ***********************************/
+	char FourCC[5];
+	unsigned long long filesize;
+	float fps;	///< Framerate in frame per sec
+
+	/****************************** DATA ***********************************/
 	// ---- Custom tags ----
 	QStringList keywords;			/*! User's custom keywords */
 
@@ -125,8 +138,11 @@ class ImageInfo {
 public:
 	ImageInfo();
 	~ImageInfo();
-	/** @brief Load input image */
+	/** @brief Load input file as an image */
 	int loadFile(QString filename);
+
+	/** @brief Load input file as a movie  */
+	int loadMovieFile(QString filename);
 
 	/** @brief Return colored histogram */
 	IplImage * getHistogram() { return m_HistoImage; };
@@ -151,6 +167,10 @@ private:
 
 	/** @brief Structure containing every image information needed for sorting */
 	t_image_info_struct m_image_info_struct;
+
+	/// File video acquisition used to read movie properties
+	FileVideoAcquisition mFileVA;
+
 
 	/** @brief Original image */
 	IplImage * m_originalImage;

@@ -86,7 +86,7 @@ const char swlog_msgtab[6][12] = {
 		"TRACE  "
 };
 
-#define SWLOG_MSG(a) ((a)>=SWLOG_TRACE&&(a)<=TMLOG_CRITICAL?tmlog_msgtab[(a)+2]:"UNKNOWN")
+#define SWLOG_MSG(a) ((a)>=SWLOG_TRACE&&(a)<=SWLOG_CRITICAL?swlog_msgtab[(a)+2]:"UNKNOWN")
 
 #define PIAF_MSG(a,...)       { \
 			if( (a)>=g_debug_piaf ) { \

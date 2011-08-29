@@ -104,13 +104,13 @@ typedef struct {
 /** @brief Workflow interface settings storage */
 typedef struct {
 	/// List of input directories
-	QStringList mDirectoryList;
+	QStringList directoryList;
 
 	/// list of collections
-	QList<t_collection> mCollectionList;
+	QList<t_collection> collectionList;
 
 	/// List of devices
-	QList<t_device> mDevicesList;
+	QList<t_device> devicesList;
 
 } t_workflow_settings ;
 

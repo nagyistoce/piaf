@@ -25,10 +25,12 @@
 #include <QString>
 #include <QStringList>
 #include <QBuffer>
+#include <QFileInfo>
 
 #include "imageinfo.h"
 
 #include "imgutils.h"
+#include "piaf-common.h"
 
 // Read metadata
 #include <exiv2/image.hpp>
@@ -110,6 +112,12 @@ void clearImageInfoStruct(t_image_info_struct * pinfo)
 //			QString iptc_countrycode[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
 //		//0x0065 	101 	Iptc.Application2.CountryName 	String 	No 	No 	0 	64 	Provides full
 //			QString iptc_countryname[MAX_EXIF_LEN];		/*! IPTC City name, field Iptc.Application2.City */
+
+	pinfo->width = pinfo->height = 0;
+	pinfo->filesize = 0;
+	// Movie
+	strcpy(pinfo->FourCC, "????");
+
 
 	// Image processing data
 	pinfo->grayscaled = 0;
@@ -419,24 +427,75 @@ int ImageInfo::readMetadata(QString filename) {
 	return 0;
 }
 
-int ImageInfo::loadFile(QString filename) {
+int ImageInfo::loadMovieFile(QString filename)
+{
+	//
 	m_image_info_struct.valid = 0;
+
+	clearImageInfoStruct(&m_image_info_struct);
+	m_image_info_struct.valid = 0;
+
+	// File info
+	QFileInfo fi(filename);
+	if(!fi.exists()) {
+		return -1;
+	}
+
+	m_image_info_struct.filesize = fi.size();
+
+	// load movie
+	tBoxSize size;
+	size.x = size.y = 0;
+	size.width = 320; size.height = 240; //
+	if(mFileVA.openDevice(fi.absoluteFilePath().toUtf8().data(), size)<0) {
+		PIAF_MSG(SWLOG_ERROR, "cannot open file '%s'", fi.absoluteFilePath().toUtf8().data());
+		return -1;
+	}
+
+	t_video_properties props = mFileVA.getVideoProperties();
+
+	// Read properties
+	m_image_info_struct.width = props.frame_width;
+	m_image_info_struct.height = props.frame_height;
+	m_image_info_struct.fps = props.fps;
+	PIAF_MSG(SWLOG_INFO, "file '%s' : %dx%d @ %g fps",
+			  fi.absoluteFilePath().toUtf8().data(),
+			  m_image_info_struct.width, m_image_info_struct.height, m_image_info_struct.fps );
+	return 0;
+}
+
+int ImageInfo::loadFile(QString filename) {
 	tmReleaseImage(&m_originalImage);
 
 	clearImageInfoStruct(&m_image_info_struct);
+	m_image_info_struct.valid = 0;
 
+	// File info
+	QFileInfo fi(filename);
+	if(!fi.exists()) {
+		return -1;
+	}
+
+	m_image_info_struct.filesize = fi.size();
 
 	// LOAD IMAGE METADATA
 	readMetadata(filename);
 
 	// LOAD IMAGE PIXMAP
 	m_originalImage = cvLoadImage(filename.toUtf8().data());
+	m_image_info_struct.filepath = QString( filename );
+
 	if(!m_originalImage) {
 		fprintf(stderr, "ImageInfo::%s:%d: cannot load image '%s' (with openCV)\n",
 				__func__, __LINE__, filename.toAscii().data());
+		// Load as movie
+		loadMovieFile(filename);
 		return -1;
 	}
-	m_image_info_struct.filepath = QString( filename );
+
+	m_image_info_struct.width = m_originalImage->width;
+	m_image_info_struct.height = m_originalImage->height;
+	m_image_info_struct.nChannels = m_originalImage->nChannels;
 
 	if(g_debug_ImageInfo) {
 		fprintf(stderr, "\tImageInfo::%s:%d : loaded '%s' : %dx%d x %d\n", __func__, __LINE__,

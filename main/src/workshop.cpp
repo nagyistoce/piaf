@@ -16,6 +16,8 @@
  *                                                                         *
  ***************************************************************************/
 
+
+#define WORKSHOP_CPP
 #include "piaf-common.h"
 
 #include <math.h>
@@ -37,7 +39,6 @@
 
 #include <QFileDialog>
 
-#define WORKSHOP_CPP
 
 // application specific includes
 #include "workshop.h"
