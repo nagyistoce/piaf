@@ -24,6 +24,7 @@
 #define MAINDISPLAYWIDGET_H
 
 #include <QWidget>
+#include <QTimer>
 
 #include "imageinfo.h"
 
@@ -33,7 +34,7 @@ namespace Ui {
     class MainDisplayWidget;
 }
 
-
+class MovieBookmarkForm;
 class FilterSequencer;
 
 /** @brief Main image display in middle of GUI
@@ -65,11 +66,32 @@ private:
 
 	/// Video acquisition
 	FileVideoAcquisition mFileVA;
+	QTimer mPlayTimer;
+	bool mPlayGrayscale;///< if true, only decode grayscaled image (Y buffer)
+	float mPlaySpeed; ///< play speed ratio
 
 	/// Input image
 	QImage m_fullImage;
 
 	FilterSequencer * mpFilterSequencer;
+
+
+	// Bookmarks
+	QList<video_bookmark_t> m_listBookmarks;
+	MovieBookmarkForm * m_editBookmarksForm;
+
+private slots:
+	void on_bookmarksButton_clicked();
+	void on_magneticButton_clicked();
+	void on_speedComboBox_currentIndexChanged(QString );
+	void on_grayscaleButton_toggled(bool);
+	void on_goLastButton_clicked();
+	void on_goNextButton_clicked();
+	void on_playButton_toggled(bool checked);
+	void on_goPrevButton_clicked();
+	void on_goFirstButton_clicked();
+	void updateDisplay();
+	void on_mPlayTimer_timeout();
 
 };
 

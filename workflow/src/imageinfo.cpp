@@ -558,6 +558,8 @@ int ImageInfo::loadFile(QString filename)
 					__func__, __LINE__, this);
 			// purge scaled images
 			purgeScaled();
+
+			purgeThumbs();
 		}
 
 		// Scale original image to smaller image to fasten later processinggs
@@ -587,6 +589,7 @@ int ImageInfo::loadFile(QString filename)
 
 			while((th_w % 4) != 0) { th_w++; }
 			while((th_h % 4) != 0) { th_h++; }
+
 			m_thumbImage = tmCreateImage( cvSize(th_w, th_h), IPL_DEPTH_8U, m_originalImage->nChannels);
 		}
 

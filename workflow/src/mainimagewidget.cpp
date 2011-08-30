@@ -126,8 +126,8 @@ int MainImageWidget::setImage(QImage imageIn,
 	if(!m_fullImage.isNull()) {
 		QString strInfo;
 		if(!pinfo) {
-			strInfo.sprintf( "%s\n%d x %d x %d\n",
-					pinfo->filepath.toUtf8().data(),
+			strInfo.sprintf( "%d x %d x %d\n",
+					//pinfo->filepath.toUtf8().data(),
 					m_fullImage.width(),
 					m_fullImage.height(),
 					m_fullImage.depth()/8);
