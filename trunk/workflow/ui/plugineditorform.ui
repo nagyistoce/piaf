@@ -52,6 +52,9 @@
      </widget>
      <widget class="QWidget" name="pageEditParams">
       <layout class="QVBoxLayout" name="verticalLayout_4">
+       <property name="margin">
+        <number>1</number>
+       </property>
        <item>
         <widget class="QScrollArea" name="scrollArea">
          <property name="widgetResizable">
@@ -62,8 +65,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>326</width>
-            <height>148</height>
+            <width>342</width>
+            <height>170</height>
            </rect>
           </property>
          </widget>
@@ -108,6 +111,9 @@
      <layout class="QGridLayout" name="gridLayout">
       <property name="leftMargin">
        <number>0</number>
+      </property>
+      <property name="topMargin">
+       <number>2</number>
       </property>
       <property name="rightMargin">
        <number>0</number>
@@ -155,7 +161,7 @@
         </property>
         <property name="icon">
          <iconset resource="../ema.qrc">
-          <normaloff>:/icons/icons/16x16/edit-delete.png</normaloff>:/icons/icons/16x16/edit-delete.png</iconset>
+          <normaloff>:/icons/icons/16x16/network-disconnect.png</normaloff>:/icons/icons/16x16/network-disconnect.png</iconset>
         </property>
        </widget>
       </item>
@@ -190,17 +196,8 @@
       <item row="0" column="0" colspan="2">
        <widget class="QWidget" name="widget" native="true">
         <layout class="QHBoxLayout" name="horizontalLayout">
-         <property name="leftMargin">
+         <property name="margin">
           <number>0</number>
-         </property>
-         <property name="topMargin">
-          <number>2</number>
-         </property>
-         <property name="rightMargin">
-          <number>0</number>
-         </property>
-         <property name="bottomMargin">
-          <number>2</number>
          </property>
          <item>
           <widget class="QPushButton" name="pluginsButton">

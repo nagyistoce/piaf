@@ -28,7 +28,7 @@
 #include "piaf-common.h"
 #include "PiafFilter.h"
 
-
+#include "moviebookmarkform.h"
 
 MainDisplayWidget::MainDisplayWidget(QWidget *parent) :
     QWidget(parent),
@@ -36,6 +36,11 @@ MainDisplayWidget::MainDisplayWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 	mpFilterSequencer = NULL;
+
+	mPlayGrayscale = false;
+	mPlaySpeed = 1.f;
+
+	connect(&mPlayTimer, SIGNAL(timeout()), this, SLOT(on_mPlayTimer_timeout()));
 
 }
 
@@ -62,7 +67,7 @@ int MainDisplayWidget::setImageFile(QString imagePath,
 	int ret = 0;
 	// print allocated images
 	tmPrintIplImages();
-
+	ui->stackedWidget->hide();
 	fprintf(stderr, "NavImageWidget::%s:%d ('%s')\n",
 			__func__, __LINE__,
 			imagePath.toAscii().data());
@@ -85,8 +90,12 @@ void  MainDisplayWidget::zoomOn(int x, int y, int scale) {
 	ui->mainImageWidget->zoomOn(x,y,scale);
 }
 
+/******************************************************************************
 
-/** @brief Set the movie file */
+							MOVIE PLAYER SECTION
+
+  ******************************************************************************/
+/* @brief Set the movie file */
 int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pinfo)
 {
 	mFileVA.stopAcquisition();
@@ -101,6 +110,109 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 	}
 
 	ui->mainImageWidget->setImage(m_fullImage, pinfo);
-
+	ui->stackedWidget->show();
+	ui->stackedWidget->setCurrentIndex(0);
 	return ret;
+}
+
+
+void MainDisplayWidget::on_goFirstButton_clicked()
+{
+	mFileVA.slotRewindMovie();
+	updateDisplay();
+}
+
+void MainDisplayWidget::updateDisplay()
+{
+	m_fullImage = iplImageToQImage( mPlaySpeed ? mFileVA.readImageRGB32() : mFileVA.readImageY() );
+
+	ui->mainImageWidget->setImage(m_fullImage, NULL);
+}
+
+void MainDisplayWidget::on_goPrevButton_clicked()
+{
+	mFileVA.slotRewindMovie();
+	mPlayTimer.stop();
+
+	ui->playButton->blockSignals(true);
+	ui->playButton->setChecked(false);
+	ui->playButton->blockSignals(false);
+
+	updateDisplay();
+}
+
+void MainDisplayWidget::on_playButton_toggled(bool checked)
+{
+	if(checked)
+	{
+		mPlayTimer.start(1000 * mPlaySpeed / mFileVA.getFrameRate());
+	} else {
+		mPlayTimer.stop();
+	}
+}
+
+void MainDisplayWidget::on_goNextButton_clicked()
+{
+	bool got_picture = mFileVA.GetNextFrame();
+	if(got_picture)
+	{
+		updateDisplay();
+	}
+	else if(mPlayTimer.isActive())
+	{
+		ui->playButton->setChecked(false);
+	}
+}
+
+void MainDisplayWidget::on_mPlayTimer_timeout()
+{
+	on_goNextButton_clicked();
+}
+
+void MainDisplayWidget::on_goLastButton_clicked()
+{
+
+}
+
+void MainDisplayWidget::on_grayscaleButton_toggled(bool gray)
+{
+	mPlayGrayscale = gray;
+
+}
+
+void MainDisplayWidget::on_speedComboBox_currentIndexChanged(QString val)
+{
+	if(val.contains("/"))
+	{
+		QStringList split = val.split("/");
+		if(split.count()>1)
+		{
+			mPlaySpeed = split[1].toInt();
+		}
+	} else {
+		mPlaySpeed = val.toInt();
+	}
+	fprintf(stderr, "MainDisplayWidget::%s:%d : playspeed=%g\n",
+			__func__, __LINE__, mPlaySpeed);
+	if(mPlayTimer.isActive())
+	{
+		if(mFileVA.getFrameRate()>0) {
+			mPlayTimer.setInterval(1000 * mPlaySpeed / mFileVA.getFrameRate());
+		}
+	}
+}
+
+void MainDisplayWidget::on_magneticButton_clicked()
+{
+
+}
+
+void MainDisplayWidget::on_bookmarksButton_clicked()
+{
+	if(!m_editBookmarksForm)
+	{
+		m_editBookmarksForm = new MovieBookmarkForm(NULL);
+		m_editBookmarksForm->setBookmarkList(m_listBookmarks);
+	}
+	m_editBookmarksForm->show();
 }

@@ -27,7 +27,8 @@
 #include "imgutils.h"
 
 #ifndef MAX_PATH_LEN
-#define MAX_PATH_LEN	512
+/// Maximum length of path = UTF-8 * 512 char
+#define MAX_PATH_LEN	1024
 #endif
 
 /// Max length of an EXIF field

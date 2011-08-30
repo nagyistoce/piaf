@@ -81,8 +81,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>210</width>
-              <height>427</height>
+              <width>206</width>
+              <height>434</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -90,7 +90,7 @@
               <number>0</number>
              </property>
              <item>
-              <widget class="QToolBox" name="inputsToolBox">
+              <widget class="QTabWidget" name="inputsTabWidget">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                  <horstretch>0</horstretch>
@@ -98,25 +98,20 @@
                 </sizepolicy>
                </property>
                <property name="toolTip">
-                <string>Live stream devices</string>
+                <string>Folders explorer</string>
                </property>
                <property name="currentIndex">
                 <number>0</number>
                </property>
-               <widget class="QWidget" name="page">
-                <property name="geometry">
-                 <rect>
-                  <x>0</x>
-                  <y>0</y>
-                  <width>210</width>
-                  <height>334</height>
-                 </rect>
-                </property>
+               <widget class="QWidget" name="inputsTabWidgetPage1" native="true">
                 <attribute name="icon">
                  <iconset resource="../ema.qrc">
                   <normaloff>:/icons/icons/22x22/system-file-manager.png</normaloff>:/icons/icons/22x22/system-file-manager.png</iconset>
                 </attribute>
-                <attribute name="label">
+                <attribute name="title">
+                 <string/>
+                </attribute>
+                <attribute name="toolTip">
                  <string>Folders</string>
                 </attribute>
                 <layout class="QVBoxLayout" name="verticalLayout_7">
@@ -221,20 +216,15 @@
                  </item>
                 </layout>
                </widget>
-               <widget class="QWidget" name="page_2">
-                <property name="geometry">
-                 <rect>
-                  <x>0</x>
-                  <y>0</y>
-                  <width>210</width>
-                  <height>334</height>
-                 </rect>
-                </property>
+               <widget class="QWidget" name="inputsTabWidgetPage2" native="true">
                 <attribute name="icon">
                  <iconset resource="../ema.qrc">
-                  <normaloff>:/icons/icons/22x22/address-book-new.png</normaloff>:/icons/icons/22x22/address-book-new.png</iconset>
+                  <normaloff>:/icons/icons/16x16/address-book-new.png</normaloff>:/icons/icons/16x16/address-book-new.png</iconset>
                 </attribute>
-                <attribute name="label">
+                <attribute name="title">
+                 <string/>
+                </attribute>
+                <attribute name="toolTip">
                  <string>Collections</string>
                 </attribute>
                 <layout class="QVBoxLayout" name="verticalLayout_9">
@@ -329,20 +319,15 @@
                  </item>
                 </layout>
                </widget>
-               <widget class="QWidget" name="page_3">
-                <property name="geometry">
-                 <rect>
-                  <x>0</x>
-                  <y>0</y>
-                  <width>210</width>
-                  <height>334</height>
-                 </rect>
-                </property>
+               <widget class="QWidget" name="inputsTabWidgetPage3" native="true">
                 <attribute name="icon">
                  <iconset resource="../ema.qrc">
                   <normaloff>:/icons/icons/16x16/camera-web.png</normaloff>:/icons/icons/16x16/camera-web.png</iconset>
                 </attribute>
-                <attribute name="label">
+                <attribute name="title">
+                 <string/>
+                </attribute>
+                <attribute name="toolTip">
                  <string>Live streams</string>
                 </attribute>
                 <layout class="QVBoxLayout" name="verticalLayout_12">
@@ -477,6 +462,14 @@
                      <string>OpenCV</string>
                     </property>
                    </item>
+                   <item>
+                    <property name="text">
+                     <string>Axis</string>
+                    </property>
+                    <property name="text">
+                     <string>unsupported</string>
+                    </property>
+                   </item>
                   </widget>
                  </item>
                 </layout>
@@ -556,9 +549,15 @@
              <property name="shortcut">
               <string>G</string>
              </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
              <property name="flat">
               <bool>true</bool>
              </property>
+             <attribute name="buttonGroup">
+              <string>buttonGroup</string>
+             </attribute>
             </widget>
            </item>
            <item>
@@ -591,9 +590,15 @@
              <property name="shortcut">
               <string>I</string>
              </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
              <property name="flat">
               <bool>true</bool>
              </property>
+             <attribute name="buttonGroup">
+              <string>buttonGroup</string>
+             </attribute>
             </widget>
            </item>
            <item>
@@ -611,9 +616,15 @@
                <height>22</height>
               </size>
              </property>
+             <property name="checkable">
+              <bool>true</bool>
+             </property>
              <property name="flat">
               <bool>true</bool>
              </property>
+             <attribute name="buttonGroup">
+              <string>buttonGroup</string>
+             </attribute>
             </widget>
            </item>
            <item>
@@ -667,8 +678,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>94</width>
-                  <height>24</height>
+                  <width>98</width>
+                  <height>28</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -746,9 +757,13 @@
          <enum>QTabWidget::South</enum>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tabSearch">
+         <attribute name="icon">
+          <iconset resource="../ema.qrc">
+           <normaloff>:/icons/icons/22x22/document-properties.png</normaloff>:/icons/icons/22x22/document-properties.png</iconset>
+         </attribute>
          <attribute name="title">
           <string>Keywords</string>
          </attribute>
@@ -838,6 +853,10 @@
          </layout>
         </widget>
         <widget class="QWidget" name="tab_info">
+         <attribute name="icon">
+          <iconset resource="../ema.qrc">
+           <normaloff>:/icons/icons/22x22/view-object-histogram-linear.png</normaloff>:/icons/icons/22x22/view-object-histogram-linear.png</iconset>
+         </attribute>
          <attribute name="title">
           <string>Picture</string>
          </attribute>
@@ -864,6 +883,10 @@
          </layout>
         </widget>
         <widget class="QWidget" name="tab_plugins">
+         <attribute name="icon">
+          <iconset resource="../ema.qrc">
+           <normaloff>:/icons/icons/22x22/preferences-plugin.png</normaloff>:/icons/icons/22x22/preferences-plugin.png</iconset>
+         </attribute>
          <attribute name="title">
           <string>Plugins</string>
          </attribute>
@@ -890,8 +913,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>421</width>
-               <height>444</height>
+               <width>405</width>
+               <height>443</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1075,8 +1098,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>994</width>
-             <height>165</height>
+             <width>996</width>
+             <height>169</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1111,7 +1134,7 @@
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>27</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1256,4 +1279,7 @@
   <include location="../../main/piaf.qrc"/>
  </resources>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>

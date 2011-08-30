@@ -197,5 +197,6 @@
         <file>icons/16x16/network-connect.png</file>
         <file>icons/16x16/network-disconnect.png</file>
         <file>icons/22x22/network-connect.png</file>
+        <file>icons/22x22/icon-magnet.png</file>
     </qresource>
 </RCC>
