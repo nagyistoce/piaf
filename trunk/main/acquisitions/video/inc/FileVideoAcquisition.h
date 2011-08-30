@@ -75,7 +75,7 @@ extern "C" {
  @version 0.1.0 \Date
  */
 
-class FileVideoAcquisition {
+class FileVideoAcquisition : public VirtualDeviceAcquisition {
 public:
 	/// Constructor
 	FileVideoAcquisition();
@@ -104,9 +104,53 @@ public:
 	/// Checks if video acquisition is initialised
 	bool AcqIsInitialised();
 	
+	/** @brief Open device and read first image */
 	int openDevice(const char * aDevice, tBoxSize newSize);
-	/// Gets definitive image size. You should do that to verify that your selected image size is supported by device.
+
+	// FOR VirtualDeviceAcquisition PURE VIRTUAL API
+	/** \brief Use sequential mode
+		If true, grabbing is done when a new image is requested.
+		Else a thread is started to grab */
+	void setSequentialMode(bool on);
+
+	/** \brief Function called by the doc (parent) thread */
+	int grab();
+
+	/** \brief Return true if acquisition device is ready to start */
+	bool isDeviceReady();
+
+	/** \brief Return true if acquisition is running */
+	bool isAcquisitionRunning();
+
+	/** \brief Start acquisition */
+	int startAcquisition();
+
+	/** \brief Return image size */
 	CvSize getImageSize();
+
+	/** \brief Stop acquisition */
+	int stopAcquisition();
+
+	/** \brief Grabs one image and convert to RGB32 coding format
+		if sequential mode, return last acquired image, else read and return image
+
+		\return NULL if error
+		*/
+	IplImage * readImageRGB32();
+
+	/** \brief Grabs one image and convert to grayscale coding format
+		if sequential mode, return last acquired image, else read and return image
+
+		\return NULL if error
+		*/
+	IplImage * readImageY();
+
+	/** \brief Grabs one image of depth buffer, in meter
+		if sequential mode, return last acquired image, else read and return image
+
+		\return NULL if error
+		*/
+	IplImage * readImageDepth() { return 0; }
 
 	/** @brief Get video properties (not updated) */
 	t_video_properties getVideoProperties() { updateVideoProperties(); return m_video_properties; }
@@ -116,6 +160,8 @@ public:
 
 	/** @brief Set video properties (not updated) */
 	int setVideoProperties(t_video_properties props);
+
+	// end of VirtualDeviceAcquisition API
 
 	/// change acquisition size
 	int changeAcqParams(tBoxSize newSize, int channel);
@@ -298,8 +344,10 @@ private:
 	suseconds_t timeref_usec;
 #endif
 
+	// index of played frame
 	long playFrame;
 
+	/// File size in bytes
 	unsigned long long m_fileSize;
 
 	/// Usage to be confirmed...
@@ -309,6 +357,16 @@ private:
 	unsigned long long m_prevPosition;
 	/** @brief Last movie position, defined by the position of last key frame and nb of frame since this key frame */
 	t_movie_pos m_movie_pos;
+
+
+	// Variables for VirtualDeviceAcquisition API
+	void initVirtualDevice();///< init of VirtualDeviceAcqiosition API variables
+	void purgeVirtualDevice();///< init of VirtualDeviceAcqiosition API variables
+
+	bool mSequentialMode; ///< Sequential mode vs threaded (default= true)
+	IplImage * m_imageRGB32;
+	IplImage * m_imageBGR32;
+	IplImage * m_imageY;
 };
 
 #endif

@@ -23,6 +23,7 @@
 
 #include "mainimagewidget.h"
 #include "ui_mainimagewidget.h"
+#include "piaf-common.h"
 
 #include "PiafFilter.h"
 
@@ -100,7 +101,7 @@ void MainImageWidget::slotUpdateImage()
 
 }
 
-void MainImageWidget::setImageFile(QString imagePath,
+int MainImageWidget::setImageFile(QString imagePath,
 								   t_image_info_struct * pinfo )
 {
 	// print allocated images
@@ -116,7 +117,7 @@ void MainImageWidget::setImageFile(QString imagePath,
 	m_ui->globalImageLabel->setRefImage(&m_displayImage);
 
 	// hide movie navigation bar
-	m_ui->movieToolbarWidget->hide();
+//	m_ui->movieToolbarWidget->hide();
 
 	if(!m_fullImage.isNull()) {
 		QString strInfo;
@@ -147,6 +148,44 @@ void MainImageWidget::setImageFile(QString imagePath,
 	}
 
 	slotUpdateImage();
+
+	return 0;
+}
+
+/** @brief Set the movie file */
+int MainImageWidget::setMovieFile(QString moviePath, t_image_info_struct * pinfo)
+{
+	mFileVA.stopAcquisition();
+
+	tBoxSize boxsize; memset(&boxsize, 0, sizeof(tBoxSize));
+
+	int ret = mFileVA.openDevice(moviePath.toUtf8().data(), boxsize);
+	if(ret >= 0) {
+		m_fullImage = iplImageToQImage(mFileVA.readImageRGB32());
+		m_displayImage = m_fullImage.copy();
+	} else {
+		PIAF_MSG(SWLOG_ERROR, "Could not open file '%s'", moviePath.toUtf8().data());
+	}
+
+	m_ui->globalImageLabel->setRefImage(&m_displayImage);
+
+	// hide movie navigation bar
+//	m_ui->movieToolbarWidget->show();
+	if(!m_fullImage.isNull()) {
+		QString strInfo;
+		strInfo.sprintf("%s\n%d x %d x %d\n%g fps",
+				moviePath.toUtf8().data(),
+				m_fullImage.width(),
+				m_fullImage.height(),
+				m_fullImage.depth()/8,
+				pinfo->fps
+				);
+		m_ui->globalImageLabel->setToolTip(strInfo);
+	}
+
+	slotUpdateImage();
+
+	return ret;
 }
 
 void  MainImageWidget::zoomOn(int x, int y, int scale) {

@@ -430,19 +430,21 @@ void ImageInfoWidget::setImageInfo(t_image_info_struct * pinfo) {
 	}
 
 	// RGB Histogram
-	IplImage * histo =
-			drawHistogram(pinfo->log_histogram, pinfo->grayscaled);
+	if(pinfo->log_histogram[0]) {
+		IplImage * histo =
+				drawHistogram(pinfo->log_histogram, pinfo->grayscaled);
 
-	if(histo) {
-		// Display in label
-		QImage img = iplImageToQImage(histo).scaled(
-				m_ui->sharpnessImageLabel->width(),
-				m_ui->sharpnessImageLabel->height(),
-				Qt::KeepAspectRatio
-				);
-		int sh = tmmin(100, (int)pinfo->histo_score);
-		m_ui->histoDial->setValue(sh);
-		m_ui->histoImageLabel->setPixmap(QPixmap::fromImage(img));
+		if(histo) {
+			// Display in label
+			QImage img = iplImageToQImage(histo).scaled(
+					m_ui->sharpnessImageLabel->width(),
+					m_ui->sharpnessImageLabel->height(),
+					Qt::KeepAspectRatio
+					);
+			int sh = tmmin(100, (int)pinfo->histo_score);
+			m_ui->histoDial->setValue(sh);
+			m_ui->histoImageLabel->setPixmap(QPixmap::fromImage(img));
+		}
 	}
 
 	// And sharpness

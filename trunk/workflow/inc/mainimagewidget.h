@@ -25,6 +25,7 @@
 #define MAINIMAGEWIDGET_H
 
 #include "imageinfo.h"
+#include "FileVideoAcquisition.h"
 #include <QtGui/QWidget>
 
 namespace Ui {
@@ -42,8 +43,12 @@ public:
 	explicit MainImageWidget(QWidget *parent = 0);
 	virtual ~MainImageWidget();
 
-	/** @brief Set the background image */
-	void setImageFile(QString imagePath, t_image_info_struct * pinfo = NULL);
+	/** @brief Set the image */
+	int setImageFile(QString imagePath, t_image_info_struct * pinfo = NULL);
+
+	/** @brief Set the movie file */
+	int setMovieFile(QString imagePath, t_image_info_struct * pinfo = NULL);
+
 	/** @brief Zoom on a part of input image at a specified scale */
 	void zoomOn(int unscaled_x, int unscaled_y, int scale);
 	/** @brief crop absolute part of image for display */
@@ -84,9 +89,11 @@ private slots:
 
 	void slotUpdateImage();
 
+
 private:
 	Ui::MainImageWidget *m_ui;
-
+	/// Video acquisition
+	FileVideoAcquisition mFileVA;
 signals:
 	/// Signal to tell where the crop window is located
 	void signalCropRect(QRect);
@@ -98,6 +105,7 @@ signals:
 
 	/** @brief The greyscale mode has been toggled */
 	void signalGreyscaleToggled(bool);
+
 
 };
 
