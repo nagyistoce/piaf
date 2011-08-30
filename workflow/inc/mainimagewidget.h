@@ -1,8 +1,8 @@
 /***************************************************************************
  *      Main image display in middle of GUI
  *
- *  Sun Aug 16 19:32:41 2009
- *  Copyright  2009  Christophe Seyve
+ *  Sun Aug 16 19:32:41 2011
+ *  Copyright  2011  Christophe Seyve
  *  Email cseyve@free.fr
  ****************************************************************************/
 /*
@@ -25,7 +25,6 @@
 #define MAINIMAGEWIDGET_H
 
 #include "imageinfo.h"
-#include "FileVideoAcquisition.h"
 #include <QtGui/QWidget>
 
 namespace Ui {
@@ -44,13 +43,12 @@ public:
 	virtual ~MainImageWidget();
 
 	/** @brief Set the image */
-	int setImageFile(QString imagePath, t_image_info_struct * pinfo = NULL);
+	int setImage(QImage imageIn, t_image_info_struct * pinfo = NULL);
 
-	/** @brief Set the movie file */
-	int setMovieFile(QString imagePath, t_image_info_struct * pinfo = NULL);
 
 	/** @brief Zoom on a part of input image at a specified scale */
 	void zoomOn(int unscaled_x, int unscaled_y, int scale);
+
 	/** @brief crop absolute part of image for display */
 	void cropAbsolute(int crop_x, int crop_, int scale);
 
@@ -92,8 +90,6 @@ private slots:
 
 private:
 	Ui::MainImageWidget *m_ui;
-	/// Video acquisition
-	FileVideoAcquisition mFileVA;
 signals:
 	/// Signal to tell where the crop window is located
 	void signalCropRect(QRect);

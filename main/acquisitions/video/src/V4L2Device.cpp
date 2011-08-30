@@ -455,25 +455,15 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 	{
 		fprintf(stderr, "[V4L2]::%s:%d : change br=%g/contrast=%g/saturation=%g/hue=%g/whiteness=%g...\n", __func__, __LINE__,
 				props.brightness, props.contrast, props.saturation, props.hue, props.white_balance);
-		video_picture pic;
-		pic.brightness = (u16)(props.brightness*VIDEOPICTURE_SCALE);
-		pic.contrast = (u16)(props.contrast*VIDEOPICTURE_SCALE);
-		pic.colour = (u16)(props.saturation*VIDEOPICTURE_SCALE);
-		pic.hue = (u16)(props.hue*VIDEOPICTURE_SCALE);
-		pic.whiteness = (u16)(props.white_balance*VIDEOPICTURE_SCALE);
-		fprintf(stderr, "[V4L2]::%s:%d :x%g => change br=%g/contrast=%g/saturation=%g/hue=%g/whiteness=%g...\n", __func__, __LINE__,
-				VIDEOPICTURE_SCALE,
-				props.brightness, props.contrast, props.saturation, props.hue, props.white_balance);
 
 		// copy vaklues directly in V4L2
 		setCameraControl(V4L2_CID_BRIGHTNESS, props.brightness);
 		setCameraControl(V4L2_CID_CONTRAST, props.contrast);
 		setCameraControl(V4L2_CID_SATURATION, props.saturation);
 		setCameraControl(V4L2_CID_HUE, props.hue);
+
 		//setCameraControl(V4L2_CID_WHITENESS, pic.whiteness);
 		setCameraControl(V4L2_CID_WHITE_BALANCE_TEMPERATURE, props.white_balance);
-
-		//setpicture(pic.brightness, pic.hue, pic.colour, pic.contrast, pic.whiteness);
 	}
 
 	// EXPOSURE
@@ -1718,73 +1708,38 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 		v4l2Input.index ++ ;
 	}
 
-
-#if 0
-	// FRAME SIZE
-	struct v4l2_frmsizeenum fsize;
-
-	memset(&fsize, 0, sizeof(fsize));
-	fsize.index = 0;
-	fsize.pixel_format = pixfmt;
-	while ((ret = xioctl(fd, VIDIOC_ENUM_FRAMESIZES, &fsize)) == 0)
+	// LISTING FORMATS
+	struct v4l2_fmtdesc fmtdesc;
+	memset(&fmtdesc, 0, sizeof(fmtdesc));
+	fmtdesc.index = 0;
+	fmtdesc.type = V4L2_BUF_TYPE_VIDEO_CAPTURE;
+	int ret;
+	while ((ret = xioctl(vd.fd, VIDIOC_ENUM_FMT, &fmtdesc)) == 0)
 	{
-		fsize.index++;
-		if (fsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
-		{
-			printf("{ discrete: width = %u, height = %u }\n",
-					 fsize.discrete.width, fsize.discrete.height);
+		fmtdesc.index++;
+		char fourcc[5]="1234";
+		memcpy(fourcc, &fmtdesc.pixelformat, 4);
+		fourcc[4]='\0';
+		V4L2_printf("\tSupported : '%s'", fourcc);
+		struct v4l2_frmsizeenum fsize;
 
-			fsizeind++;
-			listVidFormats[fmtind-1].listVidCap = g_renew(VidCap,
-														  listVidFormats[fmtind-1].listVidCap,
-														  fsizeind);
-
-			listVidFormats[fmtind-1].listVidCap[fsizeind-1].width = fsize.discrete.width;
-			listVidFormats[fmtind-1].listVidCap[fsizeind-1].height = fsize.discrete.height;
-
-			ret = enum_frame_intervals(listVidFormats,
-									   pixfmt,
-									   fsize.discrete.width,
-									   fsize.discrete.height,
-									   fmtind,
-									   fsizeind,
-									   fd);
-
-			if (ret != 0) perror("  Unable to enumerate frame sizes");
-		}
-		else if (fsize.type == V4L2_FRMSIZE_TYPE_CONTINUOUS)
+		memset(&fsize, 0, sizeof(fsize));
+		fsize.index = 0;
+		fsize.pixel_format = fmtdesc.pixelformat;
+		while ((ret = xioctl(vd.fd, VIDIOC_ENUM_FRAMESIZES, &fsize)) == 0)
 		{
-			printf("{ continuous: min { width = %u, height = %u } .. "
-					 "max { width = %u, height = %u } }\n",
-					 fsize.stepwise.min_width, fsize.stepwise.min_height,
-					 fsize.stepwise.max_width, fsize.stepwise.max_height);
-			printf("  will not enumerate frame intervals.\n");
+			fsize.index++;
+			if (fsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
+			{
+				V4L2_printf("\t\t'%s'\t{ discrete: width = %u, height = %u }",
+							fourcc,
+							fsize.discrete.width, fsize.discrete.height);
+			}
 		}
-		else if (fsize.type == V4L2_FRMSIZE_TYPE_STEPWISE)
-		{
-			printf("{ stepwise: min { width = %u, height = %u } .. "
-					 "max { width = %u, height = %u } / "
-					 "stepsize { width = %u, height = %u } }\n",
-					 fsize.stepwise.min_width, fsize.stepwise.min_height,
-					 fsize.stepwise.max_width, fsize.stepwise.max_height,
-					 fsize.stepwise.step_width, fsize.stepwise.step_height);
-			printf("  will not enumerate frame intervals.\n");
-		}
-		else
-		{
-			printf("  fsize.type not supported: %d\n", fsize.type);
-			printf("     (Discrete: %d   Continuous: %d  Stepwise: %d)\n",
-					   V4L2_FRMSIZE_TYPE_DISCRETE,
-					   V4L2_FRMSIZE_TYPE_CONTINUOUS,
-					   V4L2_FRMSIZE_TYPE_STEPWISE);
-		}
+
 	}
-	if (ret != 0 && errno != EINVAL)
-	{
-		perror("VIDIOC_ENUM_FRAMESIZES - Error enumerating frame sizes");
-		return errno;
-	}
-#endif
+
+
 	
 	// select video input : S-Video = index 3
 	int VideoInputIndex = 0 ;
@@ -2863,10 +2818,13 @@ int V4L2Device::v4l_setframebuffer(void *base,
 	vd.buffer.depth = depth;
 	vd.buffer.bytesperline = bytesperline;
 	
+	V4L2_printf("OBSOLETE !!");
+
 	if(ioctl(vd.fd, VIDIOCSFBUF, &(vd.buffer)) < 0) {
 		perror("!\t!\t[V4L2]::v4l_setframebuffer:VIDIOCSFBUF");
 		return -1;
 	}
+
 	return 0;
 }
 

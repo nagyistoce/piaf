@@ -1,8 +1,8 @@
 /***************************************************************************
  *      Main image display in middle of GUI
  *
- *  Sun Aug 16 19:32:41 2009
- *  Copyright  2009  Christophe Seyve
+ *  Sun Aug 16 19:32:41 2011
+ *  Copyright  2011  Christophe Seyve
  *  Email cseyve@free.fr
  ****************************************************************************/
 /*
@@ -80,6 +80,8 @@ void MainImageWidget::setFilterSequencer(FilterSequencer * pFS)
 	connect(mpFilterSequencer, SIGNAL(selectedFilterChanged()), this, SLOT(slotUpdateImage()));
 
 }
+
+
 void MainImageWidget::slotUpdateImage()
 {
 	fprintf(stderr, "MainImageWidget::%s:%d update !!\n", __func__, __LINE__);
@@ -101,17 +103,19 @@ void MainImageWidget::slotUpdateImage()
 
 }
 
-int MainImageWidget::setImageFile(QString imagePath,
+int MainImageWidget::setImage(QImage imageIn,
 								   t_image_info_struct * pinfo )
 {
 	// print allocated images
 	tmPrintIplImages();
 
-	fprintf(stderr, "NavImageWidget::%s:%d ('%s')\n",
+	fprintf(stderr, "NavImageWidget::%s:%d (%dx%dx%d, pinfo=%p)\n",
 			__func__, __LINE__,
-			imagePath.toAscii().data());
+			imageIn.width(), imageIn.height(), imageIn.depth(),
+			pinfo
+			);
 
-	m_fullImage.load(imagePath);
+	m_fullImage = imageIn.copy();
 	m_displayImage = m_fullImage.copy();
 
 	m_ui->globalImageLabel->setRefImage(&m_displayImage);
@@ -123,7 +127,7 @@ int MainImageWidget::setImageFile(QString imagePath,
 		QString strInfo;
 		if(!pinfo) {
 			strInfo.sprintf( "%s\n%d x %d x %d\n",
-					imagePath.toUtf8().data(),
+					pinfo->filepath.toUtf8().data(),
 					m_fullImage.width(),
 					m_fullImage.height(),
 					m_fullImage.depth()/8);
@@ -137,13 +141,14 @@ int MainImageWidget::setImageFile(QString imagePath,
 //					pinfo->datetime.toAscii().data()
 //					);
 			strInfo.sprintf("%s\n%d x %d x %d\n%d ISO",
-					imagePath.toUtf8().data(),
+					pinfo->filepath.toUtf8().data(),
 					m_fullImage.width(),
 					m_fullImage.height(),
 					m_fullImage.depth()/8,
 					pinfo->ISO
 					);
 		}
+
 		m_ui->globalImageLabel->setToolTip(strInfo);
 	}
 
@@ -152,41 +157,6 @@ int MainImageWidget::setImageFile(QString imagePath,
 	return 0;
 }
 
-/** @brief Set the movie file */
-int MainImageWidget::setMovieFile(QString moviePath, t_image_info_struct * pinfo)
-{
-	mFileVA.stopAcquisition();
-
-	tBoxSize boxsize; memset(&boxsize, 0, sizeof(tBoxSize));
-
-	int ret = mFileVA.openDevice(moviePath.toUtf8().data(), boxsize);
-	if(ret >= 0) {
-		m_fullImage = iplImageToQImage(mFileVA.readImageRGB32());
-		m_displayImage = m_fullImage.copy();
-	} else {
-		PIAF_MSG(SWLOG_ERROR, "Could not open file '%s'", moviePath.toUtf8().data());
-	}
-
-	m_ui->globalImageLabel->setRefImage(&m_displayImage);
-
-	// hide movie navigation bar
-//	m_ui->movieToolbarWidget->show();
-	if(!m_fullImage.isNull()) {
-		QString strInfo;
-		strInfo.sprintf("%s\n%d x %d x %d\n%g fps",
-				moviePath.toUtf8().data(),
-				m_fullImage.width(),
-				m_fullImage.height(),
-				m_fullImage.depth()/8,
-				pinfo->fps
-				);
-		m_ui->globalImageLabel->setToolTip(strInfo);
-	}
-
-	slotUpdateImage();
-
-	return ret;
-}
 
 void  MainImageWidget::zoomOn(int x, int y, int scale) {
 	if(m_fullImage.isNull()) { return; }

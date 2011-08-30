@@ -23,11 +23,11 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QSplitter" name="splitter_2">
+     <widget class="QSplitter" name="verticalSplitter">
       <property name="orientation">
        <enum>Qt::Vertical</enum>
       </property>
-      <widget class="QSplitter" name="splitter">
+      <widget class="QSplitter" name="lateralSplitter">
        <property name="orientation">
         <enum>Qt::Horizontal</enum>
        </property>
@@ -81,8 +81,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>206</width>
-              <height>434</height>
+              <width>210</width>
+              <height>427</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -108,8 +108,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>206</width>
-                  <height>344</height>
+                  <width>210</width>
+                  <height>334</height>
                  </rect>
                 </property>
                 <attribute name="icon">
@@ -226,8 +226,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>206</width>
-                  <height>344</height>
+                  <width>210</width>
+                  <height>334</height>
                  </rect>
                 </property>
                 <attribute name="icon">
@@ -334,8 +334,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>206</width>
-                  <height>344</height>
+                  <width>210</width>
+                  <height>334</height>
                  </rect>
                 </property>
                 <attribute name="icon">
@@ -634,7 +634,7 @@
          <item>
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="currentIndex">
-            <number>2</number>
+            <number>0</number>
            </property>
            <widget class="QWidget" name="page_mainImage">
             <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -645,7 +645,7 @@
               <number>2</number>
              </property>
              <item>
-              <widget class="MainImageWidget" name="mainImageWidget" native="true"/>
+              <widget class="MainDisplayWidget" name="mainDisplayWidget" native="true"/>
              </item>
             </layout>
            </widget>
@@ -667,8 +667,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>492</width>
-                  <height>432</height>
+                  <width>94</width>
+                  <height>24</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -890,7 +890,7 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>264</width>
+               <width>421</width>
                <height>444</height>
               </rect>
              </property>
@@ -1075,8 +1075,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>996</width>
-             <height>169</height>
+             <width>994</width>
+             <height>165</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1111,7 +1111,7 @@
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>23</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1227,12 +1227,6 @@
    <container>1</container>
   </customwidget>
   <customwidget>
-   <class>MainImageWidget</class>
-   <extends>QWidget</extends>
-   <header location="global">mainimagewidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
    <class>MetadataWidget</class>
    <extends>QWidget</extends>
    <header location="global">metadatawidget.h</header>
@@ -1248,6 +1242,12 @@
    <class>PluginEditorForm</class>
    <extends>QWidget</extends>
    <header>plugineditorform.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>MainDisplayWidget</class>
+   <extends>QWidget</extends>
+   <header>maindisplaywidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>
