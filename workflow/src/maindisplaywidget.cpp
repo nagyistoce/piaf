@@ -59,6 +59,7 @@ void MainDisplayWidget::setFilterSequencer(FilterSequencer * pFS)
 	}
 	mpFilterSequencer = pFS;
 
+	ui->mainImageWidget->setFilterSequencer(pFS);
 }
 
 int MainDisplayWidget::setImageFile(QString imagePath,
@@ -177,7 +178,7 @@ void MainDisplayWidget::on_goLastButton_clicked()
 void MainDisplayWidget::on_grayscaleButton_toggled(bool gray)
 {
 	mPlayGrayscale = gray;
-
+	updateDisplay();
 }
 
 void MainDisplayWidget::on_speedComboBox_currentIndexChanged(QString val)
