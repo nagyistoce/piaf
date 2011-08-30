@@ -53,6 +53,10 @@
 #include "workshopimagetool.h"
 
 
+
+
+QSplashScreen * g_splash = NULL;
+
 int g_EMAMW_debug_mode = EMALOG_DEBUG;
 
 #define EMAMW_printf(a,...)  { \
@@ -82,6 +86,8 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	//ui->collecShowCheckBox->setChecked(false);
 	pWorkspace = new QWorkspace(ui->workshopFrame);
 
+	on_actionAbout_activated();
+
 	loadSettings();
 
 	mWorkImage.load(":icons/ema-splash.png");
@@ -97,12 +103,18 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	pWorkshopImage = NULL;
 	pWorkshopImageTool = NULL;
 
-	ui->mainImageWidget->setFilterSequencer(
-		ui->pluginManagerForm->createFilterSequencer()
-	);
+	ui->mainDisplayWidget->setFilterSequencer(
+			ui->pluginManagerForm->createFilterSequencer()
+			);
 
 	// FIXME : use last page saved in settings
 	ui->stackedWidget->setCurrentIndex(0);
+
+	// Hide splash
+	if(g_splash)
+	{
+		g_splash->hide();
+	}
 }
 
 EmaMainWindow::~EmaMainWindow()
@@ -147,20 +159,28 @@ void EmaMainWindow::on_appendNewPictureThumb(QString filename)
 	appendThumbImage(filename);
 }
 
-void EmaMainWindow::on_gridButton_clicked() {
-	//
-	ui->stackedWidget->setCurrentIndex(1);
-}
 
-void EmaMainWindow::on_workspaceButton_clicked()
-{
-	ui->stackedWidget->setCurrentIndex(2);
-}
+// SWITCH BETWEEN CENTRAL DISPLAY MODES
 
 
 void EmaMainWindow::on_imgButton_clicked() {
 	//
 	ui->stackedWidget->setCurrentIndex(0);
+	ui->toolsTabWidget->show();
+}
+
+void EmaMainWindow::on_gridButton_clicked() {
+	//
+	ui->stackedWidget->setCurrentIndex(1);
+	ui->toolsTabWidget->show();
+}
+
+void EmaMainWindow::on_workspaceButton_clicked()
+{
+	ui->stackedWidget->setCurrentIndex(2);
+
+//	ui->lateralSplitter->setChildrenCollapsible(true);
+	ui->toolsTabWidget->hide();
 }
 
 
@@ -170,7 +190,9 @@ void EmaMainWindow::on_imgButton_clicked() {
 
 
 
-QSplashScreen * g_splash = NULL;
+
+
+
 void EmaMainWindow::on_actionQuit_activated()
 {
 	exit(0);
@@ -200,7 +222,7 @@ void EmaMainWindow::on_actionConvert_images_to_AVI_activated()
 
 void EmaMainWindow::on_actionAbout_activated()
 {
-	QPixmap pix(":/icons/icons/ema-splash.png");
+	QPixmap pix(":/icons/icons/piafworkflow-splash.jpg");
 	if(g_splash) {
 		g_splash->setPixmap(pix);
 	}
@@ -211,12 +233,10 @@ void EmaMainWindow::on_actionAbout_activated()
 	QString verstr, cmd = QString("Ctrl+");
 	QString item = QString("<li>"), itend = QString("</li>\n");
 	g_splash->showMessage(
-
 			QString("<br><br><br><br><br><br><br><br><br>") +
 			QString("<br><br><br><br><br><br><br><br><br>") +
 			QString("<br><br><br><br><br><br><br>") +
-			tr("<b>Ema</b> version: ")
-
+			tr("<b>Piaf workflow</b> version: ")
 						  + verstr.sprintf("svn%04d%02d%02d", VERSION_YY, VERSION_MM, VERSION_DD)
 
 						  + QString("<br>Website & Wiki: <a href=\"http://github.com/athoune/ema/\">http://github.com/athoune/ema/</a><br><br>")
@@ -388,11 +408,11 @@ void DirectoryTreeWidgetItem::expand()
 			new_file->name = fi.baseName();
 			new_file->fullPath = fi.absoluteFilePath();
 
-			QStringList columns; columns << new_file->name;
+			//QStringList columns; columns << new_file->name;
 
-			new_file->treeViewItem = new QTreeWidgetItem(
+			new_file->treeViewItem = new DirectoryTreeWidgetItem(
 					this,
-					columns);
+					new_file->fullPath);
 		}
 		else if(fi.isDir() && fi.absoluteFilePath().length() > fullPath.length())
 		{
@@ -446,7 +466,6 @@ void DirectoryTreeWidgetItem::init()
 		nb_files = 0;
 		scanDirectory(fullPath, &nb_files);
 
-
 		setText(1, QString::number(nb_files));
 
 		if(nb_files > 0) {
@@ -461,6 +480,9 @@ void DirectoryTreeWidgetItem::init()
 	else if(fi.isFile())
 	{
 		mIsFile = true;
+
+		setText(0, fi.baseName());
+		setText(1, fi.extension());
 	}
 }
 
@@ -646,7 +668,8 @@ void EmaMainWindow::on_filesTreeWidget_itemClicked (
 }
 
 void EmaMainWindow::on_filesTreeWidget_itemDoubleClicked (
-		QTreeWidgetItem * item, int /*unused column */) {
+		QTreeWidgetItem * item, int /*unused column */)
+{
 	if(!item) return;
 
 	DirectoryTreeWidgetItem * curdir = (DirectoryTreeWidgetItem *)item;
@@ -658,7 +681,6 @@ void EmaMainWindow::on_filesTreeWidget_itemDoubleClicked (
 		// Add all its content recursively
 		appendFileList(curdir->getFileList());
 	}
-
 }
 
 
@@ -762,9 +784,9 @@ void EmaMainWindow::on_thumbImage_selected(QString fileName)
 }
 
 
-void EmaMainWindow::on_mainImageWidget_signalZoomRect(QRect cropRect)
+void EmaMainWindow::on_mainDisplayWidget_signalZoomRect(QRect cropRect)
 {
-	ui->globalNavImageWidget->setZoomRect(cropRect);
+//FIXME	ui->globalNavImageWidget->setZoomRect(cropRect);
 }
 
 void EmaMainWindow::on_thumbImage_clicked(QString fileName)
@@ -772,25 +794,40 @@ void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 	QFileInfo fi(fileName);
 	if(fi.exists()) {
 		ui->globalNavImageWidget->setImageFile(fileName);
-		t_image_info_struct * pinfo = emaMngr()->getInfo(fileName);
+		t_image_info_struct * pinfo = NULL;
+
+		int retry = 0;
+
+		while(!pinfo && retry<4E6) {
+			pinfo = emaMngr()->getInfo(fileName);
+			if(!pinfo) {
+				// Create its info
+				emaMngr()->appendFile(fileName);
+				usleep(100000);
+			}
+			retry += 100000;
+		}
 
 		mWorkImage.load(fileName);
-		//ui->mainImageWidget->setRefImage(&mWorkImage);
-		if(!pinfo->isMovie)
-		{
-			ui->mainImageWidget->setImageFile(fileName, pinfo);
 
-			if(pWorkshopImage) {
-				pWorkshopImage->load(fileName);
+		//ui->mainDisplayWidget->setRefImage(&mWorkImage);
+		if(pinfo) {
+			if(!pinfo->isMovie)
+			{
+				ui->mainDisplayWidget->setImageFile(fileName, pinfo);
+
+				if(pWorkshopImage) {
+					pWorkshopImage->load(fileName);
+				}
+				if(pWorkshopImageTool) {
+					pWorkshopImageTool->setWorkshopImage(pWorkshopImage);
+					//pWorkshopImageTool->update();
+				}
 			}
-			if(pWorkshopImageTool) {
-				pWorkshopImageTool->setWorkshopImage(pWorkshopImage);
-				//pWorkshopImageTool->update();
+			else
+			{
+				ui->mainDisplayWidget->setMovieFile(fileName, pinfo);
 			}
-		}
-		else
-		{
-			ui->mainImageWidget->setMovieFile(fileName, pinfo);
 		}
 
 
@@ -810,7 +847,7 @@ void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 
 
 void EmaMainWindow::on_globalNavImageWidget_signalZoomOn(int x, int y, int scale) {
-	ui->mainImageWidget->zoomOn(x,y,scale);
+	ui->mainDisplayWidget->zoomOn(x,y,scale);
 	ui->stackedWidget->setCurrentIndex(0);
 }
 

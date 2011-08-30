@@ -552,7 +552,8 @@ int ImageInfo::loadFile(QString filename)
 		while((sc_h % 4) != 0) { sc_h++; }
 
 		if(m_scaledImage
-		   && (m_scaledImage->width != sc_w || m_scaledImage->height != sc_h)) {
+		   && (m_scaledImage->width != sc_w || m_scaledImage->height != sc_h
+			   || m_scaledImage->nChannels != m_originalImage->nChannels)) {
 			fprintf(stderr, "ImageInfo::%s:%d : this=%p size changed => purge scaled\n",
 					__func__, __LINE__, this);
 			// purge scaled images
