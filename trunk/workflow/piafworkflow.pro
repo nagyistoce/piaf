@@ -64,7 +64,6 @@ SOURCES += tools/src/PiafFilter.cpp \
 	src/filtermanagerform.cpp \
     src/plugineditorform.cpp \
     ../main/tools/src/timehistogramwidget.cpp \
-    src/multitoolbarsstackedwidget.cpp \
     src/maindisplaywidget.cpp
 
 HEADERS += tools/inc/PiafFilter.h \
@@ -84,7 +83,6 @@ HEADERS += tools/inc/PiafFilter.h \
 	inc/filtermanagerform.h \
     inc/plugineditorform.h \
     ../main/tools/inc/timehistogramwidget.h \
-    inc/multitoolbarsstackedwidget.h \
     inc/maindisplaywidget.h
 
 FORMS += ui/navimagewidget.ui \
@@ -99,7 +97,6 @@ FORMS += ui/navimagewidget.ui \
 	ui/filtermanagerform.ui \
     ui/plugineditorform.ui \
     ../main/tools/ui/timehistogramwidget.ui \
-    ui/multitoolbarsstackedwidget.ui \
     ui/maindisplaywidget.ui
 
 INCLUDEPATH += tools/inc

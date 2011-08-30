@@ -175,6 +175,13 @@ void EmaMainWindow::on_gridButton_clicked() {
 	ui->toolsTabWidget->show();
 }
 
+void EmaMainWindow::on_batchPlayerButton_clicked()
+{
+	ui->stackedWidget->setCurrentIndex(3);
+	ui->toolsTabWidget->hide();
+}
+
+
 void EmaMainWindow::on_workspaceButton_clicked()
 {
 	ui->stackedWidget->setCurrentIndex(2);
@@ -346,6 +353,7 @@ void scanDirectory(QString path, int * p_nb_files)
 
 void EmaMainWindow::on_filesTreeWidget_itemExpanded(QTreeWidgetItem * item)
 {
+	fprintf(stderr, "EmaMW::%s:%d : expanded %p !\n", __func__, __LINE__, item);
 	if(!item) return;
 
 	fprintf(stderr, "EmaMW::%s:%d : expanded %p !\n", __func__, __LINE__, item);

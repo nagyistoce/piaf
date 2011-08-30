@@ -74,8 +74,10 @@ void ThumbImageFrame::setImageFile(const QString & imagePath,
 
 	fflush(stderr);
 
+
 	QFileInfo fi(imagePath);
 	m_ui->nameLabel->setText(fi.baseName());
+	m_ui->extLabel->setText(fi.extension());
 
 	QPixmap l_displayImage;// local only
 	m_imagePath = "";

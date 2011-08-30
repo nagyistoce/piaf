@@ -318,7 +318,17 @@
              <string>Magnetic navigation mode</string>
             </property>
             <property name="text">
-             <string>Magnetic</string>
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../ema.qrc">
+              <normaloff>:/icons/icons/22x22/icon-magnet.png</normaloff>:/icons/icons/22x22/icon-magnet.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>22</width>
+              <height>22</height>
+             </size>
             </property>
             <property name="checkable">
              <bool>true</bool>

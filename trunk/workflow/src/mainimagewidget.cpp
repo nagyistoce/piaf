@@ -84,8 +84,11 @@ void MainImageWidget::setFilterSequencer(FilterSequencer * pFS)
 
 void MainImageWidget::slotUpdateImage()
 {
-	fprintf(stderr, "MainImageWidget::%s:%d update !!\n", __func__, __LINE__);
-	if(mpFilterSequencer) {
+	fprintf(stderr, "MainImageWidget::%s:%d update filterseq=%p!!\n", __func__, __LINE__,
+			mpFilterSequencer);
+
+	if(mpFilterSequencer)
+	{
 		swImageStruct image;
 		memset(&image, 0, sizeof(swImageStruct));
 		image.width = (int)m_fullImage.width();
@@ -97,9 +100,11 @@ void MainImageWidget::slotUpdateImage()
 		image.buffer = m_displayImage.bits(); // Buffer
 
 		mpFilterSequencer->processImage(&image);
-		// refresh display
-		m_ui->globalImageLabel->setRefImage(&m_displayImage);
+
 	}
+
+	// refresh display
+	m_ui->globalImageLabel->setRefImage(&m_displayImage);
 
 }
 
@@ -117,8 +122,6 @@ int MainImageWidget::setImage(QImage imageIn,
 
 	m_fullImage = imageIn.copy();
 	m_displayImage = m_fullImage.copy();
-
-	m_ui->globalImageLabel->setRefImage(&m_displayImage);
 
 	// hide movie navigation bar
 //	m_ui->movieToolbarWidget->hide();
