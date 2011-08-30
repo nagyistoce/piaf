@@ -91,6 +91,8 @@ void FileVideoAcquisition::purge() {
 
 // START COPY FROM VideoPlayerTool.cpp
 void FileVideoAcquisition::initPlayer() {
+	initVirtualDevice(); // init inherited functions and vars
+
 	m_videoFileName[0] = '\0';
 	m_videoFileName[127] = '\0';
 	m_pFormatCtx 	= NULL;
@@ -130,10 +132,13 @@ void FileVideoAcquisition::initPlayer() {
 
 int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 {
-	float lfps = 25.f;
-	fprintf(stderr, "FileVA::%s:%d : OPENING VIDEO FILE '%s'............\n", __func__, __LINE__, aDevice);
+	fprintf(stderr, "FileVA::%s:%d : OPENING VIDEO FILE '%s'............\n",
+			__func__, __LINE__, aDevice);
 
 	memset(&m_video_properties, 0, sizeof(t_video_properties));
+	if(!aDevice) {
+		return -1;
+	}
 
 	if(m_inbuff)
 	{
@@ -142,6 +147,7 @@ int FileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 		purge();
 		m_inbuff = NULL;
 	}
+	float lfps = 25.f;
 
    // Open video file
 	if(av_open_input_file(&m_pFormatCtx, aDevice, NULL, 0, NULL)!=0) {
@@ -1558,4 +1564,155 @@ int FileVideoAcquisition::getPalette()
 	}
 
 	return myVD_palette;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// FOR VirtualDeviceAcquisition PURE VIRTUAL API
+void FileVideoAcquisition::initVirtualDevice()
+{
+	mSequentialMode = true;
+	m_imageRGB32 = m_imageBGR32 = m_imageY = NULL;
+	memset(&m_video_properties, 0, sizeof(t_video_properties));
+
+}
+
+void FileVideoAcquisition::purgeVirtualDevice()
+{
+	swReleaseImage(&m_imageRGB32);
+	swReleaseImage(&m_imageBGR32);
+	swReleaseImage(&m_imageY);
+}
+
+/* Use sequential mode
+	If true, grabbing is done when a new image is requested.
+	Else a thread is started to grab */
+void FileVideoAcquisition::setSequentialMode(bool on)
+{
+	mSequentialMode = on;
+}
+
+/* Function called by the doc (parent) thread */
+int FileVideoAcquisition::grab()
+{
+	// Read one frame
+	long buffersize = 0;
+	unsigned char * retgrab = readImageBuffer(&buffersize);
+
+	PIAF_MSG(SWLOG_TRACE, "read buffer=%p / %ld bytes",
+			 retgrab,
+			 buffersize)
+
+	return (retgrab ? 0 : -1);
+}
+
+/* Return true if acquisition device is ready to start */
+bool FileVideoAcquisition::isDeviceReady()
+{
+	return AcqIsInitialised();
+}
+
+/* Return true if acquisition is running */
+bool FileVideoAcquisition::isAcquisitionRunning() {
+	return AcqIsInitialised();
+}
+
+/** \brief Start acquisition */
+int FileVideoAcquisition::startAcquisition()
+{
+	// FIXME
+	return 0;
+
+}
+
+/* Stop acquisition */
+int FileVideoAcquisition::stopAcquisition()
+{
+	// FIXME
+	return 0;
+
+}
+
+/* Grabs one image and convert to RGB32 coding format
+	if sequential mode, return last acquired image, else read and return image
+
+	\return NULL if error
+	*/
+IplImage * FileVideoAcquisition::readImageRGB32()
+{
+	if(m_imageRGB32 && (m_imageRGB32->width != mImageSize.width
+						|| m_imageRGB32->height != mImageSize.height))
+	{
+		swReleaseImage(&m_imageRGB32);
+		swReleaseImage(&m_imageBGR32);
+	}
+
+	if(!m_imageRGB32) {
+		fprintf(stderr, "[FileVA]::%s:%d : create RGB32 image = %dx%d",
+				__func__, __LINE__, mImageSize.width, mImageSize.height);
+		m_imageRGB32 = swCreateImage(mImageSize, IPL_DEPTH_8U, 4);
+		m_imageBGR32 = swCreateImage(mImageSize, IPL_DEPTH_8U, 4);
+	}
+	// Decode image
+	long buffersize = m_imageRGB32->widthStep * m_imageRGB32->height;
+	int ret = readImageRGB32NoAcq((unsigned char*)m_imageRGB32->imageData,
+								  &buffersize);
+	if(ret<0) {
+
+		return NULL;
+	}
+	fprintf(stderr, "[FileVA]::%s:%d : read RGB32 image = %dx%d : ret = %d",
+			__func__, __LINE__,
+			mImageSize.width, mImageSize.height, ret);
+	cvCvtColor(m_imageRGB32, m_imageBGR32, CV_BGRA2RGBA);
+
+	return m_imageBGR32;
+}
+
+int FileVideoAcquisition::setVideoProperties(t_video_properties props)
+{
+// FIXME
+	return 0;
+}
+
+/* Grabs one image and convert to grayscale coding format
+	if sequential mode, return last acquired image, else read and return image
+
+	\return NULL if error
+	*/
+IplImage * FileVideoAcquisition::readImageY()
+{
+	if(m_imageY && (m_imageY->width != mImageSize.width
+						|| m_imageY->height != mImageSize.height) )
+	{
+		swReleaseImage(&m_imageY);
+	}
+
+	if(!m_imageY) {
+		fprintf(stderr, "[FileVA]::%s:%d : create Y image = %dx%d", __func__, __LINE__,
+				mImageSize.width, mImageSize.height);
+		m_imageY = swCreateImage(mImageSize, IPL_DEPTH_8U, 1);
+	}
+	// Decode image
+	long buffersize = m_imageY->widthStep * m_imageY->height;
+	int ret = readImageYNoAcq((unsigned char*)m_imageY->imageData,
+								  &buffersize);
+
+	fprintf(stderr, "[FileVA]::%s:%d : read RGB32 image = %dx%d : ret = %d",
+			__func__, __LINE__,
+			mImageSize.width, mImageSize.height, ret);
+	return m_imageY;
+
 }

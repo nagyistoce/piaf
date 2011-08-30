@@ -78,12 +78,12 @@
 PIAF_EXTERN int g_debug_piaf	PIAF_ZERO;
 
 const char swlog_msgtab[6][12] = {
-		"none   ",
-		"ERROR  ",
-		"WARNING",
-		"INFO   ",
-		"DEBUG  ",
-		"TRACE  "
+	"TRACE  ",
+	"DEBUG  ",
+	"INFO   ",
+	"WARNING",
+	"ERROR  ",
+	"none   "
 };
 
 #define SWLOG_MSG(a) ((a)>=SWLOG_TRACE&&(a)<=SWLOG_CRITICAL?swlog_msgtab[(a)+2]:"UNKNOWN")

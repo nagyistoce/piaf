@@ -117,7 +117,8 @@ void clearImageInfoStruct(t_image_info_struct * pinfo)
 	pinfo->filesize = 0;
 	// Movie
 	strcpy(pinfo->FourCC, "????");
-
+	pinfo->isMovie = false;
+	pinfo->fps = 0.f;
 
 	// Image processing data
 	pinfo->grayscaled = 0;
@@ -438,8 +439,12 @@ int ImageInfo::loadMovieFile(QString filename)
 	// File info
 	QFileInfo fi(filename);
 	if(!fi.exists()) {
+		PIAF_MSG(SWLOG_ERROR, "cannot open file '%s': it does not exists",
+				 fi.absoluteFilePath().toUtf8().data());
 		return -1;
 	}
+
+	PIAF_MSG(SWLOG_INFO, "open file '%s'", fi.absoluteFilePath().toAscii().data())
 
 	m_image_info_struct.filesize = fi.size();
 
@@ -447,10 +452,11 @@ int ImageInfo::loadMovieFile(QString filename)
 	tBoxSize size;
 	size.x = size.y = 0;
 	size.width = 320; size.height = 240; //
-	if(mFileVA.openDevice(fi.absoluteFilePath().toUtf8().data(), size)<0) {
+	if(mFileVA.openDevice( fi.absoluteFilePath().toUtf8().data(), size)<0) {
 		PIAF_MSG(SWLOG_ERROR, "cannot open file '%s'", fi.absoluteFilePath().toUtf8().data());
 		return -1;
 	}
+	int retgrab = mFileVA.grab();
 
 	t_video_properties props = mFileVA.getVideoProperties();
 
@@ -458,13 +464,19 @@ int ImageInfo::loadMovieFile(QString filename)
 	m_image_info_struct.width = props.frame_width;
 	m_image_info_struct.height = props.frame_height;
 	m_image_info_struct.fps = props.fps;
-	PIAF_MSG(SWLOG_INFO, "file '%s' : %dx%d @ %g fps",
+	m_image_info_struct.isMovie = true;
+
+	PIAF_MSG(SWLOG_INFO, "file '%s' : retgrab=%d => %dx%d @ %g fps",
 			  fi.absoluteFilePath().toUtf8().data(),
+			  retgrab,
 			  m_image_info_struct.width, m_image_info_struct.height, m_image_info_struct.fps );
+
+	m_originalImage = tmCloneImage(mFileVA.readImageRGB32());
 	return 0;
 }
 
-int ImageInfo::loadFile(QString filename) {
+int ImageInfo::loadFile(QString filename)
+{
 	tmReleaseImage(&m_originalImage);
 
 	clearImageInfoStruct(&m_image_info_struct);
@@ -473,13 +485,15 @@ int ImageInfo::loadFile(QString filename) {
 	// File info
 	QFileInfo fi(filename);
 	if(!fi.exists()) {
+		fprintf(stderr, "ImageInfo::%s:%d: file '%s' oes not exists (with Qt)\n",
+				__func__, __LINE__, filename.toAscii().data());
 		return -1;
 	}
 
 	m_image_info_struct.filesize = fi.size();
 
-	// LOAD IMAGE METADATA
-	readMetadata(filename);
+	fprintf(stderr, "ImageInfo::%s:%d: reading file '%s' ...\n",
+			__func__, __LINE__, filename.toAscii().data());
 
 	// LOAD IMAGE PIXMAP
 	m_originalImage = cvLoadImage(filename.toUtf8().data());
@@ -488,142 +502,150 @@ int ImageInfo::loadFile(QString filename) {
 	if(!m_originalImage) {
 		fprintf(stderr, "ImageInfo::%s:%d: cannot load image '%s' (with openCV)\n",
 				__func__, __LINE__, filename.toAscii().data());
+
 		// Load as movie
 		loadMovieFile(filename);
-		return -1;
+	}
+	else
+	{
+		// LOAD IMAGE METADATA
+		readMetadata(filename);
 	}
 
-	m_image_info_struct.width = m_originalImage->width;
-	m_image_info_struct.height = m_originalImage->height;
-	m_image_info_struct.nChannels = m_originalImage->nChannels;
+	if(m_originalImage) {
+		m_image_info_struct.width = m_originalImage->width;
+		m_image_info_struct.height = m_originalImage->height;
+		m_image_info_struct.nChannels = m_originalImage->nChannels;
 
-	if(g_debug_ImageInfo) {
-		fprintf(stderr, "\tImageInfo::%s:%d : loaded '%s' : %dx%d x %d\n", __func__, __LINE__,
-				filename.toAscii().data(),
+		if(g_debug_ImageInfo) {
+			fprintf(stderr, "\tImageInfo::%s:%d : loaded '%s' : %dx%d x %d\n", __func__, __LINE__,
+					filename.toAscii().data(),
+					m_originalImage->width, m_originalImage->height,
+					m_originalImage->nChannels );
+		}
+		m_image_info_struct.grayscaled = (m_originalImage->depth == 1);
+
+		m_originalImage = tmAddBorder4x(m_originalImage); // it will purge originalImage
+		if(g_debug_ImageInfo) {
+			fprintf(stderr, "\tImageInfo::%s:%d => pitchedx4: %dx%d x %d\n", __func__, __LINE__,
 				m_originalImage->width, m_originalImage->height,
 				m_originalImage->nChannels );
-	}
-	m_image_info_struct.grayscaled = (m_originalImage->depth == 1);
-
-	m_originalImage = tmAddBorder4x(m_originalImage); // it will purge originalImage
-	if(g_debug_ImageInfo) {
-		fprintf(stderr, "\tImageInfo::%s:%d => pitchedx4: %dx%d x %d\n", __func__, __LINE__,
-			m_originalImage->width, m_originalImage->height,
-			m_originalImage->nChannels );
-	}
+		}
 
 #define IMGINFO_WIDTH	400
 #define IMGINFO_HEIGHT	400
 
-	// Scale to analysis size
-//		cvResize(tmpDisplayImage, new_displayImage, CV_INTER_LINEAR );
-	int sc_w = IMGINFO_WIDTH;
-	int sc_h = IMGINFO_HEIGHT;
-	float scale_factor_w = (float)m_originalImage->width / (float)IMGINFO_WIDTH;
-	float scale_factor_h = (float)m_originalImage->height / (float)IMGINFO_HEIGHT;
-	if(scale_factor_w > scale_factor_h) {
-		// limit w
-		sc_w = m_originalImage->width * IMGINFO_HEIGHT/m_originalImage->height;
-	} else {
-		sc_h = m_originalImage->height * IMGINFO_WIDTH/m_originalImage->width;
-	}
+		// Scale to analysis size
+		//		cvResize(tmpDisplayImage, new_displayImage, CV_INTER_LINEAR );
+		int sc_w = IMGINFO_WIDTH;
+		int sc_h = IMGINFO_HEIGHT;
+		float scale_factor_w = (float)m_originalImage->width / (float)IMGINFO_WIDTH;
+		float scale_factor_h = (float)m_originalImage->height / (float)IMGINFO_HEIGHT;
+		if(scale_factor_w > scale_factor_h) {
+			// limit w
+			sc_w = m_originalImage->width * IMGINFO_HEIGHT/m_originalImage->height;
+		} else {
+			sc_h = m_originalImage->height * IMGINFO_WIDTH/m_originalImage->width;
+		}
 
-	while((sc_w % 4) != 0) { sc_w++; }
-	while((sc_h % 4) != 0) { sc_h++; }
+		while((sc_w % 4) != 0) { sc_w++; }
+		while((sc_h % 4) != 0) { sc_h++; }
 
-	if(m_scaledImage
-	   && (m_scaledImage->width != sc_w || m_scaledImage->height != sc_h)) {
-		fprintf(stderr, "ImageInfo::%s:%d : this=%p size changed => purge scaled\n",
-				__func__, __LINE__, this);
-		// purge scaled images
-		purgeScaled();
-	}
+		if(m_scaledImage
+		   && (m_scaledImage->width != sc_w || m_scaledImage->height != sc_h)) {
+			fprintf(stderr, "ImageInfo::%s:%d : this=%p size changed => purge scaled\n",
+					__func__, __LINE__, this);
+			// purge scaled images
+			purgeScaled();
+		}
 
-	// Scale original image to smaller image to fasten later processinggs
-	if(!m_scaledImage) {
-		m_scaledImage = tmCreateImage(cvSize(sc_w, sc_h),
-								  IPL_DEPTH_8U, m_originalImage->nChannels);
-	}
+		// Scale original image to smaller image to fasten later processinggs
+		if(!m_scaledImage) {
+			m_scaledImage = tmCreateImage(cvSize(sc_w, sc_h),
+										  IPL_DEPTH_8U, m_originalImage->nChannels);
+		}
 
-	// Scale original image to processing image
-	cvResize(m_originalImage, m_scaledImage);
+		// Scale original image to processing image
+		cvResize(m_originalImage, m_scaledImage);
 
 #define IMGTHUMB_WIDTH	80
 #define IMGTHUMB_HEIGHT 80
 
-	// Scale rescaled to thumb size
-	if(!m_thumbImage) {
-		int th_w = IMGTHUMB_WIDTH;
-		int th_h = IMGTHUMB_HEIGHT;
-		float th_factor_w = (float)m_originalImage->width / (float)IMGTHUMB_WIDTH;
-		float th_factor_h = (float)m_originalImage->height / (float)IMGTHUMB_HEIGHT;
-		if(th_factor_w > th_factor_h) {
-			// limit w
-			th_w = m_originalImage->width * IMGTHUMB_HEIGHT/ m_originalImage->height;
-		} else {
-			th_h = m_originalImage->height * IMGTHUMB_WIDTH/ m_originalImage->width;
+		// Scale rescaled to thumb size
+		if(!m_thumbImage) {
+			int th_w = IMGTHUMB_WIDTH;
+			int th_h = IMGTHUMB_HEIGHT;
+			float th_factor_w = (float)m_originalImage->width / (float)IMGTHUMB_WIDTH;
+			float th_factor_h = (float)m_originalImage->height / (float)IMGTHUMB_HEIGHT;
+			if(th_factor_w > th_factor_h) {
+				// limit w
+				th_w = m_originalImage->width * IMGTHUMB_HEIGHT/ m_originalImage->height;
+			} else {
+				th_h = m_originalImage->height * IMGTHUMB_WIDTH/ m_originalImage->width;
+			}
+
+			while((th_w % 4) != 0) { th_w++; }
+			while((th_h % 4) != 0) { th_h++; }
+			m_thumbImage = tmCreateImage( cvSize(th_w, th_h), IPL_DEPTH_8U, m_originalImage->nChannels);
 		}
 
-		while((th_w % 4) != 0) { th_w++; }
-		while((th_h % 4) != 0) { th_h++; }
-		m_thumbImage = tmCreateImage( cvSize(th_w, th_h), IPL_DEPTH_8U, m_originalImage->nChannels);
-	}
+		cvResize(m_scaledImage, m_thumbImage);
 
-	cvResize(m_scaledImage, m_thumbImage);
+		m_image_info_struct.thumbImage.iplImage = m_thumbImage;
 
-	m_image_info_struct.thumbImage.iplImage = m_thumbImage;
+		compressCachedImage(&m_image_info_struct.thumbImage);
 
-	compressCachedImage(&m_image_info_struct.thumbImage);
+		if(g_debug_ImageInfo) {
+			fprintf(stderr, "\tImageInfo::%s:%d : scaled to %dx%d\n", __func__, __LINE__,
+					m_scaledImage->width, m_scaledImage->height);
+			fprintf(stderr, "\tImageInfo::%s:%d : thumb %dx%d\n", __func__, __LINE__,
+					m_thumbImage->width, m_thumbImage->height);
 
-	if(g_debug_ImageInfo) {
-		fprintf(stderr, "\tImageInfo::%s:%d : scaled to %dx%d\n", __func__, __LINE__,
-			m_scaledImage->width, m_scaledImage->height);
-		fprintf(stderr, "\tImageInfo::%s:%d : thumb %dx%d\n", __func__, __LINE__,
-			m_thumbImage->width, m_thumbImage->height);
+			fprintf(stderr, "\tImageInfo::%s:%d : processRGB(m_scaledImage=%dx%d)...\n", __func__, __LINE__,
+					m_scaledImage->width, m_scaledImage->height);fflush(stderr);
+		}
 
-		fprintf(stderr, "\tImageInfo::%s:%d : processRGB(m_scaledImage=%dx%d)...\n", __func__, __LINE__,
-			m_scaledImage->width, m_scaledImage->height);fflush(stderr);
-	}
-
-	// process RGB histogram
-	processRGB();
 
 #ifndef PIAFWORKFLOW
-	// process color analysis
-	processHSV();
+		// process RGB histogram
+		processRGB();
 
-	// then sharpness
-	if(g_debug_ImageInfo) {
-		fprintf(stderr, "\tImageInfo::%s:%d : processSharpness(gray=%dx%d)\n", __func__, __LINE__,
-			m_grayImage->width, m_grayImage->height);fflush(stderr);
-	}
-	processSharpness();
+		// process color analysis
+		processHSV();
 
-	if(g_debug_ImageInfo) {
-		fprintf(stderr, "\tImageInfo::%s:%d : process done (gray=%dx%d)\n", __func__, __LINE__,
-			m_grayImage->width, m_grayImage->height);fflush(stderr);
-	}
+		// then sharpness
+		if(g_debug_ImageInfo) {
+			fprintf(stderr, "\tImageInfo::%s:%d : processSharpness(gray=%dx%d)\n", __func__, __LINE__,
+					m_grayImage->width, m_grayImage->height);fflush(stderr);
+		}
+		processSharpness();
 
-	/* Compute the final score
+		if(g_debug_ImageInfo) {
+			fprintf(stderr, "\tImageInfo::%s:%d : process done (gray=%dx%d)\n", __func__, __LINE__,
+					m_grayImage->width, m_grayImage->height);fflush(stderr);
+		}
+
+		/* Compute the final score
 		Score is the combination of several criteria :
 		- sharpness : proportioanl, and best if superior to 50 %
 	*/
-	float sharpness_score = tmmin(1.f,
-								  2.f * m_image_info_struct.sharpness_score / 100.f);
-	float histo_score = tmmin(1.f,
+		float sharpness_score = tmmin(1.f,
+									  2.f * m_image_info_struct.sharpness_score / 100.f);
+		float histo_score = tmmin(1.f,
 								  2.f * m_image_info_struct.histo_score / 100.f);
 
-	m_image_info_struct.score = sharpness_score
-								* histo_score
-								* 100.f ; // in percent finally
+		m_image_info_struct.score = sharpness_score
+									* histo_score
+									* 100.f ; // in percent finally
 #else
-	m_image_info_struct.sharpnessImage = NULL;
-	m_image_info_struct.hsvImage = NULL;
-	m_image_info_struct.score = -1;
+		m_image_info_struct.sharpnessImage = NULL;
+		m_image_info_struct.hsvImage = NULL;
+		m_image_info_struct.score = -1;
 #endif
 
-	// Activate the validation flag
-	m_image_info_struct.valid = 1;
+		// Activate the validation flag
+		m_image_info_struct.valid = 1;
+	}
 
 	return 0;
 }

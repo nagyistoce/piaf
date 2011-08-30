@@ -100,6 +100,9 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	ui->mainImageWidget->setFilterSequencer(
 		ui->pluginManagerForm->createFilterSequencer()
 	);
+
+	// FIXME : use last page saved in settings
+	ui->stackedWidget->setCurrentIndex(0);
 }
 
 EmaMainWindow::~EmaMainWindow()
@@ -750,6 +753,7 @@ void EmaMainWindow::on_thumbImage_selected(QString fileName)
 			EMAMW_printf(EMALOG_WARNING, "File '%s' is not managed : reload and process file info\n", fileName.toUtf8().data())
 			ui->imageInfoWidget->setImageFile(fileName);
 		} else {
+
 			EMAMW_printf(EMALOG_TRACE, "File '%s' is managed : use cache info", fileName.toUtf8().data())
 			ui->imageInfoWidget->setImageInfo(pinfo);
 			ui->exifScrollArea->setImageInfo(pinfo);
@@ -772,15 +776,24 @@ void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 
 		mWorkImage.load(fileName);
 		//ui->mainImageWidget->setRefImage(&mWorkImage);
+		if(!pinfo->isMovie)
+		{
+			ui->mainImageWidget->setImageFile(fileName, pinfo);
 
-		ui->mainImageWidget->setImageFile(fileName, pinfo);
-
-		if(pWorkshopImage) {
-			pWorkshopImage->load(fileName); }
-		if(pWorkshopImageTool) {
-			pWorkshopImageTool->setWorkshopImage(pWorkshopImage);
-			//pWorkshopImageTool->update();
+			if(pWorkshopImage) {
+				pWorkshopImage->load(fileName);
+			}
+			if(pWorkshopImageTool) {
+				pWorkshopImageTool->setWorkshopImage(pWorkshopImage);
+				//pWorkshopImageTool->update();
+			}
 		}
+		else
+		{
+			ui->mainImageWidget->setMovieFile(fileName, pinfo);
+		}
+
+
 
 		if(!pinfo) {
 			EMAMW_printf(EMALOG_WARNING, "File '%s' is not managed : reload and process file info\n", fileName.toUtf8().data())
@@ -788,6 +801,8 @@ void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 		} else {
 			EMAMW_printf(EMALOG_DEBUG, "File '%s' is managed : use cache info\n", fileName.toUtf8().data())
 			ui->imageInfoWidget->setImageInfo(pinfo);
+
+			EMAMW_printf(EMALOG_DEBUG, "File '%s' show exif date\n", fileName.toUtf8().data())
 			ui->exifScrollArea->setImageInfo(pinfo);
 		}
 	}
