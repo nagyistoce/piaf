@@ -835,6 +835,7 @@ void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 			else
 			{
 				ui->mainDisplayWidget->setMovieFile(fileName, pinfo);
+				ui->globalNavImageWidget->setImage( iplImageToQImage(pinfo->thumbImage.iplImage) );
 			}
 		}
 

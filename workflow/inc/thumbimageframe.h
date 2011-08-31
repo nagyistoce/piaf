@@ -39,6 +39,7 @@ class ThumbImageFrame : public QFrame {
 public:
 	explicit ThumbImageFrame(QWidget *parent = 0);
 	virtual ~ThumbImageFrame();
+
 	/** @brief Set the image */
 	void setImageFile(const QString &  imagePath, IplImage * img = NULL, int score = -1);
 
@@ -47,27 +48,41 @@ public:
 
 	/** @brief tell if the frame is selected */
 	bool isSelected() { return mSelected; }
+
+	/** @brief Shift key is pressed */
+	bool shiftPressed() { return mShift; }
+	/** @brief Ctrl key is pressed */
+	bool ctrlPressed() { return mCtrl; }
+
 protected:
 	virtual void changeEvent(QEvent *e);
+
+	virtual void keyPressEvent ( QKeyEvent * e );
+	virtual void keyReleaseEvent ( QKeyEvent * e );
 
 private:
 	QString m_imagePath;
 	Ui::ThumbImageFrame *m_ui;
 	bool mSelected; ///< user selection flag
+
 private slots:
 	void on_globalImageLabel_signalMousePressEvent(QMouseEvent * e);
 	void on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * e);
+
 signals:
 	void signalThumbClicked(QString);
 	void signalThumbSelected(QString);
 
 private:
 	QString m_filename;
+	bool mCtrl, mShift;
+
 protected:
 	virtual void mouseDoubleClickEvent ( QMouseEvent * event );
 	virtual void mouseMoveEvent ( QMouseEvent * event );
 	virtual void mousePressEvent ( QMouseEvent * event );
 	virtual void mouseReleaseEvent ( QMouseEvent * event );
+
 signals:
 //	void changeEvent(QEvent *e);
 	void signal_mouseDoubleClickFile ( QString filename );
@@ -76,6 +91,13 @@ signals:
 	void signal_mouseMoveEvent ( QMouseEvent * event );
 	void signal_mousePressEvent ( QMouseEvent * event );
 	void signal_mouseReleaseEvent ( QMouseEvent * event );
+
+	void signal_keyPressEvent ( QKeyEvent * e );
+	void signal_keyReleaseEvent ( QKeyEvent * e );
+
+	void signal_shiftClick(ThumbImageFrame *);
+	void signal_ctrlClick(ThumbImageFrame *);
+
 };
 
 #endif // THUMBIMAGEFRAME_H

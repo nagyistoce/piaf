@@ -41,8 +41,12 @@ public:
 	explicit NavImageWidget(QWidget *parent = 0);
 	virtual ~NavImageWidget();
 
-	/** @brief Set the background image */
+	/** @brief Set the image file path */
 	void setImageFile(const QString &  imagePath);
+
+	/** @brief Set the image directly */
+	void setImage(QImage fullImage);
+
 	/** @brief Set the main display crop size  */
 	void setMainDisplaySize(int x, int h);
 

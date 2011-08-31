@@ -34,6 +34,8 @@ ThumbImageFrame::ThumbImageFrame(QWidget *parent) :
 {
 	m_ui->setupUi(this);
 	setSelected( false );
+
+	grabKeyboard ();
 }
 
 ThumbImageFrame::~ThumbImageFrame()
@@ -77,7 +79,7 @@ void ThumbImageFrame::setImageFile(const QString & imagePath,
 
 	QFileInfo fi(imagePath);
 	m_ui->nameLabel->setText(fi.baseName());
-	m_ui->extLabel->setText(fi.extension());
+	m_ui->extLabel->setText(fi.extension(false));
 
 	QPixmap l_displayImage;// local only
 	m_imagePath = "";
@@ -177,6 +179,14 @@ void ThumbImageFrame::setSelected(bool selected)
 	if(mSelected)
 	{
 		setStyleSheet("background-color: rgb(220, 230, 255);");
+
+		if(mShift) {
+			emit signal_shiftClick(this);
+		}
+		if(mCtrl) {
+			emit signal_ctrlClick(this);
+		}
+
 	} else {
 //		setStyleSheet();
 		setStyleSheet("background-color: rgba(128, 128, 128, 0);");
@@ -184,12 +194,51 @@ void ThumbImageFrame::setSelected(bool selected)
 	update();
 }
 
-void ThumbImageFrame::mousePressEvent ( QMouseEvent * event ) {
+void ThumbImageFrame::mousePressEvent ( QMouseEvent * e ) {
 	setSelected( !mSelected );
 
-	emit signal_mousePressEvent ( event );
+	emit signal_mousePressEvent ( e );
 }
-void ThumbImageFrame::mouseReleaseEvent ( QMouseEvent * event ) {
-	emit signal_mouseReleaseEvent ( event );
+void ThumbImageFrame::mouseReleaseEvent ( QMouseEvent * e ) {
+	emit signal_mouseReleaseEvent ( e );
 }
 
+void ThumbImageFrame::keyReleaseEvent ( QKeyEvent * e )
+{
+	fprintf(stderr, "ThumbImageFrame %p::%s:%d : received event=%p\n",
+			this, __func__, __LINE__, e);
+	mCtrl = mShift = false;
+	emit signal_keyReleaseEvent ( e );
+}
+
+void ThumbImageFrame::keyPressEvent ( QKeyEvent * e )
+{
+	fprintf(stderr, "ThumbImageFrame %p::%s:%d : received event=%p\n",
+			this, __func__, __LINE__, e);
+	if(e)
+	{
+		QString key = e->text();
+		//if(g_debug_Imagewidget)
+		{
+			fprintf(stderr, "ThumbImageFrame::%s:%d : received event=%p='%s' = %d\n", __func__, __LINE__,
+					e,
+					e->text().toUtf8().data(),
+					e->key());
+		}
+
+//		if(e == QKeySequence(tr("Shift")))
+//		{
+//			fprintf(stderr, "ThumbImageFrame::%s:%d : Shift !\n",
+//					__func__, __LINE__);
+//			mShift = true;
+//		}
+//		if(e == QKeySequence(tr("Ctrl")))
+//		{
+//			fprintf(stderr, "ThumbImageFrame::%s:%d : Ctrl !\n",
+//					__func__, __LINE__);
+//			mCtrl = true;
+//		}
+	}
+
+	emit signal_keyPressEvent ( e );
+}

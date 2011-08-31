@@ -74,6 +74,30 @@ void NavImageWidget::on_zoomx2Button_released()
 			2);
 }
 
+void NavImageWidget::setImage(QImage fullImage)
+{
+	if(fullImage.isNull()) {
+		PIAF_MSG(SWLOG_ERROR, "input image is null");
+		m_displayImage.fill(127);
+		m_fullRect = QRect(0, 0, 0, 0);
+		return;
+	}
+	else {
+		int wdisp = m_ui->globalImageLabel->width()-2;
+		int hdisp = m_ui->globalImageLabel->height()-2;
+
+		m_fullRect = QRect(0, 0, fullImage.width(), fullImage.height());
+
+		m_displayImage.fromImage(fullImage.scaled( wdisp, hdisp,
+										  Qt::KeepAspectRatio ));
+		m_inputImage = m_displayImage;
+	}
+
+	m_ui->globalImageLabel->setPixmap( m_displayImage );
+
+	on_zoomFitButton_clicked();
+}
+
 void NavImageWidget::setImageFile(const QString & imagePath)
 {
 	// "NavImageWidget::%s:%d ('%s')\n",
@@ -81,6 +105,7 @@ void NavImageWidget::setImageFile(const QString & imagePath)
 	//		imagePath);
 
 	QPixmap fullImage(imagePath);
+
 	if(fullImage.isNull()) {
 		m_displayImage.fill(127);
 		m_fullRect = QRect(0, 0, 0, 0);
