@@ -78,13 +78,15 @@ int EmaImageManager::appendFileList(QStringList list) {
 
 	QString fileName;
 	int nb = list.count();
-	EMAIM_printf(EMALOG_DEBUG, "Appending %d files...", nb)
+	EMAIM_printf(EMALOG_DEBUG, "Appending %d files...", nb);
 
+	m_appendFileListMutex.lock();
 	while(it != list.end()) {
 		fileName = (*it);
 		++it;
 		m_appendFileList.append(fileName);
 	}
+	m_appendFileListMutex.unlock();
 
 	// Unlock thread
 	mutex.lock();
@@ -182,7 +184,10 @@ int EmaImageManager::removeFile(QString filename) {
 		return 0;
 	}
 
+	m_removeFileListMutex.lock();
 	m_removeFileList.append(filename);
+	m_removeFileListMutex.unlock();
+
 	m_managedFileListMutex.unlock();
 
 	// Unlock thread
@@ -211,18 +216,24 @@ void EmaImageManager::run() {
 		waitCond.wait(&mutex, wait_ms);
 		mutex.unlock();
 
+		QStringList appendList;
+		m_appendFileListMutex.lock();
+		appendList = m_appendFileList;
+		m_appendFileList.clear();
+		m_appendFileListMutex.unlock();
+
 		// Check if new files have been added
-		if(!m_appendFileList.isEmpty()) {
+		if(!appendList.isEmpty()) {
 			//
 			// Process image info extraction, then add files
-			QStringList::Iterator it = m_appendFileList.begin();
+			QStringList::Iterator it = appendList.begin();
 
 			QString fileName;
-			int nb = m_appendFileList.count();
+			int nb = appendList.count();
 			EMAIM_printf(EMALOG_DEBUG, "Adding %d files...", nb)
 
 			int cur = 0;
-			while(it != m_appendFileList.end()) {
+			while(it != appendList.end()) {
 				fileName = (*it);
 				++it;
 				EMAIM_printf(EMALOG_DEBUG, "\tAdding file '%s'...", fileName.toUtf8().data())
@@ -261,7 +272,6 @@ void EmaImageManager::run() {
 				cur++;
 				m_progress = 100 * cur / nb;
 			}
-			m_appendFileList.clear(); // FIXME : protect with mutex or local copy
 		}
 
 	}

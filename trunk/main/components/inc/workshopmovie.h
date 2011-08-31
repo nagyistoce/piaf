@@ -45,6 +45,12 @@ typedef struct {
 	int nbFramesSinceKeyFrame; /*! Nb of frames since last key frame */
 } t_movie_pos;
 
+typedef struct {
+	QAction * pAction;
+	int index;
+	t_movie_pos movie_pos; /*! Position in file */
+	int percent;	/*! Percentage of the movie size */
+} video_bookmark_t;
 
 /**
 	This handles mainly the path of the file saved on disk.

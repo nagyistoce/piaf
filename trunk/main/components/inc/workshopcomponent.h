@@ -36,9 +36,10 @@
 #define REAL_VALUE     0
 #define VIRTUAL_VALUE  1
 
+#ifndef MAX_PATH_LEN
 /// Maximum length of path = UTF-8 * 512 char
 #define MAX_PATH_LEN	1024
-
+#endif
 /**
 	This class handles components type, date ... 
 	It is inherited by all component classes (for sigal, image, ...).
