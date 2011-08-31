@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>86</width>
-    <height>108</height>
+    <width>88</width>
+    <height>112</height>
    </rect>
   </property>
   <property name="maximumSize">
@@ -75,7 +75,8 @@
       </sizepolicy>
      </property>
      <property name="styleSheet">
-      <string notr="true">font: 9pt &quot;Courier 10 Pitch&quot;;</string>
+      <string notr="true">font: 9pt &quot;Courier 10 Pitch&quot;; 
+color: #808080; </string>
      </property>
      <property name="text">
       <string>-</string>

@@ -65,8 +65,8 @@
            <rect>
             <x>0</x>
             <y>0</y>
-            <width>342</width>
-            <height>170</height>
+            <width>340</width>
+            <height>186</height>
            </rect>
           </property>
          </widget>
@@ -136,6 +136,12 @@
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/view-media-equalizer.png</normaloff>:/icons/icons/16x16/view-media-equalizer.png</iconset>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string>buttonGroup</string>
+        </attribute>
        </widget>
       </item>
       <item row="7" column="0">
@@ -214,6 +220,15 @@
             <iconset resource="../ema.qrc">
              <normaloff>:/icons/icons/22x22/preferences-plugin.png</normaloff>:/icons/icons/22x22/preferences-plugin.png</iconset>
            </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="checked">
+            <bool>true</bool>
+           </property>
+           <attribute name="buttonGroup">
+            <string>buttonGroup</string>
+           </attribute>
           </widget>
          </item>
          <item>
@@ -344,6 +359,12 @@
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/chronometer.png</normaloff>:/icons/icons/16x16/chronometer.png</iconset>
         </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <attribute name="buttonGroup">
+         <string>buttonGroup</string>
+        </attribute>
        </widget>
       </item>
      </layout>
@@ -364,4 +385,7 @@
   <include location="../../main/piaf.qrc"/>
  </resources>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+ </buttongroups>
 </ui>

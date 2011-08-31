@@ -267,6 +267,11 @@ void ImageWidget::keyPressEvent ( QKeyEvent * event )
 			setZoomParams(xZoomCenter, yZoomCenter, 1);
 			update();
 		}
+		else if(key ==  QKeySequence(tr("Shift")))
+		{
+			fprintf(stderr, "ImageWidget::%s:%d : Shift !\n",
+					__func__, __LINE__);
+		}
 
 	}
 }
