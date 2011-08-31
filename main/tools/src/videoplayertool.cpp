@@ -69,7 +69,8 @@ VideoPlayerTool::~VideoPlayerTool()
 //	fprintf(stderr, "%s::%s:%d : deleted.\n", __FILE__, __func__, __LINE__);
 }
 
-void VideoPlayerTool::run() {
+void VideoPlayerTool::run()
+{
 	 for(;;) {
 		mutex.lock();
 		waitCondition.wait(&mutex, play_period_ms);

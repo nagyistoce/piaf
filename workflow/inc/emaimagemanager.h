@@ -73,7 +73,9 @@ private:
 	QWaitCondition waitCond;
 
 	QStringList m_appendFileList;
+	QMutex m_appendFileListMutex;
 	QStringList m_removeFileList;
+	QMutex m_removeFileListMutex;
 
 	// ============= Image list management =============
 public:
