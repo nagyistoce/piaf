@@ -172,7 +172,9 @@ public slots:
 	void on_thumbImage_clicked(QString fileName);
 	void on_thumbImage_selected(QString);
 private slots:
-	void on_batchPlayerButton_clicked();
+	void on_actionView_right_column_toggled(bool );
+ void on_actionView_left_column_toggled(bool );
+ void on_batchPlayerButton_clicked();
 	void on_filesTreeWidget_itemExpanded(QTreeWidgetItem* item);
 	void on_workspaceButton_clicked();
 	void on_filesShowCheckBox_stateChanged(int);

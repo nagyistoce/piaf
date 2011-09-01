@@ -36,9 +36,10 @@ MainDisplayWidget::MainDisplayWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 	mpFilterSequencer = NULL;
-
+	mpImageInfoStruct = NULL;
 	mPlayGrayscale = false;
 	mPlaySpeed = 1.f;
+	m_editBookmarksForm = NULL;
 
 	connect(&mPlayTimer, SIGNAL(timeout()), this, SLOT(on_mPlayTimer_timeout()));
 
@@ -65,6 +66,9 @@ void MainDisplayWidget::setFilterSequencer(FilterSequencer * pFS)
 int MainDisplayWidget::setImageFile(QString imagePath,
 								   t_image_info_struct * pinfo )
 {
+	m_listBookmarks.clear();
+	mpImageInfoStruct = pinfo;
+
 	int ret = 0;
 	// print allocated images
 	tmPrintIplImages();
@@ -99,6 +103,9 @@ void  MainDisplayWidget::zoomOn(int x, int y, int scale) {
 /* @brief Set the movie file */
 int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pinfo)
 {
+	mpImageInfoStruct = pinfo;
+
+	m_listBookmarks.clear();
 	mFileVA.stopAcquisition();
 
 	tBoxSize boxsize; memset(&boxsize, 0, sizeof(tBoxSize));
@@ -110,12 +117,62 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 		PIAF_MSG(SWLOG_ERROR, "Could not open file '%s'", moviePath.toUtf8().data());
 	}
 
+	if(pinfo)
+	{
+		QList<t_movie_pos>::iterator it;
+		int idx=0;
+		for(it=pinfo->bookmarksList.begin(); it!=pinfo->bookmarksList.end(); ++it, ++idx)
+		{
+			t_movie_pos pos = (*it);
+			appendBookmark(pos);
+		}
+		ui->timeLineWidget->setFileInfo(*pinfo);
+	}
+
+	ui->timeLineWidget->setFilePosition(0);
 	ui->mainImageWidget->setImage(m_fullImage, pinfo);
 	ui->stackedWidget->show();
 	ui->stackedWidget->setCurrentIndex(0);
+
 	return ret;
 }
+void MainDisplayWidget::appendBookmark(t_movie_pos pos)
+{
+	video_bookmark_t bmk;
+	bmk.pAction = NULL;
+	bmk.index = m_listBookmarks.count();
+	bmk.movie_pos = pos;
+	if(mpImageInfoStruct && mpImageInfoStruct->filesize > 0) {
+		bmk.percent = (double)pos.prevAbsPosition / (double)mpImageInfoStruct->filesize * 100.;
+	}
+	else {
+		bmk.percent = -1;
+	}
+	m_listBookmarks.append(bmk);
 
+}
+
+void MainDisplayWidget::slotNewBookmarkList(QList<video_bookmark_t> list) {
+	// clear actions
+	mpImageInfoStruct->bookmarksList.clear();
+
+	QList<video_bookmark_t>::iterator it;
+	for(it = m_listBookmarks.begin(); it != m_listBookmarks.end(); it++) {
+
+		// delete action
+		//menuBookmarks->removeAction((*it).pAction);
+	}
+	m_listBookmarks.clear();
+
+	QList<t_movie_pos> bmklist;
+	for(it = list.begin(); it != list.end(); it++) {
+		mpImageInfoStruct->bookmarksList.append((*it).movie_pos);
+
+		appendBookmark((*it).movie_pos);
+	}
+
+	ui->timeLineWidget->setFileInfo(*mpImageInfoStruct);
+}
 
 void MainDisplayWidget::on_goFirstButton_clicked()
 {
@@ -128,6 +185,7 @@ void MainDisplayWidget::updateDisplay()
 	m_fullImage = iplImageToQImage( mPlayGrayscale ? mFileVA.readImageY() : mFileVA.readImageRGB32() );
 
 	ui->mainImageWidget->setImage(m_fullImage, NULL);
+	ui->timeLineWidget->setFilePosition(mFileVA.getAbsolutePosition());
 }
 
 void MainDisplayWidget::on_goPrevButton_clicked()
@@ -184,18 +242,29 @@ void MainDisplayWidget::on_grayscaleButton_toggled(bool gray)
 
 void MainDisplayWidget::on_speedComboBox_currentIndexChanged(QString val)
 {
+	bool ok = false;
 	if(val.contains("/"))
 	{
 		QStringList split = val.split("/");
 		if(split.count()>1)
 		{
-			mPlaySpeed = split[1].toInt();
+			mPlaySpeed = split[1].toInt(&ok);
+		}
+		else {
+			fprintf(stderr, "MainDisplayWidget::%s:%d : cannot split val='%s' playspeed=%g\n",
+					__func__, __LINE__,
+					val.toAscii().data(),
+					mPlaySpeed);
+
 		}
 	} else {
-		mPlaySpeed = val.toInt();
+		mPlaySpeed = val.toInt(&ok);
 	}
-	fprintf(stderr, "MainDisplayWidget::%s:%d : playspeed=%g\n",
-			__func__, __LINE__, mPlaySpeed);
+
+	fprintf(stderr, "MainDisplayWidget::%s:%d : val='%s' playspeed=%g ok=%c\n",
+			__func__, __LINE__,
+			val.toAscii().data(),
+			mPlaySpeed, ok?'T':'F');
 	if(mPlayTimer.isActive())
 	{
 		if(mFileVA.getFrameRate()>0) {
@@ -204,9 +273,48 @@ void MainDisplayWidget::on_speedComboBox_currentIndexChanged(QString val)
 	}
 }
 
-void MainDisplayWidget::on_magneticButton_clicked()
+void MainDisplayWidget::on_timeLineWidget_signalCursorBookmarkChanged(
+		t_movie_pos movie_pos)
 {
+	fprintf(stderr, "MainDisplayWidget::%s:%d received !\n", __func__, __LINE__);
+	if(movie_pos.nbFramesSinceKeyFrame <= 1) {
+		mFileVA.setAbsolutePosition(movie_pos.prevAbsPosition);
 
+		// display
+		on_goNextButton_clicked();
+
+	} // else go some frames before
+	else {
+		mFileVA.setAbsolutePosition(movie_pos.prevKeyFramePosition);
+		fprintf(stderr, "[VidPlay]::%s:%d : skip %d frames to reach the bookmark frame\n",
+				__func__, __LINE__, movie_pos.nbFramesSinceKeyFrame-1);
+		// display
+		for(int nb = 0; nb < movie_pos.nbFramesSinceKeyFrame-1; nb++) {
+			mFileVA.GetNextFrame();
+		}
+
+		// Display & process last one
+		fprintf(stderr, "[MainDispW]::%s:%d : Display & process last one\n",
+				__func__, __LINE__);
+		on_goNextButton_clicked();
+		fprintf(stderr, "[MainDispW]::%s:%d : jump done & processed\n",
+				__func__, __LINE__);
+
+	}
+
+}
+
+void MainDisplayWidget::on_timeLineWidget_signalCursorPositionChanged(unsigned long long filepos)
+{
+	fprintf(stderr, "MainDisplayWidget::%s:%d received !\n", __func__, __LINE__);
+	mFileVA.setAbsolutePosition(filepos);
+	on_goNextButton_clicked();
+
+}
+
+void MainDisplayWidget::on_magneticButton_toggled(bool on)
+{
+	ui->timeLineWidget->setMagneticMode(on);
 }
 
 void MainDisplayWidget::on_bookmarksButton_clicked()
@@ -214,7 +322,20 @@ void MainDisplayWidget::on_bookmarksButton_clicked()
 	if(!m_editBookmarksForm)
 	{
 		m_editBookmarksForm = new MovieBookmarkForm(NULL);
-		m_editBookmarksForm->setBookmarkList(m_listBookmarks);
+
+		connect(m_editBookmarksForm, SIGNAL(signalNewBookmarkList(QList<video_bookmark_t>)),
+				this, SLOT(slotNewBookmarkList(QList<video_bookmark_t>)));
 	}
+
+	m_editBookmarksForm->setBookmarkList(m_listBookmarks);
 	m_editBookmarksForm->show();
+}
+
+void MainDisplayWidget::on_addBkmkButton_clicked()
+{
+	appendBookmark(mFileVA.getMoviePosition());
+	if(mpImageInfoStruct) {
+		mpImageInfoStruct->bookmarksList.append(mFileVA.getMoviePosition());
+		ui->timeLineWidget->setFileInfo(*mpImageInfoStruct);
+	}
 }

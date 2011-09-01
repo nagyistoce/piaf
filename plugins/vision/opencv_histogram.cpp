@@ -462,11 +462,15 @@ void logstretch_histo()
 
 void signalhandler(int sig)
 {
-	fprintf(stderr, "================== RECEIVED SIGNAL %d = '%s' From process %d ==============\n", sig, sys_siglist[sig], getppid());
+	fprintf(stderr, "%s : ================== RECEIVED SIGNAL %d = '%s' From process %d ==============\n", 
+		__FILE__, sig, sys_siglist[sig], getppid());
 	signal(sig, signalhandler);
 
-	if(sig != SIGUSR1)
+	if(sig != SIGUSR1) {
+		fprintf(stderr, "%s : ================== RECEIVED SIGNAL != SIGUSR1 => exit !! Bye. =====\n",
+			__FILE__);
 		exit(0);
+	}
 }
 /***************** END ON PLUGIN DECLARATIONS **********************/
 

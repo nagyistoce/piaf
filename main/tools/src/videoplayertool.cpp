@@ -469,7 +469,7 @@ void VideoPlayerTool::on_menuBookmarks_triggered(QAction * pAction) {
 		slotPlayPauseMovie();
 
 	} else {
-		// Wa activated one bookmark, go to this position
+		// We activated one bookmark, go to this position
 		QList<video_bookmark_t>::iterator i;
 		for (i = m_listBookmarks.begin(); i != m_listBookmarks.end(); ++i) {
 			video_bookmark_t sel_bookmark = *i;

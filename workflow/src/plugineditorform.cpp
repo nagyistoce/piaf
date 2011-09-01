@@ -489,6 +489,7 @@ void PluginEditorForm::on_timeButton_clicked()
 
 void PluginEditorForm::on_upButton_clicked()
 {
+	if(!mpFilterSequencer) return;
 
 }
 

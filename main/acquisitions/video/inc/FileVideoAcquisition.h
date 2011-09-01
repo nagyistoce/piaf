@@ -222,7 +222,7 @@ public:
 	/** Return the index of last read frame (needed for post-processing or permanent encoding) */
 	long getFrameIndex(); 
 	/** Return the absolute position to be stored in database (needed for post-processing or permanent encoding) */
-	unsigned long getAbsolutePosition();
+	unsigned long long getAbsolutePosition();
 	
 	/** set absolute position in file
 	 */

@@ -86,6 +86,7 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 	dImage=NULL;
 	ZoomScale = 1;
 	m_colorMode = 0;
+	mShift = mCtrl = false;
 
 	mEditMode = EDITMODE_NONE;
 
@@ -224,10 +225,27 @@ void ImageWidget::setColorMode(int mode)
 	update();
 }
 #define KEY_ZOOM_INC	0.2f
+
+void ImageWidget::focusInEvent ( QFocusEvent * event )
+{
+	grabKeyboard();
+}
+
+void ImageWidget::focusOutEvent ( QFocusEvent * event )
+{
+	releaseKeyboard();
+}
+
+void ImageWidget::keyReleaseEvent ( QKeyEvent * event )
+{
+	mShift = mCtrl = false;
+}
+
 void ImageWidget::keyPressEvent ( QKeyEvent * event )
 {
 	fprintf(stderr, "ImageWidget %p::%s:%d : received event=%p\n",
 			this, __func__, __LINE__, event);
+
 	if(event)
 	{
 		QString key = event->text();
@@ -267,12 +285,29 @@ void ImageWidget::keyPressEvent ( QKeyEvent * event )
 			setZoomParams(xZoomCenter, yZoomCenter, 1);
 			update();
 		}
-		else if(key ==  QKeySequence(tr("Shift")))
+		if(event->key() == Qt::Key_Shift)
 		{
-			fprintf(stderr, "ImageWidget::%s:%d : Shift !\n",
-					__func__, __LINE__);
+//			fprintf(stderr, "ThumbImageFrame::%s:%d : Shift !\n",
+//					__func__, __LINE__);
+			mShift = true;
 		}
 
+		if(event->key() == Qt::Key_Control)
+		{
+//			fprintf(stderr, "ThumbImageFrame::%s:%d : Ctrl !\n",
+//					__func__, __LINE__);
+			mCtrl = true;
+		}
+
+		if(event->key() == Qt::Key_Delete)
+		{
+			// only works with ROIs
+			if(mEditMode == EDITMODE_ROIS &&  mSelectedROI) {
+				mROIList.removeOne(mSelectedROI);
+				mSelectedROI = NULL;
+				update();
+			}
+		}
 	}
 }
 

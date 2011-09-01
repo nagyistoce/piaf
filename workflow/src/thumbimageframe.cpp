@@ -33,10 +33,10 @@ ThumbImageFrame::ThumbImageFrame(QWidget *parent) :
 	m_ui(new Ui::ThumbImageFrame)
 {
 	m_ui->setupUi(this);
+	mpTwin = NULL;
 	setSelected( false );
-
-	grabKeyboard ();
 }
+
 
 ThumbImageFrame::~ThumbImageFrame()
 {
@@ -175,6 +175,13 @@ void ThumbImageFrame::mouseMoveEvent ( QMouseEvent * event ) {
 void ThumbImageFrame::setSelected(bool selected)
 {
 	mSelected = selected;
+	if(mpTwin)
+	{
+		if(mpTwin->isSelected() != mSelected) {
+			mpTwin->setSelected(mSelected);
+		}
+	}
+
 	// Toggle state
 	if(mSelected)
 	{
@@ -208,6 +215,15 @@ void ThumbImageFrame::mouseReleaseEvent ( QMouseEvent * e ) {
 	emit signal_mouseReleaseEvent ( e );
 }
 
+void ThumbImageFrame::focusInEvent ( QFocusEvent * event )
+{
+	grabKeyboard();
+}
+
+void ThumbImageFrame::focusOutEvent ( QFocusEvent * event )
+{
+	releaseKeyboard();
+}
 void ThumbImageFrame::keyReleaseEvent ( QKeyEvent * e )
 {
 	fprintf(stderr, "ThumbImageFrame %p::%s:%d : received event=%p\n",
