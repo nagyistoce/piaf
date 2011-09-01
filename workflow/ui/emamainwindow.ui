@@ -79,7 +79,7 @@
               <x>0</x>
               <y>0</y>
               <width>214</width>
-              <height>414</height>
+              <height>486</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -591,6 +591,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="workspaceButton">
+             <property name="toolTip">
+              <string>Workspace (legacy tools)</string>
+             </property>
              <property name="text">
               <string/>
              </property>
@@ -611,6 +614,9 @@
            </item>
            <item>
             <widget class="QPushButton" name="batchPlayerButton">
+             <property name="toolTip">
+              <string>Batch</string>
+             </property>
              <property name="text">
               <string/>
              </property>
@@ -683,8 +689,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>473</width>
-                  <height>394</height>
+                  <width>94</width>
+                  <height>24</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -738,7 +744,7 @@
               <number>2</number>
              </property>
              <item>
-              <widget class="QGroupBox" name="groupBox">
+              <widget class="QGroupBox" name="batchQueueGroupBox">
                <property name="title">
                 <string>Batch queue</string>
                </property>
@@ -762,7 +768,7 @@
                     <number>1</number>
                    </property>
                    <item>
-                    <widget class="QPushButton" name="pushButton_2">
+                    <widget class="QPushButton" name="batchPlayButton">
                      <property name="toolTip">
                       <string>Toggle play/pause</string>
                      </property>
@@ -796,7 +802,7 @@
                     </spacer>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="pushButton_5">
+                    <widget class="QPushButton" name="batchMoveUpButton">
                      <property name="toolTip">
                       <string>Move up selected batch item</string>
                      </property>
@@ -805,7 +811,7 @@
                      </property>
                      <property name="icon">
                       <iconset resource="../ema.qrc">
-                       <normaloff>:/icons/icons/22x22/arrow-up.png</normaloff>:/icons/icons/22x22/arrow-up.png</iconset>
+                       <normaloff>:/icons/icons/16x16/arrow-up.png</normaloff>:/icons/icons/16x16/arrow-up.png</iconset>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -813,7 +819,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="pushButton_6">
+                    <widget class="QPushButton" name="batchMoveDownButton">
                      <property name="toolTip">
                       <string>Move down selected batch item</string>
                      </property>
@@ -822,7 +828,7 @@
                      </property>
                      <property name="icon">
                       <iconset resource="../ema.qrc">
-                       <normaloff>:/icons/icons/22x22/arrow-down.png</normaloff>:/icons/icons/22x22/arrow-down.png</iconset>
+                       <normaloff>:/icons/icons/16x16/arrow-down.png</normaloff>:/icons/icons/16x16/arrow-down.png</iconset>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -830,7 +836,7 @@
                     </widget>
                    </item>
                    <item>
-                    <widget class="QPushButton" name="pushButton_4">
+                    <widget class="QPushButton" name="batchDeleteButton">
                      <property name="toolTip">
                       <string>Delete selected batch item</string>
                      </property>
@@ -839,7 +845,7 @@
                      </property>
                      <property name="icon">
                       <iconset resource="../ema.qrc">
-                       <normaloff>:/icons/icons/22x22/trash-empty.png</normaloff>:/icons/icons/22x22/trash-empty.png</iconset>
+                       <normaloff>:/icons/icons/16x16/trash-empty.png</normaloff>:/icons/icons/16x16/trash-empty.png</iconset>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -895,6 +901,10 @@
                    <property name="text">
                     <string>100%</string>
                    </property>
+                   <property name="icon">
+                    <iconset resource="../ema.qrc">
+                     <normaloff>:/icons/icons/16x16/dialog-ok-apply.png</normaloff>:/icons/icons/16x16/dialog-ok-apply.png</iconset>
+                   </property>
                   </item>
                   <item>
                    <property name="text">
@@ -911,6 +921,10 @@
                    </property>
                    <property name="text">
                     <string>42%</string>
+                   </property>
+                   <property name="icon">
+                    <iconset resource="../ema.qrc">
+                     <normaloff>:/icons/icons/16x16/system-software-update.png</normaloff>:/icons/icons/16x16/system-software-update.png</iconset>
                    </property>
                   </item>
                   <item>
@@ -929,6 +943,10 @@
                    <property name="text">
                     <string>Waiting</string>
                    </property>
+                   <property name="icon">
+                    <iconset resource="../ema.qrc">
+                     <normaloff>:/icons/icons/16x16/view-history.png</normaloff>:/icons/icons/16x16/view-history.png</iconset>
+                   </property>
                   </item>
                  </widget>
                 </item>
@@ -936,7 +954,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="groupBox_2">
+              <widget class="QGroupBox" name="batchCurProcessGroupBox">
                <property name="sizePolicy">
                 <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
                  <horstretch>0</horstretch>
@@ -947,12 +965,15 @@
                 <string>Current process</string>
                </property>
                <layout class="QGridLayout" name="gridLayout">
-                <item row="0" column="0" rowspan="2" colspan="2">
-                 <widget class="QGroupBox" name="groupBox_4">
-                  <property name="title">
-                   <string>Status</string>
-                  </property>
+                <property name="margin">
+                 <number>4</number>
+                </property>
+                <item row="0" column="0" rowspan="2">
+                 <widget class="QWidget" name="widget_4" native="true">
                   <layout class="QGridLayout" name="gridLayout_3">
+                   <property name="margin">
+                    <number>0</number>
+                   </property>
                    <item row="0" column="0">
                     <widget class="QLabel" name="label">
                      <property name="sizePolicy">
@@ -991,6 +1012,9 @@
                    </item>
                    <item row="0" column="3">
                     <widget class="QLabel" name="nbProcLabel">
+                     <property name="toolTip">
+                      <string>Number of files with processed</string>
+                     </property>
                      <property name="text">
                       <string>--</string>
                      </property>
@@ -998,6 +1022,12 @@
                    </item>
                    <item row="0" column="4">
                     <widget class="QLabel" name="label_4">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
                      <property name="text">
                       <string>Err:</string>
                      </property>
@@ -1005,6 +1035,9 @@
                    </item>
                    <item row="0" column="5">
                     <widget class="QLabel" name="nbErrLabel">
+                     <property name="toolTip">
+                      <string>Number of files with errors</string>
+                     </property>
                      <property name="text">
                       <string>--</string>
                      </property>
@@ -1017,20 +1050,26 @@
                      </property>
                     </widget>
                    </item>
+                   <item row="2" column="0" colspan="6">
+                    <widget class="TimeHistogramWidget" name="timeHistoWidget" native="true">
+                     <property name="sizePolicy">
+                      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
+                       <horstretch>0</horstretch>
+                       <verstretch>0</verstretch>
+                      </sizepolicy>
+                     </property>
+                     <property name="minimumSize">
+                      <size>
+                       <width>0</width>
+                       <height>80</height>
+                      </size>
+                     </property>
+                    </widget>
+                   </item>
                   </layout>
                  </widget>
                 </item>
-                <item row="1" column="1" rowspan="2">
-                 <widget class="TimeHistogramWidget" name="timeHistoWidget" native="true">
-                  <property name="minimumSize">
-                   <size>
-                    <width>0</width>
-                    <height>80</height>
-                   </size>
-                  </property>
-                 </widget>
-                </item>
-                <item row="2" column="0">
+                <item row="0" column="1" rowspan="2">
                  <widget class="ImageWidget" name="imageLabel" native="true">
                   <property name="sizePolicy">
                    <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
@@ -1234,8 +1273,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>283</width>
-               <height>405</height>
+               <width>315</width>
+               <height>482</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1439,8 +1478,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>996</width>
-             <height>198</height>
+             <width>994</width>
+             <height>125</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1475,7 +1514,7 @@
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>23</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1588,6 +1627,12 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
+   <class>TimeHistogramWidget</class>
+   <extends>QWidget</extends>
+   <header>timehistogramwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>NavImageWidget</class>
    <extends>QWidget</extends>
    <header location="global">navimagewidget.h</header>
@@ -1621,12 +1666,6 @@
    <class>MainDisplayWidget</class>
    <extends>QWidget</extends>
    <header>maindisplaywidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>TimeHistogramWidget</class>
-   <extends>QWidget</extends>
-   <header>timehistogramwidget.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

@@ -144,20 +144,7 @@
         </attribute>
        </widget>
       </item>
-      <item row="7" column="0">
-       <spacer name="verticalSpacer">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>40</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="3" column="0">
+      <item row="4" column="0">
        <widget class="QPushButton" name="activateButton">
         <property name="toolTip">
          <string>Activate/disactivate button</string>
@@ -169,9 +156,12 @@
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/network-disconnect.png</normaloff>:/icons/icons/16x16/network-disconnect.png</iconset>
         </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
-      <item row="5" column="0">
+      <item row="6" column="0">
        <widget class="QPushButton" name="upButton">
         <property name="toolTip">
          <string>Move the selected plugin up</string>
@@ -183,9 +173,12 @@
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/arrow-up.png</normaloff>:/icons/icons/16x16/arrow-up.png</iconset>
         </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="7" column="0">
        <widget class="QPushButton" name="downButton">
         <property name="toolTip">
          <string>Move the selected plugin down</string>
@@ -196,6 +189,9 @@
         <property name="icon">
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/arrow-down.png</normaloff>:/icons/icons/16x16/arrow-down.png</iconset>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
       </item>
@@ -250,6 +246,9 @@
             <iconset resource="../ema.qrc">
              <normaloff>:/icons/icons/16x16/document-open-folder.png</normaloff>:/icons/icons/16x16/document-open-folder.png</iconset>
            </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
           </widget>
          </item>
          <item>
@@ -261,8 +260,11 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../../main/piaf.qrc">
-             <normaloff>:/images/22x22/document-save.png</normaloff>:/images/22x22/document-save.png</iconset>
+            <iconset resource="../ema.qrc">
+             <normaloff>:/icons/icons/16x16/media-floppy.png</normaloff>:/icons/icons/16x16/media-floppy.png</iconset>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -288,8 +290,11 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../../main/piaf.qrc">
-             <normaloff>:/images/22x22/list-add.png</normaloff>:/images/22x22/list-add.png</iconset>
+            <iconset resource="../ema.qrc">
+             <normaloff>:/icons/icons/16x16/list-add.png</normaloff>:/icons/icons/16x16/list-add.png</iconset>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
@@ -302,15 +307,18 @@
             <string/>
            </property>
            <property name="icon">
-            <iconset resource="../../main/piaf.qrc">
-             <normaloff>:/images/22x22/list-remove.png</normaloff>:/images/22x22/list-remove.png</iconset>
+            <iconset resource="../ema.qrc">
+             <normaloff>:/icons/icons/16x16/list-remove.png</normaloff>:/icons/icons/16x16/list-remove.png</iconset>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
            </property>
           </widget>
          </item>
         </layout>
        </widget>
       </item>
-      <item row="1" column="1" rowspan="7">
+      <item row="1" column="1" rowspan="8">
        <widget class="QTreeWidget" name="selectedPluginsTreeWidget">
         <property name="toolTip">
          <string>Loaded plugins, processed from top to bottom</string>
@@ -367,6 +375,19 @@
         </attribute>
        </widget>
       </item>
+      <item row="3" column="0">
+       <spacer name="verticalSpacer">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>40</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
      </layout>
     </widget>
    </item>
@@ -382,7 +403,6 @@
  </customwidgets>
  <resources>
   <include location="../ema.qrc"/>
-  <include location="../../main/piaf.qrc"/>
  </resources>
  <connections/>
  <buttongroups>
