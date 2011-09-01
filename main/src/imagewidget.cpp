@@ -297,13 +297,64 @@ void ImageWidget::mousePressEvent(QMouseEvent *e) {
 			yMouseMoveStart = e->pos().y();
 			xOriginMoveStart = xOrigine;
 			yOriginMoveStart = yOrigine;
-			QRect * prect = new QRect(displayToImage(QRect(xMouseMoveStart, yMouseMoveStart,
-													 e->pos().x()-xMouseMoveStart,
-													 e->pos().y()-yMouseMoveStart))
-									  );
-			mROIList.append(prect);
-			mSelectedROI = prect; }
-			break;
+
+			QRect inImage = displayToImage(QRect(xMouseMoveStart, yMouseMoveStart,
+												 e->pos().x()-xMouseMoveStart,
+												 e->pos().y()-yMouseMoveStart));
+			// Check if we selected an existing rect or add a new one
+			QList<QRect *>::iterator it;
+			mSelectedROI = NULL;
+			int dmin = 5;
+			for(it = mROIList.begin(); it!=mROIList.end(); ++it)
+			{
+				QRect * prect = (*it);
+				if(prect)
+				{
+					QRect onDisplay = imageToDisplay(*prect);
+
+					// check if point is on the border
+					if(e->pos().x() >= onDisplay.x()-dmin && e->pos().x() <= onDisplay.x()+onDisplay.width()+dmin)
+					{
+						// mouse X is on region
+
+						// now check if it's near the top or bottom border of the rect
+						int dymin = std::min( abs(e->pos().y() - onDisplay.y()),
+										   abs(e->pos().y() - (onDisplay.y()+onDisplay.height()))
+										   );
+						if(dymin < dmin)
+						{
+							dmin = dymin;
+							mSelectedROI = prect;
+						}
+					}
+					// same test with y instead of x
+					if(e->pos().y() >= onDisplay.y()-dmin && e->pos().y() <= onDisplay.y()+onDisplay.height()+dmin)
+					{
+						// mouse Y is on region
+
+						// now check if it's near the top or bottom border of the rect
+						int dxmin = std::min( abs(e->pos().x() - onDisplay.x()),
+										   abs(e->pos().x() - (onDisplay.x()+onDisplay.width()))
+										   );
+						if(dxmin < dmin)
+						{
+							dmin = dxmin;
+							mSelectedROI = prect;
+						}
+					}
+
+				}
+			}
+			if(!mSelectedROI) {
+				QRect * prect = new QRect(inImage);
+				mROIList.append(prect);
+				mSelectedROI = prect;
+			}
+			else
+			{
+				update();
+			}
+			}break;
 		case EDITMODE_PICKER: {
 			QPoint pt = displayToImage(e->pos());
 			QRgb colorRGB = dImage->pixel(pt);
@@ -636,7 +687,7 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 	{
 		QList<QRect *>::iterator it;
 		if(!mROIList.isEmpty()) {
-			p.setPen(QPen(QColor(qRgb(64,128,64))));
+			p.setPen(QPen(QColor(qRgb(164,192,164))));
 
 			for(it = mROIList.begin(); it!=mROIList.end(); ++it)
 			{
@@ -702,12 +753,14 @@ QRect ImageWidget::displayToImage(QRect display_rect)
 					 (float)display_rect.width() /mZoomFitFactor,
 					 (float)display_rect.height() /mZoomFitFactor
 					 );
-	fprintf(stderr, "ImgWidget::%s:%d : sc=%g O=%d,%d disp=%d,%d+%dx%d => img=%d,%d+%dx%d\n",
-			__func__, __LINE__,
-			mZoomFitFactor, xOrigine, yOrigine,
-			display_rect.x(),display_rect.y(), display_rect.width(), display_rect.height(),
-			img_rect.x(),img_rect.y(), img_rect.width(), img_rect.height()
-			);
+	if(g_debug_ImageWidget) {
+		fprintf(stderr, "ImgWidget::%s:%d : sc=%g O=%d,%d disp=%d,%d+%dx%d => img=%d,%d+%dx%d\n",
+				__func__, __LINE__,
+				mZoomFitFactor, xOrigine, yOrigine,
+				display_rect.x(),display_rect.y(), display_rect.width(), display_rect.height(),
+				img_rect.x(),img_rect.y(), img_rect.width(), img_rect.height()
+				);
+	}
 
 	return img_rect;
 }
