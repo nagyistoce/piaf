@@ -24,6 +24,8 @@
 
 #include "navimagewidget.h"
 #include "ui_navimagewidget.h"
+#include "piaf-common.h"
+#include <stdio.h>
 
 NavImageWidget::NavImageWidget(QWidget *parent) :
 	QWidget(parent),
