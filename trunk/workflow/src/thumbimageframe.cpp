@@ -181,9 +181,14 @@ void ThumbImageFrame::setSelected(bool selected)
 		setStyleSheet("background-color: rgb(220, 230, 255);");
 
 		if(mShift) {
+			fprintf(stderr, "ThumbImageFrame %p::%s:%d : shift+click this=%p\n",
+					this, __func__, __LINE__, this);
+
 			emit signal_shiftClick(this);
 		}
 		if(mCtrl) {
+			fprintf(stderr, "ThumbImageFrame %p::%s:%d : Ctrl+click this=%p\n",
+					this, __func__, __LINE__, this);
 			emit signal_ctrlClick(this);
 		}
 
@@ -217,27 +222,27 @@ void ThumbImageFrame::keyPressEvent ( QKeyEvent * e )
 			this, __func__, __LINE__, e);
 	if(e)
 	{
-		QString key = e->text();
+		int key = e->key();
 		//if(g_debug_Imagewidget)
 		{
-			fprintf(stderr, "ThumbImageFrame::%s:%d : received event=%p='%s' = %d\n", __func__, __LINE__,
+			fprintf(stderr, "ThumbImageFrame::%s:%d : received event=%p='%s' = %x\n", __func__, __LINE__,
 					e,
 					e->text().toUtf8().data(),
 					e->key());
 		}
-
-//		if(e == QKeySequence(tr("Shift")))
-//		{
+		if(key == Qt::Key_Shift)
+		{
 //			fprintf(stderr, "ThumbImageFrame::%s:%d : Shift !\n",
 //					__func__, __LINE__);
-//			mShift = true;
-//		}
-//		if(e == QKeySequence(tr("Ctrl")))
-//		{
+			mShift = true;
+		}
+
+		if(key  == Qt::Key_Control)
+		{
 //			fprintf(stderr, "ThumbImageFrame::%s:%d : Ctrl !\n",
 //					__func__, __LINE__);
-//			mCtrl = true;
-//		}
+			mCtrl = true;
+		}
 	}
 
 	emit signal_keyPressEvent ( e );
