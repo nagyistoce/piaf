@@ -111,14 +111,12 @@ void MainImageWidget::slotUpdateImage()
 int MainImageWidget::setImage(QImage imageIn,
 								   t_image_info_struct * pinfo )
 {
-	// print allocated images
-	tmPrintIplImages();
 
-	fprintf(stderr, "NavImageWidget::%s:%d (%dx%dx%d, pinfo=%p)\n",
-			__func__, __LINE__,
-			imageIn.width(), imageIn.height(), imageIn.depth(),
-			pinfo
-			);
+//	fprintf(stderr, "NavImageWidget::%s:%d (%dx%dx%d, pinfo=%p)\n",
+//			__func__, __LINE__,
+//			imageIn.width(), imageIn.height(), imageIn.depth(),
+//			pinfo
+//			);
 
 	m_fullImage = imageIn.copy();
 	m_displayImage = m_fullImage.copy();

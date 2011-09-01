@@ -1710,9 +1710,9 @@ IplImage * FileVideoAcquisition::readImageY()
 	int ret = readImageYNoAcq((unsigned char*)m_imageY->imageData,
 								  &buffersize);
 
-	fprintf(stderr, "[FileVA]::%s:%d : read RGB32 image = %dx%d : ret = %d",
-			__func__, __LINE__,
-			mImageSize.width, mImageSize.height, ret);
+//	fprintf(stderr, "[FileVA]::%s:%d : read YNoac image = %dx%d : ret = %d\n",
+//			__func__, __LINE__,
+//			mImageSize.width, mImageSize.height, ret);
 	return m_imageY;
 
 }

@@ -816,7 +816,8 @@ void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 			retry += 100000;
 		}
 
-		mWorkImage.load(fileName);
+		// print allocated images
+		tmPrintIplImages();
 
 		//ui->mainDisplayWidget->setRefImage(&mWorkImage);
 		if(pinfo) {
@@ -825,6 +826,7 @@ void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 				ui->mainDisplayWidget->setImageFile(fileName, pinfo);
 
 				if(pWorkshopImage) {
+					mWorkImage.load(fileName);
 					pWorkshopImage->load(fileName);
 				}
 				if(pWorkshopImageTool) {

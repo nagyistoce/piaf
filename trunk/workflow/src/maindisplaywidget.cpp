@@ -125,7 +125,7 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 
 void MainDisplayWidget::updateDisplay()
 {
-	m_fullImage = iplImageToQImage( mPlaySpeed ? mFileVA.readImageRGB32() : mFileVA.readImageY() );
+	m_fullImage = iplImageToQImage( mPlayGrayscale ? mFileVA.readImageY() : mFileVA.readImageRGB32() );
 
 	ui->mainImageWidget->setImage(m_fullImage, NULL);
 }
@@ -178,6 +178,7 @@ void MainDisplayWidget::on_goLastButton_clicked()
 void MainDisplayWidget::on_grayscaleButton_toggled(bool gray)
 {
 	mPlayGrayscale = gray;
+
 	updateDisplay();
 }
 
