@@ -74,15 +74,17 @@ private:
 	QImage m_fullImage;
 
 	FilterSequencer * mpFilterSequencer;
-
+	t_image_info_struct * mpImageInfoStruct;
 
 	// Bookmarks
 	QList<video_bookmark_t> m_listBookmarks;
 	MovieBookmarkForm * m_editBookmarksForm;
+	void appendBookmark(t_movie_pos);
 
 private slots:
-	void on_bookmarksButton_clicked();
-	void on_magneticButton_clicked();
+	void on_addBkmkButton_clicked();
+ void on_bookmarksButton_clicked();
+	void on_magneticButton_toggled(bool on);
 	void on_speedComboBox_currentIndexChanged(QString );
 	void on_grayscaleButton_toggled(bool);
 	void on_goLastButton_clicked();
@@ -93,6 +95,10 @@ private slots:
 	void updateDisplay();
 	void on_mPlayTimer_timeout();
 
+	void on_timeLineWidget_signalCursorBookmarkChanged(t_movie_pos);
+	void on_timeLineWidget_signalCursorPositionChanged(unsigned long long);
+
+	void slotNewBookmarkList(QList<video_bookmark_t>);
 };
 
 #endif // MAINDISPLAYWIDGET_H

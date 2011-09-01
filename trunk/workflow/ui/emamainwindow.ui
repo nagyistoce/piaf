@@ -14,11 +14,8 @@
    <string>Piaf Workflow</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../ema.qrc">
-    <normaloff>:/icons/icons/ema-icon.png</normaloff>:/icons/icons/ema-icon.png</iconset>
-  </property>
-  <property name="toolTip">
-   <string>Sort your pictures</string>
+   <iconset resource="../../main/piaf.qrc">
+    <normaloff>:/images/pixmaps/piaf.png</normaloff>:/images/pixmaps/piaf.png</iconset>
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
@@ -79,7 +76,7 @@
               <x>0</x>
               <y>0</y>
               <width>214</width>
-              <height>486</height>
+              <height>487</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -689,8 +686,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>94</width>
-                  <height>24</height>
+                  <width>96</width>
+                  <height>26</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1273,8 +1270,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>315</width>
-               <height>482</height>
+               <width>312</width>
+               <height>478</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1478,8 +1475,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>994</width>
-             <height>125</height>
+             <width>996</width>
+             <height>130</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1514,7 +1511,7 @@
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>27</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1532,8 +1529,10 @@
    </widget>
    <widget class="QMenu" name="menuEdit">
     <property name="title">
-     <string>Edit</string>
+     <string>View</string>
     </property>
+    <addaction name="actionView_left_column"/>
+    <addaction name="actionView_right_column"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -1621,6 +1620,31 @@
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionView_left_column">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>View left column</string>
+   </property>
+   <property name="shortcut">
+    <string>L</string>
+   </property>
+   <property name="iconVisibleInMenu">
+    <bool>true</bool>
+   </property>
+  </action>
+  <action name="actionView_right_column">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>View right column</string>
+   </property>
+   <property name="shortcut">
+    <string>R</string>
    </property>
   </action>
  </widget>

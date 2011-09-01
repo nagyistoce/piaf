@@ -59,7 +59,7 @@ long FileVideoAcquisition::getFrameIndex() {
 	return (long)playFrame;
 }
 
-unsigned long FileVideoAcquisition::getAbsolutePosition() {
+unsigned long long FileVideoAcquisition::getAbsolutePosition() {
 	if(!m_pFormatCtx)
 		return 0;
 
@@ -1673,9 +1673,9 @@ IplImage * FileVideoAcquisition::readImageRGB32()
 
 		return NULL;
 	}
-	fprintf(stderr, "[FileVA]::%s:%d : read RGB32 image = %dx%d : ret = %d",
-			__func__, __LINE__,
-			mImageSize.width, mImageSize.height, ret);
+//	fprintf(stderr, "[FileVA]::%s:%d : read RGB32 image = %dx%d : ret = %d",
+//			__func__, __LINE__,
+//			mImageSize.width, mImageSize.height, ret);
 	cvCvtColor(m_imageRGB32, m_imageBGR32, CV_BGRA2RGBA);
 
 	return m_imageBGR32;

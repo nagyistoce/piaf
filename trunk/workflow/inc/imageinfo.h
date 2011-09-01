@@ -126,6 +126,7 @@ typedef struct {
 
 	// Image judgement
 	float score;			/*! Final score factor in [0..100] */
+	QList<t_movie_pos> bookmarksList;	/*! List of bookmarks */
 
 } t_image_info_struct;
 

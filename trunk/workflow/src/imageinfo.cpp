@@ -119,6 +119,7 @@ void clearImageInfoStruct(t_image_info_struct * pinfo)
 	strcpy(pinfo->FourCC, "????");
 	pinfo->isMovie = false;
 	pinfo->fps = 0.f;
+	pinfo->bookmarksList.clear();
 
 	// Image processing data
 	pinfo->grayscaled = 0;
@@ -447,6 +448,20 @@ int ImageInfo::loadMovieFile(QString filename)
 	PIAF_MSG(SWLOG_INFO, "open file '%s'", fi.absoluteFilePath().toAscii().data())
 
 	m_image_info_struct.filesize = fi.size();
+
+	/// \bug FIXME CHEAT MODE
+	t_movie_pos pos;
+	pos.nbFramesSinceKeyFrame = 0;
+
+	pos.prevAbsPosition = pos.prevKeyFramePosition = m_image_info_struct.filesize / 4;
+	m_image_info_struct.bookmarksList.append(pos);
+
+	pos.prevAbsPosition = pos.prevKeyFramePosition = m_image_info_struct.filesize * 2/3;
+	m_image_info_struct.bookmarksList.append(pos);
+
+	pos.prevAbsPosition = pos.prevKeyFramePosition = m_image_info_struct.filesize * 5/7;
+	m_image_info_struct.bookmarksList.append(pos);
+
 
 	// load movie
 	tBoxSize size;

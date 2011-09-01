@@ -189,6 +189,22 @@ void EmaMainWindow::on_workspaceButton_clicked()
 //	ui->lateralSplitter->setChildrenCollapsible(true);
 	ui->toolsTabWidget->hide();
 }
+void EmaMainWindow::on_actionView_left_column_toggled(bool on)
+{
+	if(on)
+		ui->leftWidget->show();
+	else
+		ui->leftWidget->hide();
+}
+
+void EmaMainWindow::on_actionView_right_column_toggled(bool on)
+{
+	if(on)
+		ui->toolsTabWidget->show();
+	else
+		ui->toolsTabWidget->hide();
+
+}
 
 
 
@@ -229,7 +245,7 @@ void EmaMainWindow::on_actionConvert_images_to_AVI_activated()
 
 void EmaMainWindow::on_actionAbout_activated()
 {
-	QPixmap pix(":/icons/icons/piafworkflow-splash.jpg");
+	QPixmap pix(":/icons/ema-splash.png");
 	if(g_splash) {
 		g_splash->setPixmap(pix);
 	}
@@ -246,8 +262,8 @@ void EmaMainWindow::on_actionAbout_activated()
 			tr("<b>Piaf workflow</b> version: ")
 						  + verstr.sprintf("svn%04d%02d%02d", VERSION_YY, VERSION_MM, VERSION_DD)
 
-						  + QString("<br>Website & Wiki: <a href=\"http://github.com/athoune/ema/\">http://github.com/athoune/ema/</a><br><br>")
-						  + tr("Shortcuts :<br><ul>\n")
+						  + QString("<br>Website & Wiki: <a href=\"http://piaf.googlecode.com/\">http://piaf.googlecode.com/</a><br><br>")
+//						  + tr("Shortcuts :<br><ul>\n")
 //							+ item + cmd + tr("O: Open a picture file") + itend
 //							+ item + cmd + tr("S: Save corrected image") + itend
 //							+ item + cmd + tr("H: Display version information") + itend
@@ -260,7 +276,7 @@ void EmaMainWindow::on_actionAbout_activated()
 //							+ item + cmd + tr("") + itend
 //							+ item + tr("") + itend
 //							+ item + cmd + tr("") + itend
-						+ QString("</ul>\n")
+//						+ QString("</ul>\n")
 							);
 	repaint();// to force display of splash
 
@@ -748,6 +764,10 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 		newThumb2->setImageFile(fileName, pinfo->thumbImage.iplImage,
 								pinfo->score);
 
+		// Cross-connection
+		newThumb2->setTwin(newThumb);
+		newThumb->setTwin(newThumb2);
+
 		// now delete thumb ?
 		// FIXME : check if there is no side effect of this deletion
 		tmReleaseImage(&pinfo->thumbImage.iplImage);
@@ -861,6 +881,7 @@ void EmaMainWindow::on_globalNavImageWidget_signalZoomOn(int x, int y, int scale
 	ui->mainDisplayWidget->zoomOn(x,y,scale);
 	ui->stackedWidget->setCurrentIndex(0);
 }
+
 
 
 

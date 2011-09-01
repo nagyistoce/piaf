@@ -168,7 +168,12 @@ signals:
 	 */
 	void signalZoomRect(QRect cropRect);
 protected:
+	virtual void focusInEvent ( QFocusEvent * event );
+	virtual void focusOutEvent ( QFocusEvent * event );
 	virtual void keyPressEvent ( QKeyEvent * event );
+	virtual void keyReleaseEvent ( QKeyEvent * event );
+	bool mShift, mCtrl;
+
 	virtual void mousePressEvent(QMouseEvent *e);
 	virtual void mouseReleaseEvent(QMouseEvent *e);
 	virtual void mouseMoveEvent(QMouseEvent *e);

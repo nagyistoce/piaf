@@ -294,21 +294,27 @@
            <number>0</number>
           </property>
           <item>
-           <widget class="QImageDisplay" name="timeLineLabel">
+           <widget class="TimeLineWidget" name="timeLineWidget">
             <property name="sizePolicy">
              <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
               <horstretch>0</horstretch>
               <verstretch>0</verstretch>
              </sizepolicy>
             </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>22</height>
+             </size>
+            </property>
             <property name="styleSheet">
-             <string notr="true">background-color: rgb(163, 163, 163);</string>
+             <string notr="true">background-color: rgb(58, 58, 58);</string>
             </property>
             <property name="frameShape">
              <enum>QFrame::StyledPanel</enum>
             </property>
             <property name="text">
-             <string>--------</string>
+             <string/>
             </property>
            </widget>
           </item>
@@ -334,6 +340,32 @@
              <bool>true</bool>
             </property>
             <property name="checked">
+             <bool>true</bool>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="addBkmkButton">
+            <property name="toolTip">
+             <string>Add a new bookmark at current positin</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../ema.qrc">
+              <normaloff>:/icons/icons/16x16/rating.png</normaloff>:/icons/icons/16x16/rating.png</iconset>
+            </property>
+            <property name="iconSize">
+             <size>
+              <width>22</width>
+              <height>22</height>
+             </size>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+B</string>
+            </property>
+            <property name="flat">
              <bool>true</bool>
             </property>
            </widget>
@@ -370,15 +402,15 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>QImageDisplay</class>
-   <extends>QLabel</extends>
-   <header location="global">qimagedisplay.h</header>
-  </customwidget>
-  <customwidget>
    <class>MainImageWidget</class>
    <extends>QWidget</extends>
    <header location="global">mainimagewidget.h</header>
    <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>TimeLineWidget</class>
+   <extends>QLabel</extends>
+   <header>timelinewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources>

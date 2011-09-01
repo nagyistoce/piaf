@@ -40,6 +40,9 @@ public:
 	explicit ThumbImageFrame(QWidget *parent = 0);
 	virtual ~ThumbImageFrame();
 
+	/** @set mirror twin frame */
+	void setTwin(ThumbImageFrame * pTwin) { mpTwin = pTwin; }
+
 	/** @brief Set the image */
 	void setImageFile(const QString &  imagePath, IplImage * img = NULL, int score = -1);
 
@@ -59,9 +62,11 @@ protected:
 
 	virtual void keyPressEvent ( QKeyEvent * e );
 	virtual void keyReleaseEvent ( QKeyEvent * e );
-
+	virtual void focusInEvent ( QFocusEvent * event );
+	virtual void focusOutEvent ( QFocusEvent * event );
 private:
 	QString m_imagePath;
+	ThumbImageFrame * mpTwin;
 	Ui::ThumbImageFrame *m_ui;
 	bool mSelected; ///< user selection flag
 
