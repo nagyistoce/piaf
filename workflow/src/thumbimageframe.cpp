@@ -171,6 +171,7 @@ void ThumbImageFrame::mouseDoubleClickEvent ( QMouseEvent * event ) {
 void ThumbImageFrame::mouseMoveEvent ( QMouseEvent * event ) {
 	emit signal_mouseMoveEvent ( event );
 }
+
 /* set the selected flag */
 void ThumbImageFrame::setSelected(bool selected)
 {
@@ -185,7 +186,7 @@ void ThumbImageFrame::setSelected(bool selected)
 	// Toggle state
 	if(mSelected)
 	{
-		setStyleSheet("background-color: rgb(220, 230, 255);");
+		setStyleSheet("background-color: rgb(190, 200, 255);");
 
 		if(mShift) {
 			fprintf(stderr, "ThumbImageFrame %p::%s:%d : shift+click this=%p\n",
@@ -206,8 +207,44 @@ void ThumbImageFrame::setSelected(bool selected)
 	update();
 }
 
+void ThumbImageFrame::setActive(bool active)
+{
+	mActive = active;
+	if(mpTwin)
+	{
+		if(mpTwin->isActive() != mActive) {
+			mpTwin->setActive(mActive);
+		}
+	}
+
+	// Toggle state
+	if(mActive)
+	{
+		setStyleSheet("background-color: rgb(60, 70, 255);");
+
+		if(mShift) {
+			fprintf(stderr, "ThumbImageFrame %p::%s:%d : shift+click this=%p\n",
+					this, __func__, __LINE__, this);
+
+			emit signal_shiftClick(this);
+		}
+		if(mCtrl) {
+			fprintf(stderr, "ThumbImageFrame %p::%s:%d : Ctrl+click this=%p\n",
+					this, __func__, __LINE__, this);
+			emit signal_ctrlClick(this);
+		}
+
+	} else {
+		//		refresh selection
+		setSelected(mSelected);
+	}
+	update();
+}
+
+
 void ThumbImageFrame::mousePressEvent ( QMouseEvent * e ) {
 	setSelected( !mSelected );
+	setActive( true );
 
 	emit signal_mousePressEvent ( e );
 }

@@ -166,19 +166,25 @@ void EmaMainWindow::on_appendNewPictureThumb(QString filename)
 void EmaMainWindow::on_imgButton_clicked() {
 	//
 	ui->stackedWidget->setCurrentIndex(0);
-	ui->toolsTabWidget->show();
+//	ui->toolsTabWidget->show();
+	ui->actionView_left_column->setChecked(true);
+	ui->actionView_right_column->setChecked(true);
 }
 
 void EmaMainWindow::on_gridButton_clicked() {
 	//
 	ui->stackedWidget->setCurrentIndex(1);
-	ui->toolsTabWidget->show();
+	//ui->toolsTabWidget->show();
+	ui->actionView_left_column->setChecked(true);
+
 }
 
 void EmaMainWindow::on_batchPlayerButton_clicked()
 {
 	ui->stackedWidget->setCurrentIndex(3);
-	ui->toolsTabWidget->hide();
+//	ui->toolsTabWidget->hide();
+	ui->actionView_left_column->setChecked(false);
+	ui->actionView_right_column->setChecked(false);
 }
 
 
@@ -187,7 +193,8 @@ void EmaMainWindow::on_workspaceButton_clicked()
 	ui->stackedWidget->setCurrentIndex(2);
 
 //	ui->lateralSplitter->setChildrenCollapsible(true);
-	ui->toolsTabWidget->hide();
+	ui->actionView_left_column->setChecked(false);
+//		ui->toolsTabWidget->hide();
 }
 void EmaMainWindow::on_actionView_left_column_toggled(bool on)
 {
@@ -886,3 +893,8 @@ void EmaMainWindow::on_globalNavImageWidget_signalZoomOn(int x, int y, int scale
 
 
 
+
+void EmaMainWindow::on_actionClean_activated()
+{
+	ui->pluginManagerForm->cleanAllPlugins();
+}
