@@ -134,6 +134,10 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 	ui->stackedWidget->show();
 	ui->stackedWidget->setCurrentIndex(0);
 
+	if(mFileVA.getFrameRate()>0) {
+		mPlayTimer.setInterval((int)(1000.f /(mPlaySpeed * (float)mFileVA.getFrameRate())));
+	}
+
 	return ret;
 }
 void MainDisplayWidget::appendBookmark(t_movie_pos pos)
@@ -204,7 +208,7 @@ void MainDisplayWidget::on_playButton_toggled(bool checked)
 {
 	if(checked)
 	{
-		mPlayTimer.start(1000 * mPlaySpeed / mFileVA.getFrameRate());
+		mPlayTimer.start((int)(1000.f / (mPlaySpeed * (float)mFileVA.getFrameRate())));
 	} else {
 		mPlayTimer.stop();
 	}
@@ -243,12 +247,17 @@ void MainDisplayWidget::on_grayscaleButton_toggled(bool gray)
 void MainDisplayWidget::on_speedComboBox_currentIndexChanged(QString val)
 {
 	bool ok = false;
+	val.replace("x", "");
+
 	if(val.contains("/"))
 	{
 		QStringList split = val.split("/");
 		if(split.count()>1)
 		{
-			mPlaySpeed = split[1].toInt(&ok);
+			int denom = split[1].toInt(&ok);
+			if(ok) {
+				mPlaySpeed = 1.f / (float)denom;
+			}
 		}
 		else {
 			fprintf(stderr, "MainDisplayWidget::%s:%d : cannot split val='%s' playspeed=%g\n",
@@ -265,11 +274,8 @@ void MainDisplayWidget::on_speedComboBox_currentIndexChanged(QString val)
 			__func__, __LINE__,
 			val.toAscii().data(),
 			mPlaySpeed, ok?'T':'F');
-	if(mPlayTimer.isActive())
-	{
-		if(mFileVA.getFrameRate()>0) {
-			mPlayTimer.setInterval(1000 * mPlaySpeed / mFileVA.getFrameRate());
-		}
+	if(mFileVA.getFrameRate()>0) {
+		mPlayTimer.setInterval((int)(1000.f /(mPlaySpeed * (float)mFileVA.getFrameRate())));
 	}
 }
 

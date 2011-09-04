@@ -492,6 +492,20 @@ void PluginEditorForm::on_upButton_clicked()
 	if(!mpFilterSequencer) return;
 
 }
+/* Kill all processes running on computer (killall for all exec names) */
+void PluginEditorForm::cleanAllPlugins()
+{
+	QList<PiafFilter *> availList = mFilterSequencer.getAvailableFilters();
+	QList<PiafFilter *>::iterator it;
+	for(it = availList.begin(); it != availList.end(); ++it)
+	{
+		PiafFilter * filter = (*it);
+		char command[1024];
+		sprintf(command, "killall -9 %s", filter->exec_name);
+		PIAF_MSG(SWLOG_DEBUG, "run cmd '%s'", command);
+		system(command);
+	}
+}
 
 void PluginEditorForm::on_downButton_clicked()
 {

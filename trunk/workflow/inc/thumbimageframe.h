@@ -52,6 +52,12 @@ public:
 	/** @brief tell if the frame is selected */
 	bool isSelected() { return mSelected; }
 
+	/** @brief set the active flag */
+	void setActive(bool active);
+
+	/** @brief tell if the frame is selected */
+	bool isActive() { return mActive; }
+
 	/** @brief Shift key is pressed */
 	bool shiftPressed() { return mShift; }
 	/** @brief Ctrl key is pressed */
@@ -69,6 +75,7 @@ private:
 	ThumbImageFrame * mpTwin;
 	Ui::ThumbImageFrame *m_ui;
 	bool mSelected; ///< user selection flag
+	bool mActive; ///< active file flag: this is the file seen in main display
 
 private slots:
 	void on_globalImageLabel_signalMousePressEvent(QMouseEvent * e);

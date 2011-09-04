@@ -1540,11 +1540,18 @@
     </property>
     <addaction name="actionConvert_images_to_AVI"/>
     <addaction name="actionBatch_processor"/>
+   </widget>
+   <widget class="QMenu" name="menuPlugins">
+    <property name="title">
+     <string>Plugins</string>
+    </property>
     <addaction name="actionEdit_plugins"/>
+    <addaction name="actionClean"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
+   <addaction name="menuPlugins"/>
    <addaction name="menuAbout"/>
   </widget>
   <action name="actionPreferences">
@@ -1592,7 +1599,7 @@
      <normaloff>:/images/16x16/system-run.png</normaloff>:/images/16x16/system-run.png</iconset>
    </property>
    <property name="text">
-    <string>Batch processor</string>
+    <string>External batch processor </string>
    </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
@@ -1626,6 +1633,9 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>View left column</string>
    </property>
@@ -1640,11 +1650,22 @@
    <property name="checkable">
     <bool>true</bool>
    </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
    <property name="text">
     <string>View right column</string>
    </property>
    <property name="shortcut">
     <string>R</string>
+   </property>
+  </action>
+  <action name="actionClean">
+   <property name="text">
+    <string>Clean running plugins</string>
+   </property>
+   <property name="toolTip">
+    <string>Clean (kill) all running plugins</string>
    </property>
   </action>
  </widget>

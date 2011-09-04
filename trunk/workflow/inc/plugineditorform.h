@@ -97,6 +97,9 @@ public:
 	void setFilterSequencer(FilterSequencer *);
 	/** @brief Create its own sequencer */
 	FilterSequencer * createFilterSequencer();
+
+	/** @brief Kill all processes running on computer (killall for all exec names) */
+	void cleanAllPlugins();
 protected:
     void changeEvent(QEvent *e);
 

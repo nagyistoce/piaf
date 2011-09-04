@@ -204,13 +204,15 @@ void FilterSequencer::init() {
 void FilterSequencer::purge() {
 	fprintf(stderr, "FilterSequencer::%s:%d DELETE FilterSequencer\n", __func__, __LINE__);
 
-	unloadAllAvailable();
 	unloadAllLoaded();
+	fprintf(stderr, "FilterSequencer::%s:%d DELETE FilterSequencer\n", __func__, __LINE__);
+
+	unloadAllAvailable();
 }
 
 void FilterSequencer::unloadAllAvailable()
 {
-	DEBUG_MSG("unloading all filters...");
+	DEBUG_MSG("unloading all available filters process...");
 
 	// empty available filter list
 	PiafFilter * lastF = NULL;
@@ -222,10 +224,11 @@ void FilterSequencer::unloadAllAvailable()
 			PiafFilter * filter = (*it);
 			if(filter != lastF) {
 //#ifdef __SWPLUGIN_MANAGER__
-				fprintf(stderr, "Deleting filter '%s' from available filterColl...\n",
-					filter->exec_name);
-					fflush(stderr);
-///#endif
+				fprintf(stderr, "%s:%d Deleting filter '%s' from available filterColl...\n",
+						__func__, __LINE__,
+						filter->exec_name);
+				fflush(stderr);
+				///#endif
 				lastF = filter;
 				filter->unloadChildProcess();
 			}
@@ -250,6 +253,9 @@ void FilterSequencer::unloadAllAvailable()
 */
 PiafFilter *  FilterSequencer::addFilter(PiafFilter * newFilter, int id)
 {
+	fprintf(stderr, "FilterSequencer::%s:%d : adding filter %p at id=%d\n",
+			__func__ ,__LINE__, newFilter, id);
+
 	if(strlen(mPluginSequenceFile) == 0)
 	{
 		strcat(mPluginSequenceFile, "(custom)");
@@ -386,6 +392,19 @@ int FilterSequencer::removeFilter(PiafFilter * filter)
 
 		emit selectedFilterChanged();
 		return id;
+	} else {
+		fprintf(stderr, "[PiafFiler]::%s:%d : filter %p='%s' not found\n",
+				__func__, __LINE__,
+				filter, filter?filter->exec_name : "null"
+				);
+		if(filter) {
+			fprintf(stderr, "[PiafFilterMng]::%s:%d : unloadChildProcess...\n", __func__, __LINE__);
+			filter->unloadChildProcess();
+		}
+		if(g_debug_FilterSequencer) {
+			fprintf(stderr, "%s:%d : '%s' deleted.\n", __func__, __LINE__,
+					filter?filter->exec_name : "null");
+		}
 	}
 	emit selectedFilterChanged();
 	return -1;
@@ -508,15 +527,17 @@ PiafFilter * FilterSequencer::addFilter(PiafFilter * filter)
 		return NULL;
 	}
 
+
 	PiafFilter * newFilter = new PiafFilter(filter);
+	fprintf(stderr, "FilterSequencer::%s:%d : adding filter %p at end\n",
+			__func__ ,__LINE__, newFilter);
 
 	// start process
-	// FIXME
 	newFilter->loadChildProcess();
-
 
 	// append to list
 	mLoadedFiltersList.append(newFilter);
+	setFinal(newFilter);
 
 	connect(newFilter, SIGNAL(signalDied(int)), this, SLOT(slotFilterDied(int)));
 
@@ -527,8 +548,8 @@ PiafFilter * FilterSequencer::addFilter(PiafFilter * filter)
 
 	return newFilter;
 }
-/* Set final plugin in sequence: the next plugins won't be processed */
 
+/* Set final plugin in sequence: the next plugins won't be processed */
 void FilterSequencer::setFinal(PiafFilter * filter)
 {
 	QList<PiafFilter *>::iterator it;
@@ -537,52 +558,51 @@ void FilterSequencer::setFinal(PiafFilter * filter)
 		++it)
 	{
 		PiafFilter * pv = (*it);
-		if(  pv  )
+		if( pv )
 		{
 			pv->setFinal((pv == filter));
 		}
 	}
+
+	filter->setFinal(true);
 
 	emit selectedFilterChanged();
 }
 
 void FilterSequencer::unloadAllLoaded()
 {
-	if(g_debug_FilterSequencer) {
-		fprintf(stderr, "FilterSequencer::%s:%d: unloading all plugins...\n", __func__,__LINE__);
-	}
+//	if(g_debug_FilterSequencer) {
+	fprintf(stderr, "FilterSequencer::%s:%d: unloading all %d loaded plugins...\n", __func__,__LINE__,
+			mLoadedFiltersList.count());
+//	}
 
 	// looking for filter plugin
-	bool found = true;
-	while(found) {
-		found = false;
+	if(!mLoadedFiltersList.isEmpty())
+	{
+		QList<PiafFilter *>::iterator it;
 
-		if(!mLoadedFiltersList.isEmpty())
+		for(it=mLoadedFiltersList.begin();
+			it!=mLoadedFiltersList.end();
+			++it)
 		{
-			QList<PiafFilter *>::iterator it;
-			for(it=mLoadedFiltersList.begin();
-				it!=mLoadedFiltersList.end() && !found;  // use !found to restart at every iteration
-				++it)
+			PiafFilter * pv = (*it);
+			fprintf(stderr, "\tDelete loaded? filter '%s' \n",
+				pv->exec_name);
+			if(  pv->loaded() )
 			{
-				PiafFilter * pv = (*it);
-				if(  pv->loaded() )
-				{
-					// then add it to selectedListView
+				// then add it to selectedListView
 //#ifdef __SWPLUGIN_MANAGER__
-					if(pv->indexFunction < pv->nb_func) {
-						fprintf(stderr, "\tDelete filter '%s' \n",
-							pv->funcList[pv->indexFunction].name);
-					}
-//#endif
-					// wait for process flag to go down
-					while(lockProcess) {
-						usleep(10000);
-					}
-
-					removeFilter( pv );
-
-					found = true;
+				if(pv->indexFunction < pv->nb_func) {
+					fprintf(stderr, "\tDelete filter '%s' \n",
+						pv->funcList[pv->indexFunction].name);
 				}
+//#endif
+				// wait for process flag to go down
+				while(lockProcess) {
+					usleep(10000);
+				}
+
+				removeFilter( pv );
 			}
 		}
 	}
@@ -1375,7 +1395,7 @@ int FilterSequencer::processImage(swImageStruct * image)
 	}
 
 	if(mLoadedFiltersList.isEmpty()) {
-		fprintf(stderr, "[FilterSequencer]::%s:%d : empty filter list\n", __func__, __LINE__);
+		fprintf(stderr, "[FilterSequencer]::%s:%d : filter list is empty\n", __func__, __LINE__);
 		return -1;
 	}
 
@@ -1790,6 +1810,12 @@ int PiafFilter::loadChildProcess()
 		return 0;
 	}
 
+	if(statusOpen) {
+		fprintf(stderr, "PiafFilter::%s:%d : exec_name='%s' already opened\n",
+				__func__, __LINE__, exec_name);
+		return 0;
+	}
+
 	// Go to this directory
 	char path[512]="";
 	strcpy(path, exec_name);
@@ -1935,7 +1961,8 @@ int PiafFilter::unloadChildProcess()
 
 	// send quit message
 //#ifdef __SWPLUGIN_MANAGER__
-	fprintf(stderr, "unloadChildProcess : Sending quit message to child '%s'\n", exec_name);
+	fprintf(stderr, "PiafFilter::%s:%d : Sending quit message to child '%s'\n",
+			__func__, __LINE__, exec_name);
 	sendRequest(SWFRAME_QUIT);
 
 //#endif
@@ -1962,6 +1989,8 @@ int PiafFilter::unloadChildProcess()
 		fprintf(stderr, "%s:%d : waitpid(%d, WNOHANG) !\n", __func__, __LINE__,
 				childpid);
 	}
+	fprintf(stderr, "PiafFilter::%s:%d : OK. Killed child '%s'\n",
+			__func__, __LINE__, exec_name);
 
 	childpid = 0;
 
