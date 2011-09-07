@@ -51,7 +51,7 @@ AvailablePluginTreeWidgetItem::AvailablePluginTreeWidgetItem(
 
 AvailablePluginTreeWidgetItem::~AvailablePluginTreeWidgetItem()
 {
-	DEBUG_MSG("Deleting AvailablePluginTreeWidgetItem");
+//	DEBUG_MSG("Deleting AvailablePluginTreeWidgetItem");
 }
 
 PluginEditorForm::PluginEditorForm(QWidget *parent) :
@@ -117,6 +117,8 @@ void PluginEditorForm::setFilterSequencer(FilterSequencer * seq)
 	if(mpFilterSequencer) {
 		connect(mpFilterSequencer, SIGNAL(selectedFilterChanged()), this,
 				SLOT(on_filterSequencer_selectedFilterChanged()));
+		connect(mpFilterSequencer, SIGNAL(signalFilterDied(PiafFilter*)), this,
+				SLOT(on_filterSequencer_signalFilterDied(PiafFilter *)));
 	}
 }
 
@@ -140,6 +142,20 @@ void PluginEditorForm::on_filterSequencer_selectedFilterChanged()
 	fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
 	updateSelectedView();
 }
+
+void PluginEditorForm::on_filterSequencer_signalFilterDied(PiafFilter * filter)
+{
+	if(!filter) return;
+
+	// Display message
+	QMessageBox::warning(NULL, tr("Plugin ") + filter->exec_name + tr(" crashed"),
+						 tr("The plugin ") + filter->exec_name
+						 + tr(" crashed. It will not be reloaded automatically to let you correct the bug.")
+						 );
+	fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
+	updateSelectedView();
+}
+
 
 void PluginEditorForm::changeEvent(QEvent *e)
 {
