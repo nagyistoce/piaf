@@ -132,8 +132,10 @@ private:
 private slots:
 	/// Refresh function
 	void on_pluginsButton_clicked();
- void on_selectedPluginsTreeWidget_itemDoubleClicked(QTreeWidgetItem* item, int column);
+
+	void on_selectedPluginsTreeWidget_itemDoubleClicked(QTreeWidgetItem* item, int column);
 	void on_selectedPluginsTreeWidget_itemClicked(QTreeWidgetItem* item, int column);
+
 	void on_downButton_clicked();
 	void on_upButton_clicked();
 	void on_timeButton_clicked();
@@ -142,7 +144,7 @@ private slots:
 	void on_removePluginButton_clicked();
 	void on_saveButton_clicked();
 	void on_filterSequencer_selectedFilterChanged();
-
+	void on_filterSequencer_signalFilterDied(PiafFilter *);
 	void on_appendPluginButton_clicked();
 	void on_loadButton_clicked();
 

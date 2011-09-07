@@ -78,6 +78,9 @@ void NavImageWidget::on_zoomx2Button_released()
 
 void NavImageWidget::setImage(QImage fullImage)
 {
+	fprintf(stderr, "NavImagewidget::%s:%d : fullImage=%dx%dx%d\n",
+			__func__, __LINE__, fullImage.width(), fullImage.height(), fullImage.depth());
+
 	if(fullImage.isNull()) {
 		PIAF_MSG(SWLOG_ERROR, "input image is null");
 		m_displayImage.fill(127);

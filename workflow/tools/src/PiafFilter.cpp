@@ -323,10 +323,14 @@ void FilterSequencer::slotFilterDied(int pid)
 			fprintf(stderr, "[PiafFilterMng]::%s:%d : dead filter pid=%d (but no warning)...\n",
 					__func__, __LINE__, pid);
 			filter->plugin_died = true;
+			emit signalFilterDied(filter);
 		}
 	}
 
-	//emit selectedFilterChanged();
+	// Signal that it changed
+	fprintf(stderr, "[PiafFilterMng]::%s:%d : dead filter pid=%d => send filter changed...\n",
+			__func__, __LINE__, pid);
+	emit selectedFilterChanged();
 }
 
 
@@ -563,7 +567,6 @@ void FilterSequencer::setFinal(PiafFilter * filter)
 			pv->setFinal((pv == filter));
 		}
 	}
-
 	filter->setFinal(true);
 
 	emit selectedFilterChanged();

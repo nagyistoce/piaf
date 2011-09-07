@@ -796,7 +796,7 @@ int swWriteToPipe(unsigned char * mBuffer, u32 size, FILE * pipe, int timeout_ms
 	int iter=0;
 	int itermax = timeout_ms * 1000/TIMEOUT_STEP;
 	u32 index = 0;
-	u32 result = 0;
+	int result = 0;
 	while(iter < itermax && index<size) {
 		iter++;
 
@@ -817,8 +817,9 @@ int swWriteToPipe(unsigned char * mBuffer, u32 size, FILE * pipe, int timeout_ms
 						__func__, __LINE__, errnum, strerror(errnum), EINTR);
 				return 0;
 			}
+		} else {
+			fflush(pipe);
 		}
-		fflush(pipe);
 
 		if( tobewritten == BUFSIZ ) {
 //			usleep( 5000 );

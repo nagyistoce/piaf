@@ -2,6 +2,11 @@
 # Project created by QtCreator 2009-07-01T21:37:51
 # -------------------------------------------------
 TEMPLATE = app
+# The following line was inserted by qt3to4
+QT += qt3support xml
+
+# The following line was inserted by qt3to4
+CONFIG += uic3
 
 # Use lowercase name for Linux
 linux-g++: {
@@ -385,11 +390,6 @@ FORMS3 = $$LEGACYPATH/ui/piafconfigurationdialog.ui
 #    ui/pluginlistdialog.ui
 TEMPLATE = app
 
-# The following line was inserted by qt3to4
-QT += qt3support
-
-# The following line was inserted by qt3to4
-CONFIG += uic3
 
 
 ###########################################################

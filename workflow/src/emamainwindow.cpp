@@ -38,6 +38,7 @@
 
 #include <QFileDialog>
 #include <QSplashScreen>
+#include <QDomDocument>
 
 // External tools which open new windows
 // Piaf Dialogs
@@ -73,6 +74,7 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	mSettings( PIAFWKFL_SETTINGS )
 {
 	ui->setupUi(this);
+	g_splash->showMessage(QObject::tr("Restore settings ..."), Qt::AlignBottom | Qt::AlignHCenter);
 	ui->loadProgressBar->hide();
 
 	connect(&m_timer, SIGNAL(timeout()),
@@ -103,6 +105,7 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	pWorkshopImage = NULL;
 	pWorkshopImageTool = NULL;
 
+	g_splash->showMessage(QObject::tr("Load plugins ..."), Qt::AlignBottom | Qt::AlignHCenter);
 	ui->mainDisplayWidget->setFilterSequencer(
 			ui->pluginManagerForm->createFilterSequencer()
 			);
@@ -113,7 +116,7 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	// Hide splash
 	if(g_splash)
 	{
-		g_splash->hide();
+//		g_splash->hide();
 	}
 }
 
@@ -151,6 +154,65 @@ void EmaMainWindow::saveSettings()
 
 	mSettings.endArray();
 
+	QDomDocument doc("piafworkflowsettings");
+//	QFile file("piafworkflowsettings.xml");
+//	if (!file.open(QIODevice::ReadOnly)) {
+//		PIAF_MSG(SWLOG_ERROR, "could not open file '%s' for reading: err=%s",
+//				 file.name().toAscii().data(),
+//				 file.errorString().toAscii().data());
+//		//	 return;
+//	}
+//	else {
+//		if (!doc.setContent(&file)) {
+//			PIAF_MSG(SWLOG_ERROR, "could not read content of file '%s' dor XML doc: err=%s",
+//					 file.name().toAscii().data(),
+//					 file.errorString().toAscii().data());
+//			file.close();
+
+//			// return;
+//		}
+//		file.close();
+//	}
+//	 // print out the element names of all elements that are direct children
+//	 // of the outermost element.
+//	 QDomElement docElem = doc.documentElement();
+//	 QDomNode n = docElem.firstChild();
+//	 while(!n.isNull()) {
+//		 QDomElement e = n.toElement(); // try to convert the node to an element.
+//		 if(!e.isNull()) {
+//			 cout << qPrintable(e.tagName()) << endl; // the node really is an element.
+//		 }
+//		 n = n.nextSibling();
+//	 }
+
+	 // Here we append a new element to the end of the document
+	 QDomElement elem = doc.createElement("Folders");
+	 //elem.setAttribute("src", "myimage.png");
+	 for (int i = 0; i < m_workflow_settings.directoryList.size(); ++i) {
+		 //mSettings.setValue("path", m_workflow_settings.directoryList.at(i));
+		 QDomElement folder = doc.createElement("folder");
+		 folder.setAttribute("path", m_workflow_settings.directoryList.at(i));
+		 QFileInfo fi(m_workflow_settings.directoryList.at(i));
+		 folder.setAttribute("filename", fi.baseName());
+		 folder.setAttribute("extension", fi.extension());
+		 elem.appendChild(folder);
+
+		 EMAMW_printf(EMALOG_DEBUG, "\tadded directory '%s' to XML",
+					  m_workflow_settings.directoryList.at(i).toAscii().data()
+					  );
+	 }
+	 doc.appendChild(elem);
+
+	 QFile fileout( "/tmp/piafsettings.xml" );
+	 if( !fileout.open( IO_WriteOnly ) ) {
+		 PIAF_MSG(SWLOG_ERROR, "cannot save piafsettings.xml");
+		 return ;
+	 }
+	 QTextStream ts( &fileout );
+	 ts << doc.toString();
+
+	 fileout.close();
+	 PIAF_MSG(SWLOG_ERROR, " saved /tmp/settingsout.xml");
 }
 
 void EmaMainWindow::on_appendNewPictureThumb(QString filename)
@@ -336,6 +398,8 @@ void EmaMainWindow::on_filesLoadButton_clicked()
 			__func__, __LINE__, new_dir, new_dir);
 	mDirectoryList.append( new_dir );
 //	appendFileList(list);
+	saveSettings();
+
 }
 
 

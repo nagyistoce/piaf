@@ -331,6 +331,7 @@ protected slots:
 
 signals:
 	void selectedFilterChanged();
+	void signalFilterDied(PiafFilter *);
 };
 
 
