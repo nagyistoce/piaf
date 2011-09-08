@@ -146,9 +146,9 @@ void EmaMainWindow::saveSettings()
 	mSettings.beginWriteArray("folders");
 	for (int i = 0; i < m_workflow_settings.directoryList.size(); ++i) {
 		mSettings.setArrayIndex(i);
-		mSettings.setValue("path", m_workflow_settings.directoryList.at(i));
+		mSettings.setValue("path", m_workflow_settings.directoryList.at(i).fullpath);
 		EMAMW_printf(EMALOG_DEBUG, "\tadded directory '%s'",
-					 m_workflow_settings.directoryList.at(i).toAscii().data());
+					 m_workflow_settings.directoryList.at(i).fullpath.toAscii().data());
 		//settings.setValue("password", list.at(i).password);
 	}
 
@@ -191,14 +191,16 @@ void EmaMainWindow::saveSettings()
 	 for (int i = 0; i < m_workflow_settings.directoryList.size(); ++i) {
 		 //mSettings.setValue("path", m_workflow_settings.directoryList.at(i));
 		 QDomElement folder = doc.createElement("folder");
-		 folder.setAttribute("path", m_workflow_settings.directoryList.at(i));
-		 QFileInfo fi(m_workflow_settings.directoryList.at(i));
-		 folder.setAttribute("filename", fi.baseName());
-		 folder.setAttribute("extension", fi.extension());
+		 folder.setAttribute("path", m_workflow_settings.directoryList.at(i).fullpath);
+		 folder.setAttribute("filename", m_workflow_settings.directoryList.at(i).filename);
+		 folder.setAttribute("filename", m_workflow_settings.directoryList.at(i).extension);
+		 folder.setAttribute("filename", m_workflow_settings.directoryList.at(i).expanded);
+
+		 QFileInfo fi(m_workflow_settings.directoryList.at(i).extension);
 		 elem.appendChild(folder);
 
 		 EMAMW_printf(EMALOG_DEBUG, "\tadded directory '%s' to XML",
-					  m_workflow_settings.directoryList.at(i).toAscii().data()
+					  m_workflow_settings.directoryList.at(i).fullpath.toAscii().data()
 					  );
 	 }
 	 doc.appendChild(elem);
@@ -314,7 +316,7 @@ void EmaMainWindow::on_actionConvert_images_to_AVI_activated()
 
 void EmaMainWindow::on_actionAbout_activated()
 {
-	QPixmap pix(":/icons/ema-splash.png");
+	QPixmap pix(":/icons/icons/ema-splash.png");
 	if(g_splash) {
 		g_splash->setPixmap(pix);
 	}
@@ -325,9 +327,9 @@ void EmaMainWindow::on_actionAbout_activated()
 	QString verstr, cmd = QString("Ctrl+");
 	QString item = QString("<li>"), itend = QString("</li>\n");
 	g_splash->showMessage(
-			QString("<br><br><br><br><br><br><br><br><br>") +
-			QString("<br><br><br><br><br><br><br><br><br>") +
-			QString("<br><br><br><br><br><br><br>") +
+//			QString("<br><br><br><br><br><br><br><br><br>") +
+//			QString("<br><br><br><br><br><br><br><br><br>") +
+//			QString("<br><br><br><br><br><br><br>") +
 			tr("<b>Piaf workflow</b> version: ")
 						  + verstr.sprintf("svn%04d%02d%02d", VERSION_YY, VERSION_MM, VERSION_DD)
 
@@ -587,7 +589,12 @@ DirectoryTreeWidgetItem * EmaMainWindow::appendDirectoryToLibrary(QString path,
 	QFileInfo fi(path);
 	if(!fi.exists()) { return NULL; }
 
-	m_workflow_settings.directoryList.append(path);
+	t_folder folder;
+	folder.fullpath = path;
+	folder.extension = fi.extension();
+	folder.filename = fi.baseName();
+	folder.expanded = false;
+	m_workflow_settings.directoryList.append(folder);
 
 	DirectoryTreeWidgetItem * new_dir ;
 	if(!itemParent) {
@@ -891,59 +898,77 @@ void EmaMainWindow::on_mainDisplayWidget_signalZoomRect(QRect cropRect)
 void EmaMainWindow::on_thumbImage_clicked(QString fileName)
 {
 	QFileInfo fi(fileName);
-	if(fi.exists()) {
-		ui->globalNavImageWidget->setImageFile(fileName);
-		t_image_info_struct * pinfo = NULL;
+	if(!fi.exists()) {
+		PIAF_MSG(SWLOG_ERROR, "File '%s' does not exists",
+				 fileName.toAscii().data());
+		return;
+	}
 
-		int retry = 0;
+	ui->globalNavImageWidget->setImageFile(fileName);
+	t_image_info_struct * pinfo = NULL;
 
-		while(!pinfo && retry<4E6) {
-			pinfo = emaMngr()->getInfo(fileName);
-			if(!pinfo) {
-				// Create its info
-				emaMngr()->appendFile(fileName);
-				usleep(100000);
-			}
-			retry += 100000;
-		}
+	int retry = 0;
 
-		// print allocated images
-		tmPrintIplImages();
-
-		//ui->mainDisplayWidget->setRefImage(&mWorkImage);
-		if(pinfo) {
-			if(!pinfo->isMovie)
-			{
-				ui->mainDisplayWidget->setImageFile(fileName, pinfo);
-
-				if(pWorkshopImage) {
-					mWorkImage.load(fileName);
-					pWorkshopImage->load(fileName);
-				}
-				if(pWorkshopImageTool) {
-					pWorkshopImageTool->setWorkshopImage(pWorkshopImage);
-					//pWorkshopImageTool->update();
-				}
-			}
-			else
-			{
-				ui->mainDisplayWidget->setMovieFile(fileName, pinfo);
-				ui->globalNavImageWidget->setImage( iplImageToQImage(pinfo->thumbImage.iplImage) );
-			}
-		}
-
-
-
+	while(!pinfo && retry<4E6) {
+		pinfo = emaMngr()->getInfo(fileName);
 		if(!pinfo) {
-			EMAMW_printf(EMALOG_WARNING, "File '%s' is not managed : reload and process file info\n", fileName.toUtf8().data())
-			ui->imageInfoWidget->setImageFile(fileName);
-		} else {
-			EMAMW_printf(EMALOG_DEBUG, "File '%s' is managed : use cache info\n", fileName.toUtf8().data())
-			ui->imageInfoWidget->setImageInfo(pinfo);
-
-			EMAMW_printf(EMALOG_DEBUG, "File '%s' show exif date\n", fileName.toUtf8().data())
-			ui->exifScrollArea->setImageInfo(pinfo);
+			// Create its info
+			emaMngr()->appendFile(fileName);
+			usleep(100000);
 		}
+		retry += 100000;
+	}
+
+	// print allocated images
+	tmPrintIplImages();
+
+	//ui->mainDisplayWidget->setRefImage(&mWorkImage);
+	if(pinfo) {
+
+		if(!pinfo->isMovie)
+		{
+			ui->mainDisplayWidget->setImageFile(fileName, pinfo);
+			PIAF_MSG(SWLOG_INFO, "picture image=%dx%dx%d",
+					 ui->mainDisplayWidget->getImage().width(),
+					 ui->mainDisplayWidget->getImage().height(),
+					 ui->mainDisplayWidget->getImage().depth());
+
+			if(pWorkshopImage) {
+				mWorkImage.load(fileName);
+				pWorkshopImage->load(fileName);
+			}
+
+			if(pWorkshopImageTool) {
+				pWorkshopImageTool->setWorkshopImage(pWorkshopImage);
+				//pWorkshopImageTool->update();
+			}
+		}
+		else // use main widget decoder to read the image
+		{
+			ui->mainDisplayWidget->setMovieFile(fileName, pinfo);
+
+			PIAF_MSG(SWLOG_INFO, "movie image=%dx%dx%d",
+					 ui->mainDisplayWidget->getImage().width(),
+					 ui->mainDisplayWidget->getImage().height(),
+					 ui->mainDisplayWidget->getImage().depth());
+			ui->globalNavImageWidget->setImage( ui->mainDisplayWidget->getImage() );
+			//
+//			ui->globalNavImageWidget->setImage( iplImageToQImage(pinfo->thumbImage.iplImage) );
+		}
+	}
+
+
+
+	if(!pinfo) {
+		EMAMW_printf(EMALOG_WARNING, "File '%s' is not managed : reload and process file info\n", fileName.toUtf8().data())
+		ui->imageInfoWidget->setImageFile(fileName);
+	} else {
+
+		EMAMW_printf(EMALOG_DEBUG, "File '%s' is managed : use cache info\n", fileName.toUtf8().data())
+		ui->imageInfoWidget->setImageInfo(pinfo);
+
+		EMAMW_printf(EMALOG_DEBUG, "File '%s' show exif date\n", fileName.toUtf8().data())
+		ui->exifScrollArea->setImageInfo(pinfo);
 	}
 }
 

@@ -81,6 +81,14 @@ namespace Ui
 	class EmaMainWindow;
 }
 
+/** @brief Folder listed */
+typedef struct {
+	QString fullpath;	///< Full path to directory
+	QString filename;	///< basename
+	QString extension;	///< File extension
+	bool expanded;		///< Expanded state on explorer
+} t_folder;
+
 /** @brief File known in collection */
 typedef struct {
 	QString fullpath;	///< Full path to file
@@ -104,7 +112,7 @@ typedef struct {
 /** @brief Workflow interface settings storage */
 typedef struct {
 	/// List of input directories
-	QStringList directoryList;
+	QList<t_folder> directoryList;
 
 	/// list of collections
 	QList<t_collection> collectionList;

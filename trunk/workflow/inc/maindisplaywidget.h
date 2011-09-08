@@ -54,6 +54,9 @@ public:
 	/** @brief Set the movie file */
 	int setMovieFile(QString imagePath, t_image_info_struct * pinfo = NULL);
 
+	/** @brief Get current image at full resolution */
+	QImage getImage() { return m_fullImage; }
+
 	/** @brief Zoom on a part of input image at a specified scale */
 	void zoomOn(int unscaled_x, int unscaled_y, int scale);
 	/** @brief crop absolute part of image for display */
@@ -83,7 +86,7 @@ private:
 
 private slots:
 	void on_addBkmkButton_clicked();
- void on_bookmarksButton_clicked();
+	void on_bookmarksButton_clicked();
 	void on_magneticButton_toggled(bool on);
 	void on_speedComboBox_currentIndexChanged(QString );
 	void on_grayscaleButton_toggled(bool);
