@@ -26,6 +26,7 @@
 #include "ui_imageinfowidget.h"
 
 #include "imgutils.h"
+#include "piaf-common.h"
 
 
 ImageInfoWidget::ImageInfoWidget(QWidget *parent) :
@@ -82,8 +83,7 @@ static void init_grayToBGR32()
 
 QImage iplImageToQImage(IplImage * iplImage) {
 	if(!iplImage) {
-		fprintf(stderr, "%s %s:%d : no IplImage",
-				__FILE__, __func__ ,__LINE__);
+		PIAF_MSG(SWLOG_ERROR, "IplImage is null");
 		return QImage();
 	}
 

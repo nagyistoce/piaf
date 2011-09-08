@@ -19,6 +19,12 @@ cd colibri
 $QMAKE && make $@ || echo "Build failed. Missing packages ? Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
 cd ..
 
+echo " + building Workflow GUI..."
+cd workflow
+$QMAKE && make $@ || echo "Build failed. Missing packages ? Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
+cd ..
+
+
 echo "Building plugins..."
 
 cd plugins/vision/
