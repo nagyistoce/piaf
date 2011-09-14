@@ -118,6 +118,10 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	{
 //		g_splash->hide();
 	}
+
+
+	connect(ui->mainDisplayWidget, SIGNAL(signalImageChanged(QImage)),
+			ui->globalNavImageWidget, SLOT(on_signalImageChanged(QImage)));
 }
 
 EmaMainWindow::~EmaMainWindow()
@@ -645,7 +649,8 @@ void EmaMainWindow::on_timer_timeout() {
 
 	QStringList::Iterator it = m_appendFileList.begin();
 	while( !m_appendFileList.isEmpty() &&
-			(it != m_appendFileList.end()) ) {
+			(it != m_appendFileList.end()) )
+	{
 		fileName = (*it);
 		ui->loadProgressBar->setValue(emaMngr()->getProgress());
 
@@ -670,6 +675,7 @@ void EmaMainWindow::on_timer_timeout() {
 	}
 
 
+	// update progress bar
 	ui->loadProgressBar->setValue(emaMngr()->getProgress());
 
 	if(!m_appendFileList.isEmpty()) {
@@ -677,7 +683,8 @@ void EmaMainWindow::on_timer_timeout() {
 		m_timer.start(500);
 	}
 
-	if(emaMngr()->getProgress() == 100) {
+	if(emaMngr()->getProgress() == 100)
+	{
 		ui->loadProgressBar->hide();
 		m_timer.stop();
 	}

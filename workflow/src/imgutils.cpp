@@ -295,9 +295,12 @@ void subReleaseImage(const char * file, const char * func, int line,
 	}
 
 	if(found<0) {
-		fprintf(stderr, "[imgutils] %s:%d : could not find where image has been allocated ! %dx%dx%d",
+		fprintf(stderr, "[imgutils] %s:%d : could not find where image has been allocated ! "
+				"Size:%dx%dx%d call from %s %s:%d\n",
 				__func__, __LINE__,
-				(*img)->width, (*img)->height, (*img)->nChannels );
+				(*img)->width, (*img)->height, (*img)->nChannels,
+				file, func, line
+				);
 	}
 
 	if( !(*img)->imageData ) return;

@@ -220,14 +220,14 @@ void MainImageWidget::cropAbsolute(int x_crop, int y_crop, int scale)
 void MainImageWidget::on_globalImageLabel_signalPicker(QRgb colorRGB, int colorGrey, QPoint pt)
 {
 	QString str;
-	str.sprintf("%d,%d : (%d,%d,%d) g=%d",
+	str.sprintf("%d,%d : (%d,%d,%d)\ng=%d",
 				pt.x(), pt.y(), qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB), colorGrey);
 	m_ui->infoLabel->setText(str);
 	str.sprintf("background-color: rgb(%d,%d,%d);\n"
 				"color: rgb(%d,%d,%d);\n"
-								,
-								qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB),
-								(128+qRed(colorRGB))%255, (128+qGreen(colorRGB))%255, (128+qBlue(colorRGB))%255
+				,
+				qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB),
+				(128+qRed(colorRGB))%255, (128+qGreen(colorRGB))%255, (128+qBlue(colorRGB))%255
 				);
 	m_ui->infoLabel->setStyleSheet(str);
 }

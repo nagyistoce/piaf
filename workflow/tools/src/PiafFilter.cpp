@@ -1453,6 +1453,7 @@ int FilterSequencer::processImage(swImageStruct * image)
 					else
 					{	// Processing has one error
 						global_return --;
+
 						fprintf(stderr, "[PiafFiltersManager]::%s:%d : filter '%s' failed "
 								"=> will return %d\n",
 								__func__, __LINE__, pv->exec_name,
@@ -1490,6 +1491,14 @@ int FilterSequencer::processImage(swImageStruct * image)
 
 			// reload same file
 			loadSequence(getPluginSequenceFile());
+		}
+		else
+		{
+			fprintf(stderr, "[FilterSequencer]::%s:%d : a plugin failed & auto-reload is OFF\n",
+					__func__, __LINE__
+					);
+			QMessageBox::critical(NULL, tr("A plugin crashed"),
+								  tr("A plugin in sequence has crashed"));
 		}
 	}
 

@@ -70,6 +70,9 @@ private:
 	QPoint m_last_zoom; ///< last zoom position in original image size reference
 	QPoint m_lastClick;
 
+public slots:
+	void on_signalImageChanged(QImage);
+
 private slots:
 	void on_zoomSlider_sliderReleased();
 	void on_zoomSlider_sliderMoved(int position);

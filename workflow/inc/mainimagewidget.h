@@ -69,6 +69,7 @@ protected:
 //	QRect m_cropRect;
 //	QRect m_lastCrop;
 
+
 	//bool m_mouse_has_moved;
 private slots:
 	// Zoom options
@@ -91,6 +92,7 @@ private slots:
 private:
 	Ui::MainImageWidget *m_ui;
 signals:
+
 	/// Signal to tell where the crop window is located
 	void signalCropRect(QRect);
 
