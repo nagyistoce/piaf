@@ -76,6 +76,12 @@ void NavImageWidget::on_zoomx2Button_released()
 			2);
 }
 
+void NavImageWidget::on_signalImageChanged(QImage imageIn)
+{
+	setImage(imageIn);
+}
+
+
 void NavImageWidget::setImage(QImage fullImage)
 {
 	fprintf(stderr, "NavImagewidget::%s:%d : fullImage=%dx%dx%d\n",
@@ -87,13 +93,14 @@ void NavImageWidget::setImage(QImage fullImage)
 		m_fullRect = QRect(0, 0, 0, 0);
 		return;
 	}
-	else {
+	else
+	{
 		int wdisp = m_ui->globalImageLabel->width()-2;
 		int hdisp = m_ui->globalImageLabel->height()-2;
 
 		m_fullRect = QRect(0, 0, fullImage.width(), fullImage.height());
 
-		m_displayImage.fromImage(fullImage.scaled( wdisp, hdisp,
+		m_displayImage = QPixmap::fromImage(fullImage.scaled( wdisp, hdisp,
 										  Qt::KeepAspectRatio ));
 		m_inputImage = m_displayImage;
 	}
@@ -109,26 +116,8 @@ void NavImageWidget::setImageFile(const QString & imagePath)
 	//		__func__, __LINE__,
 	//		imagePath);
 
-	QPixmap fullImage(imagePath);
-
-	if(fullImage.isNull()) {
-		m_displayImage.fill(127);
-		m_fullRect = QRect(0, 0, 0, 0);
-		return;
-	}
-	else {
-		int wdisp = m_ui->globalImageLabel->width()-2;
-		int hdisp = m_ui->globalImageLabel->height()-2;
-
-		m_fullRect = QRect(0, 0, fullImage.width(), fullImage.height());
-
-		m_inputImage = m_displayImage = fullImage.scaled( wdisp, hdisp,
-								Qt::KeepAspectRatio );
-	}
-
-	m_ui->globalImageLabel->setPixmap( m_displayImage );
-
-	on_zoomFitButton_clicked();
+	QImage fullImage(imagePath);
+	setImage(fullImage);
 }
 
 void  NavImageWidget::zoomOn(int x, int y, int scale) {

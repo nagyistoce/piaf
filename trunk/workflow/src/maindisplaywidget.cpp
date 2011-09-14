@@ -182,6 +182,10 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 {
 	mFileVA.slotRewindMovie();
 	updateDisplay();
+
+	// to update navigation image widget
+	emit signalImageChanged(m_fullImage);
+
 }
 
 void MainDisplayWidget::updateDisplay()
@@ -202,6 +206,8 @@ void MainDisplayWidget::on_goPrevButton_clicked()
 	ui->playButton->blockSignals(false);
 
 	updateDisplay();
+	// to update navigation image widget
+	emit signalImageChanged(m_fullImage);
 }
 
 void MainDisplayWidget::on_playButton_toggled(bool checked)
@@ -212,6 +218,9 @@ void MainDisplayWidget::on_playButton_toggled(bool checked)
 	} else {
 		mPlayTimer.stop();
 	}
+
+	// to update navigation image widget
+	emit signalImageChanged(m_fullImage);
 }
 
 void MainDisplayWidget::on_goNextButton_clicked()
@@ -225,11 +234,22 @@ void MainDisplayWidget::on_goNextButton_clicked()
 	{
 		ui->playButton->setChecked(false);
 	}
+	// to update navigation image widget
+	emit signalImageChanged(m_fullImage);
+
 }
 
 void MainDisplayWidget::on_mPlayTimer_timeout()
 {
-	on_goNextButton_clicked();
+	bool got_picture = mFileVA.GetNextFrame();
+	if(got_picture)
+	{
+		updateDisplay();
+	}
+	else if(mPlayTimer.isActive())
+	{
+		ui->playButton->setChecked(false);
+	}
 }
 
 void MainDisplayWidget::on_goLastButton_clicked()
