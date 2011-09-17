@@ -1497,8 +1497,20 @@ int FilterSequencer::processImage(swImageStruct * image)
 			fprintf(stderr, "[FilterSequencer]::%s:%d : a plugin failed & auto-reload is OFF\n",
 					__func__, __LINE__
 					);
-			QMessageBox::critical(NULL, tr("A plugin crashed"),
-								  tr("A plugin in sequence has crashed"));
+			int answer = QMessageBox::question(NULL, tr("A plugin crashed"),
+								  tr("A plugin in sequence has crashed. Do you want to reload the whole sequence ?"),
+								  QMessageBox::Yes, QMessageBox::No);
+			if(answer == QMessageBox::Yes)
+			{
+				/// \fixme save in /dev/shm
+				saveSequence( "/dev/shm/crashedsequence.flist");
+
+				// unload previously loaded filters
+				unloadAllLoaded();
+
+				// reload same file
+				loadSequence(getPluginSequenceFile());
+			}
 		}
 	}
 
