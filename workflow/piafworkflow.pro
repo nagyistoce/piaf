@@ -49,7 +49,7 @@ OBJECTS_DIR = .obj-simple
 
 #DEFINES += QT3_SUPPORT
 
-TRANSLATIONS = photogeny_French.ts
+TRANSLATIONS = piafworkflow_French.ts
 
 SOURCES += tools/src/PiafFilter.cpp \
 	src/main.cpp \

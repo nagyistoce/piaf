@@ -95,7 +95,7 @@
                 <string>Folders explorer</string>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>2</number>
                </property>
                <widget class="QWidget" name="inputsTabWidgetPage1">
                 <attribute name="icon">
@@ -411,7 +411,7 @@
                     <item>
                      <widget class="QPushButton" name="deviceClearButton">
                       <property name="toolTip">
-                       <string>Remove the selected device form list</string>
+                       <string>Remove the selected device from list</string>
                       </property>
                       <property name="text">
                        <string/>
@@ -686,8 +686,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>96</width>
-                  <height>26</height>
+                  <width>98</width>
+                  <height>28</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1288,13 +1288,7 @@
                <number>1</number>
               </property>
               <item>
-               <widget class="QFrame" name="pluginsFrame">
-                <property name="frameShape">
-                 <enum>QFrame::StyledPanel</enum>
-                </property>
-                <property name="frameShadow">
-                 <enum>QFrame::Raised</enum>
-                </property>
+               <widget class="QWidget" name="pluginsWidget" native="true">
                 <layout class="QVBoxLayout" name="verticalLayout_16">
                  <property name="margin">
                   <number>0</number>
@@ -1672,6 +1666,12 @@
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
   <customwidget>
+   <class>ImageWidget</class>
+   <extends>QWidget</extends>
+   <header>imagewidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
    <class>TimeHistogramWidget</class>
    <extends>QWidget</extends>
    <header>timehistogramwidget.h</header>
@@ -1711,12 +1711,6 @@
    <class>MainDisplayWidget</class>
    <extends>QWidget</extends>
    <header>maindisplaywidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>ImageWidget</class>
-   <extends>QWidget</extends>
-   <header>imagewidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

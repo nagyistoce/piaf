@@ -107,7 +107,9 @@ void NavImageWidget::setImage(QImage fullImage)
 
 	m_ui->globalImageLabel->setPixmap( m_displayImage );
 
-	on_zoomFitButton_clicked();
+	// reset zoom scale
+	m_zoom_scale = 0;
+
 }
 
 void NavImageWidget::setImageFile(const QString & imagePath)
