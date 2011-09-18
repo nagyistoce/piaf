@@ -27,6 +27,7 @@
 #include "metadatawidget.h"
 #include "ui_metadatawidget.h"
 
+#include <sstream>
 // Read metadata
 #include <exiv2/image.hpp>
 #include <exiv2/exif.hpp>

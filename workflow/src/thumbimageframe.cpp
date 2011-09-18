@@ -34,6 +34,8 @@ ThumbImageFrame::ThumbImageFrame(QWidget *parent) :
 {
 	m_ui->setupUi(this);
 	mpTwin = NULL;
+        mCtrl = mShift = false;
+
 	setSelected( false );
 }
 

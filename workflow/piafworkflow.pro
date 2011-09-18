@@ -187,12 +187,10 @@ SOURCES += \
 	$$LEGACYPATH/tools/src/SwFilters.cpp \
 	$$LEGACYPATH/tools/src/workshopimagetool.cpp \
 	$$LEGACYPATH/tools/src/videoplayertool.cpp \
-	$$LEGACYPATH/acquisitions/video/src/v4lutils.c \
 	$$LEGACYPATH/acquisitions/video/src/FileVideoAcquisition.cpp \
 	$$LEGACYPATH/acquisitions/video/src/videocapture.cpp \
 	$$LEGACYPATH/acquisitions/video/src/swvideodetector.cpp \
 	$$LEGACYPATH/acquisitions/video/src/uvccolor.c \
-	$$LEGACYPATH/acquisitions/video/src/jdatasrc.c \
 	$$LEGACYPATH/tools/src/swtoolmainwindow.cpp \
 	$$LEGACYPATH/tools/src/OpenCVEncoder.cpp \
 	$$LEGACYPATH/tools/src/moviebookmarkform.cpp \
@@ -202,7 +200,11 @@ SOURCES += \
 	$$LEGACYPATH/tools/src/batchfiltersmainwindow.cpp \
 	$$LEGACYPATH/tools/src/vidacqsettingswindow.cpp \
 	$$LEGACYPATH/src/imagewidget.cpp
-
+linux-g++: {
+	SOURCES += $$LEGACYPATH/acquisitions/video/src/v4lutils.c \
+        	$$LEGACYPATH/acquisitions/video/src/jdatasrc.c  
+	HEADERS += $$LEGACYPATH/acquisitions/video/inc/v4lutils.h
+}
 # Replaced by OpenCVEncoder.cpp
 # tools/src/FFMpegEncoder.cpp
 #    tools/src/SwMpegEncoder.cpp \
@@ -223,8 +225,9 @@ SOURCES += \
 # acquisitions/video/src/utils.c \
 # acquisitions/video/src/color.c \
 # acquisitions/video/src/avilib.c \
-# acquisitions/video/src/V4L2Device.cpp \
-linux-g++:exists(/usr/lib/gcc/x86_64-linux-gnu) {
+# acquisitions/video/src/V4L2Device.cpp 
+
+linux-g++: exists(/usr/lib/gcc/x86_64-linux-gnu) {
 	message( "64bit CPU => use C function for YUV conversion" )
 	SOURCES += $$LEGACYPATH/acquisitions/video/src/ccvt_c.c
 }
@@ -263,7 +266,6 @@ HEADERS += $$LEGACYPATH/inc/workshop.h \
 	$$LEGACYPATH/tools/inc/videoplayertool.h \
 	$$LEGACYPATH/tools/inc/OpenCVEncoder.h \
 	$$LEGACYPATH/tools/inc/moviebookmarkform.h \
-	$$LEGACYPATH/acquisitions/video/inc/v4lutils.h \
 	$$LEGACYPATH/acquisitions/video/inc/ccvt.h \
 	$$LEGACYPATH/acquisitions/video/inc/SwVideoAcquisition.h \
 	$$LEGACYPATH/acquisitions/video/inc/FileVideoAcquisition.h \

@@ -24,6 +24,7 @@
 #ifndef IMAGEINFO_H
 #define IMAGEINFO_H
 
+#include <sstream>
 #include "imgutils.h"
 
 #ifndef MAX_PATH_LEN
