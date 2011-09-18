@@ -26,6 +26,7 @@
 #include <QStringList>
 #include <QBuffer>
 #include <QFileInfo>
+#include <sstream>
 
 #include "imageinfo.h"
 

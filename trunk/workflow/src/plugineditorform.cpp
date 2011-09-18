@@ -148,8 +148,8 @@ void PluginEditorForm::on_filterSequencer_signalFilterDied(PiafFilter * filter)
 	if(!filter) return;
 
 	// Display message
-	QMessageBox::warning(NULL, tr("Plugin ") + filter->exec_name + tr(" crashed"),
-						 tr("The plugin ") + filter->exec_name
+	QMessageBox::warning(NULL, tr("Plugin ") + QString(filter->exec_name) + tr(" crashed"),
+						 tr("The plugin ") + QString(filter->exec_name)
 						 + tr(" crashed. It will not be reloaded automatically to let you correct the bug.")
 						 );
 	fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);

@@ -25,7 +25,7 @@
 //#include <stdlib.h>
 //#include <stdio.h>
 
-
+#include <sstream>
 #include "emamainwindow.h"
 #include "ui_emamainwindow.h"
 
