@@ -144,9 +144,6 @@ void ccvt_yuyv_rgb32(int width, int height, void *src, void *dst) {
 
 void ccvt_yuyv_bgr32(int width, int height, void *src, void *dst) 
 {
-	fprintf(stderr, "%s %s:%d : not implemented !\n", __FILE__, __func__, __LINE__);
-//NOT_IMPLEMENTED
-	// FAKE : use only Y
 	int pos;
 	unsigned char * src_8u = (unsigned char *) src;
 	unsigned char * dst_8u = (unsigned char *) dst;
