@@ -112,6 +112,8 @@ public:
 	/** contains the implementation for printing functionality and gets called by MultiVideoApp::slotFilePrint() */
 	void print(QPrinter *pPrinter);
 
+	WorkshopImageTool * getDetailsView() { return detailsView; }
+
 	void setWorkspace(QWorkspace * wksp);
 protected:
 	virtual void closeEvent(QCloseEvent*);

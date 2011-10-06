@@ -855,8 +855,8 @@ void WorkshopApp::createVideoCaptureView(VideoCaptureDoc * va)
 	}
 	vcv->setWorkspace(pWorkspace);
 
-	connect(vcv, SIGNAL(ImageSaved(QImage *)), this, SLOT(slotSnapShot(QImage *)));
-	connect(vcv, SIGNAL(VideoSaved(char *)), this, SLOT(slotMovieCapture(char *)));
+	connect(vcv->getDetailsView(), SIGNAL(ImageSaved(QImage *)), this, SLOT(slotSnapShot(QImage *)));
+	connect(vcv->getDetailsView(), SIGNAL(VideoSaved(char *)), this, SLOT(slotMovieCapture(char *)));
 
 	// install event filter on close event
 	vcv->display()->installEventFilter(this);
@@ -1604,6 +1604,11 @@ void WorkshopApp::slotDelMeasureOnTool(int param)
 void WorkshopApp::slotSnapShot(QImage * image)
 {
 	statusBar()->message(tr("Snapshot!"));
+	fprintf(stderr, "WorkshopApp::%s:%d : received image snap (%dx%dx%d) !\n",
+			__func__, __LINE__,
+			image->width(), image->height(),
+			image->depth()
+			);
 	//printf("Snapshot!!\n");
 	WorkshopImage *pWi;
 	QString snapShotName;
@@ -1612,6 +1617,12 @@ void WorkshopApp::slotSnapShot(QImage * image)
 	do {
 		snapShotName = QString("snapshot%1").arg(long(untitledSnapShotCount));
 		fi.setFile(g_imageDirName + "/" + snapShotName + ".png");
+		fprintf(stderr, "WorkshopApp::%s:%d : tray saving image snap (%dx%dx%d) in '%s'\n",
+				__func__, __LINE__,
+				image->width(), image->height(),
+				image->depth(),
+				fi.absoluteFilePath().toAscii().data()
+				);
 
 		untitledSnapShotCount++;
 	} while(fi.exists());
