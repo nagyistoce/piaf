@@ -56,21 +56,7 @@
         <number>1</number>
        </property>
        <item>
-        <widget class="QScrollArea" name="scrollArea">
-         <property name="widgetResizable">
-          <bool>true</bool>
-         </property>
-         <widget class="QWidget" name="scrollAreaWidgetContents">
-          <property name="geometry">
-           <rect>
-            <x>0</x>
-            <y>0</y>
-            <width>342</width>
-            <height>181</height>
-           </rect>
-          </property>
-         </widget>
-        </widget>
+        <widget class="PluginSettingsWidget" name="pluginSettingsWidget" native="true"/>
        </item>
       </layout>
      </widget>
@@ -451,6 +437,12 @@
    <class>TimeHistogramWidget</class>
    <extends>QWidget</extends>
    <header>timehistogramwidget.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>PluginSettingsWidget</class>
+   <extends>QWidget</extends>
+   <header>pluginsettingswidget.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

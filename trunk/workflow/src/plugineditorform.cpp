@@ -380,25 +380,29 @@ LoadedPluginTreeWidgetItem::LoadedPluginTreeWidgetItem(QTreeWidget * treeWidget,
 	QString str1, str2;
 
 	if(pFilter->isEnabled()) {
-		icon1 = QIcon(":/icons/16x16/page-zoom.png");
+		icon1 = QIcon(":/icons/icons/16x16/network-connect.png");
 		str1 = "T";
 	} else {
-		icon1 = QIcon(":/icons/16x16/edit-delete.png");
+		icon1 = QIcon(":/icons/icons/16x16/network-disconnect.png");
 		str1 = "F";
 	}
-	setIcon(1, icon1);
-	setText(1, str1);
+	if(!icon1.isNull())
+		setIcon(1, icon1);
+	else
+		setText(1, str1);
 
 	if(pFilter->isFinal()) {
-		icon2 = QIcon(":/icons/16x16/page-zoom.png");
+		icon2 = QIcon(":/images/16x16/layer-visible-on.png");
 		str2 = "T";
 	}
 	else
 	{
 		str2 = "";
 	}
-	setIcon(2, icon2);
-	setText(2, str2);
+	if(!icon2.isNull())
+		setIcon(2, icon2);
+	else
+		setText(2, str2);
 
 }
 
@@ -485,6 +489,7 @@ void PluginEditorForm::on_paramsButton_clicked()
 
 void PluginEditorForm::on_activateButton_clicked()
 {
+	if(ui->selectedPluginsTreeWidget->selectedItems().isEmpty()) { return; }
 	LoadedPluginTreeWidgetItem * item =
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
 	if(!item) { return; }
@@ -527,9 +532,20 @@ void PluginEditorForm::on_downButton_clicked()
 {
 
 }
+void PluginEditorForm::on_pluginSettingsWidget_selectedFilterChanged()
+{
+	fprintf(stderr, "PluginEditorForm::%s:%d : update !\n", __func__, __LINE__);
+	if(mpFilterSequencer)
+	{
+		mpFilterSequencer->update();
+	}
+}
 
 void PluginEditorForm::on_selectedPluginsTreeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
+	LoadedPluginTreeWidgetItem * loaded =
+			(LoadedPluginTreeWidgetItem *)item;
+	ui->pluginSettingsWidget->setPiafFilter(loaded->getFilter());
 
 }
 

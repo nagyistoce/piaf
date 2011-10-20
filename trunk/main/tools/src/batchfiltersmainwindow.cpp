@@ -72,7 +72,8 @@ BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
 #define BATCHSETTING_LASTPLUGINDIR "batch.lastPluginDir"
 #define BATCHSETTING_LASTFILEDIR "batch.lastFileDir"
 
-void BatchFiltersMainWindow::loadSettings() {
+void BatchFiltersMainWindow::loadSettings()
+{
 	// overwrite with batch settings
 	QString entry = mSettings.readEntry(BATCHSETTING_LASTPLUGINDIR);
 	if(!entry.isNull())

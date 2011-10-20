@@ -64,8 +64,8 @@ int main(int argc, char *argv[])
 	QLocale localLang;
 
 #ifdef xxLINUX
-	g_application_path = QString("/usr/share/tamanoir");
-	QDir dir("/usr/share/tamanoir");
+	g_application_path = QString("/usr/share/piaf");
+	QDir dir("/usr/share/piaf");
 #else
 	QDir dir(QApplication::applicationDirPath());
 	QString g_application_path = QApplication::applicationDirPath();

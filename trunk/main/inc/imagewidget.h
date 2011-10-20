@@ -167,6 +167,13 @@ signals:
 		@param coordinates of rect in original image reference
 	 */
 	void signalZoomRect(QRect cropRect);
+
+private slots:
+	void slot_shortcut_in_activated();
+	void slot_shortcut_out_activated();
+	void slot_shortcut_1_activated();
+	void slot_shortcut_fit_activated();
+
 protected:
 	virtual void focusInEvent ( QFocusEvent * event );
 	virtual void focusOutEvent ( QFocusEvent * event );

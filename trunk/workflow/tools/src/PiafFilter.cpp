@@ -552,6 +552,10 @@ PiafFilter * FilterSequencer::addFilter(PiafFilter * filter)
 
 	return newFilter;
 }
+void FilterSequencer::update()
+{
+	emit selectedFilterChanged();
+}
 
 /* Set final plugin in sequence: the next plugins won't be processed */
 void FilterSequencer::setFinal(PiafFilter * filter)
@@ -2304,4 +2308,100 @@ int PiafFilter::treatFrame(char *frame, int framesize)
 	}
 
 	return 0;
+}
+
+
+
+swFunctionDescriptor * PiafFilter::getFunctionDescriptor()
+{
+	// Add an item for each param
+	// ---- ask plugin process for parameters values ----
+	char txt[1024];
+	sprintf(txt, SWFRAME_ASKFUNCTIONDESC "\t%d", indexFunction);
+	// send function
+	if(waitForUnlock(1000)) {
+		lockComm();
+		sendRequest(txt);
+		// wait for answer then draw widgets
+		if( ! waitForAnswer(1000) )
+		{
+			fprintf(stderr, "PiafFilter::%s:%d : Error : Plugin does not answer.\n",
+					__func__, __LINE__);
+			unlockComm();
+			return NULL;
+		}
+		unlockComm(); // unlock communication pipes
+	}
+
+	// ---- generate automatically the interface (text+combo) ---
+	swFunctionDescriptor * func = &(funcList[indexFunction]);
+	return func;
+}
+
+
+/*
+ * Send current params to plugin
+ */
+int PiafFilter::sendParams()
+{
+	swFunctionDescriptor * func = &(funcList[indexFunction]);
+	if(!func) { return -1; }
+
+	// send params to plugin
+	char txt[4096];
+	sprintf(txt, "%d", func->nb_params);
+
+	// ask for parameters values
+	sprintf(txt, SWFRAME_SETFUNCTIONDESC "\t%d" // function index
+			"\t%s" // function name
+			"\t%d" // number of params
+			"\t",
+			indexFunction,
+			func->name,
+			func->nb_params
+			);
+	char par[2048]="";// big buffer because may be an accumulation of many strings
+
+	if(func->param_list)
+	{
+		for(int i=0; i < func->nb_params; i++)
+		{
+			if(func->param_list[i].type == swStringList)
+			{
+				swStringListStruct *s = (swStringListStruct *)func->param_list[i].value;
+				fprintf(stderr, "[PiafFilter]::%s:%d : stringList s=%p->curitem = %d\n",
+						__func__, __LINE__, s, s->curitem);
+
+			}
+			swGetStringValueFromType(func->param_list[i].type,
+									 func->param_list[i].value,
+									 par);
+			fprintf(stderr, "\t%s:%d\tparam[%d]:'%s' => val=%p='%s'\n",
+					__func__, __LINE__, i,
+					func->param_list[i].name,
+					func->param_list[i].value,
+					par);
+
+			sprintf(txt,"%s" // old text
+						"%s\t%c\t%s\t", // param : name \t type \t value \t
+						txt,
+						func->param_list[i].name,
+						func->param_list[i].type,
+						par
+						);
+		}
+	}
+
+	// send function
+	if(waitForUnlock(1000)) {
+		lockComm();
+		PIAF_MSG(SWLOG_INFO, "Sending message '%s' to plugin", txt);
+		sendRequest(txt);
+		unlockComm();
+		return 0;
+	}
+
+	PIAF_MSG(SWLOG_INFO, "Wait for unlock failed");
+
+	return -1;
 }

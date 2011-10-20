@@ -71,28 +71,28 @@ void MetadataWidget::setImageInfo(t_image_info_struct * p_image_info_struct)
 
 //	DEBUG_MSG("p_image_info_struct=%p / FIXME : disabled", p_image_info_struct);
 //	DEBUG_MSG("model='%s'", p_image_info_struct->model.toAscii().data());
-	m_ui->makerLineEdit->setText(p_image_info_struct->model);
+	m_ui->makerLineEdit->setText(p_image_info_struct->exif.model);
 
 	// Orientation
 	//exifMaker = exifData["Exif.Image.Orientation"]; str = exifMaker.toString();
 	//displayStr = QString::fromStdString(str);
 	//m_image_info_struct.orientation = (char)( displayStr.contains("0") ? 0 : 1);
-	displayStr.sprintf("%d", (int)p_image_info_struct->orientation);
+	displayStr.sprintf("%d", (int)p_image_info_struct->exif.orientation);
 	m_ui->orientationLineEdit->setText(displayStr);
 
 	// DateTime
 	//exifMaker = exifData["Exif.Photo.DateTimeOriginal"]; str = exifMaker.toString();
-	m_ui->dateLineEdit->setText( p_image_info_struct->datetime );
+	m_ui->dateLineEdit->setText( p_image_info_struct->exif.datetime );
 
 	// Focal
 	//exifMaker = exifData["Exif.Photo.FocalLengthIn35mmFilm"]; str = exifMaker.toString();
-	if(p_image_info_struct->focal_mm > 0) {
+	if(p_image_info_struct->exif.focal_mm > 0) {
 		//exifMaker = exifData["Exif.Photo.FocalLength"]; str = exifMaker.toString();
 		//	displayStr.sprintf("%d", (int)p_image_info_struct->orientation);displayStr = QString::fromStdString(str);
-		displayStr.sprintf("%g", p_image_info_struct->focal_mm);
+		displayStr.sprintf("%g", p_image_info_struct->exif.focal_mm);
 
-	} else if(p_image_info_struct->focal_eq135_mm > 0) {
-		displayStr.sprintf("%g", p_image_info_struct->focal_eq135_mm );
+	} else if(p_image_info_struct->exif.focal_eq135_mm > 0) {
+		displayStr.sprintf("%g", p_image_info_struct->exif.focal_eq135_mm );
 
 		displayStr += tr("eq. 35mm");
 	} else displayStr = "??";
@@ -103,18 +103,18 @@ void MetadataWidget::setImageInfo(t_image_info_struct * p_image_info_struct)
 	//exifMaker = exifData["Exif.Photo.FNumber"]; str = exifMaker.toString();
 	//displayStr = QString::fromStdString(str);
 	//m_image_info_struct.aperture = rational_to_float(displayStr);
-	displayStr.sprintf("%g", p_image_info_struct->aperture );
+	displayStr.sprintf("%g", p_image_info_struct->exif.aperture );
 	m_ui->apertureLineEdit->setText(displayStr);
 
 	// Speed
 	//exifMaker = exifData["Exif.Photo.ExposureTime"]; str = exifMaker.toString();
 	//displayStr = QString::fromStdString(str);
 	//m_image_info_struct.speed_s = rational_to_float(displayStr);
-	if(p_image_info_struct->speed_s > 0) {
-		if(p_image_info_struct->speed_s < 1.f)
-			displayStr.sprintf("1/%d s", (int)(1.f/p_image_info_struct->speed_s) );
+	if(p_image_info_struct->exif.speed_s > 0) {
+		if(p_image_info_struct->exif.speed_s < 1.f)
+			displayStr.sprintf("1/%d s", (int)(1.f/p_image_info_struct->exif.speed_s) );
 		else
-			displayStr.sprintf("%g s", (p_image_info_struct->speed_s) );
+			displayStr.sprintf("%g s", (p_image_info_struct->exif.speed_s) );
 	}
 	else displayStr = "??";
 
@@ -122,7 +122,7 @@ void MetadataWidget::setImageInfo(t_image_info_struct * p_image_info_struct)
 
 	// ISO
 //	exifMaker = exifData["Exif.Photo.ISOSpeedRatings"]; str = exifMaker.toString();
-	displayStr.sprintf("%d", p_image_info_struct->ISO);
+	displayStr.sprintf("%d", p_image_info_struct->exif.ISO);
 //		displayStr = rational(displayStr);
 //	m_image_info_struct.ISO = (int)rational_to_float(displayStr);
 	m_ui->isoLineEdit->setText(displayStr);

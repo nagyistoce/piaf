@@ -64,11 +64,13 @@ ImageInfo::~ImageInfo() {
 	purge(); // delete images (should be already done)
 
 }
+
 void ImageInfo::purgeThumbs() {
-	// the image themselves will be deleted in purgeScaled
+	// just set the pointer to null, the image themselves will be deleted in purgeScaled
 	m_image_info_struct.thumbImage.iplImage =
 			m_image_info_struct.sharpnessImage =
-			m_image_info_struct.hsvImage = NULL;			/*! HSV histogram image for faster display */
+			m_image_info_struct.hsvImage = NULL;
+
 	tmReleaseImage(&m_thumbImage);
 	tmReleaseImage(&m_sharpnessImage);
 	tmReleaseImage(&m_ColorHistoImage);
@@ -94,12 +96,12 @@ void clearImageInfoStruct(t_image_info_struct * pinfo)
 
 //			QString datetime;	/*! Date/time of the shot */
 
-	pinfo->orientation = 0;			/*! Image orientation : 0 for horizontal (landscape), 1 for vertical (portrait) */
-	pinfo->focal_mm = 				/*! Real focal in mm */
-			pinfo->focal_eq135_mm =		/*! 135mm equivalent focal in mm (if available) */
-			pinfo->aperture =				/*! F Number */
-			pinfo->speed_s = 0.f;				/*! Speed = shutter opening time in seconds */
-	pinfo->ISO = 0;					/*! ISO Sensitivity */
+	pinfo->exif.orientation = 0;			/*! Image orientation : 0 for horizontal (landscape), 1 for vertical (portrait) */
+	pinfo->exif.focal_mm = 				/*! Real focal in mm */
+			pinfo->exif.focal_eq135_mm =		/*! 135mm equivalent focal in mm (if available) */
+			pinfo->exif.aperture =				/*! F Number */
+			pinfo->exif.speed_s = 0.f;				/*! Speed = shutter opening time in seconds */
+	pinfo->exif.ISO = 0;					/*! ISO Sensitivity */
 
 //			// IPTC TAGS
 //		// Ref: /usr/share/doc/libexiv2-doc/html/tags-iptc.html
@@ -298,19 +300,19 @@ int ImageInfo::readMetadata(QString filename) {
 
 		Exiv2::Exifdatum& exifMaker = exifData["Exif.Image.Make"];
 		std::string str = exifMaker.toString();
-		m_image_info_struct.maker = QString::fromStdString(str);
+		m_image_info_struct.exif.maker = QString::fromStdString(str);
 
 		exifMaker = exifData["Exif.Image.Model"];str = exifMaker.toString();
-		m_image_info_struct.model = QString::fromStdString(str);
+		m_image_info_struct.exif.model = QString::fromStdString(str);
 
 		// DateTime
 		exifMaker = exifData["Exif.Photo.DateTimeOriginal"]; str = exifMaker.toString();
-		m_image_info_struct.datetime = QString::fromStdString(str);
+		m_image_info_struct.exif.datetime = QString::fromStdString(str);
 
 		// Orientation
 		exifMaker = exifData["Exif.Image.Orientation"]; str = exifMaker.toString();
 		displayStr = QString::fromStdString(str);
-		m_image_info_struct.orientation = (char)( displayStr.contains("0") ? 0 : 1);
+		m_image_info_struct.exif.orientation = (char)( displayStr.contains("0") ? 0 : 1);
 
 
 		// Focal
@@ -324,11 +326,11 @@ int ImageInfo::readMetadata(QString filename) {
 
 			//bool ok;
 			//displayStr = rational(displayStr);
-			m_image_info_struct.focal_mm = rational_to_float(displayStr);
-			m_image_info_struct.focal_eq135_mm = -1.f;
+			m_image_info_struct.exif.focal_mm = rational_to_float(displayStr);
+			m_image_info_struct.exif.focal_eq135_mm = -1.f;
 		} else {
-			m_image_info_struct.focal_eq135_mm = rational_to_float(displayStr);
-			m_image_info_struct.focal_mm = -1.f;
+			m_image_info_struct.exif.focal_eq135_mm = rational_to_float(displayStr);
+			m_image_info_struct.exif.focal_mm = -1.f;
 
 			displayStr += QString("eq. 35mm");
 		}
@@ -336,33 +338,33 @@ int ImageInfo::readMetadata(QString filename) {
 			fprintf(stderr, "\t[ImageInfo %p]::%s:%d: Focal : '%s' => %g s %g 35mm\n",
 					this, __func__, __LINE__,
 					displayStr.toUtf8().data(),
-					m_image_info_struct.focal_mm,
-					m_image_info_struct.focal_eq135_mm);
+					m_image_info_struct.exif.focal_mm,
+					m_image_info_struct.exif.focal_eq135_mm);
 		}
 
 		// Aperture
 		exifMaker = exifData["Exif.Photo.FNumber"];
 		str = exifMaker.toString();
 		displayStr = QString::fromStdString(str);
-		m_image_info_struct.aperture = rational_to_float(displayStr);
+		m_image_info_struct.exif.aperture = rational_to_float(displayStr);
 
 		// Speed
 		exifMaker = exifData["Exif.Photo.ExposureTime"];
 		str = exifMaker.toString();
 		displayStr = QString::fromStdString(str);
-		m_image_info_struct.speed_s = rational_to_float(displayStr);
+		m_image_info_struct.exif.speed_s = rational_to_float(displayStr);
 		if(g_debug_ImageInfo) {
 			fprintf(stderr, "\t[ImageInfo %p]::%s:%d: Exposure time : '%s' => %g s\n",
 					this, __func__, __LINE__,
-					displayStr.toUtf8().data(), m_image_info_struct.speed_s);
+					displayStr.toUtf8().data(), m_image_info_struct.exif.speed_s);
 		}
 
 		// ISO
 		exifMaker = exifData["Exif.Photo.ISOSpeedRatings"]; str = exifMaker.toString();
 		displayStr = QString::fromStdString(str);
-		m_image_info_struct.ISO = (int)rational_to_float(displayStr);
+		m_image_info_struct.exif.ISO = (int)rational_to_float(displayStr);
 
-		if(0)
+#if 0
 		for (Exiv2::ExifData::const_iterator i = exifData.begin(); i != end; ++i) {
 
 /*			str.sprintf("%d ", i->key());
@@ -387,7 +389,7 @@ int ImageInfo::readMetadata(QString filename) {
 					<< std::dec << i->value()
 					<< "\n";
 		}
-
+#endif
 
 		// IPTC - IPTC - IPTC - IPTC - IPTC - IPTC - IPTC - IPTC - IPTC -
 		Exiv2::IptcData &iptcData = image->iptcData();

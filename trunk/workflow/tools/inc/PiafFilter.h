@@ -61,13 +61,13 @@ public:
 	/** Destructor */
 	~PiafFilter();
 
-	/** close pipe */
+	/** @brief close pipe */
 	int forceCloseConnection();
 
-	/** read child pid */
+	/** @brief read child pid */
 	int getChildPid() { return childpid; };
 
-	/** wait until communication locked flag is down */
+	/** @brief wait until communication locked flag is down */
 	bool waitForUnlock(int timeout_ms);
 
 	/** @brief Return function descriptor */
@@ -75,6 +75,9 @@ public:
 
 	/** @brief Get index of loaded function */
 	int getIndexFunction() { return indexFunction; }
+
+	/** @brief Send current parameters to plugin processus */
+	int sendParams();
 
 	/** @brief index of loaded function
 	  <0 if not loaded
@@ -122,6 +125,11 @@ public:
 
 	/** @brief Set processing duration in us for statistics */
 	void setTimeUS(int dt_us);
+
+	/** @brief Return description for current function */
+	swFunctionDescriptor * getFunctionDescriptor();
+
+
 private:
 	/// Communication frame
 	swFrame frame;
@@ -151,6 +159,21 @@ private:
 	/// boolean to tell if communication is locked
 	bool comLock;
 
+	/** @brief Lock communication
+	\todo use mutex ?
+	*/
+	void lockComm() { comLock = true; }
+	/** @brief Unlock communication */
+	void unlockComm() { comLock = false; }
+
+	/** send a request to child process
+	*/
+	void sendRequest(char * req);
+	/** wait timeout_ms for an answer on pipeR then cancel
+
+	*/
+	int waitForAnswer(int timeout_ms);
+
 	/// communication buffer
 	char * buffer;
 	// communication pipes
@@ -172,10 +195,7 @@ private:
 
 	/* treat received framebuffer */
 	int treatFrame(char *framebuffer, int framesize);
-	/** send a request to child process */
-	void sendRequest(char * req);
-	/** wait timeout_ms for an answer on pipeR then cancel */
-	int waitForAnswer(int timeout_ms);
+
 
 	/** constructor common part */
 	void init();
@@ -211,6 +231,9 @@ class FilterSequencer : public QObject
 public:
 	FilterSequencer();
 	~FilterSequencer();
+
+	/** @brief Emit a signal to force update of processing */
+	void update();
 
 	/** @brief Unload all loaded filters */
 	void unloadAllLoaded();
