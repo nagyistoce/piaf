@@ -34,7 +34,11 @@
 
 #include "workshopimagetool.h"
 
+/** @brief Structure to define a mapping between a file and a tree item
 
+ Beware: containing objects
+
+  */
 typedef struct _t_file {
 	QString name;
 	QString fullPath;
@@ -43,7 +47,9 @@ typedef struct _t_file {
 
 class EmaMainWindow;
 
-/** \brief Directory tree */
+
+
+/** \brief Directory tree item */
 class DirectoryTreeWidgetItem : QTreeWidgetItem
 {
 //	Q_OBJECT
@@ -74,6 +80,40 @@ private:
 
 
 };
+
+
+/** \brief Collection tree item */
+class CollecTreeWidgetItem : QTreeWidgetItem
+{
+//	Q_OBJECT
+	friend class EmaMainWindow;
+public:
+	CollecTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, QString collecname);
+	CollecTreeWidgetItem(QTreeWidget * treeWidgetParent, QString collecname);
+	~CollecTreeWidgetItem();
+
+	/** \brief Expand contents: read directory contents and display it */
+	void expand();
+	/** \brief collapse contents: collapse directory and clear data */
+	void collapse();
+
+	/** \brief Return true if entry is a file, false if it is a list of collections */
+	bool isFile() { return mIsFile; }
+
+protected:
+	void init(); ///< init internal data and fill nb files
+	void purge(); ///< purge internal data and free memory
+
+	QString mCollecName;
+	bool mIsFile;///< true if the item is a file
+	QTreeWidgetItem * subItem;///< fake item to see the content
+private:
+	QList<CollecTreeWidgetItem *> subCollecsList;
+
+	/// List of files
+	QList<t_file *> filesList;
+};
+
 
 
 namespace Ui
@@ -221,6 +261,9 @@ private slots:
 
 	void on_filesTreeWidget_itemClicked ( QTreeWidgetItem * item, int column );
 	void on_filesTreeWidget_itemDoubleClicked ( QTreeWidgetItem * item, int column );
+	void on_collecAddButton_clicked();
+	void on_collecClearButton_clicked();
+	void on_collecEditButton_clicked();
 };
 
 #endif // EmaMAINWINDOW_H

@@ -75,6 +75,8 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 {
 	ui->setupUi(this);
 	g_splash->showMessage(QObject::tr("Restore settings ..."), Qt::AlignBottom | Qt::AlignHCenter);
+	g_splash->update();
+
 	ui->loadProgressBar->hide();
 
 	connect(&m_timer, SIGNAL(timeout()),
@@ -88,8 +90,7 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	//ui->collecShowCheckBox->setChecked(false);
 	pWorkspace = new QWorkspace(ui->workshopFrame);
 
-	on_actionAbout_activated();
-
+	g_splash->showMessage(QObject::tr("Restore settings ..."), Qt::AlignBottom | Qt::AlignHCenter);
 	loadSettings();
 
 	mWorkImage.load(":icons/ema-splash.png");
@@ -106,12 +107,16 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	pWorkshopImageTool = NULL;
 
 	g_splash->showMessage(QObject::tr("Load plugins ..."), Qt::AlignBottom | Qt::AlignHCenter);
+	g_splash->repaint();
 	ui->mainDisplayWidget->setFilterSequencer(
 			ui->pluginManagerForm->createFilterSequencer()
 			);
 
 	// FIXME : use last page saved in settings
 	ui->stackedWidget->setCurrentIndex(0);
+
+	// Default on file tree // FIXME: use last saved setting
+	ui->inputsTabWidget->setCurrentIndex(0);
 
 	// Hide splash
 	if(g_splash)
@@ -993,4 +998,148 @@ void EmaMainWindow::on_globalNavImageWidget_signalZoomOn(int x, int y, int scale
 void EmaMainWindow::on_actionClean_activated()
 {
 	ui->pluginManagerForm->cleanAllPlugins();
+}
+
+
+/******************************************************************************
+
+				COLLECTIONS
+
+  *****************************************************************************/
+
+
+void EmaMainWindow::on_collecAddButton_clicked()
+{
+
+}
+
+
+void EmaMainWindow::on_collecClearButton_clicked()
+{
+
+}
+
+void EmaMainWindow::on_collecEditButton_clicked()
+{
+
+}
+
+
+
+
+
+
+
+
+/*
+QStringList CollecTreeWidgetItem::getFileList()
+{
+	QStringList fileList;
+
+	fileList.append(directoryFileScan(fullPath));
+
+	return fileList;
+}
+
+void CollecTreeWidgetItem::expand()
+{
+	QDir dir(fullPath);
+	QFileInfoList fiList = dir.entryInfoList();
+	QFileInfoList::iterator it;
+	for(it = fiList.begin(); it != fiList.end(); ++it)
+	{
+		QFileInfo fi = (*it);
+		if(fi.isFile() && fi.absoluteFilePath().length() > fullPath.length())
+		{
+			EMAMW_printf(EMALOG_TRACE, "\tadding FILE '%s'\n",
+					fi.absoluteFilePath().toAscii().data());
+
+
+			// Add item for file
+			t_file * new_file = new t_file;
+			new_file->name = fi.baseName();
+			new_file->fullPath = fi.absoluteFilePath();
+
+			//QStringList columns; columns << new_file->name;
+
+			new_file->treeViewItem = new DirectoryTreeWidgetItem(
+					this,
+					new_file->fullPath);
+		}
+		else if(fi.isDir() && fi.absoluteFilePath().length() > fullPath.length())
+		{
+			EMAMW_printf(EMALOG_TRACE, "adding subdir '%s'\n",
+					fi.absoluteFilePath().toAscii().data());
+
+			subDirsList.append(
+					new DirectoryTreeWidgetItem(this,
+							fi.absoluteFilePath())
+					);
+		}
+	}
+
+	// delete fake "waiting" item
+	if(subItem) {
+		removeChild( subItem );
+		delete subItem;
+		subItem = NULL;
+	}
+
+}
+*/
+
+CollecTreeWidgetItem::CollecTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent,
+										   QString collecname)
+	: QTreeWidgetItem(treeWidgetItemParent),
+	mCollecName(collecname)
+{
+	init();
+}
+
+CollecTreeWidgetItem::CollecTreeWidgetItem(QTreeWidget * treeWidgetParent,
+										   QString collecname)
+	: QTreeWidgetItem(treeWidgetParent),
+	mCollecName(collecname)
+{
+	init();
+}
+
+CollecTreeWidgetItem::~CollecTreeWidgetItem()
+{
+	purge();
+}
+
+void CollecTreeWidgetItem::init()
+{
+	setText(0, mCollecName);
+	subItem = NULL;
+	mIsFile = false;
+
+/*	if(fi.isDir()) {
+		nb_files = 0;
+		scanDirectory(fullPath, &nb_files);
+
+		setText(1, QString::number(nb_files));
+
+		if(nb_files > 0) {
+			// Add fake sub item "waiting"
+			QStringList columns;
+			columns.clear();
+			columns << "...";
+
+			subItem = new QTreeWidgetItem(this, columns);
+		}
+	}
+	else if(fi.isFile())
+	{
+		mIsFile = true;
+
+		setText(0, fi.baseName());
+		setText(1, fi.extension());
+	}*/
+}
+
+void CollecTreeWidgetItem::purge()
+{
+
 }

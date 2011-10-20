@@ -19,6 +19,7 @@
 #include "piaf-common.h"
 #include <stdio.h>
 #include <QPainter>
+#include <QShortcut>
 
 
 #include <qcolor.h>
@@ -83,6 +84,7 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 	xOrigine = yOrigine = 0;
 	xZoomCenter = yZoomCenter = 0;
 
+	//setFocusPolicy (Qt::StrongFocus);
 	dImage=NULL;
 	ZoomScale = 1;
 	m_colorMode = 0;
@@ -90,6 +92,18 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 
 	mEditMode = EDITMODE_NONE;
 
+	QShortcut * shortcut_in = new QShortcut(QKeySequence(tr("+", "Zoom in")),
+											this);
+	connect(shortcut_in, SIGNAL(activated()), this, SLOT(slot_shortcut_in_activated()));
+	QShortcut * shortcut_out = new QShortcut(QKeySequence(tr("-", "Zoom out")),
+											this);
+	connect(shortcut_out, SIGNAL(activated()), this, SLOT(slot_shortcut_out_activated()));
+	QShortcut * shortcut_fit = new QShortcut(QKeySequence(tr("x", "Zoom fit")),
+											this);
+	connect(shortcut_fit, SIGNAL(activated()), this, SLOT(slot_shortcut_fit_activated()));
+	QShortcut * shortcut_1 = new QShortcut(QKeySequence(tr("1", "Zoom 1:1")),
+											this);
+	connect(shortcut_1, SIGNAL(activated()), this, SLOT(slot_shortcut_1_activated()));
 }
 
 void ImageWidget::setRefImage(QImage *pIm)
@@ -228,17 +242,38 @@ void ImageWidget::setColorMode(int mode)
 
 void ImageWidget::focusInEvent ( QFocusEvent * event )
 {
+	fprintf(stderr, "ImageWidget::%s:%d event=%p\n", __func__, __LINE__, event);
 	grabKeyboard();
 }
 
 void ImageWidget::focusOutEvent ( QFocusEvent * event )
 {
+	fprintf(stderr, "ImageWidget::%s:%d event=%p\n", __func__, __LINE__, event);
 	releaseKeyboard();
 }
 
 void ImageWidget::keyReleaseEvent ( QKeyEvent * event )
 {
 	mShift = mCtrl = false;
+}
+void ImageWidget::slot_shortcut_in_activated()
+{
+	zoomOn(width()/2, height()/2, KEY_ZOOM_INC);
+}
+
+void ImageWidget::slot_shortcut_out_activated()
+{
+	zoomOn(width()/2, height()/2, -KEY_ZOOM_INC);
+}
+void ImageWidget::slot_shortcut_fit_activated()
+{
+	mZoomFitFactor = -1;
+	update();
+}
+void ImageWidget::slot_shortcut_1_activated()
+{
+	setZoomParams(xZoomCenter, yZoomCenter, 1);
+	update();
 }
 
 void ImageWidget::keyPressEvent ( QKeyEvent * event )
@@ -676,8 +711,8 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 
 	if(mZoomFit)
 	{
-		int wdisp = size().width()-2;
-		int hdisp = size().height()-2;
+		int wdisp = size().width();
+		int hdisp = size().height();
 		if(mZoomFitFactor<0.) {
 			mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
 									   (float)hdisp / (float)dImage->height() );
@@ -701,18 +736,19 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 			else {
 				m_displayImage = cropImage.scaled( wdisp, hdisp,
 												   Qt::KeepAspectRatio,
-												   Qt::SmoothTransformation ).copy(cr);
+												   (mZoomFitFactor > 1? Qt::FastTransformation: Qt::SmoothTransformation) ).copy(cr);
 			}
 		}
 
-		p.drawImage(0,0, m_displayImage);
+		p.drawImage(0, 0, m_displayImage);
 	}
 	else
 	{
-		if(cr != this->rect())
+		if(cr != this->rect()) {
 			p.drawImage(0,0, dImage->copy(cr));
-		else
+		} else {
 			p.drawImage(0,0, *dImage);
+		}
 	}
 
 	//#define EDITMODE_ZOOM	0

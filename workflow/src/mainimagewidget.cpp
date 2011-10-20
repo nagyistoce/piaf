@@ -47,7 +47,7 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	mpFilterSequencer = NULL;
 	m_ui->setupUi(this);
 	m_ui->globalImageLabel->switchToSmartZoomMode(true);
-	m_ui->globalImageLabel->grabKeyboard ();
+	//m_ui->globalImageLabel->grabKeyboard ();
 	m_ui->globalImageLabel->setEditMode(EDITMODE_ZOOM);
 
 }
@@ -146,7 +146,7 @@ int MainImageWidget::setImage(QImage imageIn,
 					m_fullImage.width(),
 					m_fullImage.height(),
 					m_fullImage.depth()/8,
-					pinfo->ISO
+					pinfo->exif.ISO
 					);
 		}
 

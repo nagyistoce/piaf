@@ -37,7 +37,8 @@ int g_EMAImgMng_debug_mode = EMALOG_DEBUG;
 
 EmaImageManager * g_EmaImageManager = NULL;
 
-EmaImageManager * emaMngr() {
+EmaImageManager * emaMngr()
+{
 	if(!g_EmaImageManager) {
 		EMAIM_printf(EMALOG_INFO, "Creating main manager...")
 		g_EmaImageManager = new EmaImageManager();

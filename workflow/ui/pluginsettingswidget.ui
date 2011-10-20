@@ -1,0 +1,142 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>PluginSettingsWidget</class>
+ <widget class="QWidget" name="PluginSettingsWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>228</width>
+    <height>243</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>2</number>
+   </property>
+   <property name="margin">
+    <number>1</number>
+   </property>
+   <item>
+    <widget class="QLabel" name="pluginNameLabel">
+     <property name="text">
+      <string>Plugin name</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="pluginPIDLabel">
+     <property name="text">
+      <string>Plugin Pid</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QLabel" name="nbParamsLabel">
+     <property name="toolTip">
+      <string>Number of parameters</string>
+     </property>
+     <property name="text">
+      <string>Nb params</string>
+     </property>
+    </widget>
+   </item>
+   <item>
+    <widget class="QScrollArea" name="scrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="scrollAreaWidgetContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>224</width>
+        <height>150</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <property name="leftMargin">
+        <number>0</number>
+       </property>
+       <property name="topMargin">
+        <number>1</number>
+       </property>
+       <property name="rightMargin">
+        <number>0</number>
+       </property>
+       <property name="bottomMargin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="QWidget" name="paramsWidget" native="true">
+         <layout class="QGridLayout" name="gridLayout">
+          <property name="leftMargin">
+           <number>2</number>
+          </property>
+          <property name="topMargin">
+           <number>1</number>
+          </property>
+          <property name="rightMargin">
+           <number>2</number>
+          </property>
+          <property name="bottomMargin">
+           <number>1</number>
+          </property>
+          <property name="horizontalSpacing">
+           <number>1</number>
+          </property>
+          <item row="0" column="0">
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>No param</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="revertButton">
+       <property name="toolTip">
+        <string>Revert params from plugin</string>
+       </property>
+       <property name="text">
+        <string>Revert</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../main/piaf.qrc">
+         <normaloff>:/images/22x22/edit-undo.png</normaloff>:/images/22x22/edit-undo.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="applyButton">
+       <property name="text">
+        <string>Apply</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../ema.qrc">
+         <normaloff>:/icons/icons/22x22/dialog-ok-apply.png</normaloff>:/icons/icons/22x22/dialog-ok-apply.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../ema.qrc"/>
+  <include location="../../main/piaf.qrc"/>
+ </resources>
+ <connections/>
+</ui>

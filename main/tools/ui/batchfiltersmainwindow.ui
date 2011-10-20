@@ -206,7 +206,7 @@
           <string>Record output image when inputs are still images or movies when inputs are movies</string>
          </property>
          <property name="whatsThis">
-          <string>what's this ?Record output image or movies</string>
+          <string>Record output image or movies</string>
          </property>
          <property name="text">
           <string>Record</string>
@@ -223,7 +223,7 @@
        <item row="0" column="3">
         <widget class="QPushButton" name="greyButton">
          <property name="toolTip">
-          <string>if down, the images will be converted to grayscale befor eprocessing</string>
+          <string>if down, the images will be converted to grayscale before processing</string>
          </property>
          <property name="statusTip">
           <string>Process input files in color or in grayscale: conversion is done before sending the images to plugins</string>

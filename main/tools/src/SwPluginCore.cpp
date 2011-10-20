@@ -1862,6 +1862,8 @@ int swGetStringValueFromType(swType type, // type
 		break;
 	case swStringList: {
 		swStringListStruct *s =(swStringListStruct *)value;
+		fprintf(stderr, "\t" SWPLUGIN_SIDE_PRINT " %s:%d s=%p curitem=%d\n",
+				__func__, __LINE__, s, s->curitem);
 		sprintf(txt, "%d|%d", s->nbitems, s->curitem);
 		for(int i=0; i< s->nbitems;i++) {
 			sprintf(txt, "%s|%s", txt, s->list[i]);
