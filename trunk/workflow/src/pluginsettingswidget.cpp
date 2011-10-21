@@ -87,7 +87,7 @@ void PluginSettingsWidget::updateDisplay()
 	}
 
 
-	swFunctionDescriptor * func = mpPiafFilter->getFunctionDescriptor();
+	swFunctionDescriptor * func = mpPiafFilter->updateFunctionDescriptor();
 
 	if(func)
 	{
@@ -166,7 +166,7 @@ void PluginSettingsWidget::updateDisplay()
 void PluginSettingsWidget::on_applyButton_clicked()
 {
 	if(!mpPiafFilter) { return; }
-	swFunctionDescriptor * func = mpPiafFilter->getFunctionDescriptor();
+	swFunctionDescriptor * func = mpPiafFilter->updateFunctionDescriptor();
 	if(!func) { return; }
 
 	// check if values are coherent with types
@@ -224,5 +224,15 @@ void PluginSettingsWidget::on_applyButton_clicked()
 
 void PluginSettingsWidget::on_revertButton_clicked()
 {
+	// Refresh function descriptor from the plugin
+	swFunctionDescriptor * func = mpPiafFilter->updateFunctionDescriptor();
 
+	int ret = mpPiafFilter->sendParams();
+	if(ret < 0)
+	{
+		QMessageBox::critical(NULL, tr("Plugin error"),
+							  tr("The new parameters could not be sent to plugin."));
+
+	}
+	updateDisplay();
 }

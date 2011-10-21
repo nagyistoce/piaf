@@ -256,10 +256,6 @@ PiafFilter *  FilterSequencer::addFilter(PiafFilter * newFilter, int id)
 	fprintf(stderr, "FilterSequencer::%s:%d : adding filter %p at id=%d\n",
 			__func__ ,__LINE__, newFilter, id);
 
-	if(strlen(mPluginSequenceFile) == 0)
-	{
-		strcat(mPluginSequenceFile, "(custom)");
-	}
 
 	if(id==-1)
 	{
@@ -291,7 +287,24 @@ PiafFilter *  FilterSequencer::addFilter(PiafFilter * newFilter, int id)
 	newFilter->setEnabled(true);
 	setFinal(newFilter);
 
+	connect(newFilter, SIGNAL(signalParamsChanged()), this, SLOT(slot_signalParamsChanged()));
+
+	// save current list
+	strcpy(mPluginSequenceFile, TMP_DIRECTORY "customseq.flist");
+	saveSequence(mPluginSequenceFile);
+
 	return newFilter;
+}
+
+void FilterSequencer::slot_signalParamsChanged()
+{
+	// save current list in temp sequence file
+	strcpy(mPluginSequenceFile, TMP_DIRECTORY "customseq.flist");
+
+	fprintf(stderr, "[FilterSequencer]::%s:%d : params changed ! save tmp sequence as '%s'\n",
+			__func__, __LINE__, mPluginSequenceFile);
+
+	saveSequence(mPluginSequenceFile);
 }
 
 // get filter pointer from id.
@@ -544,7 +557,7 @@ PiafFilter * FilterSequencer::addFilter(PiafFilter * filter)
 	setFinal(newFilter);
 
 	connect(newFilter, SIGNAL(signalDied(int)), this, SLOT(slotFilterDied(int)));
-
+//signalParams
 //FIXME	newFilter->enabled = true;
 
 	fprintf(stderr, "[FilterSequencer]::%s:%d : ADDED!!!\n", __func__, __LINE__);
@@ -552,6 +565,7 @@ PiafFilter * FilterSequencer::addFilter(PiafFilter * filter)
 
 	return newFilter;
 }
+
 void FilterSequencer::update()
 {
 	emit selectedFilterChanged();
@@ -1230,7 +1244,8 @@ int FilterSequencer::saveSequence(char * filename)
 	}
 
 	QList<PiafFilter *>::iterator it;
-	for(it = mLoadedFiltersList.begin(); it != mLoadedFiltersList.end(); ++it) {
+	int idx = 0;
+	for(it = mLoadedFiltersList.begin(); it != mLoadedFiltersList.end(); ++it, ++idx) {
 		PiafFilter * filter = (*it);
 		// process
 #ifdef __SWPLUGIN_DEBUG__
@@ -1240,18 +1255,32 @@ int FilterSequencer::saveSequence(char * filename)
 		fprintf(f, "%s\t%d\n",
 				filter->exec_name,
 				filter->indexFunction);
-		// --- read parameters
+		// --- read parameters from plugin
 		// send request and wait for answer
 		filter->sendRequest(SWFRAME_ASKFUNCTIONDESC);
 
 		// then save reply string
-		char txt[256];
+		char txt[1024]="";
 		if(filter->pipeR) {
-			fgets(txt, 256, filter->pipeR);
+			char * ret = fgets(txt, 1023, filter->pipeR);
+			if(ret)
+			{
 #ifdef __SWPLUGIN_DEBUG__
-			fprintf(stderr, "slotSave : read answer '%s'\n", txt);
+				fprintf(stderr, "[PluginSequencer]::%s:%d : read params "
+						"from plugin [%d]:'%s' : params='%s'\n",
+						__func__, __LINE__,
+						idx, filter->name(),
+						txt);
 #endif
-			fprintf(f, "%s", txt);
+				fprintf(f, "%s", txt);
+			}
+			else
+			{
+				fprintf(stderr, "[PluginSequencer]::%s:%d : could not read answer "
+						"from plugin [%d]:'%s'\n",
+						__func__, __LINE__,
+						idx, filter->name());
+			}
 		}
 	}
 
@@ -2312,7 +2341,7 @@ int PiafFilter::treatFrame(char *frame, int framesize)
 
 
 
-swFunctionDescriptor * PiafFilter::getFunctionDescriptor()
+swFunctionDescriptor * PiafFilter::updateFunctionDescriptor()
 {
 	// Add an item for each param
 	// ---- ask plugin process for parameters values ----
@@ -2398,6 +2427,8 @@ int PiafFilter::sendParams()
 		PIAF_MSG(SWLOG_INFO, "Sending message '%s' to plugin", txt);
 		sendRequest(txt);
 		unlockComm();
+
+		emit signalParamsChanged();
 		return 0;
 	}
 
