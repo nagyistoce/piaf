@@ -127,7 +127,7 @@ public:
 	void setTimeUS(int dt_us);
 
 	/** @brief Return description for current function */
-	swFunctionDescriptor * getFunctionDescriptor();
+	swFunctionDescriptor * updateFunctionDescriptor();
 
 
 private:
@@ -205,6 +205,10 @@ private:
 signals:
 	/** emitted when child died */
 	void signalDied(int pid);
+
+	/** emitted when parameters have been changed on filter (by GUI user) */
+	void signalParamsChanged();
+
 };
 
 
@@ -351,6 +355,7 @@ public:
 protected slots:
 
 	void slotFilterDied(int);
+	void slot_signalParamsChanged();
 
 signals:
 	void selectedFilterChanged();
