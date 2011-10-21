@@ -22,8 +22,12 @@
 #ifndef BASE_DIRECTORY
 #define BASE_DIRECTORY "/usr/local/piaf/"
 #endif
-
-
+#ifndef TMP_DIRECTORY
+#define TMP_DIRECTORY	"/tmp/"
+#endif
+#ifndef SHM_DIRECTORY
+#define SHM_DIRECTORY	"/dev/shm/"
+#endif
 #define EXIT_ON_ERROR fprintf(stderr,"%s (%s:%d) : EXIT - FATAL ERROR !!!!!!!!!!!!!\n",__func__,__FILE__,__LINE__);fflush(stderr);exit(0);
 #define DEBUG_ALL(s) fprintf(stderr, "DEBUG_MSG %s (%s l.%d) '%s'\n",__func__,__FILE__,__LINE__, (s));
 #define PRINT_FIXME fprintf(stderr, "%s : %s:%d FIXME\n", __FILE__, __func__, __LINE__);
