@@ -557,6 +557,7 @@ PiafFilter * FilterSequencer::addFilter(PiafFilter * filter)
 	setFinal(newFilter);
 
 	connect(newFilter, SIGNAL(signalDied(int)), this, SLOT(slotFilterDied(int)));
+	connect(newFilter, SIGNAL(signalParamsChanged()), this, SLOT(slot_signalParamsChanged()));
 //signalParams
 //FIXME	newFilter->enabled = true;
 
@@ -681,7 +682,6 @@ int FilterSequencer::moveDown(PiafFilter * filter)
 	// change order into selectedFiltersList
 	// looking for filer plugin
 
-
 	int idx = mLoadedFiltersList.findIndex(filter);
 	if(idx < 0)
 	{
@@ -695,10 +695,14 @@ int FilterSequencer::moveDown(PiafFilter * filter)
 				__func__, __LINE__);
 		return 0;
 	}
-
+///  \bug FIXME index mismatch
 	// remove then insert at next place
+	PIAF_MSG(SWLOG_INFO, "Remove @ index %d", idx);
 	mLoadedFiltersList.removeAt(idx);
-	mLoadedFiltersList.insert(idx-1, filter);
+	// insert at same place because it's been removed, so the next index will be
+	// one item after
+	PIAF_MSG(SWLOG_INFO, "Insert @ index %d", idx+1);
+	mLoadedFiltersList.insert(idx+1, filter);
 
 	idEditPlugin = mLoadedFiltersList.findIndex(filter);;
 	fprintf(stderr, "FilterSequencer::%s:%d : moved to %d\n",
@@ -1441,7 +1445,11 @@ int FilterSequencer::processImage(swImageStruct * image)
 
 	int global_return = 0;
 
-	if(!lockProcess) {
+	if(lockProcess) {
+		fprintf(stderr, "[FilterSequencer]::%s:%d : process is locked !! do not process\n",
+				__func__, __LINE__);
+
+	} else {
 		lockProcess = true;
 
 		swImageStruct *im1 = image, *im2 = imageTmp;
@@ -1451,6 +1459,9 @@ int FilterSequencer::processImage(swImageStruct * image)
 
 		// Time accumulation in us
 		float total_time_us = 0.f;
+		fprintf(stderr, "[FilterSequencer]::%s:%d : processing %d filters...\n",
+				__func__, __LINE__,
+				mLoadedFiltersList.count());
 
 		if(!mLoadedFiltersList.isEmpty())
 		{
@@ -1461,7 +1472,8 @@ int FilterSequencer::processImage(swImageStruct * image)
 				PiafFilter * pv = (*it);
 				// process
 				if( pv->enabled ) {
-					if(g_debug_FilterSequencer) {
+					//if(g_debug_FilterSequencer)
+					{
 						fprintf(stderr, "FilterSequencer::%s:%d processing filter func[%d]=%s\n",
 								__func__, __LINE__,
 								pv->indexFunction,

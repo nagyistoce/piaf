@@ -226,7 +226,7 @@ void EmaMainWindow::saveSettings()
 	 PIAF_MSG(SWLOG_ERROR, " saved /tmp/settingsout.xml");
 }
 
-void EmaMainWindow::on_appendNewPictureThumb(QString filename)
+void EmaMainWindow::slot_appendNewPictureThumb(QString filename)
 {
 	// update progress
 	appendThumbImage(filename);
@@ -366,10 +366,6 @@ void EmaMainWindow::on_actionAbout_activated()
 }
 
 
-void EmaMainWindow::on_groupBox_7_clicked()
-{
-
-}
 
 void EmaMainWindow::on_zoomx1Button_clicked()
 {
@@ -778,7 +774,7 @@ void EmaMainWindow::on_filesTreeWidget_itemClicked (
 
 	// read image file
 	QString fileName = item->text(0); // col 0 has the full path
-	on_thumbImage_selected( fileName );
+	slot_thumbImage_selected( fileName );
 }
 
 void EmaMainWindow::on_filesTreeWidget_itemDoubleClicked (
@@ -790,7 +786,7 @@ void EmaMainWindow::on_filesTreeWidget_itemDoubleClicked (
 	// read image file
 	if(curdir->isFile()) {
 		QString fileName = curdir->fullPath; // col 0 has the full path
-		on_thumbImage_clicked( fileName );
+		slot_thumbImage_clicked( fileName );
 	} else {
 		// Add all its content recursively
 		appendFileList(curdir->getFileList());
@@ -866,11 +862,11 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 		grid_layout->addWidget( newThumb2, row, col );
 
 		// connect this signal
-		connect(newThumb, SIGNAL(signalThumbClicked(QString)), this, SLOT(on_thumbImage_clicked(QString)));
-		connect(newThumb, SIGNAL(signalThumbSelected(QString)), this, SLOT(on_thumbImage_selected(QString)));
+		connect(newThumb, SIGNAL(signalThumbClicked(QString)), this, SLOT(slot_thumbImage_clicked(QString)));
+		connect(newThumb, SIGNAL(signalThumbSelected(QString)), this, SLOT(slot_thumbImage_selected(QString)));
 		if(newThumb2) {
-			connect(newThumb2, SIGNAL(signalThumbClicked(QString)), this, SLOT(on_thumbImage_clicked(QString)));
-			connect(newThumb2, SIGNAL(signalThumbSelected(QString)), this, SLOT(on_thumbImage_selected(QString)));
+			connect(newThumb2, SIGNAL(signalThumbClicked(QString)), this, SLOT(slot_thumbImage_clicked(QString)));
+			connect(newThumb2, SIGNAL(signalThumbSelected(QString)), this, SLOT(slot_thumbImage_selected(QString)));
 		}
 	}
 }
@@ -884,7 +880,7 @@ void EmaMainWindow::on_mainGroupBox_resizeEvent(QResizeEvent * e) {
 
 
 
-void EmaMainWindow::on_thumbImage_selected(QString fileName)
+void EmaMainWindow::slot_thumbImage_selected(QString fileName)
 {
 	QFileInfo fi(fileName);
 	if(fi.exists()) {
@@ -907,7 +903,7 @@ void EmaMainWindow::on_mainDisplayWidget_signalZoomRect(QRect cropRect)
 //FIXME	ui->globalNavImageWidget->setZoomRect(cropRect);
 }
 
-void EmaMainWindow::on_thumbImage_clicked(QString fileName)
+void EmaMainWindow::slot_thumbImage_clicked(QString fileName)
 {
 	QFileInfo fi(fileName);
 	if(!fi.exists()) {
