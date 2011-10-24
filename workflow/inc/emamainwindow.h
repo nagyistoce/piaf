@@ -217,13 +217,13 @@ private:
 	WorkshopImage * pWorkshopImage;
 	WorkshopImageTool * pWorkshopImageTool;
 public slots:
-	void on_thumbImage_clicked(QString fileName);
-	void on_thumbImage_selected(QString);
+	void slot_thumbImage_clicked(QString fileName);
+	void slot_thumbImage_selected(QString);
 private slots:
 	void on_actionClean_activated();
- void on_actionView_right_column_toggled(bool );
- void on_actionView_left_column_toggled(bool );
- void on_batchPlayerButton_clicked();
+	void on_actionView_right_column_toggled(bool );
+	void on_actionView_left_column_toggled(bool );
+	void on_batchPlayerButton_clicked();
 	void on_filesTreeWidget_itemExpanded(QTreeWidgetItem* item);
 	void on_workspaceButton_clicked();
 	void on_filesShowCheckBox_stateChanged(int);
@@ -231,7 +231,7 @@ private slots:
 	void on_filesClearButton_clicked();
 	void on_zoomx2Button_clicked();
 	void on_zoomx1Button_clicked();
-	void on_groupBox_7_clicked();
+
 
 	void on_gridWidget_signal_resizeEvent(QResizeEvent *);
 
@@ -257,7 +257,7 @@ private slots:
 	void on_actionConvert_images_to_AVI_activated();
 	void on_actionAbout_activated();
 
-	void on_appendNewPictureThumb( QString  );
+	void slot_appendNewPictureThumb( QString  );
 
 	void on_filesTreeWidget_itemClicked ( QTreeWidgetItem * item, int column );
 	void on_filesTreeWidget_itemDoubleClicked ( QTreeWidgetItem * item, int column );

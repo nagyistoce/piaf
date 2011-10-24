@@ -511,8 +511,25 @@ void PluginEditorForm::on_timeButton_clicked()
 void PluginEditorForm::on_upButton_clicked()
 {
 	if(!mpFilterSequencer) return;
+	if(ui->selectedPluginsTreeWidget->selectedItems().isEmpty()) { return; }
+	LoadedPluginTreeWidgetItem * item =
+			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
+	if(!item) { return; }
 
+	mpFilterSequencer->moveUp(item->getFilter());
 }
+
+void PluginEditorForm::on_downButton_clicked()
+{
+	if(!mpFilterSequencer) return;
+	if(ui->selectedPluginsTreeWidget->selectedItems().isEmpty()) { return; }
+	LoadedPluginTreeWidgetItem * item =
+			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
+	if(!item) { return; }
+
+	mpFilterSequencer->moveDown(item->getFilter());
+}
+
 /* Kill all processes running on computer (killall for all exec names) */
 void PluginEditorForm::cleanAllPlugins()
 {
@@ -528,10 +545,7 @@ void PluginEditorForm::cleanAllPlugins()
 	}
 }
 
-void PluginEditorForm::on_downButton_clicked()
-{
 
-}
 void PluginEditorForm::on_pluginSettingsWidget_selectedFilterChanged()
 {
 	fprintf(stderr, "PluginEditorForm::%s:%d : update !\n", __func__, __LINE__);
