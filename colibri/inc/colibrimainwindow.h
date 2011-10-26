@@ -79,6 +79,8 @@ public:
 	void lockDisplay() { mDisplayMutex.lock(); }
 	void unlockDisplay() { mDisplayMutex.unlock(); }
 
+
+
 private:
 	/// Iteration counter
 	int m_iteration;
@@ -174,7 +176,7 @@ private slots:
 	void on_m_timer_timeout();
 
 	void on_grabTimer_timeout();
-
+	void on_gridButton_toggled(bool checked);
 	void on_fullScreenButton_clicked();
 	void on_actionFull_screen_activated();
 

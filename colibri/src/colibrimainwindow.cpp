@@ -813,3 +813,8 @@ void ColibriThread::run()
 
 
 
+
+void ColibriMainWindow::on_gridButton_toggled(bool checked)
+{
+	ui->imageLabel->showGrid( (checked ? 4 : 0) );
+}
