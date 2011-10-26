@@ -690,6 +690,8 @@ int close_v4l2(struct vdIn *vd)
     vd->videodevice = NULL;
     vd->status = NULL;
     vd->pictName = NULL;
+
+	return 0;
 }
 
 /* return >= 0 ok otherwhise -1 */

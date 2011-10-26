@@ -18,14 +18,14 @@ void printVideoProperties(t_video_properties * props)
 	fprintf(stderr, "frame_count=%g, ", props->frame_count);
 	fprintf(stderr, "format=%g, ", props->format);
 	fprintf(stderr, "mode=%g, ", props->mode);
-	fprintf(stderr, "brightness=%g, ", props->brightness);
-	fprintf(stderr, "contrast=%g, ", props->contrast);
-	fprintf(stderr, "saturation=%g, ", props->saturation);
-	fprintf(stderr, "hue=%g, ", props->hue);
-	fprintf(stderr, "gain=%g, ", props->gain);
+	fprintf(stderr, "brightness=%d, ", props->brightness);
+	fprintf(stderr, "contrast=%d, ", props->contrast);
+	fprintf(stderr, "saturation=%d, ", props->saturation);
+	fprintf(stderr, "hue=%d, ", props->hue);
+	fprintf(stderr, "gain=%d, ", props->gain);
 	fprintf(stderr, "exposure=%g, ", props->exposure);
 	fprintf(stderr, "convert_rgb=%g, ", props->convert_rgb);
-	fprintf(stderr, "white_balance=%g, ", props->white_balance);
+	fprintf(stderr, "white_balance=%d, ", props->white_balance);
 
 	fprintf(stderr, " }\n");
 }
