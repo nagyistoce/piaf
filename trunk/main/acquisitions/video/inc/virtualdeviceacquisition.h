@@ -96,7 +96,7 @@ typedef struct {
 	double convert_rgb;		/*!< CV_CAP_PROP_CONVERT_RGB Boolean flags indicating whether images should be converted to RGB */
 	int auto_white_balance;	///< Automatic white balance
 	bool do_white_balance;	///< Perform automatic white balance (will be set to 0 afterwards)
-	double white_balance;	/*!< CV_CAP_PROP_WHITE_BALANCE Currently unsupported */
+	int white_balance;	/*!< CV_CAP_PROP_WHITE_BALANCE Currently unsupported */
 
 	// FOCUS
 	int auto_focus;			/*!< Auto-focus mode : 0=off (manuel), 1=on : V4L2_CID_FOCUS_AUTO */

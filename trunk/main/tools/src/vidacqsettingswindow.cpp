@@ -150,7 +150,7 @@ void VidAcqSettingsWindow::updateVideoProperties()
 		CHANGE_SLIDER(ui->backlightSlider, ui->backlightLabel, m_video_properties.backlight);
 
 		// Exposure values
-		CHANGE_SLIDER(ui->exposureSlider, ui->exposureLabel, m_video_properties.exposure);
+		//CHANGE_SLIDER(ui->exposureSpinBox, ui->exposureLabel, m_video_properties.exposure);
 		CHANGE_SLIDER(ui->gainSlider, ui->gainLabel, m_video_properties.gain);
 
 		CHANGE_COMBO_INDEX(ui->exposureModeComboBox, ui->exposureModeLabel, m_video_properties.auto_exposure);
@@ -188,6 +188,12 @@ void VidAcqSettingsWindow::on_exposureSlider_valueChanged(int value)
 	m_video_properties.exposure = value;
 	sendVideoProperties();
 }
+void VidAcqSettingsWindow::on_exposureSpinBox_valueChanged(int value)
+{
+	m_video_properties.exposure = value;
+	sendVideoProperties();
+}
+
 void VidAcqSettingsWindow::on_gainSlider_valueChanged(int value)
 {
 	m_video_properties.gain = value;
@@ -411,3 +417,5 @@ void VidAcqSettingsWindow::on_backlightSlider_valueChanged(int value)
 	m_video_properties.backlight = value;
 	sendVideoProperties();
 }
+
+

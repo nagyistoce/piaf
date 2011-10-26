@@ -91,6 +91,7 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 	mShift = mCtrl = false;
 
 	mEditMode = EDITMODE_NONE;
+	mGridSteps = 0; // disabled by default
 
 	QShortcut * shortcut_in = new QShortcut(QKeySequence(tr("+", "Zoom in")),
 											this);
@@ -104,6 +105,17 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 	QShortcut * shortcut_1 = new QShortcut(QKeySequence(tr("1", "Zoom 1:1")),
 											this);
 	connect(shortcut_1, SIGNAL(activated()), this, SLOT(slot_shortcut_1_activated()));
+}
+
+/* display a grid over the image */
+void ImageWidget::showGrid(int steps)
+{
+	if(mGridSteps != steps)
+	{
+		mGridSteps = steps;
+
+		update();
+	}
 }
 
 void ImageWidget::setRefImage(QImage *pIm)
@@ -748,6 +760,27 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 			p.drawImage(0,0, dImage->copy(cr));
 		} else {
 			p.drawImage(0,0, *dImage);
+		}
+	}
+
+	if(mGridSteps > 0 && dImage)
+	{
+		p.setPen(QPen(QColor(qRgb(0,0,192))));
+
+		for(int step = 0; step < mGridSteps; step++)
+		{
+			int x = (int)((float)dImage->width() * (float)step
+						  / (float)mGridSteps + 0.5f);
+			int y = (int)((float)dImage->height() * (float)step
+						  / (float)mGridSteps + 0.5f);
+
+			QPoint P1H = imageToDisplay(QPoint(x, 0));
+			QPoint P2H = imageToDisplay(QPoint(x, dImage->height()));
+			QPoint P1V = imageToDisplay(QPoint(0, y));
+			QPoint P2V = imageToDisplay(QPoint(dImage->width(), y));
+
+			p.drawLine(P1H, P2H); // horizontal line
+			p.drawLine(P1V, P2V); // vertical line
 		}
 	}
 

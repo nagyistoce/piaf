@@ -108,6 +108,9 @@ public:
 		m_overlayColor = col;
 	}
 
+	/** @brief display a grid over the image */
+	void showGrid(int steps);
+
 	/** @brief Get position of zoom center in original image reference */
 	QPoint getZoomCenter() { return QPoint(xZoomCenter, yZoomCenter); }
 
@@ -195,6 +198,8 @@ private:
 	QRect * mSelectedROI;
 
 	QImage *dImage;
+	int mGridSteps;
+
 	int xOrigine;
 	int yOrigine;
 	// zoom center in original image

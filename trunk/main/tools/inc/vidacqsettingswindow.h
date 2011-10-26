@@ -105,6 +105,8 @@ private slots:
 
 	void on_backlightSlider_valueChanged(int value);
 
+	void on_exposureSpinBox_valueChanged(int arg1);
+
 private:
 
 	/** @brief Send current video props to device */
