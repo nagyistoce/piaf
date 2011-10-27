@@ -382,9 +382,10 @@ FORMS += $$LEGACYPATH/tools/ui/swtoolmainwindow.ui \
 	$$LEGACYPATH/tools/ui/vidacqsettingswindow.ui
 
 HEADERS += $$LEGACYPATH/tools/inc/imagetoavidialog.h
-
 SOURCES += $$LEGACYPATH/tools/src/imagetoavidialog.cpp
 
+HEADERS += $$LEGACYPATH/tools/inc/time_histogram.h
+SOURCES += $$LEGACYPATH/tools/src/time_histogram.cpp
 
 
 # The following line was changed from FORMS to FORMS3 by qt3to4

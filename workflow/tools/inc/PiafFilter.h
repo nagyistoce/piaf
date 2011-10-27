@@ -29,6 +29,7 @@
 #include <SwImage.h>
 
 #include "SwPluginCore.h"
+#include "time_histogram.h"
 
 #define PIAFFILTER_MSG(...)	{ \
 			fprintf(stderr, "PIAFFILER  %s:%d: ", __FILE__, __func__, __LINE__); \
@@ -78,6 +79,9 @@ public:
 
 	/** @brief Send current parameters to plugin processus */
 	int sendParams();
+
+	/** \brief get time histogram */
+	t_time_histogram getTimeHistogram() { return mTimeHistogram; }
 
 	/** @brief index of loaded function
 	  <0 if not loaded
@@ -196,6 +200,8 @@ private:
 	/* treat received framebuffer */
 	int treatFrame(char *framebuffer, int framesize);
 
+	/** @brief histogram of processing time */
+	t_time_histogram mTimeHistogram;
 
 	/** constructor common part */
 	void init();

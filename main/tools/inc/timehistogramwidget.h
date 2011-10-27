@@ -27,25 +27,15 @@
 #define TIMEHISTOGRAMWIDGET_H
 
 #include <QWidget>
+#include "time_histogram.h"
 
 namespace Ui {
     class TimeHistogramWidget;
 }
 
-/** \brief Processing time statistics
-*/
-typedef struct {
-	int nb_iter;
-	unsigned int * histogram;
-	int max_histogram;	///< nb of items in max_histogram array
-	float time_scale;	///< time scale : item us to index in array
-	int index_max;		///< index of histogram max
-	unsigned int value_max;
-	int overflow_count; ///< nb of overflow count
-	double overflow_cumul_us; ///< Cumul of overflow times
-} t_time_histogram;
 
-
+/** @brief Display histogram of processing time
+  */
 class TimeHistogramWidget : public QWidget
 {
     Q_OBJECT

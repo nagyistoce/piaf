@@ -1,10 +1,10 @@
-/***************************************************************************
+/**************************************************************************
  *  V4L2Device.h - Low level acquisition class for Video4Linux2 API
  *
  *  Thu Mar 6 10:06:23 2002
  *  Copyright  2002  Christophe Seyve - SISELL
  *  christophe.seyve@sisell.com
- ****************************************************************************/
+ ***************************************************************************/
 /***************************************************************************
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
@@ -24,7 +24,6 @@
 #include <fcntl.h>
 #include <sys/ioctl.h>
 #include <sys/types.h>
-#include "nolinux_videodev.h"
 #include <pthread.h>
 #include <string.h>
 
@@ -32,6 +31,8 @@
 #include "sw_types.h"
 
 //#include "VirtualDevice.h"
+#include "nolinux_videodev.h"
+
 #include "virtualdeviceacquisition.h"
 
 #define DEFAULT_DEVICE 						"/dev/video0"
