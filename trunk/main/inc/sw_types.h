@@ -18,17 +18,19 @@
 #ifndef SW_TYPES_H
 #define SW_TYPES_H
 
+
+#include <stdlib.h>
+#include <stdint.h>
+
 #ifndef FALSE
 #define FALSE 0
 #define TRUE  1
 #endif
 
-#include <stdint.h>
-
 /*
- * redefinition des types standards
+ * redefinition of standard types
  */
-typedef unsigned char 	u8;
+typedef uint8_t		 	u8;
 typedef char 			i8;
 typedef uint16_t 		u16;
 typedef int16_t			i16;
@@ -36,8 +38,7 @@ typedef uint32_t		u32;
 typedef int32_t 		i32;
 typedef float			d32;
 typedef double			d64;
-typedef long double 	d80;
-
+typedef long double 		d80;
 
 /** @brief Region of interest / rectangle position and size */
 typedef struct _tBoxSize {

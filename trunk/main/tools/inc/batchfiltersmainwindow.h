@@ -30,6 +30,9 @@
 #include <QSettings>
 
 #include "SwFilters.h"
+
+#include "time_histogram.h"
+
 #include "timehistogramwidget.h"
 #include "swvideodetector.h"
 

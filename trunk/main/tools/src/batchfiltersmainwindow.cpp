@@ -697,12 +697,7 @@ bool g_debug_BatchFiltersThread = false;
 
 void BatchFiltersThread::allocHistogram(float maxproctime_us)
 {
-	mTimeHistogram.max_histogram = 256;
-	mTimeHistogram.histogram = new unsigned int [ mTimeHistogram.max_histogram ];
-	memset(mTimeHistogram.histogram, 0, sizeof(unsigned int)*mTimeHistogram.max_histogram);
-
-	// Scale : max = 2*first proc time
-	mTimeHistogram.time_scale = mTimeHistogram.max_histogram / maxproctime_us;
+	::allocHistogram(&mTimeHistogram, maxproctime_us);
 	fprintf(stderr, "[BatchThread]::%s:%d: max proc time at init : %g us "
 			"=> max=%d => scale=%g item/us\n",
 			__func__, __LINE__, maxproctime_us,
@@ -713,50 +708,7 @@ void BatchFiltersThread::allocHistogram(float maxproctime_us)
 
 void BatchFiltersThread::appendTimeUS(float proctime_us)
 {
-	// don't count first iteration
-	mTimeHistogram.nb_iter++;
-	if(mTimeHistogram.nb_iter<=0) { return; }
-
-	if(!mTimeHistogram.histogram) {
-		// use twice the proctime as max
-		allocHistogram(2.f * proctime_us);
-	}
-
-	int index = (int)roundf(mTimeHistogram.time_scale * proctime_us);
-
-	if(index > mTimeHistogram.max_histogram) {
-		mTimeHistogram.overflow_count ++;
-		mTimeHistogram.overflow_cumul_us += proctime_us;
-	} else {
-		mTimeHistogram.histogram[index]++;
-	}
-
-	if(mTimeHistogram.overflow_count > 1
-	   && mTimeHistogram.overflow_count > mTimeHistogram.nb_iter / 5)
-	{	// too many overflows, recompute
-		float overflow_mean = mTimeHistogram.overflow_cumul_us / (double)mTimeHistogram.overflow_count;
-
-		unsigned int * oldhistogram = mTimeHistogram.histogram;
-		if(oldhistogram) {
-			float old_scale = mTimeHistogram.time_scale;
-
-			// realloc histogram, then convert old stats
-			allocHistogram(2.f * overflow_mean);
-			for(int h = 0; h< mTimeHistogram.max_histogram; h++)
-			{
-				// convert to new scale
-				float old_us = (float)h / old_scale;
-				int newh = old_us * mTimeHistogram.time_scale;
-				mTimeHistogram.histogram[newh] = oldhistogram[h];
-			}
-
-			// delete old
-			delete [] oldhistogram;
-		}
-		mTimeHistogram.overflow_count = 0;
-		mTimeHistogram.overflow_cumul_us = 0.;
-	}
-
+	::appendTimeUS(&mTimeHistogram, proctime_us);
 }
 
 void BatchFiltersThread::run()
