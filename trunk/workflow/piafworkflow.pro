@@ -71,7 +71,8 @@ SOURCES += tools/src/PiafFilter.cpp \
     ../main/tools/src/timehistogramwidget.cpp \
     src/maindisplaywidget.cpp \
     src/timelinewidget.cpp \
-    src/pluginsettingswidget.cpp
+    src/pluginsettingswidget.cpp \
+    tools/src/collectioneditdialog.cpp
 
 HEADERS += tools/inc/PiafFilter.h \
 	inc/navimagewidget.h \
@@ -92,7 +93,9 @@ HEADERS += tools/inc/PiafFilter.h \
     ../main/tools/inc/timehistogramwidget.h \
     inc/maindisplaywidget.h \
     inc/timelinewidget.h \
-    inc/pluginsettingswidget.h
+    inc/pluginsettingswidget.h \
+    tools/inc/collectioneditdialog.h \
+    inc/workflowtypes.h
 
 FORMS += ui/navimagewidget.ui \
     ui/thumbimagewidget.ui \
@@ -107,7 +110,8 @@ FORMS += ui/navimagewidget.ui \
     ui/plugineditorform.ui \
     ../main/tools/ui/timehistogramwidget.ui \
 	ui/maindisplaywidget.ui \
-    ui/pluginsettingswidget.ui
+    ui/pluginsettingswidget.ui \
+    tools/ui/collectioneditdialog.ui
 
 INCLUDEPATH += tools/inc
 INCLUDEPATH += ../main/tools/inc
@@ -436,3 +440,7 @@ message( "FINAL CONFIGURATION ==================================================
 message( "")
 message( "")
 OTHER_FILES += doc/OpenCVToolsForPhoto.txt
+
+
+
+
