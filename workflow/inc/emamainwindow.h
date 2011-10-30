@@ -31,19 +31,12 @@
 #include <QtGui/QTreeWidgetItem>
 #include <QWorkspace>
 #include <QSettings>
-
+#include <QDomDocument>
 #include "workshopimagetool.h"
 
-/** @brief Structure to define a mapping between a file and a tree item
+#include "workflowtypes.h"
 
- Beware: containing objects
 
-  */
-typedef struct _t_file {
-	QString name;
-	QString fullPath;
-	QTreeWidgetItem * treeViewItem;
-} t_file;
 
 class EmaMainWindow;
 
@@ -88,8 +81,8 @@ class CollecTreeWidgetItem : QTreeWidgetItem
 //	Q_OBJECT
 	friend class EmaMainWindow;
 public:
-	CollecTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, QString collecname);
-	CollecTreeWidgetItem(QTreeWidget * treeWidgetParent, QString collecname);
+	CollecTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, t_collection * pcollec);
+	CollecTreeWidgetItem(QTreeWidget * treeWidgetParent, t_collection * pcollec);
 	~CollecTreeWidgetItem();
 
 	/** \brief Expand contents: read directory contents and display it */
@@ -100,11 +93,15 @@ public:
 	/** \brief Return true if entry is a file, false if it is a list of collections */
 	bool isFile() { return mIsFile; }
 
+	/** \brief Return collection */
+	t_collection * getCollection() { return mpCollec; }
+
 protected:
 	void init(); ///< init internal data and fill nb files
 	void purge(); ///< purge internal data and free memory
+	void updateDisplay(); ///< display information about collection
 
-	QString mCollecName;
+	t_collection * mpCollec; ///< pointer to collection
 	bool mIsFile;///< true if the item is a file
 	QTreeWidgetItem * subItem;///< fake item to see the content
 private:
@@ -121,44 +118,17 @@ namespace Ui
 	class EmaMainWindow;
 }
 
-/** @brief Folder listed */
-typedef struct {
-	QString fullpath;	///< Full path to directory
-	QString filename;	///< basename
-	QString extension;	///< File extension
-	bool expanded;		///< Expanded state on explorer
-} t_folder;
-
-/** @brief File known in collection */
-typedef struct {
-	QString fullpath;	///< Full path to file
-	QString filename;	///< basename
-	int type;			///< Type: movie, image
-	struct _t_collection * pCollection; ///< Reverse pointer to its collection
-} t_collection_file;
-
-/** @brief Collection storage */
-typedef struct _t_collection {
-	QString title;
-	QString comment;
-	QList<t_collection_file *> filesList;	///< List of full path to their images
-	QList<struct _t_collection *> subCollectionsList;
-} t_collection;
-
-typedef struct {
-	QString node;
-} t_device;
 
 /** @brief Workflow interface settings storage */
 typedef struct {
 	/// List of input directories
-	QList<t_folder> directoryList;
+	QList<t_folder *> directoryList;
 
 	/// list of collections
-	QList<t_collection> collectionList;
+	QList<t_collection *> collectionList;
 
 	/// List of devices
-	QList<t_device> devicesList;
+	QList<t_device *> devicesList;
 
 } t_workflow_settings ;
 
@@ -210,6 +180,10 @@ private:
 	void removeThumbImage(QString fileName);
 
 private:
+	QDomDocument mSettingsDoc;
+	void addFolderToXMLSettings(QDomElement * parent_elem, t_folder folder);
+	void addCollectionToXMLSettings(QDomElement * elem, t_collection collect);
+
 	QTimer m_timer;
 	QWorkspace * pWorkspace;
 	QImage mWorkImage;
@@ -226,29 +200,29 @@ private slots:
 	void on_batchPlayerButton_clicked();
 	void on_filesTreeWidget_itemExpanded(QTreeWidgetItem* item);
 	void on_workspaceButton_clicked();
-	void on_filesShowCheckBox_stateChanged(int);
+	void slot_filesShowCheckBox_stateChanged(int);
 	void on_filesLoadButton_clicked();
 	void on_filesClearButton_clicked();
 	void on_zoomx2Button_clicked();
 	void on_zoomx1Button_clicked();
 
 
-	void on_gridWidget_signal_resizeEvent(QResizeEvent *);
+	void slot_gridWidget_signal_resizeEvent(QResizeEvent *);
 
 	// Collections
 	void on_collecShowCheckBox_stateChanged(int);
 
-	void on_timer_timeout();
+	void slot_timer_timeout();
 
 	void on_gridButton_clicked();
 	void on_imgButton_clicked();
 
-	void on_mainGroupBox_resizeEvent(QResizeEvent *);
+	void slot_mainGroupBox_resizeEvent(QResizeEvent *);
 	//
 	void on_globalNavImageWidget_signalZoomOn(int, int, int);
 
 	//void on_mainDisplayWidget_signalGreyscaleToggled(bool);
-	void on_mainDisplayWidget_signalZoomRect(QRect cropRect);
+	void slot_mainDisplayWidget_signalZoomRect(QRect cropRect);
 
 	// MAIN MENU ACTION
 	void on_actionQuit_activated();
@@ -262,7 +236,9 @@ private slots:
 	void on_filesTreeWidget_itemClicked ( QTreeWidgetItem * item, int column );
 	void on_filesTreeWidget_itemDoubleClicked ( QTreeWidgetItem * item, int column );
 	void on_collecAddButton_clicked();
-	void on_collecClearButton_clicked();
+	void slot_newCollDialog_signalNewCollection(t_collection);
+	void slot_newCollDialog_signalCollectionChanged(t_collection *);
+	void on_collecDeleteButton_clicked();
 	void on_collecEditButton_clicked();
 };
 

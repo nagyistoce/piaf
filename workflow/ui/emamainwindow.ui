@@ -305,9 +305,9 @@
                      </widget>
                     </item>
                     <item>
-                     <widget class="QPushButton" name="collecClearButton">
+                     <widget class="QPushButton" name="collecDeleteButton">
                       <property name="toolTip">
-                       <string>Clear the list of collections</string>
+                       <string>Delete selected collection</string>
                       </property>
                       <property name="text">
                        <string/>
