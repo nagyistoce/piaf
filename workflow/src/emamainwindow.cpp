@@ -76,7 +76,7 @@ int g_EMAMW_debug_mode = EMALOG_DEBUG;
 EmaMainWindow::EmaMainWindow(QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::EmaMainWindow),
 	  mSettings( PIAFWKFL_SETTINGS ),
-	  mSettingsDoc()
+	  mSettingsDoc(PIAFWKFL_SETTINGS)
 {
 	ui->setupUi(this);
 	g_splash->showMessage(QObject::tr("Restore settings ..."), Qt::AlignBottom | Qt::AlignHCenter);
@@ -150,6 +150,58 @@ void EmaMainWindow::loadSettings()
 		mDirectoryList.append( appendDirectoryToLibrary(path));
 	}
 	mSettings.endArray();
+
+
+
+	// READ CONFIGURATION IN XML FILE
+	char home[1024] = "/home";
+	if(getenv("HOME")) {
+		strcpy(home, getenv("HOME"));
+	}
+
+	// Concatenate configuration directories
+	QFile file( QString(home) + "/piafsettings.xml" );
+	if (!file.open(QIODevice::ReadOnly)) {
+		PIAF_MSG(SWLOG_ERROR, "could not open file '%s' for reading: err=%s",
+				 file.name().toAscii().data(),
+				 file.errorString().toAscii().data());
+		return;
+	}
+	else
+	{
+		bool namespaceProcessing = false;
+		QString errorMsg;
+		int errorLine = 0;
+		int errorColumn = 0;
+		if( !mSettingsDoc.setContent(&file, &errorMsg, &errorLine, &errorColumn) )
+		{
+			PIAF_MSG(SWLOG_ERROR,
+					 "could not read content of file '%s' as XML doc: "
+					 "err='%s' line %d col %d",
+					 file.name().toAscii().data(),
+					 errorMsg.toAscii().data(),
+					 errorLine, errorColumn
+					 );
+
+			file.close();
+
+			return;
+		}
+		file.close();
+	}
+
+	// print out the element names of all elements that are direct children
+	// of the outermost element.
+	QDomElement docElem = mSettingsDoc.documentElement();
+	QDomNode n = docElem.firstChild();
+	while(!n.isNull()) {
+		QDomElement e = n.toElement(); // try to convert the node to an element.
+		if(!e.isNull()) {
+			cout << qPrintable(e.tagName()) << endl; // the node really is an element.
+		}
+		n = n.nextSibling();
+	}
+
 }
 
 void EmaMainWindow::addFolderToXMLSettings(QDomElement * parent_elem, t_folder folder)
@@ -172,7 +224,7 @@ void EmaMainWindow::addCollectionToXMLSettings(QDomElement * parent_elem,
 	for(fit = collec.filesList.begin(); fit != collec.filesList.end(); ++fit)
 	{
 		QDomElement file_elem = mSettingsDoc.createElement("collection_files");
-		t_collection_file *pfile;
+		t_collection_file *pfile = (*fit);
 		file_elem.setAttribute("filename", pfile->filename);
 		file_elem.setAttribute("fullpath", pfile->fullpath);
 		file_elem.setAttribute("type", pfile->type);
@@ -215,7 +267,7 @@ void EmaMainWindow::saveSettings()
 
 	mSettings.endArray();
 	// Clear XML tree
-	//mSettingsDoc.clear();
+	mSettingsDoc.clear();
 
 //	QFile file("piafworkflowsettings.xml");
 //	if (!file.open(QIODevice::ReadOnly)) {
@@ -276,15 +328,27 @@ void EmaMainWindow::saveSettings()
 	}
 	mSettingsDoc.appendChild(elemCollecs);
 
-	QFile fileout( "/tmp/piafsettings.xml" );
+	char home[1024] = "/home";
+	if(getenv("HOME")) {
+		strcpy(home, getenv("HOME"));
+	}
+	// Concatenate configuration directories
+	QFile fileout( QString(home) + "/piafsettings.xml" );
+
 	if( !fileout.open( IO_WriteOnly ) ) {
 		PIAF_MSG(SWLOG_ERROR, "cannot save piafsettings.xml");
 		return ;
 	}
-	fileout.write(mSettingsDoc.toString());
+	QTextStream sout(&fileout);
+	sout << mSettingsDoc.toString();
+	sout.flush();
+
+	fileout.flush();
 	fileout.close();
+
 	PIAF_MSG(SWLOG_INFO, " saved '%s' in /tmp/piafsettings.xml",
-			 mSettingsDoc.toString().toAscii().data());
+			 mSettingsDoc.toString().toAscii().data()
+			 );
 }
 
 void EmaMainWindow::slot_appendNewPictureThumb(QString filename)

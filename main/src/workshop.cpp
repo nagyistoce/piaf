@@ -194,7 +194,7 @@ void WorkshopApp::initVars()
 	untitledMovieCount = 0;
 
 
-	char home[128] = "/home";
+	char home[1024] = "/home";
 	if(getenv("HOME")) {
 		strcpy(home, getenv("HOME"));
 	}
