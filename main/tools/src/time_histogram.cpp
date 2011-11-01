@@ -36,6 +36,17 @@ void allocHistogram(t_time_histogram * pTimeHistogram, float maxproctime_us)
 			pTimeHistogram->time_scale
 			);
 }
+/* delete a time histogram */
+void deleteHistogram(t_time_histogram * pTimeHistogram)
+{
+	if(pTimeHistogram->histogram)
+	{
+		delete [] pTimeHistogram->histogram;
+		pTimeHistogram->histogram = NULL;
+	}
+	memset(pTimeHistogram, 0, sizeof(t_time_histogram) );
+
+}
 
 void appendTimeUS(t_time_histogram * pTimeHistogram, float proctime_us)
 {
