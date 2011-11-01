@@ -1459,15 +1459,19 @@ int FilterSequencer::processImage(swImageStruct * image)
 
 		// Time accumulation in us
 		float total_time_us = 0.f;
-		fprintf(stderr, "[FilterSequencer]::%s:%d : processing %d filters...\n",
+
+		fprintf(stderr, "[FilterSequencer]::%s:%d : processing %d filters / stop @ id=%d...\n",
 				__func__, __LINE__,
-				mLoadedFiltersList.count());
+				mLoadedFiltersList.count(),
+				idViewPlugin );
 
 		if(!mLoadedFiltersList.isEmpty())
 		{
+			id = 0;
 			QList<PiafFilter *>::iterator it;
 			for(it = mLoadedFiltersList.begin();
-					it!=mLoadedFiltersList.end() && ret && id<=idViewPlugin;
+				it!=mLoadedFiltersList.end()
+				&& ret && (id<=idViewPlugin || idViewPlugin<0);
 					++it ) {
 				PiafFilter * pv = (*it);
 				// process
@@ -1671,7 +1675,7 @@ void PiafFilter::init()
 	buffer = new char [BUFFER_SIZE];
 	memset(buffer, 0, sizeof(BUFFER_SIZE));
 
-
+	memset(&mTimeHistogram, 0, sizeof(t_time_histogram) );
 
 	// pipes initialisation
 	pipeIn[0]  = 0;
@@ -1711,6 +1715,7 @@ int PiafFilter::destroy() {
 
 	unloadChildProcess();
 
+	deleteHistogram(&mTimeHistogram);
 	swFreeFrame(&frame);
 
 
@@ -2140,6 +2145,15 @@ int PiafFilter::processFunction(int indexFunction, void * data_in, void * data_o
 								__func__, __LINE__, childpid);
 					emit signalDied(childpid);
 				}
+				else
+				{
+					swImageStruct * im2 = (swImageStruct *)data_out;
+
+					// append processing time
+					PIAF_MSG(SWLOG_INFO, "\tdeltaTus=%d us", (int)im2->deltaTus);
+					appendTimeUS(&mTimeHistogram, im2->deltaTus);
+
+				}
 
 			} else {
 				ret = 0;
@@ -2147,6 +2161,7 @@ int PiafFilter::processFunction(int indexFunction, void * data_in, void * data_o
 		}
 
 		comLock = false;
+
 
 		return ret;
 	}

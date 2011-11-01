@@ -140,6 +140,91 @@ EmaMainWindow::~EmaMainWindow()
 	delete ui;
 }
 
+
+
+
+
+void EmaMainWindow::appendCollection(QDomElement collecElem, t_collection * parent_collec)
+{
+	// Read parameters
+	QString title = collecElem.attribute("title");
+	t_collection * newCollec = new t_collection;
+	newCollec->title = title;
+	newCollec->comment = collecElem.attribute("comment");
+	newCollec->treeViewItem = NULL;
+
+	PIAF_MSG(SWLOG_INFO, "\t\tAdding collection '%s' / '%s'...",
+			 title.toAscii().data(),
+			 newCollec->comment.toAscii().data());
+
+	// Read files
+	QDomNode subcollecNode = collecElem.firstChild();
+	while(!subcollecNode.isNull()) {
+		QDomElement subcollecElem = subcollecNode.toElement(); // try to convert the node to an element.
+		if(!subcollecElem.isNull()) {
+			if(subcollecElem.tagName().compare("collection_files")==0)
+			{
+				PIAF_MSG(SWLOG_INFO, "\t\t\tAdding files...");
+				QDomNode fileNode = subcollecElem.firstChild();
+				while(!fileNode.isNull()) {
+					// Add file
+					QDomElement fileElem = fileNode.toElement(); // try to convert the node to an element.
+					if(!fileElem.isNull()) {
+						t_collection_file * pfile = new t_collection_file;
+
+						pfile->fullpath = fileElem.attribute("fullpath");
+						pfile->filename = QFileInfo(pfile->fullpath).baseName();
+						pfile->pCollection = newCollec;
+						pfile->treeViewItem = NULL;
+
+						newCollec->filesList.append(pfile);
+
+						PIAF_MSG(SWLOG_INFO, "\t\t\tAdding file '%s'...",
+								 pfile->filename.toAscii().data()
+								 );
+					}
+
+					fileNode = fileNode.nextSibling();
+				}
+			}
+			// Adding sub-connections !
+			if(subcollecElem.tagName().compare("subcollections")==0)
+			{
+				PIAF_MSG(SWLOG_INFO, "\t\t\tAdding files...");
+				QDomNode subcollecNode2 = subcollecElem.firstChild();
+				while(!subcollecNode2.isNull()) {
+					QDomElement subcollecElem2 = subcollecNode2.toElement(); // try to convert the node to an element.
+					if(!subcollecElem2.isNull()) {
+						appendCollection(subcollecElem2, newCollec);
+					}
+					subcollecNode2 = subcollecNode2.nextSibling();
+				}
+			}
+
+			// append this collection to parent
+			if(parent_collec)
+			{
+				parent_collec->subCollectionsList.append(newCollec);
+			}
+		}
+		subcollecNode = subcollecNode.nextSibling();
+	}
+
+	QStringList columns;
+	columns << title;
+	if(!parent_collec)
+	{
+		newCollec->treeViewItem = (QTreeWidgetItem *)new CollecTreeWidgetItem(
+					ui->collecTreeWidget, newCollec );
+	}
+	else
+	{
+		newCollec->treeViewItem = (QTreeWidgetItem *)new CollecTreeWidgetItem(
+					newCollec->treeViewItem, newCollec);
+	}
+
+}
+
 void EmaMainWindow::loadSettings()
 {
 	int size = mSettings.beginReadArray("folders");
@@ -147,7 +232,7 @@ void EmaMainWindow::loadSettings()
 		mSettings.setArrayIndex(i);
 		QString path = mSettings.value("path").toString();
 
-		mDirectoryList.append( appendDirectoryToLibrary(path));
+//		mDirectoryList.append( appendDirectoryToLibrary(path));
 	}
 	mSettings.endArray();
 
@@ -185,7 +270,7 @@ void EmaMainWindow::loadSettings()
 
 			file.close();
 
-			return;
+			//do not return because it can work ! return;
 		}
 		file.close();
 	}
@@ -197,10 +282,41 @@ void EmaMainWindow::loadSettings()
 	while(!n.isNull()) {
 		QDomElement e = n.toElement(); // try to convert the node to an element.
 		if(!e.isNull()) {
-			cout << qPrintable(e.tagName()) << endl; // the node really is an element.
+			PIAF_MSG(SWLOG_INFO, "\tCategory '%s'", e.tagName().toAscii().data()); // the node really is an element.
+			if(e.tagName().compare("Folders")==0) // Read folders
+			{
+				// Clear previous list
+				mDirectoryList.clear();
+
+				QDomNode folderNode = e.firstChild();
+				while(!folderNode.isNull()) {
+					QDomElement folderElem = folderNode.toElement(); // try to convert the node to an element.
+					if(!folderElem.isNull()) {
+						// Read parameters
+						QString path = folderElem.attribute("fullpath");
+						PIAF_MSG(SWLOG_INFO, "\t\tAdding folder '%s'...", path.toAscii().data());
+						mDirectoryList.append( appendDirectoryToLibrary(path));
+					}
+					folderNode = folderNode.nextSibling();
+				}
+			}
+			if(e.tagName().compare("Collections")==0) // Read folders
+			{
+				// Clear previous list
+				QDomNode collecNode = e.firstChild();
+				while(!collecNode.isNull()) {
+					QDomElement collecElem = collecNode.toElement(); // try to convert the node to an element.
+					if(!collecElem.isNull()) {
+						appendCollection(collecElem, NULL);
+					}
+					collecNode = collecNode.nextSibling();
+				}
+			}
 		}
 		n = n.nextSibling();
 	}
+
+
 
 }
 
@@ -298,26 +414,28 @@ void EmaMainWindow::saveSettings()
 //		 }
 //		 n = n.nextSibling();
 //	 }
+	QDomElement elemGUI = mSettingsDoc.createElement("GUISettings");
 
-	 // Here we append a new element to the end of the document
-	 QDomElement elemFolders = mSettingsDoc.createElement("Folders");
-	 for (int i = 0; i < m_workflow_settings.directoryList.size(); ++i) {
-		 //mSettings.setValue("path", m_workflow_settings.directoryList.at(i));
+	// Here we append a new element to the end of the document
+	QDomElement elemFolders = mSettingsDoc.createElement("Folders");
+	for (int i = 0; i < m_workflow_settings.directoryList.size(); ++i) {
+		//mSettings.setValue("path", m_workflow_settings.directoryList.at(i));
 
-		 t_folder * folder = m_workflow_settings.directoryList.at(i) ;
-		 QDomElement elem = mSettingsDoc.createElement("folder");
-		 elem.setAttribute("fullpath", folder->fullpath);
-		 elem.setAttribute("filename", folder->filename);
-		 elem.setAttribute("extension", folder->extension);
-		 elem.setAttribute("expanded", folder->expanded);
+		t_folder * folder = m_workflow_settings.directoryList.at(i) ;
+		QDomElement elem = mSettingsDoc.createElement("folder");
+		elem.setAttribute("fullpath", folder->fullpath);
+		elem.setAttribute("filename", folder->filename);
+		elem.setAttribute("extension", folder->extension);
+		elem.setAttribute("expanded", folder->expanded);
 
-		 elemFolders.appendChild(elem);
+		elemFolders.appendChild(elem);
 
-		 EMAMW_printf(EMALOG_INFO, "\tadded directory '%s' to XML",
-					  m_workflow_settings.directoryList.at(i)->fullpath.toAscii().data()
-					  );
-	 }
-	 mSettingsDoc.appendChild(elemFolders);
+		EMAMW_printf(EMALOG_INFO, "\tadded directory '%s' to XML",
+					 m_workflow_settings.directoryList.at(i)->fullpath.toAscii().data()
+					 );
+	}
+
+	elemGUI.appendChild(elemFolders);
 
 	// SAVE COLLECTIONS
 	QDomElement elemCollecs = mSettingsDoc.createElement("Collections");
@@ -326,7 +444,8 @@ void EmaMainWindow::saveSettings()
 		t_collection * collec = m_workflow_settings.collectionList.at(i);
 		addCollectionToXMLSettings(&elemCollecs, *collec);
 	}
-	mSettingsDoc.appendChild(elemCollecs);
+	elemGUI.appendChild(elemCollecs);
+	mSettingsDoc.appendChild(elemGUI);
 
 	char home[1024] = "/home";
 	if(getenv("HOME")) {
@@ -340,13 +459,12 @@ void EmaMainWindow::saveSettings()
 		return ;
 	}
 	QTextStream sout(&fileout);
-	sout << mSettingsDoc.toString();
-	sout.flush();
+	mSettingsDoc.save(sout, 4);
 
 	fileout.flush();
 	fileout.close();
 
-	PIAF_MSG(SWLOG_INFO, " saved '%s' in /tmp/piafsettings.xml",
+	PIAF_MSG(SWLOG_INFO, " saved string '%s' in $HOME/piafsettings.xml",
 			 mSettingsDoc.toString().toAscii().data()
 			 );
 }
@@ -1301,7 +1419,9 @@ void CollecTreeWidgetItem::init()
 	if(mpCollec) {
 		setText(0, mpCollec->title);
 	}
-	subItem = NULL;
+	QStringList columns;
+	columns << QObject::tr("(expanding...)");
+	subItem = new QTreeWidgetItem(this, columns );
 	mIsFile = false;
 
 	if(!mpCollec->filesList.isEmpty())

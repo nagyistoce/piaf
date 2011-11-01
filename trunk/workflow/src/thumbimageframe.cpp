@@ -25,6 +25,7 @@
 
 #include "thumbimageframe.h"
 #include "ui_thumbimageframe.h"
+#include "piaf-common.h"
 #include <QToolTip>
 #include <QFileInfo>
 
@@ -34,8 +35,9 @@ ThumbImageFrame::ThumbImageFrame(QWidget *parent) :
 {
 	m_ui->setupUi(this);
 	mpTwin = NULL;
-        mCtrl = mShift = false;
+	mCtrl = mShift = false;
 
+	mActive = false;
 	setSelected( false );
 }
 
@@ -177,19 +179,35 @@ void ThumbImageFrame::mouseMoveEvent ( QMouseEvent * event ) {
 /* set the selected flag */
 void ThumbImageFrame::setSelected(bool selected)
 {
-	mSelected = selected;
-	if(mpTwin)
+	PIAF_MSG(SWLOG_INFO, "this=%p Thumb '%s' set selected='%c'",
+			 this,
+			 m_imagePath.toAscii().data(),
+			 selected ? 'T':'F');
+
+	if(mSelected == selected)
 	{
+		return;
+	}
+	mSelected = selected;
+
+	if(mpTwin) {
 		if(mpTwin->isSelected() != mSelected) {
 			mpTwin->setSelected(mSelected);
 		}
 	}
 
 	// Toggle state
-	if(mSelected)
-	{
-		setStyleSheet("background-color: rgb(190, 200, 255);");
-
+	if(mSelected) {
+		PIAF_MSG(SWLOG_INFO, "this=%p Thumb '%s' selected='%c' active='%c' => changed background",
+				 this,
+				 m_imagePath.toAscii().data(),
+				 mSelected ? 'T':'F',
+				 mActive ? 'T':'F' );
+		if(mActive) {
+			setStyleSheet("background-color: rgb(190, 200, 255);");
+		} else {
+			setStyleSheet("background-color: rgb(60, 70, 255);");
+		}
 		if(mShift) {
 			fprintf(stderr, "ThumbImageFrame %p::%s:%d : shift+click this=%p\n",
 					this, __func__, __LINE__, this);
@@ -203,10 +221,19 @@ void ThumbImageFrame::setSelected(bool selected)
 		}
 
 	} else {
-//		setStyleSheet();
-		setStyleSheet("background-color: rgba(128, 128, 128, 0);");
+		PIAF_MSG(SWLOG_INFO, "this=%p Thumb '%s' selected='%c' active='%c' => changed background",
+				 this,
+				 m_imagePath.toAscii().data(),
+				 mSelected ? 'T':'F',
+				 mActive ? 'T':'F' );
+//		if(mActive) {
+//			setStyleSheet("background-color: rgba(128, 128, 128, 255);");
+//		} else {
+			setStyleSheet("background-color: rgba(128, 128, 128, 0);");
+//		}
 	}
-	update();
+
+	repaint();
 }
 
 void ThumbImageFrame::setActive(bool active)
@@ -220,33 +247,36 @@ void ThumbImageFrame::setActive(bool active)
 	}
 
 	// Toggle state
-	if(mActive)
-	{
-		setStyleSheet("background-color: rgb(60, 70, 255);");
+//	if(mActive)
+//	{
+//		if(mSelected) {
+//			setStyleSheet("background-color: rgb(60, 70, 255);");
+//		}
+//		if(mShift) {
+//			fprintf(stderr, "ThumbImageFrame %p::%s:%d : shift+click this=%p\n",
+//					this, __func__, __LINE__, this);
 
-		if(mShift) {
-			fprintf(stderr, "ThumbImageFrame %p::%s:%d : shift+click this=%p\n",
-					this, __func__, __LINE__, this);
+//			emit signal_shiftClick(this);
+//		}
+//		if(mCtrl) {
+//			fprintf(stderr, "ThumbImageFrame %p::%s:%d : Ctrl+click this=%p\n",
+//					this, __func__, __LINE__, this);
+//			emit signal_ctrlClick(this);
+//		}
 
-			emit signal_shiftClick(this);
-		}
-		if(mCtrl) {
-			fprintf(stderr, "ThumbImageFrame %p::%s:%d : Ctrl+click this=%p\n",
-					this, __func__, __LINE__, this);
-			emit signal_ctrlClick(this);
-		}
-
-	} else {
-		//		refresh selection
-		setSelected(mSelected);
-	}
-	update();
+//	} else {
+//		//		refresh selection
+//		setSelected(mSelected);
+//	}
+//	update();
 }
 
 
-void ThumbImageFrame::mousePressEvent ( QMouseEvent * e ) {
-	setSelected( !mSelected );
+void ThumbImageFrame::mousePressEvent ( QMouseEvent * e )
+{
+	bool invert = !mSelected;
 	setActive( true );
+	setSelected( invert );
 
 	emit signal_mousePressEvent ( e );
 }

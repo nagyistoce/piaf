@@ -97,10 +97,11 @@ void MainImageWidget::slotUpdateImage()
 		image.buffer_size = image.width * image.height * image.depth;
 
 		m_displayImage = m_fullImage.copy();
-		image.buffer = m_displayImage.bits(); // Buffer
 
-		mpFilterSequencer->processImage(&image);
+		image.buffer = m_displayImage.bits(); // use diplay image as processing uffer
 
+		int ret = mpFilterSequencer->processImage(&image);
+		PIAF_MSG(SWLOG_INFO, "sequence returned %d", ret);
 	}
 
 	// refresh display

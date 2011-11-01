@@ -45,6 +45,8 @@ typedef struct {
 	QString filename;	///< basename
 	QString extension;	///< File extension
 	bool expanded;		///< Expanded state on explorer
+
+	QTreeWidgetItem * treeViewItem;
 } t_folder;
 
 /** @brief File known in collection */
@@ -53,6 +55,8 @@ typedef struct {
 	QString filename;	///< basename
 	int type;			///< Type: movie, image
 	struct _t_collection * pCollection; ///< Reverse pointer to its collection
+
+	QTreeWidgetItem * treeViewItem;
 } t_collection_file;
 
 /** @brief Collection storage */
@@ -61,6 +65,8 @@ typedef struct _t_collection {
 	QString comment;
 	QList<t_collection_file *> filesList;	///< List of full path to their images
 	QList<struct _t_collection *> subCollectionsList;
+
+	QTreeWidgetItem * treeViewItem;
 } t_collection;
 
 typedef struct {

@@ -37,5 +37,7 @@ void allocHistogram(t_time_histogram * pTimeHistogram, float maxproctime_us);
 /** @brief Allocate a processing time in histogram */
 void appendTimeUS(t_time_histogram * pTimeHistogram, float proctime_us);
 
+/** @brief delete a time histogram */
+void deleteHistogram(t_time_histogram * pTimeHistogram);
 
 #endif // TIME_HISTOGRAM_H

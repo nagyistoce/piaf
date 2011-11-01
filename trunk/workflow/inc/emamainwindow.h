@@ -59,6 +59,7 @@ public:
 
 	bool isFile() { return mIsFile; }
 	QStringList getFileList();
+
 protected:
 	void init(); ///< init internal data and fill nb files
 	QString name;
@@ -66,11 +67,10 @@ protected:
 	int nb_files;
 	bool mIsFile;///< true if the item is a file
 	QTreeWidgetItem * subItem;///< fake item to see the content
-private:
 
+private:
 	QList<DirectoryTreeWidgetItem *> subDirsList;
 	QList<t_file *> filesList;
-
 
 };
 
@@ -158,6 +158,9 @@ private:
 	t_workflow_settings m_workflow_settings;
 	/// List of input directories
 	QList<DirectoryTreeWidgetItem *> mDirectoryList;
+
+	/** \brief Append recursivelly a collection from a XML tree branch */
+	void appendCollection(QDomElement collecElem, t_collection * parent_collec);
 
 	/// Opened image paths
 	QStringList m_imageList;
