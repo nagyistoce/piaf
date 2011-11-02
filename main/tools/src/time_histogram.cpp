@@ -45,7 +45,6 @@ void deleteHistogram(t_time_histogram * pTimeHistogram)
 		pTimeHistogram->histogram = NULL;
 	}
 	memset(pTimeHistogram, 0, sizeof(t_time_histogram) );
-
 }
 
 void appendTimeUS(t_time_histogram * pTimeHistogram, float proctime_us)

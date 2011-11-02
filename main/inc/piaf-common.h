@@ -95,9 +95,9 @@ const char swlog_msgtab[6][12] = {
 #define PIAF_MSG(a,...)       { \
 			if( (a)>=g_debug_piaf ) { \
 					struct timeval l_nowtv; gettimeofday (&l_nowtv, NULL); \
-					fprintf(stderr,"%03d.%03d %s [Piaf] %s:%d : ", \
+					fprintf(stderr,"%03d.%03d %s [Piaf] [%s] %s:%d : ", \
 							(int)(l_nowtv.tv_sec%1000), (int)(l_nowtv.tv_usec/1000), \
-							SWLOG_MSG((a)), __func__,__LINE__); \
+							SWLOG_MSG((a)), __FILE__,__func__,__LINE__); \
 					fprintf(stderr,__VA_ARGS__); \
 					fprintf(stderr,"\n"); \
 			} \

@@ -1460,26 +1460,29 @@ int FilterSequencer::processImage(swImageStruct * image)
 		// Time accumulation in us
 		float total_time_us = 0.f;
 
-		fprintf(stderr, "[FilterSequencer]::%s:%d : processing %d filters / stop @ id=%d...\n",
+		fprintf(stderr, "[FilterSequencer]::%s:%d : processing %d filters...\n",
 				__func__, __LINE__,
-				mLoadedFiltersList.count(),
-				idViewPlugin );
+				mLoadedFiltersList.count());
 
 		if(!mLoadedFiltersList.isEmpty())
 		{
-			id = 0;
+			bool finalreached = false;
 			QList<PiafFilter *>::iterator it;
+			int filtidx = 0;
 			for(it = mLoadedFiltersList.begin();
 				it!=mLoadedFiltersList.end()
-				&& ret && (id<=idViewPlugin || idViewPlugin<0);
-					++it ) {
+				&& ret && !finalreached;
+					++it, ++filtidx ) {
 				PiafFilter * pv = (*it);
+				finalreached |= pv->isFinal();
+
 				// process
 				if( pv->enabled ) {
 					//if(g_debug_FilterSequencer)
 					{
-						fprintf(stderr, "FilterSequencer::%s:%d processing filter func[%d]=%s\n",
+						fprintf(stderr, "FilterSequencer::%s:%d processing filter [%d] func[%d]=%s\n",
 								__func__, __LINE__,
+								filtidx,
 								pv->indexFunction,
 								pv->funcList[pv->indexFunction].name);
 					}
@@ -1562,7 +1565,9 @@ int FilterSequencer::processImage(swImageStruct * image)
 			}
 		}
 	}
-
+	else { // on succes, signal that the processing is done so the widtgets can be updated
+		emit signalProcessingDone();
+	}
 	return global_return;
 }
 
@@ -1704,7 +1709,8 @@ PiafFilter::~PiafFilter()
 	destroy();
 }
 
-int PiafFilter::destroy() {
+int PiafFilter::destroy()
+{
 	fprintf(stderr, "[PiafFilter]::%s:%d : DESTROYing PiafFilter %p='%s'...\n",
 			__func__, __LINE__, this, exec_name);
 
@@ -2150,7 +2156,7 @@ int PiafFilter::processFunction(int indexFunction, void * data_in, void * data_o
 					swImageStruct * im2 = (swImageStruct *)data_out;
 
 					// append processing time
-					PIAF_MSG(SWLOG_INFO, "\tdeltaTus=%d us", (int)im2->deltaTus);
+					//PIAF_MSG(SWLOG_INFO, "\tdeltaTus=%d us", (int)im2->deltaTus);
 					appendTimeUS(&mTimeHistogram, im2->deltaTus);
 
 				}

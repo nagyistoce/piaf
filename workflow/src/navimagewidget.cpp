@@ -84,8 +84,8 @@ void NavImageWidget::on_signalImageChanged(QImage imageIn)
 
 void NavImageWidget::setImage(QImage fullImage)
 {
-	fprintf(stderr, "NavImagewidget::%s:%d : fullImage=%dx%dx%d\n",
-			__func__, __LINE__, fullImage.width(), fullImage.height(), fullImage.depth());
+	PIAF_MSG(SWLOG_DEBUG, "NavImagewidget: fullImage=%dx%dx%d\n",
+			fullImage.width(), fullImage.height(), fullImage.depth());
 
 	if(fullImage.isNull())
 	{
