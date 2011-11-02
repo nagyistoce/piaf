@@ -364,8 +364,11 @@ protected slots:
 	void slot_signalParamsChanged();
 
 signals:
+	/** @brief Selected filter changed or its parameters changed */
 	void selectedFilterChanged();
 	void signalFilterDied(PiafFilter *);
+	/** @brief Signal that processing is done with success */
+	void signalProcessingDone();
 };
 
 

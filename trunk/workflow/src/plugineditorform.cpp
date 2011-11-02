@@ -117,6 +117,8 @@ void PluginEditorForm::setFilterSequencer(FilterSequencer * seq)
 	if(mpFilterSequencer) {
 		connect(mpFilterSequencer, SIGNAL(selectedFilterChanged()), this,
 				SLOT(on_filterSequencer_selectedFilterChanged()));
+		connect(mpFilterSequencer, SIGNAL(signalProcessingDone()), this,
+				SLOT(on_filterSequencer_signalProcessingDone()));
 		connect(mpFilterSequencer, SIGNAL(signalFilterDied(PiafFilter*)), this,
 				SLOT(on_filterSequencer_signalFilterDied(PiafFilter *)));
 	}
@@ -132,6 +134,16 @@ PluginEditorForm::~PluginEditorForm()
 {
 	purge();
 	delete ui;
+}
+
+void PluginEditorForm::on_filterSequencer_signalProcessingDone()
+{
+	if(!mpFilterSequencer) return;
+
+	// Update time histogram
+	fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
+	updateTimeHistogram();
+
 }
 
 void PluginEditorForm::on_filterSequencer_selectedFilterChanged()
@@ -557,9 +569,29 @@ void PluginEditorForm::on_pluginSettingsWidget_selectedFilterChanged()
 
 void PluginEditorForm::on_selectedPluginsTreeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
+	if(!item) { return; }
 	LoadedPluginTreeWidgetItem * loaded =
 			(LoadedPluginTreeWidgetItem *)item;
+
 	ui->pluginSettingsWidget->setPiafFilter(loaded->getFilter());
+
+	// update time histogram
+	updateTimeHistogram();
+}
+
+void PluginEditorForm::updateTimeHistogram()
+{
+	if(ui->selectedPluginsTreeWidget->selectedItems().isEmpty()) { return; }
+
+	LoadedPluginTreeWidgetItem * loaded = // load first selected item
+			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
+	if(!loaded) { return; }
+	fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
+
+	// Show its histogram
+	if(loaded->getFilter()) {
+		ui->timeHistoWidget->displayHisto( loaded->getFilter()->getTimeHistogram() );
+	}
 
 }
 
