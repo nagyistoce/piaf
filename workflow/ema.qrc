@@ -204,5 +204,7 @@
         <file>icons/16x16/view-history.png</file>
         <file>icons/16x16/xmag.png</file>
         <file>icons/16x16/system-software-update.png</file>
+        <file>icons/22x22/FocusFar.png</file>
+        <file>icons/22x22/FocusNear.png</file>
     </qresource>
 </RCC>
