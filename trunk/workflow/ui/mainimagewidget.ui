@@ -85,7 +85,7 @@
         </property>
         <property name="icon">
          <iconset resource="../ema.qrc">
-          <normaloff>:/icons/icons/16x16/zoom-in.png</normaloff>:/icons/icons/16x16/zoom-in.png</iconset>
+          <normaloff>:/icons/icons/16x16/xmag.png</normaloff>:/icons/icons/16x16/xmag.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
