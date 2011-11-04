@@ -100,13 +100,14 @@ private slots:
 
 	void on_timeLineWidget_signalCursorBookmarkChanged(t_movie_pos);
 	void on_timeLineWidget_signalCursorPositionChanged(unsigned long long);
+	void on_mainImageWidget_signalZoomRect(QRect cropRect);
 
 	void slotNewBookmarkList(QList<video_bookmark_t>);
 signals:
 	/** @brief Signal that the image has changed (when play/pause) to update navigation image widget
 	*/
 	void signalImageChanged(QImage);
-
+	void signalZoomRect(QRect);
 };
 
 #endif // MAINDISPLAYWIDGET_H

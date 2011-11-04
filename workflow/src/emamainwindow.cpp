@@ -130,6 +130,8 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	}
 
 
+	connect(ui->mainDisplayWidget, SIGNAL(signalZoomRect(QRect)),
+			ui->globalNavImageWidget, SLOT(slot_mainImageWidget_signalZoomRect(QRect)));
 	connect(ui->mainDisplayWidget, SIGNAL(signalImageChanged(QImage)),
 			ui->globalNavImageWidget, SLOT(on_signalImageChanged(QImage)));
 }

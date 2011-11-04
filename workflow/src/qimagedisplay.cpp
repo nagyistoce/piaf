@@ -25,12 +25,39 @@
 #include "qimagedisplay.h"
 #include <qevent.h>
 #include <stdio.h>
+#include <QPainter>
 
 unsigned char g_debug_QImageDisplay = 0;
 
 QImageDisplay::QImageDisplay(QWidget * l_parent)
 	: QLabel(l_parent) {
 	setMouseTracking(true);
+}
+
+/** @brief Overloaded paintEvent */
+void QImageDisplay::paintEvent( QPaintEvent * )
+{
+	QPainter p(this);
+	int xoff = 0, yoff = 0;
+	if(pixmap() && !pixmap()->isNull())
+	{
+		xoff = (rect().width() - pixmap()->width())/2;
+		yoff = (rect().height() - pixmap()->height())/2;
+		QImage dispImage = pixmap()->toImage();
+		p.drawImage(xoff, yoff, dispImage.copy());
+//		fprintf(stderr, "QImageDisplay::%s:%d : pixmap()=%p => %dx%d\n",
+//				__func__, __LINE__, pixmap(),
+//				dispImage.width(), dispImage.height());
+	}
+
+	if(!m_overlayRect.isNull()) {
+		//	QColor m_overlayColor;
+		p.setPen(m_overlayColor);
+		p.drawRect(QRect(m_overlayRect.x()+xoff, m_overlayRect.y()+yoff,
+						 m_overlayRect.width(), m_overlayRect.height()));
+	}
+
+	p.end();
 }
 
 void QImageDisplay::mousePressEvent(QMouseEvent * e)

@@ -179,6 +179,14 @@ void  MainImageWidget::zoomOn(int x, int y, int scale) {
 //	cropAbsolute(x_crop, y_crop, scale);
 }
 
+void MainImageWidget::on_globalImageLabel_signalZoomRect(QRect cropRect)
+{
+	fprintf(stderr, "MainImageWidget::%s:%d : received signalZoomRect(cropRect=%d,%d+%dx%d);\n",
+			__func__, __LINE__,
+			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
+	emit signalZoomRect(cropRect);
+}
+
 void MainImageWidget::cropAbsolute(int x_crop, int y_crop, int scale)
 {
 	return; // FIXME
