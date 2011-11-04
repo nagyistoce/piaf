@@ -59,7 +59,8 @@ protected:
 private:
 	Ui::NavImageWidget *m_ui;
 
-	QRect m_fullRect;
+	QRect m_fullRect;///< size of fullscale image
+	QRect m_zoomRect; ///< Position of room rectangle
 	QRect m_displayRect;
 	QPixmap m_inputImage;
 	QPixmap m_displayImage;
@@ -71,8 +72,8 @@ private:
 	QPoint m_lastClick;
 
 public slots:
-	void on_signalImageChanged(QImage);
-
+	void slot_signalImageChanged(QImage);
+	void slot_mainImageWidget_signalZoomRect(QRect);
 private slots:
 	void on_zoomSlider_sliderReleased();
 	void on_zoomSlider_sliderMoved(int position);

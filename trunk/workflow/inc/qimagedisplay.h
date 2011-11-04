@@ -37,8 +37,23 @@ class QImageDisplay : public QLabel {
 public:
 	QImageDisplay(QWidget * l_parent = NULL);
 
+
+	/** @brief Set overlay rect */
+	void setOverlayRect(QRect overlayRect, QColor col) {
+
+		m_overlayRect = overlayRect;
+		m_overlayColor = col;
+	}
+
+	/** @brief Overloaded paintEvent */
+	void paintEvent( QPaintEvent * );
+
 private:
-	void	focusInEvent ( QFocusEvent * event );
+	QRect m_overlayRect;
+	QColor m_overlayColor;
+
+
+	void focusInEvent ( QFocusEvent * event );
 	void mouseReleaseEvent(QMouseEvent * e);
 	void mousePressEvent(QMouseEvent * e);
 	void mouseMoveEvent(QMouseEvent * e);

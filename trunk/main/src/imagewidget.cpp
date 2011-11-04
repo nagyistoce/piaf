@@ -476,8 +476,6 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent *e){
 
 void ImageWidget::mouseMoveEvent(QMouseEvent *e){
 
-
-
 	switch(mEditMode)
 	{
 	default:
@@ -546,6 +544,9 @@ void ImageWidget::clipSmartZooming()
 	yZoomCenter = yOrigine + height/2 ;
 
 	QRect cropRect = displayToImage(QRect(0,0, size().width(), size().height()));
+	fprintf(stderr, "ImageWidget::%s:%d : emit signalZoomRect(cropRect=%d,%d+%dx%d);\n",
+			__func__, __LINE__,
+			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
 	emit signalZoomRect(cropRect);
 
 }

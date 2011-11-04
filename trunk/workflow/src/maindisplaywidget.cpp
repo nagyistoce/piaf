@@ -223,6 +223,14 @@ void MainDisplayWidget::on_playButton_toggled(bool checked)
 	emit signalImageChanged(m_fullImage);
 }
 
+void MainDisplayWidget::on_mainImageWidget_signalZoomRect(QRect cropRect)
+{
+	fprintf(stderr, "MainDisplayWidget::%s:%d : received signalZoomRect(cropRect=%d,%d+%dx%d);\n",
+			__func__, __LINE__,
+			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
+	emit signalZoomRect(cropRect);
+}
+
 void MainDisplayWidget::on_goNextButton_clicked()
 {
 	bool got_picture = mFileVA.GetNextFrame();

@@ -84,7 +84,7 @@ private slots:
 	void on_globalImageLabel_signalWheelEvent( QWheelEvent * e );
 
 	void on_globalImageLabel_signalPicker(QRgb colorRGB, int colorGrey, QPoint pt);
-	void on_globalImageLabel_signalZoomRect(QRect cropRect) { emit signalZoomRect(cropRect); }
+	void on_globalImageLabel_signalZoomRect(QRect cropRect);
 
 	void slotUpdateImage();
 
