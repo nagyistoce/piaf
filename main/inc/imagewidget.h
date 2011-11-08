@@ -95,7 +95,10 @@ public:
 	int getColorMode() { return m_colorMode; }
 
 	/** @brief Set zoom scale and origin of zooming in original image reference */
-	void setZoomParams(int xO, int yO, int scale);
+	void setZoomParams(int xO, int yO, float scale);
+
+	/** @brief Set zoom scale and center of zooming in original image reference */
+	void setZoomCenter(int xO, int yO, float scale);
 
 	/** @brief Overloaded paintEvent */
 	void paintEvent( QPaintEvent * );
@@ -171,6 +174,10 @@ signals:
 	 */
 	void signalZoomRect(QRect cropRect);
 
+	/** @brief Zoom factor changed
+		@param ratio between display and image
+	 */
+	void signalZoomChanged(float);
 private slots:
 	void slot_shortcut_in_activated();
 	void slot_shortcut_out_activated();
@@ -205,7 +212,7 @@ private:
 	// zoom center in original image
 	int xZoomCenter, yZoomCenter;
 
-	int ZoomScale;			///< Integer zoom scale : 1 = 1:1 : 2=2:1 ; 0=1:2 ...
+//	int ZoomScale;			///< Integer zoom scale : 1 = 1:1 : 2=2:1 ; 0=1:2 ...
 	int m_colorMode;
 	bool mZoomFit;			///< Fit zoom to size (not integer zoom factor). Default= true
 	float mZoomFitFactor;	///< Fit zoom to size (floating point zoom factor)

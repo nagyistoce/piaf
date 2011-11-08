@@ -47,7 +47,7 @@ public:
 
 
 	/** @brief Zoom on a part of input image at a specified scale */
-	void zoomOn(int unscaled_x, int unscaled_y, int scale);
+	void zoomOn(int unscaled_x, int unscaled_y, float scale);
 
 	/** @brief crop absolute part of image for display */
 	void cropAbsolute(int crop_x, int crop_, int scale);
@@ -85,6 +85,7 @@ private slots:
 
 	void on_globalImageLabel_signalPicker(QRgb colorRGB, int colorGrey, QPoint pt);
 	void on_globalImageLabel_signalZoomRect(QRect cropRect);
+	void on_globalImageLabel_signalZoomChanged(float);
 
 	void slotUpdateImage();
 
@@ -100,6 +101,7 @@ signals:
 		@param coordinates of rect in original image reference
 	 */
 	void signalZoomRect(QRect cropRect);
+	void signalZoomChanged(float scale);
 
 	/** @brief The greyscale mode has been toggled */
 	void signalGreyscaleToggled(bool);

@@ -132,6 +132,8 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 
 	connect(ui->mainDisplayWidget, SIGNAL(signalZoomRect(QRect)),
 			ui->globalNavImageWidget, SLOT(slot_mainImageWidget_signalZoomRect(QRect)));
+	connect(ui->mainDisplayWidget, SIGNAL(signalZoomChanged(float)),
+			ui->globalNavImageWidget, SLOT(slot_mainImageWidget_signalZoomChanged(float)));
 	connect(ui->mainDisplayWidget, SIGNAL(signalImageChanged(QImage)),
 			ui->globalNavImageWidget, SLOT(on_signalImageChanged(QImage)));
 }
@@ -581,13 +583,9 @@ void EmaMainWindow::on_actionAbout_activated()
 	QString verstr, cmd = QString("Ctrl+");
 	QString item = QString("<li>"), itend = QString("</li>\n");
 	g_splash->showMessage(
-//			QString("<br><br><br><br><br><br><br><br><br>") +
-//			QString("<br><br><br><br><br><br><br><br><br>") +
-//			QString("<br><br><br><br><br><br><br>") +
 			tr("<b>Piaf workflow</b> version: ")
 						  + verstr.sprintf("svn%04d%02d%02d", VERSION_YY, VERSION_MM, VERSION_DD)
-
-						  + QString("<br>Website & Wiki: <a href=\"http://piaf.googlecode.com/\">http://piaf.googlecode.com/</a><br><br>")
+						  + tr(" Website & Wiki: <a href=\"http://piaf.googlecode.com/\">http://piaf.googlecode.com/</a><br><br>")
 //						  + tr("Shortcuts :<br><ul>\n")
 //							+ item + cmd + tr("O: Open a picture file") + itend
 //							+ item + cmd + tr("S: Save corrected image") + itend
@@ -602,7 +600,8 @@ void EmaMainWindow::on_actionAbout_activated()
 //							+ item + tr("") + itend
 //							+ item + cmd + tr("") + itend
 //						+ QString("</ul>\n")
-							);
+				, (Qt::AlignBottom | Qt::AlignHCenter)
+				);
 	repaint();// to force display of splash
 
 	g_splash->show();
@@ -1226,7 +1225,7 @@ void EmaMainWindow::slot_thumbImage_clicked(QString fileName)
 }
 
 
-void EmaMainWindow::on_globalNavImageWidget_signalZoomOn(int x, int y, int scale) {
+void EmaMainWindow::on_globalNavImageWidget_signalZoomOn(int x, int y, float scale) {
 	ui->mainDisplayWidget->zoomOn(x,y,scale);
 	ui->stackedWidget->setCurrentIndex(0);
 }

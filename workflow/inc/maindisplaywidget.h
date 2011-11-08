@@ -58,9 +58,9 @@ public:
 	QImage getImage() { return m_fullImage; }
 
 	/** @brief Zoom on a part of input image at a specified scale */
-	void zoomOn(int unscaled_x, int unscaled_y, int scale);
+	void zoomOn(int unscaled_x, int unscaled_y, float scale);
 	/** @brief crop absolute part of image for display */
-	void cropAbsolute(int crop_x, int crop_, int scale);
+	void cropAbsolute(int crop_x, int crop_, float scale);
 
 	/** @brief Set pointer to filter sequencer */
 	void setFilterSequencer(FilterSequencer *);
@@ -101,6 +101,7 @@ private slots:
 	void on_timeLineWidget_signalCursorBookmarkChanged(t_movie_pos);
 	void on_timeLineWidget_signalCursorPositionChanged(unsigned long long);
 	void on_mainImageWidget_signalZoomRect(QRect cropRect);
+	void on_mainImageWidget_signalZoomChanged(float zoom_scale);
 
 	void slotNewBookmarkList(QList<video_bookmark_t>);
 signals:
@@ -108,6 +109,7 @@ signals:
 	*/
 	void signalImageChanged(QImage);
 	void signalZoomRect(QRect);
+	void signalZoomChanged(float);
 };
 
 #endif // MAINDISPLAYWIDGET_H
