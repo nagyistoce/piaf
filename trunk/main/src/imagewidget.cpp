@@ -86,7 +86,6 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 
 	//setFocusPolicy (Qt::StrongFocus);
 	dImage=NULL;
-	ZoomScale = 1;
 	m_colorMode = 0;
 	mShift = mCtrl = false;
 
@@ -139,20 +138,44 @@ void ImageWidget::switchToSmartZoomMode(bool on)
 
 	clipSmartZooming();
 }
+void ImageWidget::setZoomCenter(int xC, int yC, float scale) {
 
-void ImageWidget::setZoomParams(int xO, int yO, int scale) {
+	xOrigine = xC - scale * 0.5f * size().width();
+	yOrigine = yC - scale * 0.5f * size().height();
+
+	float diff = (mZoomFitFactor - scale);
+	if(diff < 0.f) { diff = -diff; }
+	mZoomFitFactor = scale;
+
+	fprintf(stderr, "ImageWidget::%s:%d : zoom on center=%d,%d, sc=%g / disp=%dx%d"
+			" => origin=%d,%d\n",
+			__func__, __LINE__, xC, yC, scale,
+			size().width(), size().height(),
+			xOrigine, yOrigine
+			);
+	clipSmartZooming();
+	update();
+
+	if(diff > 0.001f) {
+		emit signalZoomChanged(mZoomFitFactor);
+	}
+}
+
+void ImageWidget::setZoomParams(int xO, int yO, float scale) {
 	xOrigine = xO;
 	yOrigine = yO;
 
+	float diff = (mZoomFitFactor - scale);
+	if(diff < 0.f) { diff = -diff; }
 	mZoomFitFactor = scale;
-	if(scale < 1)
-	{
-		mZoomFitFactor = 1.f / (2.f - scale);
-	}
-	ZoomScale = scale;
-//		mZoomFit = false;
+
+	fprintf(stderr, "ImageWidget::%s:%d : zoom on origin=%d,%d, sc=%g\n",
+			__func__, __LINE__, xO, yO, scale);
 	clipSmartZooming();
 	update();
+	if(diff > 0.001f) {
+		emit signalZoomChanged(mZoomFitFactor);
+	}
 }
 
 int ImageWidget::setEditMode(int mode)
@@ -609,6 +632,7 @@ void ImageWidget::zoomOn( int xCenterOnDisp, int yCenterOnDisp,
 		// recompute minimal zoom
 		xOrigine = yOrigine = 0;
 		mZoomFitFactor = -1.f;
+		emit signalZoomChanged(mZoomFitFactor);
 
 		update();
 		return ;
@@ -617,18 +641,11 @@ void ImageWidget::zoomOn( int xCenterOnDisp, int yCenterOnDisp,
 	xZoomCenter = xOrigine + xCenterOnDisp / curZoom;
 	yZoomCenter = yOrigine + yCenterOnDisp / curZoom;
 
-//	fprintf(stderr, "%s:%d : orig=%d,%d / %dx%d x,y=%d,%d zoom=%g => new=%g"
-//			" => ZoomCenter=%d,%d disp=%dx%d => xOrig=%dx%d\n", __func__, __LINE__,
-//			xOrigine, yOrigine, dImage->width(), dImage->height(),
-//			x,y, curZoom, mZoomFitFactor,
-//			xZoomCenter, yZoomCenter,
-//			disp_w, disp_h,
-//			xZoomCenter - disp_w*0.5f/mZoomFitFactor,
-//			yZoomCenter - disp_h*0.5f/mZoomFitFactor
-//			);
-
 	xOrigine = xZoomCenter - disp_w*0.5f/mZoomFitFactor;
 	yOrigine = yZoomCenter - disp_h*0.5f/mZoomFitFactor;
+	fprintf(stderr, "ImageWidget::%s:%d : emit signalZoomChanged(%g)\n",
+			__func__, __LINE__, mZoomFitFactor);
+	emit signalZoomChanged(mZoomFitFactor);
 
 	clipSmartZooming();
 

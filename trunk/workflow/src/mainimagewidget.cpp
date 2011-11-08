@@ -160,11 +160,11 @@ int MainImageWidget::setImage(QImage imageIn,
 }
 
 
-void  MainImageWidget::zoomOn(int x, int y, int scale) {
+void  MainImageWidget::zoomOn(int x, int y, float scale) {
 	if(m_fullImage.isNull()) { return; }
 
 
-	m_ui->globalImageLabel->setZoomParams(x,y, scale);
+	m_ui->globalImageLabel->setZoomCenter(x,y, scale);
 
 //	int wdisp = m_ui->globalImageLabel->width()-2;
 //	int hdisp = m_ui->globalImageLabel->height()-2;
@@ -185,6 +185,10 @@ void MainImageWidget::on_globalImageLabel_signalZoomRect(QRect cropRect)
 			__func__, __LINE__,
 			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
 	emit signalZoomRect(cropRect);
+}
+void MainImageWidget::on_globalImageLabel_signalZoomChanged(float scale)
+{
+	emit signalZoomChanged(scale);
 }
 
 void MainImageWidget::cropAbsolute(int x_crop, int y_crop, int scale)

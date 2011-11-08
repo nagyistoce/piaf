@@ -66,14 +66,15 @@ private:
 	QPixmap m_displayImage;
 
 	/** @brief Zoom on a part of input image at a specified scale */
-	void zoomOn(int x, int y, int scale);
-	int m_zoom_scale; ///< zoom factor
+	void zoomOn(int x, int y, float scale);
+	float m_zoom_scale; ///< zoom factor
 	QPoint m_last_zoom; ///< last zoom position in original image size reference
 	QPoint m_lastClick;
 
 public slots:
 	void slot_signalImageChanged(QImage);
 	void slot_mainImageWidget_signalZoomRect(QRect);
+	void slot_mainImageWidget_signalZoomChanged(float);
 private slots:
 	void on_zoomSlider_sliderReleased();
 	void on_zoomSlider_sliderMoved(int position);
@@ -86,7 +87,7 @@ private slots:
 	void on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * e);
 	void on_globalImageLabel_signalWheelEvent( QWheelEvent * e );
 signals:
-	void signalZoomOn(int, int, int);
+	void signalZoomOn(int xcenter, int ycenter, float zoom_scale);
 };
 
 #endif // NAVIMAGEWIDGET_H
