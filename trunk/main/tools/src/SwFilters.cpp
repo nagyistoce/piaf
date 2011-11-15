@@ -40,7 +40,6 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
-#include <sys/wait.h>
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -49,6 +48,11 @@
 //#include "videocapture.h"
 #include "piaf-common.h"
 
+#ifndef WIN32
+#include <sys/wait.h>
+#else
+/// @todo porting to win32
+#endif
 
 #include <QWorkspace>
 bool g_debug_SwSignalHandler = false;
@@ -93,6 +97,7 @@ int SwSignalHandler::registerChild(int pid, SwFilter * filter) {
 int SwSignalHandler::killChild() {
 
 	sigFilter * sigF = NULL;
+#ifndef WIN32
 
 	if(filterList.isEmpty()) {
 		fprintf(stderr, "SwSignalHandler::%s:%d : nothing in list => return 0 !\n", __func__, __LINE__);
@@ -145,11 +150,14 @@ int SwSignalHandler::killChild() {
 			return 1;
 		}
 	}
-
+#else
+/// @todo porting to win32
+#endif
 	if(g_debug_SwSignalHandler) {
 		fprintf(stderr, "SwSignalHandler::%s:%d : WARNING: filter not found in list => return 0 !\n",
 				__func__, __LINE__);
 	}
+
 
 	return 0;
 }
@@ -2317,6 +2325,7 @@ int SwFilter::loadChildProcess()
 		fprintf(stderr, "SwFilter::%s:%d : file='%s' => path='%s'\n", __func__, __LINE__,
 			exec_name, path );
 	}
+#ifndef WIN32
 	// fork and
 	// Commmunication processing
 	if( pipe( pipeOut ) == -1 || pipe( pipeIn ) == -1)
@@ -2409,6 +2418,9 @@ int SwFilter::loadChildProcess()
 			writeFlag = false;
 		}
 	}
+#else
+/// @todo porting to win32
+#endif
 
 	return 1;
 }
@@ -2457,11 +2469,14 @@ int SwFilter::unloadChildProcess()
 	fflush(stderr);
 //#endif
 
-
+#ifndef WIN32
 	while(waitpid(childpid, NULL, WNOHANG) >0) {
 		fprintf(stderr, "%s:%d : waitpid(%d, WNOHANG) !\n", __func__, __LINE__,
 				childpid);
 	}
+#else
+/// @todo porting to win32
+#endif
 
 	childpid = 0;
 
