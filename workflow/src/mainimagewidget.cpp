@@ -181,9 +181,9 @@ void  MainImageWidget::zoomOn(int x, int y, float scale) {
 
 void MainImageWidget::on_globalImageLabel_signalZoomRect(QRect cropRect)
 {
-	fprintf(stderr, "MainImageWidget::%s:%d : received signalZoomRect(cropRect=%d,%d+%dx%d);\n",
-			__func__, __LINE__,
-			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
+//	fprintf(stderr, "MainImageWidget::%s:%d : received signalZoomRect(cropRect=%d,%d+%dx%d);\n",
+//			__func__, __LINE__,
+//			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
 	emit signalZoomRect(cropRect);
 }
 void MainImageWidget::on_globalImageLabel_signalZoomChanged(float scale)

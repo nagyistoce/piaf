@@ -225,7 +225,6 @@ private slots:
 	void on_globalNavImageWidget_signalZoomOn(int, int, float);
 
 	//void on_mainDisplayWidget_signalGreyscaleToggled(bool);
-	void slot_mainDisplayWidget_signalZoomRect(QRect cropRect);
 
 	// MAIN MENU ACTION
 	void on_actionQuit_activated();

@@ -71,11 +71,11 @@ public:
 	void switchToSmartZoomMode(bool on = true);
 
 	/** @brief Change zoom centered to a point on display with a zoom increment */
-	void zoomOn(int xCenter, int yCenter, float zoominc);
+	void zoomOnDisplayPixel(int xCenter, int yCenter, float zoominc);
 
 	/** @brief Change zoom factor centered to a point on display with a zoom increment */
-	void zoomOn(QPoint ptCenter, float zoominc) {
-		zoomOn(ptCenter.x(), ptCenter.y(), zoominc);
+	void zoomOnDisplayPixel(QPoint ptCenter, float zoominc) {
+		zoomOnDisplayPixel(ptCenter.x(), ptCenter.y(), zoominc);
 	}
 	/* @brief Set edition mode: smart zoom, picker, edit rois...
 	@return Edition mode
@@ -216,6 +216,8 @@ private:
 	int m_colorMode;
 	bool mZoomFit;			///< Fit zoom to size (not integer zoom factor). Default= true
 	float mZoomFitFactor;	///< Fit zoom to size (floating point zoom factor)
+
+	QRect mCropRect; ///< Display rect in image (chen cropped)
 	QImage m_displayImage;
 
 	int xMouseMoveStart, yMouseMoveStart; ///< Start position of mouse when moving

@@ -903,7 +903,7 @@ void WorkshopImageTool::slotZoomInOnce(){
 //	yZoomOrigine = 0;
 	int x = (int)viewSize.width / 2;
 	int y  = (int)viewSize.height / 2;
-	ViewWidget->zoomOn(x, y, +1);
+	ViewWidget->zoomOnDisplayPixel(x, y, +1);
 }
 
 void WorkshopImageTool::slotZoomOutOnce(){
@@ -912,7 +912,7 @@ void WorkshopImageTool::slotZoomOutOnce(){
 //	yZoomOrigine = 0;
 	int x = (int)viewSize.width / 2;
 	int y  = (int)viewSize.height / 2;
-	ViewWidget->zoomOn(x, y, -1);
+	ViewWidget->zoomOnDisplayPixel(x, y, -1);
 }
 
 void WorkshopImageTool::slotMoveMode(){
@@ -1462,7 +1462,7 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 //		CalculateZoomWindow();
 //		memset(ImgRGB.bits(), 0, viewPixel*(ImgRGB.depth()/8));
 
-		ViewWidget->zoomOn( point.x(), point.y(), +1 );
+		ViewWidget->zoomOnDisplayPixel( point.x(), point.y(), +1 );
 		break;
 
 	case MODE_ZOOM_OUT:
@@ -1471,7 +1471,7 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 //		memset(ImgRGB.bits(), 0, viewPixel*(ImgRGB.depth()/8));
 //		CalculateZoomWindow();
 
-		ViewWidget->zoomOn( point.x(), point.y(), -1 );
+		ViewWidget->zoomOnDisplayPixel( point.x(), point.y(), -1 );
 		break;
 
 	case MODE_MOVE:
