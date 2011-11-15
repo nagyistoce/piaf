@@ -125,29 +125,31 @@ unix: {
 }
 
 win32: {
-	message("Win32 specific paths : OpenCV must be installed in C:\Program Files\OpenCV")
+	message("Win32 specific paths : OpenCV must be installed in C:\\Program Files\\OpenCV")
 	DYN_LIBS += -L"C:\Program Files\OpenCV\lib" \
 		-L"C:\Program Files\OpenCV\bin"
 
 	exists("C:\Program Files\OpenCV\cxcore\include\cxcore.h") {
-		DEFINES += OPENCV2 OPENCV21
+		message("Complete for opencv >=2.1")
+		DEFINES += OPENCV2 OPENCV22
 		INCLUDEPATH += "C:\Program Files\OpenCV\cxcore\include"
 		INCLUDEPATH += "C:\Program Files\OpenCV\cv\include"
 		INCLUDEPATH += "C:\Program Files\OpenCV\cvaux\include"
 		INCLUDEPATH += "C:\Program Files\OpenCV\otherlibs\highgui"
 		INCLUDEPATH += "C:\Program Files\OpenCV\otherlibs\highgui"
+		exists("C:\Program Files\OpenCV\bin\cvaux110.dll") {
+			DYN_LIBS += -lcxcore -lcv -lcvaux -lhighgui
+		} else {
 
-		DYN_LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui
+			DYN_LIBS += -lopencv_core -lopencv_imgproc -lopencv_highgui
+		}
 
 	} else {
-		message("Complete for opencv 2.2")
-		DEFINES += OPENCV2 OPENCV22
+		message("Complete for opencv <2.1")
+		DEFINES += OPENCV2 OPENCV21
 		INCLUDEPATH += "C:\Program Files\OpenCV\include"
 
-		DYN_LIBS += -lcxcore -lcv
-
 	}
-
 	LIBS += $$DYN_LIBS
 }
 

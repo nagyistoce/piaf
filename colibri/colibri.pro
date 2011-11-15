@@ -2,11 +2,13 @@
 # Project created by QtCreator 2009-08-10T21:22:13
 # -------------------------------------------------
 TARGET = Colibri
+QT = core gui
 
-DEFINES += QT3_SUPPORT
-QT += qt3support
-
-include(../main/ffmpeg.pri)
+linux-g++: {
+	QT += qt3support
+	DEFINES += QT3_SUPPORT
+	include(../main/ffmpeg.pri)
+}
 include(../main/opencv.pri)
 
 TEMPLATE = app
@@ -50,15 +52,19 @@ win32:TARGET = $$join(TARGET,,d)
 SOURCES += src/main.cpp \
     src/colibrimainwindow.cpp \
 	src/imgutils.cpp \
-	../main/tools/src/SwPluginCore.cpp \
-	../main/tools/src/SwFilters.cpp \
 	../main/src/imagewidget.cpp
 
 HEADERS += inc/colibrimainwindow.h \
 	inc/imgutils.h \
-	../main/tools/inc/SwPluginCore.h \
-	../main/tools/inc/SwFilters.h \
 	../main/inc/imagewidget.h
+
+linux-g++: {
+	HEADERS += \
+		../main/tools/inc/SwPluginCore.h \
+		../main/tools/inc/SwFilters.h
+	SOURCES += ../main/tools/src/SwPluginCore.cpp \
+		../main/tools/src/SwFilters.cpp
+}
 
 FORMS += ui/colibrimainwindow.ui
 INCLUDEPATH += inc
@@ -67,7 +73,13 @@ INCLUDEPATH += ../main/inc
 INCLUDEPATH += ../main/tools/inc/
 
 DEPENDPATH += $$INCLUDEPATH
-
+win32: {
+	OBJECTS_DIR = obj
+	MOC_DIR = moc
+} else {
+	OBJECTS_DIR = .obj
+	MOC_DIR = .moc
+}
 RESOURCES += colibri.qrc
 
 # # INSTALLATION

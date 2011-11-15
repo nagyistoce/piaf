@@ -44,7 +44,11 @@ ColibriMainWindow::ColibriMainWindow(QWidget *parent)
 
 	m_pColibriThread = NULL;
 
+#ifndef WIN32
 	memset(&mSwImage, 0, sizeof(swImageStruct));
+#else
+	/// \todo port to Win32
+#endif
 
 	QString filename = ":/qss/Colibri.qss";
 	QFile file(filename);
@@ -68,22 +72,22 @@ ColibriMainWindow::ColibriMainWindow(QWidget *parent)
 
 void ColibriMainWindow::loadSettings() {
 	// overwrite with batch settings
-	QString entry = mSettings.readEntry(COLIBRISETTING_LASTPLUGINDIR);
+	QVariant entry = mSettings.value(COLIBRISETTING_LASTPLUGINDIR);
 	if(!entry.isNull())
 	{
-		mLastSettings.lastPluginsDir = entry;
+		mLastSettings.lastPluginsDir = entry.toString();
 	}
 
-	entry = mSettings.readEntry(COLIBRISETTING_LASTIMAGEDIR);
+	entry = mSettings.value(COLIBRISETTING_LASTIMAGEDIR);
 	if(!entry.isNull())
 	{
-		mLastSettings.lastImagesDir = entry;
+		mLastSettings.lastImagesDir = entry.toString();
 	}
 
-	entry = mSettings.readEntry(COLIBRISETTING_LASTMOVIEDIR);
+	entry = mSettings.value(COLIBRISETTING_LASTMOVIEDIR);
 	if(!entry.isNull())
 	{
-		mLastSettings.lastMoviesDir = entry;
+		mLastSettings.lastMoviesDir = entry.toString();
 	}
 
 }
@@ -91,9 +95,9 @@ void ColibriMainWindow::loadSettings() {
 void ColibriMainWindow::saveSettings()
 {
 	// overwrite with batch settings
-	mSettings.writeEntry(COLIBRISETTING_LASTPLUGINDIR, mLastSettings.lastPluginsDir);
-	mSettings.writeEntry(COLIBRISETTING_LASTIMAGEDIR, mLastSettings.lastImagesDir);
-	mSettings.writeEntry(COLIBRISETTING_LASTMOVIEDIR, mLastSettings.lastMoviesDir);
+	mSettings.setValue(COLIBRISETTING_LASTPLUGINDIR, mLastSettings.lastPluginsDir);
+	mSettings.setValue(COLIBRISETTING_LASTIMAGEDIR, mLastSettings.lastImagesDir);
+	mSettings.setValue(COLIBRISETTING_LASTMOVIEDIR, mLastSettings.lastMoviesDir);
 }
 
 ColibriMainWindow::~ColibriMainWindow()
@@ -104,6 +108,8 @@ ColibriMainWindow::~ColibriMainWindow()
 
 int ColibriMainWindow::setPluginSequence(QString sequencepath)
 {
+
+#ifndef _WIN32
 	if(sequencepath.isEmpty()) {
 		QString fileName = QFileDialog::getOpenFileName(this, tr("Open plugin sequence file"),
 														 mLastSettings.lastPluginsDir,
@@ -121,7 +127,6 @@ int ColibriMainWindow::setPluginSequence(QString sequencepath)
 			return -1;
 		}
 	}
-
 	if(mFilterManager.loadFilterList(sequencepath.toUtf8().data()) < 0) {
 		QMessageBox::critical(NULL, tr("Invalid sequence"),
 							  tr("File containing plugins sequence is invalid : ")
@@ -129,7 +134,9 @@ int ColibriMainWindow::setPluginSequence(QString sequencepath)
 		ui->toolsWidget->setEnabled(false);
 		return -1;
 	}
-
+#else
+	/// \todo port to win32
+#endif
 	return 0;
 }
 
@@ -145,13 +152,24 @@ void ColibriMainWindow::on_fileButton_clicked()
 	if(fileName.isEmpty()) return;
 
 	QFileInfo fi(fileName);
-	if(!fi.exists()) return;
-
+	if(!fi.exists())
+	{
+		QMessageBox::critical(NULL, tr("Image loading error"),
+							  tr("File ") + fileName + tr(" does not exists."));
+		return;
+	}
 	mLastSettings.lastImagesDir = fi.absolutePath();
 	saveSettings();
 
 	// load file
 	IplImage * iplImage = cvLoadImage(fileName.toUtf8().data());
+	if(!iplImage)
+	{
+		QMessageBox::critical(NULL, tr("Image loading error"),
+							  tr("Could not load image ") + fileName);
+		return;
+	}
+
 	computeImage(iplImage);
 
 	displayImage(iplImage);
@@ -211,8 +229,8 @@ QImage iplImageToQImage(IplImage * iplImage) {
 //		orig_width--;
 
 
-        QImage qImage(orig_width, iplImage->height, depth == 1 ? QImage::Format_Mono : QImage::Format_ARGB32);
-        memset(qImage.bits(), 255, orig_width*iplImage->height*depth); // to fill the alpha channel
+	QImage qImage(orig_width, iplImage->height, depth == 1 ? QImage::Format_Mono : QImage::Format_ARGB32);
+	memset(qImage.bits(), 255, orig_width*iplImage->height*depth); // to fill the alpha channel
 
 
 	switch(iplImage->depth) {
@@ -244,7 +262,11 @@ QImage iplImageToQImage(IplImage * iplImage) {
 						buf_out[2] = buf_in[0];
 						buf_out[0] = buf_in[2];
                                         }
-*/				}
+*/
+
+				}
+
+
 			}
 		}
 		else if(rgb24_to_bgr32) {
@@ -438,6 +460,19 @@ QImage iplImageToQImage(IplImage * iplImage) {
 		}break;
 	}
 
+#ifdef WIN32
+	qImage.save("C:\\temp\\qImage.png"); /// \todo fixme : remove
+	// Force alpha channel to be 255
+	for(int r=0; r<iplImage->height; r++) {
+		u8 * buf_out = (u8 *)(qImage.bits()) + r*qImage.depth()/8;
+		for(int c4 = 0; c4 <= iplImage->widthStep; c4+=4)
+		{
+			buf_out[c4] = 255;
+		}
+	}
+	qImage.save("C:\\temp\\qImage2.png"); /// \todo fixme : remove
+#endif
+
 	if(qImage.depth() == 8) {
 		qImage.setNumColors(256);
 
@@ -459,6 +494,8 @@ QImage iplImageToQImage(IplImage * iplImage) {
 
 void ColibriMainWindow::computeImage(IplImage * iplImage) {
 	if(!iplImage) return;
+
+#ifndef WIN32
 
 	// TODO : check if size changed
 	if(mSwImage.width != iplImage->width || mSwImage.height != iplImage->height
@@ -486,7 +523,9 @@ void ColibriMainWindow::computeImage(IplImage * iplImage) {
 
 	// Process this image with filters
 	mFilterManager.processImage(&mSwImage);
-
+#else
+	/// \todo port to Win32
+#endif
 	// Display image as output
 	//displayImage(iplImage);
 }

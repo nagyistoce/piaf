@@ -77,7 +77,7 @@ bool g_debug_ImageWidget = false;
 
 
 ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
-	: QWidget(parent, name, f)
+	: QWidget(parent)
 {
 	mZoomFit = true; // fit to size by default
 	mZoomFitFactor = -1.; // don't know yet the zoom factor
@@ -126,6 +126,7 @@ void ImageWidget::setRefImage(QImage *pIm)
 			setColorMode(m_colorMode);
 		}
 	}
+
 	update();
 }
 
@@ -206,7 +207,11 @@ int ImageWidget::setEditMode(int mode)
 		break;
 
 	case EDITMODE_PICKER: {
+#ifndef WIN32
 		chdir(BASE_DIRECTORY "images/pixmaps");
+#else
+/// @todo porting to win32
+#endif
 		QCursor zoomCursor = QCursor( QBitmap( "CursorPicker.bmp", 0),
 									  QBitmap( "CursorPickerMask.bmp", 0),
 									  1, 20);
@@ -730,19 +735,13 @@ void ImageWidget::wheelEvent ( QWheelEvent * e )
 	emit signalWheelEvent( e );
 }
 
-void ImageWidget::paintEvent( QPaintEvent * e)
+void ImageWidget::paintEvent( QPaintEvent * )
 {
 	if(!dImage) {
 		return;
 	}
 
 	QRect cr = rect();
-//	if(!e) {
-//		cr = rect();
-//	} else {
-//		// Use double-buffering
-//		cr = e->rect();
-//	}
 	if(g_debug_ImageWidget) {
 		fprintf(stderr, "ImageWidget %p::%s:%d : dImage=%dx%d size=%dx%d => cr=%dx%d fit=%c\n",
 				this, __func__, __LINE__,
@@ -751,9 +750,7 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 				cr.width(), cr.height(), mZoomFit ? 'T':'F');
 	}
 
-	QPixmap pix( cr.size() );
-	pix.fill( this, cr.topLeft() );
-	QPainter p( &pix);
+	QPainter p(this);
 
 	if(mZoomFit)
 	{
@@ -856,7 +853,6 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 	}
 
 	p.end();
-	bitBlt( this, cr.topLeft(), &pix );
 }
 
 
@@ -912,12 +908,12 @@ QPoint ImageWidget::imageToDisplay(QPoint img_pt)
 	display_pt = QPoint((img_pt.x()- xOrigine) * mZoomFitFactor ,
 						(img_pt.y()- yOrigine) * mZoomFitFactor
 						 );
-	fprintf(stderr, "ImgWidget::%s:%d : zs=%g img=%d,%d => disp=%d,%d\n",
-			__func__, __LINE__,
-			mZoomFitFactor,
-			img_pt.x(),img_pt.y(),
-			display_pt.x(), display_pt.y()
-			);
+//	fprintf(stderr, "ImgWidget::%s:%d : zs=%g img=%d,%d => disp=%d,%d\n",
+//			__func__, __LINE__,
+//			mZoomFitFactor,
+//			img_pt.x(),img_pt.y(),
+//			display_pt.x(), display_pt.y()
+//			);
 	return display_pt;
 }
 

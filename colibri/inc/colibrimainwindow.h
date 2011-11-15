@@ -35,7 +35,10 @@
 
 // For capture mode
 #include "imgutils.h"
+
+#ifndef WIN32
 #include "SwFilters.h"
+#endif
 
 namespace Ui
 {
@@ -96,8 +99,12 @@ private:
 	/// Status flag of the running state of thread
 	bool m_isRunning;
 
+#ifndef WIN32
+	/// Processing sequence filter
 	SwFilterManager * m_pFilterManager;
-
+#else
+	/// \todo port to Win32
+#endif
 	IplImage * m_inputImage;
 	IplImage * m_outputImage;
 	CvCapture * m_capture;
@@ -137,7 +144,6 @@ private:
 	QTimer m_timer;
 	int m_lastIteration;
 
-	swImageStruct mSwImage; ///< Piaf plugin image struct for processing
 
 	QImage qtImage; ///< QImage for display
 	/** @brief Compute image and display result */
@@ -145,10 +151,13 @@ private:
 
 	/** @brief Start background thread for capture source */
 	void startBackgroundThread();
-
+#ifndef WIN32
 	/// Processing sequence filter
 	SwFilterManager mFilterManager;
-
+	swImageStruct mSwImage; ///< Piaf plugin image struct for processing
+#else
+	/// \todo port to Win32
+#endif
 	/// Capture thread
 	ColibriThread * m_pColibriThread;
 
