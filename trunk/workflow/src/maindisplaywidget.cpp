@@ -225,18 +225,19 @@ void MainDisplayWidget::on_playButton_toggled(bool checked)
 
 void MainDisplayWidget::on_mainImageWidget_signalZoomRect(QRect cropRect)
 {
-	fprintf(stderr, "MainDisplayWidget::%s:%d : received signalZoomRect(cropRect=%d,%d+%dx%d);\n",
-			__func__, __LINE__,
-			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
+//	fprintf(stderr, "MainDisplayWidget::%s:%d : received signalZoomRect(cropRect=%d,%d+%dx%d);\n",
+//			__func__, __LINE__,
+//			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
 	emit signalZoomRect(cropRect);
 }
 void MainDisplayWidget::on_mainImageWidget_signalZoomChanged(float zoom_scale)
 {
-	fprintf(stderr, "MainDisplayWidget::%s:%d : received signalZoomChanged(scale=%g);\n",
-			__func__, __LINE__,
-			zoom_scale);
+//	fprintf(stderr, "MainDisplayWidget::%s:%d : received signalZoomChanged(scale=%g);\n",
+//			__func__, __LINE__,
+//			zoom_scale);
 	emit signalZoomChanged(zoom_scale);
 }
+
 void MainDisplayWidget::on_goNextButton_clicked()
 {
 	bool got_picture = mFileVA.GetNextFrame();

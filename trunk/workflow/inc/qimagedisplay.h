@@ -43,6 +43,7 @@ public:
 
 		m_overlayRect = overlayRect;
 		m_overlayColor = col;
+		update();
 	}
 
 	/** @brief Overloaded paintEvent */

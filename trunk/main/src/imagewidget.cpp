@@ -21,6 +21,7 @@
 #include <QPainter>
 #include <QShortcut>
 
+#include <math.h>
 
 #include <qcolor.h>
 
@@ -140,11 +141,19 @@ void ImageWidget::switchToSmartZoomMode(bool on)
 }
 void ImageWidget::setZoomCenter(int xC, int yC, float scale) {
 
-	xOrigine = xC - scale * 0.5f * size().width();
-	yOrigine = yC - scale * 0.5f * size().height();
-
+	if(scale != 0)
+	{
+		xOrigine = (int)roundf(xC - 0.5f * size().width() / scale);
+		yOrigine = (int)roundf(yC - 0.5f * size().height() / scale);
+	}
+	else
+	{
+		xOrigine = 0;
+		yOrigine = 0;
+	}
 	float diff = (mZoomFitFactor - scale);
 	if(diff < 0.f) { diff = -diff; }
+
 	mZoomFitFactor = scale;
 
 	fprintf(stderr, "ImageWidget::%s:%d : zoom on center=%d,%d, sc=%g / disp=%dx%d"
@@ -156,12 +165,13 @@ void ImageWidget::setZoomCenter(int xC, int yC, float scale) {
 	clipSmartZooming();
 	update();
 
-	if(diff > 0.001f) {
+	if(diff > 0.001f) { // zoom increment is big enough to signal it to navigation widget
 		emit signalZoomChanged(mZoomFitFactor);
 	}
 }
 
-void ImageWidget::setZoomParams(int xO, int yO, float scale) {
+void ImageWidget::setZoomParams(int xO, int yO, float scale)
+{
 	xOrigine = xO;
 	yOrigine = yO;
 
@@ -293,12 +303,12 @@ void ImageWidget::keyReleaseEvent ( QKeyEvent * event )
 }
 void ImageWidget::slot_shortcut_in_activated()
 {
-	zoomOn(width()/2, height()/2, KEY_ZOOM_INC);
+	zoomOnDisplayPixel(width()/2, height()/2, KEY_ZOOM_INC);
 }
 
 void ImageWidget::slot_shortcut_out_activated()
 {
-	zoomOn(width()/2, height()/2, -KEY_ZOOM_INC);
+	zoomOnDisplayPixel(width()/2, height()/2, -KEY_ZOOM_INC);
 }
 void ImageWidget::slot_shortcut_fit_activated()
 {
@@ -331,14 +341,14 @@ void ImageWidget::keyPressEvent ( QKeyEvent * event )
 			fprintf(stderr, "ImageWidget::%s:%d : zoom + %g !\n",
 					__func__, __LINE__, KEY_ZOOM_INC);
 			//
-			zoomOn(width()/2, height()/2, KEY_ZOOM_INC);
+			zoomOnDisplayPixel(width()/2, height()/2, KEY_ZOOM_INC);
 		}
 		else if(key.compare("-")==0)
 		{
 			fprintf(stderr, "ImageWidget::%s:%d : zoom - %g !\n",
 					__func__, __LINE__, KEY_ZOOM_INC);
 			//
-			zoomOn(width()/2, height()/2, -KEY_ZOOM_INC);
+			zoomOnDisplayPixel(width()/2, height()/2, -KEY_ZOOM_INC);
 		}
 		else if(key.compare("x")==0)
 		{
@@ -572,6 +582,7 @@ void ImageWidget::clipSmartZooming()
 			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
 	emit signalZoomRect(cropRect);
 
+	mCropRect = cropRect;
 }
 
 QPoint ImageWidget::displayToOriginal(int x, int y)
@@ -582,8 +593,8 @@ QPoint ImageWidget::displayToOriginal(int x, int y)
 	return QPoint(xOrig, yOrig);
 }
 
-/* Change zoom centered to a point with a zoom increment */
-void ImageWidget::zoomOn( int xCenterOnDisp, int yCenterOnDisp,
+/* Change zoom centered to a point on display with a zoom increment */
+void ImageWidget::zoomOnDisplayPixel( int xCenterOnDisp, int yCenterOnDisp,
 						  float zoominc )
 {
 	if(!dImage) return;
@@ -638,11 +649,16 @@ void ImageWidget::zoomOn( int xCenterOnDisp, int yCenterOnDisp,
 		return ;
 	}
 
-	xZoomCenter = xOrigine + xCenterOnDisp / curZoom;
-	yZoomCenter = yOrigine + yCenterOnDisp / curZoom;
+	// Compute zoom center on original image = origin + display pt / previous zoom scale
+	// use float for more precision and no derivation up-left
+	float xZCf = (float)xOrigine + (float)xCenterOnDisp / curZoom;
+	float yZCf = (float)yOrigine + (float)yCenterOnDisp / curZoom;
 
-	xOrigine = xZoomCenter - disp_w*0.5f/mZoomFitFactor;
-	yOrigine = yZoomCenter - disp_h*0.5f/mZoomFitFactor;
+	xZoomCenter = (int)roundf(xZCf);
+	yZoomCenter = (int)roundf(yZCf);
+
+	xOrigine = (int)roundf(xZCf - disp_w*0.5f/mZoomFitFactor);
+	yOrigine = (int)roundf(yZCf - disp_h*0.5f/mZoomFitFactor);
 	fprintf(stderr, "ImageWidget::%s:%d : emit signalZoomChanged(%g)\n",
 			__func__, __LINE__, mZoomFitFactor);
 	emit signalZoomChanged(mZoomFitFactor);
@@ -720,13 +736,13 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 		return;
 	}
 
-	QRect cr;
-	if(!e) {
-		cr = rect();
-	} else {
-		// Use double-buffering
-		cr = e->rect();
-	}
+	QRect cr = rect();
+//	if(!e) {
+//		cr = rect();
+//	} else {
+//		// Use double-buffering
+//		cr = e->rect();
+//	}
 	if(g_debug_ImageWidget) {
 		fprintf(stderr, "ImageWidget %p::%s:%d : dImage=%dx%d size=%dx%d => cr=%dx%d fit=%c\n",
 				this, __func__, __LINE__,
@@ -769,8 +785,10 @@ void ImageWidget::paintEvent( QPaintEvent * e)
 												   (mZoomFitFactor > 1? Qt::FastTransformation: Qt::SmoothTransformation) ).copy(cr);
 			}
 		}
+		int xoff = (size().width() - m_displayImage.width())/2;
+		int yoff = (size().height() - m_displayImage.height())/2;
 
-		p.drawImage(0, 0, m_displayImage);
+		p.drawImage(xoff, yoff, m_displayImage);
 	}
 	else
 	{
@@ -857,12 +875,12 @@ QRect ImageWidget::imageToDisplay(QRect img_rect)
 						 img_rect.width() * mZoomFitFactor ,
 						 img_rect.height() * mZoomFitFactor
 						 );
-	fprintf(stderr, "ImgWidget::%s:%d : zs=%g img=%d,%d+%dx%d => %d,%d+%dx%d\n",
-			__func__, __LINE__,
-			mZoomFitFactor,
-			img_rect.x(),img_rect.y(), img_rect.width(), img_rect.height(),
-			display_rect.x(),display_rect.y(), display_rect.width(), display_rect.height()
-			);
+//	fprintf(stderr, "ImgWidget::%s:%d : zs=%g img=%d,%d+%dx%d => %d,%d+%dx%d\n",
+//			__func__, __LINE__,
+//			mZoomFitFactor,
+//			img_rect.x(),img_rect.y(), img_rect.width(), img_rect.height(),
+//			display_rect.x(),display_rect.y(), display_rect.width(), display_rect.height()
+//			);
 	return display_rect;
 }
 

@@ -581,7 +581,7 @@ void EmaMainWindow::on_actionAbout_activated()
 	}
 
 	QString verstr, cmd = QString("Ctrl+");
-	QString item = QString("<li>"), itend = QString("</li>\n");
+//	QString item = QString("<li>"), itend = QString("</li>\n");
 	g_splash->showMessage(
 			tr("<b>Piaf workflow</b> version: ")
 						  + verstr.sprintf("svn%04d%02d%02d", VERSION_YY, VERSION_MM, VERSION_DD)
@@ -1141,11 +1141,6 @@ void EmaMainWindow::slot_thumbImage_selected(QString fileName)
 	}
 }
 
-
-void EmaMainWindow::slot_mainDisplayWidget_signalZoomRect(QRect cropRect)
-{
-//FIXME	ui->globalNavImageWidget->setZoomRect(cropRect);
-}
 
 void EmaMainWindow::slot_thumbImage_clicked(QString fileName)
 {
