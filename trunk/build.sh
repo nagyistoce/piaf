@@ -8,20 +8,20 @@ if [ -f /Developer/Tools/Qt/qmake ]; then
 fi
 
 echo " + building plugins library..."
-$QMAKE piaf-lib.pro && make $@ || echo "Build failed. Missing packages ? Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
+$QMAKE piaf-lib.pro && make $@ || echo "Build failed. Missing packages ? Please use ./prepare_debian.sh to install needed packages for compilation (for ubuntu/debian)..."
 
 echo " + building GUI..."
-$QMAKE piaf.pro && make $@ || echo "Build failed. Missing packages ? Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
+$QMAKE piaf.pro && make $@ || echo "Build failed. Missing packages ? Please use ./prepare_debian.sh to install needed packages for compilation (for ubuntu/debian)..."
 cd ..
 
 echo " + building Colibri GUI..."
 cd colibri
-$QMAKE && make $@ || echo "Build failed. Missing packages ? Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
+$QMAKE && make $@ || echo "Build failed. Missing packages ? Please use ./prepare_debian.sh to install needed packages for compilation (for ubuntu/debian)..."
 cd ..
 
 echo " + building Workflow GUI..."
 cd workflow
-$QMAKE && make $@ || echo "Build failed. Missing packages ? Please use ./prepare.sh to install needed packages for compilation (for ubuntu/debian)..."
+$QMAKE && make $@ || echo "Build failed. Missing packages ? Please use ./prepare_debian.sh to install needed packages for compilation (for ubuntu/debian)..."
 cd ..
 
 
