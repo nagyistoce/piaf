@@ -36,6 +36,8 @@
 
 #include "imageinfo.h"
 
+/** @brief Image manager: read image information and compute thumbnails
+  */
 class EmaImageManager : public QThread
 {
 public:
@@ -60,6 +62,8 @@ public:
 	virtual void run();
 
 private:
+	QString m_cacheDirectory;
+
 	/** Run command */
 	bool m_run;
 

@@ -28,6 +28,9 @@
 #include <QFileInfo>
 #include <sstream>
 
+#include <QDomDocument>
+#include <QTextStream>
+
 #include "imageinfo.h"
 
 #include "imgutils.h"
@@ -1049,4 +1052,279 @@ int ImageInfo::processSharpness() {
 }
 
 
+
+void saveImageInfoStruct(t_image_info_struct * pinfo, QString path)
+{
+	if(!pinfo) { return; }
+	QDomDocument infoDoc;
+	QDomElement elemFileInfo = infoDoc.createElement("FileInfo");
+	// Append data on file
+	QDomElement elemFile = infoDoc.createElement("File");
+	elemFile.setAttribute("fullpath", pinfo->filepath);
+	elemFile.setAttribute("filesize", pinfo->filesize);
+	elemFile.setAttribute("valid", pinfo->valid);
+	elemFile.setAttribute("width", pinfo->width);
+	elemFile.setAttribute("height", pinfo->height);
+	elemFile.setAttribute("nChannels", pinfo->nChannels);
+	elemFile.setAttribute("isMovie", pinfo->isMovie);
+	elemFileInfo.appendChild(elemFile);
+
+	QDomElement elemPicture = infoDoc.createElement("Picture");
+	QDomElement elemExif = infoDoc.createElement("EXIF");
+	elemExif.setAttribute("aperture", pinfo->exif.aperture);
+	elemExif.setAttribute("datetime", pinfo->exif.datetime);
+	elemExif.setAttribute("focal_eq35mm", pinfo->exif.focal_eq135_mm);
+	elemExif.setAttribute("focal_mm", pinfo->exif.focal_mm);
+	elemExif.setAttribute("ISO", pinfo->exif.ISO);
+	elemExif.setAttribute("maker", pinfo->exif.maker);
+	elemExif.setAttribute("model", pinfo->exif.model);
+	elemExif.setAttribute("orientation", pinfo->exif.orientation);
+	elemExif.setAttribute("speed_s", pinfo->exif.speed_s);
+	elemPicture.appendChild(elemExif);
+
+	QDomElement elemIPTC = infoDoc.createElement("IPTC");
+	elemIPTC.setAttribute("city", pinfo->iptc.city);
+	elemIPTC.setAttribute("countrycode", pinfo->iptc.countrycode);
+	elemIPTC.setAttribute("countryname", pinfo->iptc.countryname);
+	elemIPTC.setAttribute("provincestate", pinfo->iptc.provincestate);
+	elemIPTC.setAttribute("sublocation", pinfo->iptc.sublocation);
+	elemPicture.appendChild(elemIPTC);
+
+	elemFileInfo.appendChild(elemPicture);
+
+	/****************************** MOVIE ***********************************/
+	// Add info about movie
+	QDomElement elemMovie = infoDoc.createElement("Movie");
+	elemMovie.setAttribute("FourCC", pinfo->FourCC);
+	elemMovie.setAttribute("fps", pinfo->fps);
+
+	elemFileInfo.appendChild(elemMovie);
+
+	/****************************** DATA ***********************************/
+	// ---- Custom tags ----
+	QDomElement elemKeywords = infoDoc.createElement("Keywords");
+	QStringList::iterator it;
+	for(it = pinfo->keywords.begin(); it!=pinfo->keywords.end(); ++it)
+	{
+		QDomElement elemKeyword = infoDoc.createElement("Keyword");
+		elemKeyword.setAttribute("keyword", (*it));
+		elemKeywords.appendChild(elemKeyword);
+	}
+	elemFileInfo.appendChild(elemKeywords);
+
+		/*! List of bookmarks */
+	QDomElement elemBookmarks = infoDoc.createElement("Bookmarks");
+	QList<t_movie_pos>::iterator b_it;
+	for(b_it = pinfo->bookmarksList.begin(); b_it != pinfo->bookmarksList.end(); b_it++)
+	{
+		QDomElement elemBookmark = infoDoc.createElement("Bookmark");
+		t_movie_pos bkmk = (*b_it);
+		elemBookmark.setAttribute("name", bkmk.name);
+		elemBookmark.setAttribute("prevAbsPosition", bkmk.prevAbsPosition);
+		elemBookmark.setAttribute("prevKeyFramePosition", bkmk.prevKeyFramePosition);
+		elemBookmark.setAttribute("nbFramesSinceKeyFrame", bkmk.nbFramesSinceKeyFrame);
+		elemBookmarks.appendChild(elemBookmark);
+	}
+
+
+	QDomElement elemImgProc = infoDoc.createElement("ImgProcessing");
+	elemImgProc.setAttribute("grayscaled", pinfo->grayscaled);
+	elemImgProc.setAttribute("sharpness_score", pinfo->sharpness_score);
+	elemImgProc.setAttribute("histo_score", pinfo->histo_score);
+	elemImgProc.setAttribute("score", pinfo->score);
+//	elemImgProc.setAttribute("", pinfo-);
+//	elemImgProc.setAttribute("", pinfo-);
+//	elemImgProc.setAttribute("", pinfo-);
+	elemFileInfo.appendChild(elemImgProc);
+
+	infoDoc.appendChild(elemFileInfo);
+
+	PIAF_MSG(SWLOG_ERROR, "saving '%s'", path.toAscii().data());
+	QFile fileout( path );
+	if( !fileout.open( IO_WriteOnly ) ) {
+		PIAF_MSG(SWLOG_ERROR, "cannot save '%s'", path.toAscii().data());
+		return ;
+	}
+
+	QTextStream sout(&fileout);
+	infoDoc.save(sout, 4);
+
+	fileout.flush();
+	fileout.close();
+
+//	t_cached_image thumbImage;		/*! Thumb image for faster display */
+//	IplImage * sharpnessImage;		/*! Sharpness image for faster display */
+//	IplImage * hsvImage;			/*! HSV histogram image for faster display */
+
+//	float * log_histogram[3];	/*! Log histogram */
+
+//	// Image judgement
+//	float score;			/*! Final score factor in [0..100] */
+//	QList<t_movie_pos> bookmarksList;	/*! List of bookmarks */
+
+	infoDoc.appendChild(elemFileInfo);
+
+}
+void printImageInfoStruct(t_image_info_struct * pinfo)
+{
+	fprintf(stderr, "[imageinfo] %s:%d : pinfo = %p\n", __func__, __LINE__, pinfo);
+	if(!pinfo) { return; }
+	// FILE DATA
+	fprintf(stderr, "File: '%s' / %ld bytes\n",
+			pinfo->filepath.toAscii().data(), (long)pinfo->filesize);
+	fprintf(stderr, "\t%d x %d x %d", pinfo->width, pinfo->height, pinfo->nChannels);
+	fprintf(stderr, "%s\n", pinfo->isMovie ? "Movie" : "Picture");
+	if(!pinfo->isMovie) {
+		fprintf(stderr, "\tEXIF: maker='%s', model='%s', date=%s orientation=%c "
+				"focal=%gmm=%g mm(eq 35mm), F/%g, %g s\n"
+				,
+				pinfo->exif.maker.toAscii().data(),
+				pinfo->exif.model.toAscii().data(),
+				pinfo->exif.datetime.toAscii().data(),
+				pinfo->exif.orientation,
+				pinfo->exif.focal_mm, pinfo->exif.focal_eq135_mm,
+				pinfo->exif.aperture, pinfo->exif.speed_s);
+		fprintf(stderr, "\tIPTC: city='%s', sublocation='%s', province/state='%s',"
+				" country code='%s', name='%s'\n",
+				pinfo->iptc.city.toAscii().data(),
+				pinfo->iptc.sublocation.toAscii().data(),
+				pinfo->iptc.provincestate.toAscii().data(),
+				pinfo->iptc.countrycode.toAscii().data(),
+				pinfo->iptc.countryname.toAscii().data() );
+	} else {
+		fprintf(stderr, "\t%g fps, FourCC='%s'\n", pinfo->fps, pinfo->FourCC);
+	}
+	fprintf(stderr, "\tKeywords={");
+	QStringList::iterator it;
+	for(it = pinfo->keywords.begin(); it != pinfo->keywords.end(); ++it)
+	{
+		fprintf(stderr, "'%s', ", (*it).toAscii().data());
+	}
+	fprintf(stderr, "}\n\tImage: %s, sharpness=%g, histo=%g\n",
+			pinfo->grayscaled ? "gray": "color",
+			pinfo->sharpness_score, pinfo->histo_score);
+
+}
+
+int loadImageInfoStruct(t_image_info_struct * pinfo, QString path)
+{
+	if(!pinfo) { return -1; }
+	QFile file( path );
+	if (!file.open(QIODevice::ReadOnly)) {
+		PIAF_MSG(SWLOG_ERROR, "could not open file '%s' for reading: err=%s",
+				 file.name().toAscii().data(),
+				 file.errorString().toAscii().data());
+		return -1;
+	}
+	QDomDocument infoDoc;
+	QString errorMsg;
+	int errorLine = 0;
+	int errorColumn = 0;
+	if( !infoDoc.setContent(&file, &errorMsg, &errorLine, &errorColumn) )
+	{
+		PIAF_MSG(SWLOG_ERROR,
+				 "could not read content of file '%s' as XML doc: "
+				 "err='%s' line %d col %d",
+				 file.name().toAscii().data(),
+				 errorMsg.toAscii().data(),
+				 errorLine, errorColumn
+				 );
+	}
+	file.close();
+
+	QDomElement docElem = infoDoc.documentElement();
+	QDomNode n = docElem.firstChild();
+	while(!n.isNull()) {
+		QDomElement e = n.toElement(); // try to convert the node to an element.
+		if(!e.isNull()) {
+			PIAF_MSG(SWLOG_INFO, "\tCategory '%s'", e.tagName().toAscii().data()); // the node really is an element.
+			if(e.tagName().compare("File")==0) // Read bookmarks
+			{
+				pinfo->filepath = e.attribute("fullpath");
+				pinfo->filesize = e.attribute("filesize", "0").toULong();
+				pinfo->valid = e.attribute("valid", "0").toInt();
+				pinfo->width = e.attribute("width", "0").toInt();
+				pinfo->height = e.attribute("height", "0").toInt();
+				pinfo->nChannels = e.attribute("nChannels", "0").toInt();
+				pinfo->isMovie = e.attribute("isMovie", "0").toInt();
+			}
+
+			// Pictures > IPTC, EXIF...
+			if(e.tagName().compare("Picture")==0) // Read bookmarks
+			{
+				QDomNode pictureNode = e.firstChild();
+				while(!pictureNode.isNull()) {
+					QDomElement pictureElem = pictureNode.toElement(); // try to convert the node to an element.
+					if(!pictureElem.isNull())
+					{
+						//
+						if(pictureElem.tagName().compare("EXIF") == 0)
+						{
+							pinfo->exif.aperture = pictureElem.attribute("aperture", "0").toFloat();
+							pinfo->exif.datetime = pictureElem.attribute("datetime");
+							pinfo->exif.focal_eq135_mm = pictureElem.attribute("focal_eq35mm", "0").toFloat();
+							pinfo->exif.focal_mm = pictureElem.attribute("focal_mm", "0").toFloat();
+							pinfo->exif.ISO = pictureElem.attribute("ISO", "O").toInt();
+							pinfo->exif.maker = pictureElem.attribute("maker", "");
+							pinfo->exif.model = pictureElem.attribute("model", "");
+							pinfo->exif.orientation = pictureElem.attribute("orientation", "0").toUInt();
+							pinfo->exif.speed_s = pictureElem.attribute("speed_s", "0").toFloat();
+						}
+
+						if(pictureElem.tagName().compare("IPTC") == 0)
+						{
+							pinfo->iptc.city = pictureElem.attribute("city");
+							pinfo->iptc.countrycode = pictureElem.attribute("countrycode");
+							pinfo->iptc.countryname = pictureElem.attribute("countryname");
+							pinfo->iptc.provincestate = pictureElem.attribute("provincestate");
+							pinfo->iptc.sublocation = pictureElem.attribute("sublocation");
+						}
+					}
+
+					pictureNode = pictureNode.nextSibling();
+				}
+			}
+			if(e.tagName().compare("Movie")==0) // Read movie properties
+			{
+				pinfo->fps = e.attribute("fps").toFloat();
+				pinfo->filesize = e.attribute("filesize", "0").toULong();
+				strcpy(pinfo->FourCC, e.attribute("valid", "0").toAscii().data());
+			}
+
+			// Keywords
+			if(e.tagName().compare("Keywords")==0) // Read Keywords
+			{
+				QDomNode folderNode = e.firstChild();
+				while(!folderNode.isNull()) {
+					QDomElement folderElem = folderNode.toElement(); // try to convert the node to an element.
+					if(!folderElem.isNull()) {
+						// Read parameters
+						QString keyword = folderElem.attribute("keyword");
+						pinfo->keywords.append(keyword);
+					}
+					folderNode = folderNode.nextSibling();
+				}
+			}
+			if(e.tagName().compare("Bookmarks")==0) // Read bookmarks
+			{
+				QDomNode folderNode = e.firstChild();
+				while(!folderNode.isNull()) {
+					QDomElement folderElem = folderNode.toElement(); // try to convert the node to an element.
+					if(!folderElem.isNull()) {
+						// Read parameters
+						t_movie_pos bkmk;
+						bkmk.name = folderElem.attribute("name");
+						bkmk.prevAbsPosition = folderElem.attribute("name").toLongLong();
+						bkmk.prevKeyFramePosition = folderElem.attribute("prevKeyFramePosition").toLongLong();
+						bkmk.nbFramesSinceKeyFrame = folderElem.attribute("prevAbsPosition").toInt();
+					}
+					folderNode = folderNode.nextSibling();
+				}
+			}
+		}
+		n = n.nextSibling();
+	}
+
+	return 0;
+}
 

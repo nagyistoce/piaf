@@ -501,27 +501,6 @@ V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 			//setCameraControl( V4L2_CID_EXPOSURE_AUTO_PRIORITY, 0);
 			setCameraControl( V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_MANUAL);
 
-			FILE * f_expo = fopen("/tmp/fexpo.txt", "w");
-			for(int e = 0; e<65536; ++e)
-			{
-				V4L2_printf("Using absolute exposure %g", e);
-				setCameraControl( V4L2_CID_EXPOSURE_ABSOLUTE, e);
-				int out = getCameraControl(V4L2_CID_EXPOSURE_ABSOLUTE);
-				{
-					if(e == out)
-					{
-						if(f_expo)
-						{
-							fprintf(f_expo, "Exposure = %d works\n", e);
-							fflush(f_expo);
-						}
-					}
-				}
-			}
-			if(f_expo)
-			{
-				fclose(f_expo);
-			}
 		} else {
 			//setCameraControl( V4L2_CID_EXPOSURE_AUTO_PRIORITY, 1);
 			//setCameraControl( V4L2_CID_EXPOSURE_AUTO, V4L2_EXPOSURE_AUTO);

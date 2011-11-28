@@ -1,5 +1,5 @@
 /***************************************************************************
-    opencv_morphology.cpp  -  description
+    opencv_morphology.cpp  -  Morphology operators 
                              -------------------
     begin                : Tue Dec  11 15:52:21 CEST 2002
     copyright            : (C) 2002 by Christophe Seyve
@@ -40,10 +40,7 @@
 #include "SwPluginCore.h"
 
 /* compile with :
-gcc -Wall -I/usr/local/sisell/include SwPluginCore.cpp -c
-gcc -Wall -I/usr/local/sisell/include opencv_morphology.cpp -c
-gcc opencv_morphology.o SwPluginCore.o -o opencv_morphology -lopencv
-# needs SwPluginCore.o
+./build_all.sh
 */
 
 
