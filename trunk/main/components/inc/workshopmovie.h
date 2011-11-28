@@ -39,17 +39,17 @@
 
 /** @brief Position in movie */
 typedef struct {
-	unsigned long long prevAbsPosition; /*! Position in file of last frame */
-
-	unsigned long long prevKeyFramePosition; /*! Position in file of last key frame */
-	int nbFramesSinceKeyFrame; /*! Nb of frames since last key frame */
+	QString name;	/*!< Name of bookmark */
+	unsigned long long prevAbsPosition; /*!< Position in file of last frame */
+	unsigned long long prevKeyFramePosition; /*!< Position in file of last key frame */
+	int nbFramesSinceKeyFrame; /*!< Nb of frames since last key frame */
 } t_movie_pos;
 
 typedef struct {
 	QAction * pAction;
 	int index;
-	t_movie_pos movie_pos; /*! Position in file */
-	int percent;	/*! Percentage of the movie size */
+	t_movie_pos movie_pos;	/*!< Position in file */
+	int percent;			/*!< Percentage of the movie size */
 } video_bookmark_t;
 
 /**

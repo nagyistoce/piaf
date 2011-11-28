@@ -55,9 +55,20 @@ EmaImageManager::EmaImageManager()
 {
 	init();
 }
+
 void EmaImageManager::init()
 {
-
+	// READ CONFIGURATION IN XML FILE
+	char home[1024] = "/home";
+	if(getenv("HOME")) {
+		strcpy(home, getenv("HOME"));
+	}
+	m_cacheDirectory = QString(home) + "/.piafcache";
+	QDir dir(home);
+	if(!dir.exists(".piafcache"))
+	{
+		dir.mkdir(".piafcache", true);
+	}
 }
 
 EmaImageManager::~EmaImageManager()
@@ -237,28 +248,77 @@ void EmaImageManager::run() {
 			while(it != appendList.end()) {
 				fileName = (*it);
 				++it;
-				EMAIM_printf(EMALOG_DEBUG, "\tAdding file '%s'...", fileName.toUtf8().data())
+				EMAIM_printf(EMALOG_DEBUG, "\tAdding file '%s'...", fileName.toUtf8().data());
 
-				// Process info extraction
-				m_imgProc.loadFile(fileName);
+				// check if image is already known, eg if it already has a thumb and data
+				QFileInfo fi(fileName);
+				QFileInfo thumb_fi(m_cacheDirectory+"/"+fi.fileName()+".jpg");
+				QFileInfo data_fi(m_cacheDirectory+"/"+fi.fileName()+".xml");
+				QString thumbPath = thumb_fi.absoluteFilePath();
+				EMAIM_printf(EMALOG_DEBUG, "\tThumb ? for file '%s' : thumb='%s'",
+							 fileName.toUtf8().data(),
+							 thumb_fi.absoluteFilePath().toAscii().data());
+				t_image_info_struct * new_info = NULL;
+				if(thumb_fi.exists() && data_fi.exists())
+				{
+					EMAIM_printf(EMALOG_DEBUG, "\tThumb & data found for file '%s' : thumb='%s'",
+								 fileName.toUtf8().data(),
+								 thumb_fi.absoluteFilePath().toAscii().data());
+					// Check if data exists
+					new_info = new t_image_info_struct;
+					clearImageInfoStruct(new_info);
 
-				// Create a new storage
-				t_image_info_struct l_info = m_imgProc.getImageInfo();
-				if(l_info.valid) {
-					t_image_info_struct * new_info = new t_image_info_struct(l_info);
+					// load data
+					loadImageInfoStruct(new_info, data_fi.absoluteFilePath());
+
+					printImageInfoStruct(new_info);
 
 					// Copy thumb
-					new_info->thumbImage.iplImage = tmCloneImage(l_info.thumbImage.iplImage);
+					new_info->thumbImage.iplImage = cvLoadImage(thumb_fi.absoluteFilePath().toUtf8().data());
+					new_info->thumbImage.fullpath = thumb_fi.absoluteFilePath().toUtf8().data();
+					new_info->thumbImage.compressed = NULL;
+					new_info->thumbImage.compressed_size = 0;
 
-					// Copy HSV histo
-					new_info->hsvImage = tmCloneImage(l_info.hsvImage);
+					fprintf(stderr, "%s:%d : Thumb = %p %dx%dx%d\n",
+							__func__, __LINE__, new_info->thumbImage.iplImage,
+							new_info->thumbImage.iplImage? new_info->thumbImage.iplImage->width : -1,
+							new_info->thumbImage.iplImage? new_info->thumbImage.iplImage->height : -1,
+							new_info->thumbImage.iplImage?new_info->thumbImage.iplImage->nChannels : -1
+							);
+					new_info->hsvImage = new_info->sharpnessImage = NULL;
+				}
 
-					// Copy sharpness
-					new_info->sharpnessImage = tmCloneImage(l_info.sharpnessImage);
+				if(!new_info) {
+					// Process info extraction
+					m_imgProc.loadFile(fileName);
 
-					// Copy RGB histo
-//					new_info->histogram
+					// Create a new storage
+					t_image_info_struct l_info = m_imgProc.getImageInfo();
+					if(l_info.valid) {
+						new_info = new t_image_info_struct(l_info);
 
+						// Copy thumb
+						new_info->thumbImage.iplImage = tmCloneImage(l_info.thumbImage.iplImage);
+
+						// save thumb
+						cvSaveImage(thumbPath.toUtf8().data(),
+									new_info->thumbImage.iplImage );
+
+						// Copy HSV histo
+						new_info->hsvImage = tmCloneImage(l_info.hsvImage);
+
+						// Copy sharpness
+						new_info->sharpnessImage = tmCloneImage(l_info.sharpnessImage);
+
+						// Save into XML file
+						saveImageInfoStruct(new_info, data_fi.absoluteFilePath());
+
+						// Copy RGB histo
+	//					new_info->histogram
+
+					}
+				}
+				if(new_info) {
 					// append to managed list
 					m_managedFileListMutex.lock();
 					m_managedFileList.append(fileName);
@@ -267,7 +327,6 @@ void EmaImageManager::run() {
 					m_managedInfoMutex.lock();
 					m_managedInfo.append(new_info);
 					m_managedInfoMutex.unlock();
-
 				}
 
 				cur++;

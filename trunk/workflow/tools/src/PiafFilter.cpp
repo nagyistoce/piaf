@@ -60,15 +60,16 @@ bool g_debug_FilterSequencer = false;
 bool g_debug_PiafFilter = false;
 
 /// Delete a filter in manager (parameters and widgets)
-#define DELETE_FILTER(_pv)	{ \
+#define DELETE_FILTER(_pv)	if((_pv)) { \
 				delete (_pv); \
+				(_pv) = NULL; \
 			}
 
 
 int PiafSignalHandler::registerChild(int pid, PiafFilter * filter) {
 
 	fprintf(stderr, "PiafSignalHandler::registerChild(%d, '%s')...\n",
-		pid, filter->exec_name);
+			pid, filter->exec_name);
 	if(pid == 0) return 0;
 
 	sigPiafFilter * sigF = new sigPiafFilter;

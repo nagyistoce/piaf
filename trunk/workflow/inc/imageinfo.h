@@ -148,6 +148,19 @@ typedef struct {
 void clearImageInfoStruct(t_image_info_struct * pinfo);
 
 
+void printImageInfoStruct(t_image_info_struct * pinfo);
+
+/** @brief Load a XML file containing data about the known file
+
+  @return 0 if success, <0 if error
+*/
+int loadImageInfoStruct(t_image_info_struct * pinfo, QString path);
+
+/** @brief save a XML file containing data about the known file
+*/
+void saveImageInfoStruct(t_image_info_struct * pinfo, QString path);
+
+
 /** @brief Image processing analyse class
   */
 class ImageInfo {
@@ -166,6 +179,7 @@ public:
 	IplImage * getSharpnessImage() { return m_sharpnessImage; };
 
 	float getSharpness() { return m_image_info_struct.sharpness_score; };
+
 	/** @brief Get structure containing every image information needed for sorting */
 	t_image_info_struct getImageInfo() { return m_image_info_struct; };
 

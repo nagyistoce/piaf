@@ -83,6 +83,7 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	g_splash->update();
 
 	ui->loadProgressBar->hide();
+	ui->stackedWidget->setCurrentIndex(1); // by default, the grid page
 
 	connect(&m_timer, SIGNAL(timeout()),
 			this, SLOT(slot_timer_timeout()));
@@ -249,7 +250,7 @@ void EmaMainWindow::loadSettings()
 	}
 
 	// Concatenate configuration directories
-	QFile file( QString(home) + "/piafsettings.xml" );
+	QFile file( QString(home) + "/.piafsettings.xml" );
 	if (!file.open(QIODevice::ReadOnly)) {
 		PIAF_MSG(SWLOG_ERROR, "could not open file '%s' for reading: err=%s",
 				 file.name().toAscii().data(),
@@ -585,7 +586,7 @@ void EmaMainWindow::on_actionAbout_activated()
 	g_splash->showMessage(
 			tr("<b>Piaf workflow</b> version: ")
 						  + verstr.sprintf("svn%04d%02d%02d", VERSION_YY, VERSION_MM, VERSION_DD)
-						  + tr(" Website & Wiki: <a href=\"http://piaf.googlecode.com/\">http://piaf.googlecode.com/</a><br><br>")
+						  + tr(" Website & Wiki: <a href=\"http://piaf.googlecode.com/\">http://piaf.googlecode.com/</a>")
 //						  + tr("Shortcuts :<br><ul>\n")
 //							+ item + cmd + tr("O: Open a picture file") + itend
 //							+ item + cmd + tr("S: Save corrected image") + itend
@@ -607,6 +608,7 @@ void EmaMainWindow::on_actionAbout_activated()
 	g_splash->show();
 	g_splash->raise(); // for full screen mode
 	g_splash->update();
+
 }
 
 
