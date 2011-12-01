@@ -428,7 +428,7 @@ void MainImageWidget::slot_actNormalView_activated()
 void MainImageWidget::slot_actInvertedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Inverted"));
-	m_ui->globalImageLabel->setRefImage();
+//	m_ui->globalImageLabel->setRefImage();
 }
 
 
