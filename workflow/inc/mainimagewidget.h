@@ -89,6 +89,11 @@ private slots:
 
 	void slotUpdateImage();
 
+	void slot_actNormalView_activated();
+	void slot_actInvertedView_activated();
+	void slot_actIndexedView_activated();
+	void slot_actBlack2RedView_activated();
+	void slot_actBlue2RedView_activated();
 
 private:
 	Ui::MainImageWidget *m_ui;

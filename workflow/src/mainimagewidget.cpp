@@ -50,7 +50,47 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	//m_ui->globalImageLabel->grabKeyboard ();
 	m_ui->globalImageLabel->setEditMode(EDITMODE_ZOOM);
 
+	QMenu * viewMenu = new QMenu(m_ui->viewModeButton);
+	m_ui->viewModeButton->setPopup(viewMenu);
+	QIcon pixIcon;
+
+	// Normal view
+	QAction * actNormalView = viewMenu->addAction(QIcon(":icons/icons/22x22/IconColorNormal.png"),
+										tr("Default colors"));
+	actNormalView->setShortcut(QKeySequence(("Ctrl+N")));
+	actNormalView->setIconVisibleInMenu(true);
+	connect(actNormalView, SIGNAL(activated()), this, SLOT(slot_actNormalView_activated()));
+
+	// Inverted view
+	QAction * actInvertedView = viewMenu->addAction(QIcon(":icons/icons/22x22/IconColorGreyInverted.png"),
+										tr("Inverted colors"));
+	actInvertedView->setShortcut(QKeySequence(("Ctrl+I")));
+	actInvertedView->setIconVisibleInMenu(true);
+	connect(actInvertedView, SIGNAL(activated()), this, SLOT(slot_actInvertedView_activated()));
+
+	// Indexed view
+	QAction * actIndexedView = viewMenu->addAction(QIcon(":icons/icons/22x22/IconColorGreyIndexed.png"),
+										tr("Indexed colors"));
+	actIndexedView->setShortcut(QKeySequence(("Ctrl+8")));
+	actIndexedView->setIconVisibleInMenu(true);
+	connect(actIndexedView, SIGNAL(activated()), this, SLOT(slot_actIndexedView_activated()));
+
+	// Thermal black->red view
+	QAction * actBlack2RedView = viewMenu->addAction(QIcon(":icons/icons/22x22/IconColorThermicBlackToRed.png"),
+										tr("Thermal black->red colors"));
+	actBlack2RedView->setShortcut(QKeySequence(("Ctrl+B")));
+	actBlack2RedView->setIconVisibleInMenu(true);
+	connect(actBlack2RedView, SIGNAL(activated()), this, SLOT(slot_actBlack2RedView_activated()));
+
+	// Thermal blue->red view
+	QAction * actBlue2RedView = viewMenu->addAction(QIcon(":icons/icons/22x22/IconColorThermicBlueToRed.png"),
+										tr("Thermal blue->red colors"));
+	actBlue2RedView->setShortcut(QKeySequence(("Ctrl+T")));
+	actBlue2RedView->setIconVisibleInMenu(true);
+	connect(actBlue2RedView, SIGNAL(activated()), this, SLOT(slot_actBlue2RedView_activated()));
+
 }
+
 
 MainImageWidget::~MainImageWidget()
 {
@@ -379,3 +419,38 @@ void MainImageWidget::on_grayscaleButton_toggled(bool checked)
 		m_ui->infoLabel->setText(tr("Color"));
 	}
 }
+
+void MainImageWidget::slot_actNormalView_activated()
+{
+	m_ui->infoLabel->setText(tr("Normal"));
+}
+
+void MainImageWidget::slot_actInvertedView_activated()
+{
+	m_ui->infoLabel->setText(tr("Inverted"));
+	m_ui->globalImageLabel->setRefImage();
+}
+
+
+void MainImageWidget::slot_actIndexedView_activated()
+{
+	m_ui->infoLabel->setText(tr("Indexed"));
+
+}
+
+
+void MainImageWidget::slot_actBlack2RedView_activated()
+{
+	m_ui->infoLabel->setText(tr("Black->red"));
+
+}
+
+
+void MainImageWidget::slot_actBlue2RedView_activated()
+{
+	m_ui->infoLabel->setText(tr("Blue->red"));
+
+}
+
+
+

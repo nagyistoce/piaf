@@ -206,5 +206,12 @@
         <file>icons/16x16/system-software-update.png</file>
         <file>icons/22x22/FocusFar.png</file>
         <file>icons/22x22/FocusNear.png</file>
+        <file>icons/22x22/IconColorGrey.png</file>
+        <file>icons/22x22/IconColorGrey8bit.png</file>
+        <file>icons/22x22/IconColorGreyIndexed.png</file>
+        <file>icons/22x22/IconColorGreyInverted.png</file>
+        <file>icons/22x22/IconColorThermicBlackToRed.png</file>
+        <file>icons/22x22/IconColorThermicBlueToRed.png</file>
+        <file>icons/22x22/IconColorNormal.png</file>
     </qresource>
 </RCC>

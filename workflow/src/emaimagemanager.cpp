@@ -274,7 +274,26 @@ void EmaImageManager::run() {
 					printImageInfoStruct(new_info);
 
 					// Copy thumb
+					IplImage * rgbImage =
 					new_info->thumbImage.iplImage = cvLoadImage(thumb_fi.absoluteFilePath().toUtf8().data());
+					if(rgbImage && rgbImage->nChannels > 1)
+					{
+						// Swap B<->R because colors are inverted
+						new_info->thumbImage.iplImage = tmCloneImage(rgbImage);
+						switch(rgbImage->nChannels)
+						{
+						default:
+							break;
+						case 3:
+							cvCvtColor(rgbImage, new_info->thumbImage.iplImage, CV_BGR2RGB);
+							break;
+						case 4:
+							cvCvtColor(rgbImage, new_info->thumbImage.iplImage, CV_BGRA2RGBA);
+							break;
+						}
+						tmReleaseImage(&rgbImage);
+					}
+
 					new_info->thumbImage.fullpath = thumb_fi.absoluteFilePath().toUtf8().data();
 					new_info->thumbImage.compressed = NULL;
 					new_info->thumbImage.compressed_size = 0;
