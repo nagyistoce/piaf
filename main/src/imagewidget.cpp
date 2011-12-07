@@ -195,6 +195,10 @@ int ImageWidget::setEditMode(int mode)
 		return mEditMode;
 	}
 
+	if(mEditMode != mode)
+	{
+		xMouseMoveStart = -1; // clear mouse state = forget history of previous action: zoom, move...
+	}
 	mEditMode = mode;
 
 	switch(mEditMode) {
@@ -237,10 +241,11 @@ int ImageWidget::setEditMode(int mode)
 
 void ImageWidget::setColorMode(int mode)
 {
-	if(mode <= COLORMODE_MAX )
+	if(mode <= COLORMODE_MAX ) {
 		m_colorMode = mode;
-	else
+	} else {
 		m_colorMode = COLORMODE_GREY;
+	}
 
 	if(dImage) {
 		if(dImage->depth() > 8) return;
@@ -479,6 +484,12 @@ void ImageWidget::mousePressEvent(QMouseEvent *e) {
 			QPoint pt = displayToImage(e->pos());
 			QRgb colorRGB = dImage->pixel(pt);
 			int colorGrey = qGray(colorRGB);
+			fprintf(stderr, "WImTool::%s:%d : "
+					"(%d,%d) RGB=%d,%d,%d gray=%d",
+					__func__, __LINE__,
+					pt.x(), pt.y(),
+					qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB),
+					colorGrey);
 
 			emit signalPicker(colorRGB, colorGrey, pt);
 			}
@@ -489,20 +500,21 @@ void ImageWidget::mousePressEvent(QMouseEvent *e) {
 
 
 void ImageWidget::mouseReleaseEvent(QMouseEvent *e){
-	if(e->button() == Qt::LeftButton) {
-		xMouseMoveStart = -1;
+	if((e->button() & Qt::LeftButton)) {
 		switch(mEditMode)
 		{
 		default:
+			xMouseMoveStart = -1;
 			emit mouseReleased(e);
 			break;
 		case EDITMODE_ZOOM:
-			if(mZoomFit) {
-				xMouseMoveStart = e->pos().x();
-				yMouseMoveStart = e->pos().y();
-				xOriginMoveStart = xOrigine;
-				yOriginMoveStart = yOrigine;
-			}
+			xMouseMoveStart = -1;
+//			if(mZoomFit) {
+//				xMouseMoveStart = e->pos().x();
+//				yMouseMoveStart = e->pos().y();
+//				xOriginMoveStart = xOrigine;
+//				yOriginMoveStart = yOrigine;
+//			}
 			break;
 		case EDITMODE_ROIS: // nothing to do, rect is defined in move event
 			break;
@@ -512,19 +524,20 @@ void ImageWidget::mouseReleaseEvent(QMouseEvent *e){
 	}
 }
 
-void ImageWidget::mouseMoveEvent(QMouseEvent *e){
+void ImageWidget::mouseMoveEvent(QMouseEvent *e)
+{
 
 	switch(mEditMode)
 	{
 	default:
 	case EDITMODE_NONE:
 		if(!mZoomFit) { return; }
-		if(xMouseMoveStart<0) { return; } // not clicked
 		emit mouseMoved(e);
+		//if(xMouseMoveStart<0) { return; } // not clicked
 		break;
 	case EDITMODE_ZOOM: {
 		if(!mZoomFit) { return; }
-		if(xMouseMoveStart<0) { return; } // not clicked
+		if( xMouseMoveStart<0 ) { return; } // not clicked
 		// dx,dy is the move in pixel on display
 		int dx = e->pos().x() - xMouseMoveStart ;
 		int dy = e->pos().y() - yMouseMoveStart ;
@@ -582,9 +595,10 @@ void ImageWidget::clipSmartZooming()
 	yZoomCenter = yOrigine + height/2 ;
 
 	QRect cropRect = displayToImage(QRect(0,0, size().width(), size().height()));
-	fprintf(stderr, "ImageWidget::%s:%d : emit signalZoomRect(cropRect=%d,%d+%dx%d);\n",
-			__func__, __LINE__,
-			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
+
+//	fprintf(stderr, "ImageWidget::%s:%d : emit signalZoomRect(cropRect=%d,%d+%dx%d);\n",
+//			__func__, __LINE__,
+//			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
 	emit signalZoomRect(cropRect);
 
 	mCropRect = cropRect;
@@ -596,6 +610,13 @@ QPoint ImageWidget::displayToOriginal(int x, int y)
 	int xOrig = xOrigine + x / curZoom;
 	int yOrig = yOrigine + y / curZoom;
 	return QPoint(xOrig, yOrig);
+}
+QPoint ImageWidget::originalToDisplay(int x, int y)
+{
+	float curZoom = mZoomFitFactor;
+	int xDisplay = x * curZoom - xOrigine;
+	int yDisplay = y * curZoom - yOrigine;
+	return QPoint(xDisplay, yDisplay);
 }
 
 /* Change zoom centered to a point on display with a zoom increment */
