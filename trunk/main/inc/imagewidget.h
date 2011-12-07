@@ -66,6 +66,8 @@ public:
 
 	/** @brief Return the position in original image for one point in display */
 	QPoint displayToOriginal(int x, int y);
+	/** @brief Return the position in display from a position in original image */
+	QPoint originalToDisplay(int x, int y);
 
 	/** @brief Switch to smart zooming mode */
 	void switchToSmartZoomMode(bool on = true);
@@ -178,6 +180,7 @@ signals:
 		@param ratio between display and image
 	 */
 	void signalZoomChanged(float);
+
 private slots:
 	void slot_shortcut_in_activated();
 	void slot_shortcut_out_activated();

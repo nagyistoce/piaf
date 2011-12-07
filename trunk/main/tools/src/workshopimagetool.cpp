@@ -76,8 +76,8 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv,
 		aMenuColor->hide();
 	}
 
-	ToolMode = MODE_SMARTZOOM;
-	ViewWidget->setRefImage(&ImgRGB);
+	mToolMode = MODE_SMARTZOOM;
+	mpViewWidget->setRefImage(&ImgRGB);
 
 	slotUpdateView();
 
@@ -153,7 +153,7 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv, QWidget *p_parent,
 	else
 		aMenuColor->hide();
 
-	ViewWidget->setRefImage(&ImgRGB);
+	mpViewWidget->setRefImage(&ImgRGB);
 
 	slotUpdateView();
 
@@ -189,8 +189,8 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv, QWidget *p_parent,
 			pWin->update();
 
 			viewPixel = viewSize.width * viewSize.height;
-			ViewWidget->resize(viewSize.width, viewSize.height);
-			ViewWidget->updateGeometry();
+			mpViewWidget->resize(viewSize.width, viewSize.height);
+			mpViewWidget->updateGeometry();
 			vBox->resize( viewSize.width+WIMGT_MARGIN+WIMGT_MARGIN, TOOLBAR_HEIGHT+WIMGT_MARGIN + viewSize.height);
 			hBox->resize( viewSize.width+WIMGT_MARGIN, TOOLBAR_HEIGHT+WIMGT_MARGIN);
 			hBox->updateGeometry();
@@ -231,9 +231,9 @@ void WorkshopImageTool::init()
 	m_colorMode = COLORMODE_GREY;
 
 	aMenuColor = NULL;
-	ViewWidget=NULL;
+	mpViewWidget=NULL;
 	selectPressed = false;
-	ToolMode = 0;
+	mToolMode = 0;
 	ZoomScale = 1;
 	xZoomOrigine = yZoomOrigine = 0;
 	xZoomCenter = yZoomCenter = 0;
@@ -324,8 +324,8 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 	if(!first ) {
 		if(	viewSize.width != oldviewSize.width
 				|| 	viewSize.height != oldviewSize.height) {
-			ViewWidget->resize(viewSize.width, viewSize.height);
-			ViewWidget->updateGeometry();
+			mpViewWidget->resize(viewSize.width, viewSize.height);
+			mpViewWidget->updateGeometry();
 			vBox->resize( viewSize.width, TOOLBAR_HEIGHT + viewSize.height);
 			hBox->resize( viewSize.width, TOOLBAR_HEIGHT);
 			hBox->updateGeometry();
@@ -440,19 +440,19 @@ void WorkshopImageTool::setToolbar()
 	// zoom +
 	pixIcon = QIcon("IconZoomInView.png" );
 	QAction * actZoomInOnce = viewMenu->addAction(QIcon("IconZoomInView.png" ), tr("Zoom in"));
-	actZoomInOnce->setShortcut(QKeySequence(("+")));
+	//actZoomInOnce->setShortcut(QKeySequence(("+")));
 	actZoomInOnce->setIconVisibleInMenu(true);
 	connect(actZoomInOnce, SIGNAL(activated()), this, SLOT(slotZoomInOnce()));
 
 	pixIcon = QIcon("IconZoomFitView.png" );
 	actZoomFitView = viewMenu->addAction(pixIcon, tr("Zoom 1:1"));
-	actZoomFitView->setShortcut(QKeySequence(("1")));
+	//actZoomFitView->setShortcut(QKeySequence(("1")));
 	actZoomFitView->setIconVisibleInMenu(true);
 	connect(actZoomFitView, SIGNAL(activated()), this, SLOT(slotZoomFit()));
 
 	pixIcon = QIcon("IconZoomOutView.png" );
 	QAction * actZoomOutOnce = viewMenu->addAction(pixIcon, tr("Zoom out once"));
-	actZoomOutOnce->setShortcut(QKeySequence(("-")));
+	//actZoomOutOnce->setShortcut(QKeySequence(("-")));
 	actZoomOutOnce->setIconVisibleInMenu(true);
 	connect(actZoomOutOnce, SIGNAL(activated()), this, SLOT(slotZoomOutOnce()));
 
@@ -614,22 +614,26 @@ void WorkshopImageTool::setToolbar()
 	hBox->setMargin(0);
 	hBox->updateGeometry();
 
-	ViewWidget = new ImageWidget(vBox,NULL , Qt::WRepaintNoErase);
+	mpViewWidget = new ImageWidget(vBox,NULL , Qt::WRepaintNoErase);
 #ifdef DEBUG_ZOOMING
 	fprintf(stderr, "ViewWidget->setMinimumSize( %lu, %ld)\n", viewSize.width, viewSize.height );
 #endif
 	//ViewWidget->setGeometry( 0,0,viewSize.width, viewSize.height );
-	ViewWidget->updateGeometry();
+	mpViewWidget->updateGeometry();
+	mpViewWidget->setEditMode(EDITMODE_ZOOM); // smart zooming mode by default
+
+	connect(mpViewWidget, SIGNAL(signalPicker(QRgb,int,QPoint)),
+			this, SLOT(slot_mpViewWidget_signalPicker(QRgb, int, QPoint)));
 
 	vBox->updateGeometry();
 
-	ViewWidget->setMouseTracking(true);
+	mpViewWidget->setMouseTracking(true);
 
-	connect(ViewWidget, SIGNAL(mouseMoved( QMouseEvent*)),
+	connect(mpViewWidget, SIGNAL(mouseMoved( QMouseEvent*)),
 			SLOT(mouseMoveEvent(  QMouseEvent*)));
-	connect(ViewWidget, SIGNAL(mousePressed( QMouseEvent *)),
+	connect(mpViewWidget, SIGNAL(mousePressed( QMouseEvent *)),
 			SLOT(mousePressEvent(  QMouseEvent*)));
-	connect(ViewWidget, SIGNAL(mouseReleased( QMouseEvent *)),
+	connect(mpViewWidget, SIGNAL(mouseReleased( QMouseEvent *)),
 			SLOT(mouseReleaseEvent( QMouseEvent*)));
 
 //	pWin->setMinimumSize(viewSize.width, viewSize.height + TOOLBAR_HEIGHT);
@@ -751,11 +755,11 @@ void WorkshopImageTool::slotUpdateView()
 							 viewSize.height / realScale
 							 ).scaled(viewSize.width, viewSize.height);
 */
-	if(!ViewWidget) { return; }
+	if(!mpViewWidget) { return; }
 	// update fake colors mode
-	ViewWidget->setColorMode(m_colorMode);
+	mpViewWidget->setColorMode(m_colorMode);
 
-	if(ToolMode == MODE_ADD_RECT && selectPressed)
+	if(mToolMode == MODE_ADD_RECT && selectPressed)
 	{
 		fprintf(stderr, "WImgTool::%s:%d : adding rect : start=%d,%d stop=%d,%d\n",
 				__func__, __LINE__,
@@ -766,7 +770,7 @@ void WorkshopImageTool::slotUpdateView()
 					   QColor(0,0,255));
 	}
 
-	if(ToolMode == MODE_SELECT && selectedMask)
+	if(mToolMode == MODE_SELECT && selectedMask)
 	{
 		setOverlayRect(QRect(selectedMask->x(), selectedMask->y(),
 							 selectedMask->width(), selectedMask->height()),
@@ -775,7 +779,7 @@ void WorkshopImageTool::slotUpdateView()
 
 //	ViewWidget->setZoomParams(xZoomOrigine, yZoomOrigine, ZoomScale);
 
-	ViewWidget->update();
+	mpViewWidget->update();
 
 #ifdef DEBUG_ZOOMING
 	fprintf(stderr, "\tslotUpdateView : done with ViewWidget->update();\n");
@@ -807,13 +811,13 @@ void WorkshopImageTool::setViewSize()
 	printf("setViewSize (0,0,%ld, %ld)\n", viewSize.width, viewSize.height);
 #endif
 
-	if(ViewWidget) {
+	if(mpViewWidget) {
 #ifdef __DEBUG_ZOOMING__
 		fprintf(stderr, "WImgT::%s:%d resize(%ld, %ld)\n",
 				__func__, __LINE__,
 				viewSize.width, viewSize.height);
 #endif
-		ViewWidget->resize(viewSize.width, viewSize.height);
+		mpViewWidget->resize(viewSize.width, viewSize.height);
 		vBox->resize( viewSize.width+WIMGT_MARGIN, TOOLBAR_HEIGHT +WIMGT_MARGIN+ viewSize.height);
 	}
 
@@ -840,7 +844,7 @@ void WorkshopImageTool::setOverlayRect(QRect overlayRect, QColor col)
 		h = overlayRect.height() / scale;
 	}
 
-	ViewWidget->setOverlayRect(QRect(Vx, Vy, w, h), col);
+	mpViewWidget->setOverlayRect(QRect(Vx, Vy, w, h), col);
 }
 
 
@@ -853,10 +857,11 @@ void WorkshopImageTool::setOverlayRect(QRect overlayRect, QColor col)
 void WorkshopImageTool::slotZoomInMode(){
 	chdir(BASE_DIRECTORY "images/pixmaps");
 
-	ToolMode = MODE_ZOOM_IN;
+	mToolMode = MODE_ZOOM_IN;
+	mpViewWidget->setEditMode(EDITMODE_NONE);
 	QCursor zoomCursor = QCursor( QBitmap( "CursorZoomIn.bmp", 0),
 								  QBitmap( "CursorZoomInMask.bmp", 0) );
-	ViewWidget->setCursor(zoomCursor);
+	mpViewWidget->setCursor(zoomCursor);
 
 	updateToolbar();
 }
@@ -878,23 +883,25 @@ void WorkshopImageTool::setZoom(int zoomscale, int xcenter, int ycenter)
 
 void WorkshopImageTool::slotZoomOutMode(){
 	chdir(BASE_DIRECTORY "images/pixmaps");
-	ToolMode = MODE_ZOOM_OUT;
+	mpViewWidget->setEditMode(EDITMODE_NONE);
+	mToolMode = MODE_ZOOM_OUT;
 	QCursor zoomCursor = QCursor( QBitmap( "CursorZoomOut.bmp", 0),
 								  QBitmap( "CursorZoomOutMask.bmp", 0));
-	ViewWidget->setCursor(zoomCursor);
+	mpViewWidget->setCursor(zoomCursor);
 
 	updateToolbar();
 }
 
 
-void WorkshopImageTool::slotZoomFit(){
+void WorkshopImageTool::slotZoomFit()
+{
 	ZoomScale = 1;
 	xZoomOrigine = 0;
 	yZoomOrigine = 0;
 	xZoomCenter = (int)viewSize.width / 2;
 	yZoomCenter = (int)viewSize.height / 2;
 
-	ViewWidget->setZoomParams(0,0,1);
+	mpViewWidget->setZoomParams(0,0,1);
 }
 
 void WorkshopImageTool::slotZoomInOnce(){
@@ -903,7 +910,8 @@ void WorkshopImageTool::slotZoomInOnce(){
 //	yZoomOrigine = 0;
 	int x = (int)viewSize.width / 2;
 	int y  = (int)viewSize.height / 2;
-	ViewWidget->zoomOnDisplayPixel(x, y, +1);
+
+	mpViewWidget->zoomOnDisplayPixel(x, y, +1);
 }
 
 void WorkshopImageTool::slotZoomOutOnce(){
@@ -912,16 +920,18 @@ void WorkshopImageTool::slotZoomOutOnce(){
 //	yZoomOrigine = 0;
 	int x = (int)viewSize.width / 2;
 	int y  = (int)viewSize.height / 2;
-	ViewWidget->zoomOnDisplayPixel(x, y, -1);
+
+	mpViewWidget->zoomOnDisplayPixel(x, y, -1);
 }
 
 void WorkshopImageTool::slotMoveMode(){
-	ToolMode = MODE_MOVE;
+	mToolMode = MODE_MOVE;
 	chdir(BASE_DIRECTORY "images/pixmaps");
 
 	QCursor zoomCursor = QCursor( QBitmap( "CursorMove.bmp", 0),
 								  QBitmap( "CursorMoveMask.bmp", 0));
-	ViewWidget->setCursor(zoomCursor);
+	mpViewWidget->setCursor(zoomCursor);
+	mpViewWidget->setEditMode(EDITMODE_ZOOM);
 	updateToolbar();
 }
 
@@ -946,7 +956,7 @@ void WorkshopImageTool::slotMenuView()
 
 void WorkshopImageTool::updateToolbar() {
 	chdir(BASE_DIRECTORY "images/pixmaps");
-	switch(ToolMode) {
+	switch(mToolMode) {
 	case MODE_ZOOM_IN:
 		aMenuView->setPixmap(QPixmap("IconZoomInView.png"));
 		break;
@@ -960,7 +970,7 @@ void WorkshopImageTool::updateToolbar() {
 	default:
 		break;
 	}
-	switch(ToolMode) {
+	switch(mToolMode) {
 	case MODE_MOVE:
 	case MODE_ZOOM_OUT:
 	case MODE_ZOOM_IN:
@@ -1006,17 +1016,17 @@ void WorkshopImageTool::slotColorPickerMode()
 	fprintf(stderr, "WImgTool::%s:%d : load cursor\n", __func__, __LINE__);
 
 	chdir(BASE_DIRECTORY "images/pixmaps");
-	ToolMode = MODE_PICKER;
+	mToolMode = MODE_PICKER;
 	QCursor zoomCursor = QCursor( QBitmap( "CursorPicker.bmp", 0),
 								  QBitmap( "CursorPickerMask.bmp", 0),
 								  1, 20);
-	ViewWidget->setCursor(zoomCursor);
-
+	mpViewWidget->setCursor(zoomCursor);
+	mpViewWidget->setEditMode(EDITMODE_PICKER);
 	updateToolbar();
 }
 
 void WorkshopImageTool::updateColorMenu() {
-	ViewWidget->setColorMode(m_colorMode);
+	mpViewWidget->setColorMode(m_colorMode);
 
 	chdir(BASE_DIRECTORY "images/pixmaps");
 	switch(m_colorMode) {
@@ -1038,6 +1048,7 @@ void WorkshopImageTool::updateColorMenu() {
 		break;
 	}
 }
+
 /*****************************************************************
 
   IMAGE MASK
@@ -1120,18 +1131,18 @@ void WorkshopImageTool::updateToolbar() {
 *************************************************************************
 */
 void WorkshopImageTool::slotSelMask(){
-	 ToolMode = MODE_SELECT;
+	 mToolMode = MODE_SELECT;
 
 	QCursor zoomCursor;
-	ViewWidget->setCursor(Qt::PointingHandCursor );
+	mpViewWidget->setCursor(Qt::PointingHandCursor );
 
 	updateToolbar();
 }
 void WorkshopImageTool::slotAddMask(){
-	 ToolMode = MODE_ADD_RECT;
+	 mToolMode = MODE_ADD_RECT;
 	QCursor zoomCursor = QCursor( QBitmap(IMAGEDIR "CursorAddArea.bmp", 0),
 		QBitmap(IMAGEDIR "CursorAddAreaMask.bmp", 0));
-	ViewWidget->setCursor(zoomCursor);
+	mpViewWidget->setCursor(zoomCursor);
 	updateToolbar();
 }
 void WorkshopImageTool::slotClearMask(){
@@ -1142,7 +1153,7 @@ void WorkshopImageTool::slotClearMask(){
 }
 
 void WorkshopImageTool::slotDelSelectedMask(){
-	if(ToolMode == MODE_SELECT)
+	if(mToolMode == MODE_SELECT)
 		if(selectedMask) {
 			printf("Delete area.\n");
 //FIXME			doc->removeMask(selectedMask);
@@ -1266,7 +1277,7 @@ void WorkshopImageTool::resizeEvent( QResizeEvent * e)
 #endif
 
 	// Change view size => change zoom origine
-	QPoint Wpos = ViewWidget->pos() + vBox->pos();
+	QPoint Wpos = mpViewWidget->pos() + vBox->pos();
 	viewSize.width  = e->size().width()  - Wpos.x();
 	viewSize.height = e->size().height() - Wpos.y();
 
@@ -1323,7 +1334,6 @@ void WorkshopImageTool::CalculateZoomWindow()
 	// left/top limit
 	if(ZoomScale >= 1) {
 		// LEFT-RIGHT LIMITATION
-
 		xZoomOrigine = xZoomCenter - (vwidth/ ZoomScale)/2;
 		if(xZoomOrigine < 0) {
 #ifdef __DEBUG_ZOOMING__
@@ -1424,35 +1434,68 @@ void WorkshopImageTool::CalculateZoomWindow()
 
 void WorkshopImageTool::refreshDisplay()
 {
-	ViewWidget->update();
+	mpViewWidget->update();
+}
+void WorkshopImageTool::slot_mpViewWidget_signalPicker(QRgb colorRGB,
+													 int colorGrey,
+													 QPoint point)
+{
+	QPoint pickPt = mpViewWidget->originalToDisplay(point.x(), point.y());
+
+	// Pick color in ImgRGB
+	emit signalColorPicker(pickPt, colorRGB);
+
+	QString colorStr;
+	colorStr.sprintf("(%d,%d) RGB=%d,%d,%d gray=%d",
+					 point.x(), point.y(),
+					 qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB),
+					 colorGrey);
+//	fprintf(stderr, "WImTool::%s:%d : %s\n",
+//			__func__, __LINE__, colorStr.toAscii().data());
+
+	QToolTip::showText(
+				pWorkspace->mapToGlobal(//point
+									//pWorkspace->mapToParent(pickPt)
+									pickPt
+//									+ QPoint(20,20)
+									- pWorkspace->mapToParent(QPoint(0,0))
+									)
+			,
+			//	  ViewWidget->rect().width(), ViewWidget->rect().height()),
+			colorStr,
+			mpViewWidget
+			);
+
 }
 
 void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 {
-	if(!ViewWidget) return;
-	switch(ToolMode)
+	if(!mpViewWidget) return;
+
+	switch(mToolMode)
 	{
+
 	default:
 		break;
 	case MODE_PICKER: {
-		QPoint pickPt = ViewWidget->displayToOriginal(point.x(), point.y());
+//		QPoint pickPt = mpViewWidget->displayToOriginal(point.x(), point.y());
 
-		// Pick color in ImgRGB
-		QRgb pickRGB = ImgRGB.pixel(point);
-		emit signalColorPicker(pickPt, pickRGB);
+//		// Pick color in ImgRGB
+//		QRgb pickRGB = ImgRGB.pixel(point);
+//		emit signalColorPicker(pickPt, pickRGB);
 
-		QString colorStr;
-		colorStr.sprintf("RGB=%d,%d,%d gray=%d",
-						 qRed(pickRGB), qGreen(pickRGB), qBlue(pickRGB),
-						 qGray(pickRGB));
-		QToolTip::showText(
-				pWorkspace->mapToGlobal(point
-				+ pWorkspace->mapToParent(QPoint(0,0)) )
-				,
-				//	  ViewWidget->rect().width(), ViewWidget->rect().height()),
-				colorStr,
-				ViewWidget
-				);
+//		QString colorStr;
+//		colorStr.sprintf("RGB=%d,%d,%d gray=%d",
+//						 qRed(pickRGB), qGreen(pickRGB), qBlue(pickRGB),
+//						 qGray(pickRGB));
+//		QToolTip::showText(
+//				pWorkspace->mapToGlobal(point
+//				+ pWorkspace->mapToParent(QPoint(0,0)) )
+//				,
+//				//	  ViewWidget->rect().width(), ViewWidget->rect().height()),
+//				colorStr,
+//				mpViewWidget
+//				);
 		}break;
 
 		/// Zoom in, so calculate zoom origine and width
@@ -1462,7 +1505,7 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 //		CalculateZoomWindow();
 //		memset(ImgRGB.bits(), 0, viewPixel*(ImgRGB.depth()/8));
 
-		ViewWidget->zoomOnDisplayPixel( point.x(), point.y(), +1 );
+		mpViewWidget->zoomOnDisplayPixel( point.x(), point.y(), +1 );
 		break;
 
 	case MODE_ZOOM_OUT:
@@ -1471,7 +1514,7 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 //		memset(ImgRGB.bits(), 0, viewPixel*(ImgRGB.depth()/8));
 //		CalculateZoomWindow();
 
-		ViewWidget->zoomOnDisplayPixel( point.x(), point.y(), -1 );
+		mpViewWidget->zoomOnDisplayPixel( point.x(), point.y(), -1 );
 		break;
 
 	case MODE_MOVE:
@@ -1481,8 +1524,13 @@ void WorkshopImageTool::onLButtonDown(Qt::ButtonState , const QPoint point)
 		myStartX = xZoomCenter;
 		myStartY = yZoomCenter;
 		moveDx = moveDy = 0;
+		fprintf(stderr, "WImgTool::%s:%d : activate select pressed\n",
+				__func__, __LINE__);
+
 		selectPressed = true;
-		//		printf("Move view : start at (%d,%d)\n", myStartX, myStartY);
+		fprintf(stderr, "WImTool::%s:%d : Move view : start at (%d,%d)\n",
+				__func__, __LINE__,
+				myStartX, myStartY);
 		break;
 
 	case MODE_SELECT: {
@@ -1544,12 +1592,14 @@ void WorkshopImageTool::Absolute2View(int Ax, int Ay, int * Vx, int * Vy)
 
 void WorkshopImageTool::onLButtonUp(Qt::ButtonState , const QPoint point)
 {
-	switch(ToolMode)
+	switch(mToolMode)
 	{
 	case MODE_ADD_RECT: {
 
 		WindowView2Absolute(point.x(), point.y(), &myStopX, &myStopY);
 
+		fprintf(stderr, "WImgTool::%s:%d : clear select pressed\n",
+				__func__, __LINE__);
 		selectPressed = false;
 
 		// set detection mask to detection object and to view object
@@ -1582,6 +1632,9 @@ void WorkshopImageTool::onLButtonUp(Qt::ButtonState , const QPoint point)
 		}
 		break;
 	default:
+
+		fprintf(stderr, "WImgTool::%s:%d : clear select pressed\n",
+				__func__, __LINE__);
 		selectPressed = false;
 		break;
 	}
@@ -1599,13 +1652,18 @@ void WorkshopImageTool::onRButtonUp(Qt::ButtonState , const QPoint )
 
 void WorkshopImageTool::onMouseMove(Qt::ButtonState nFlags, const QPoint point)
 {
+//	fprintf(stderr, "%s:%d nFlags=%d Left=%c toolMode=%d pressed=%c\n",
+//			__func__, __LINE__, (int)nFlags,
+//			( nFlags & Qt::LeftButton )?'T':'F',
+//			mToolMode,
+//			selectPressed ? 'T':'F');
 	if( ( nFlags & Qt::LeftButton ) )
 	{
-		if(ToolMode == MODE_PICKER) {
+		if(mToolMode == MODE_PICKER) {
 			onLButtonDown(Qt::NoButton, point);
 		}
 
-		if(ToolMode == MODE_MOVE && selectPressed) {
+		if(mToolMode == MODE_MOVE && selectPressed) {
 			moveDx -= (point.x() - myStopX);
 			moveDy -= (point.y() - myStopY);
 
@@ -1619,10 +1677,26 @@ void WorkshopImageTool::onMouseMove(Qt::ButtonState nFlags, const QPoint point)
 				xZoomCenter = myStartX + (moveDx * scale);
 				yZoomCenter = myStartY + (moveDy * scale);
 			}
+			fprintf(stderr, "%s:%d MOVING: nFlags=%d Left=%c toolMode=%d pressed=%c"
+					" => center =%d,%d\n",
+					__func__, __LINE__, (int)nFlags,
+					( nFlags & Qt::LeftButton )?'T':'F',
+					mToolMode,
+					selectPressed ? 'T':'F',
+					xZoomCenter, yZoomCenter
+					);
 			CalculateZoomWindow();
+			fprintf(stderr, "%s:%d MOVING: nFlags=%d Left=%c toolMode=%d pressed=%c"
+					" => center =%d,%d\n",
+					__func__, __LINE__, (int)nFlags,
+					( nFlags & Qt::LeftButton )?'T':'F',
+					mToolMode,
+					selectPressed ? 'T':'F',
+					xZoomCenter, yZoomCenter
+					);
 		}
 
-		if(ToolMode == MODE_ADD_RECT && selectPressed)
+		if(mToolMode == MODE_ADD_RECT && selectPressed)
 		{
 			WindowView2Absolute(point.x(), point.y(),
 								&myStopX, &myStopY);

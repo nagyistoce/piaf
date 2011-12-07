@@ -103,7 +103,7 @@ class WorkshopImageTool : public WorkshopTool
 	/** @brief Set overlay rect */
 	void setOverlayRect(QRect overlayRect, QColor col);
 
-	ImageWidget * imageView() { return ViewWidget; };
+	ImageWidget * imageView() { return mpViewWidget; };
 
 	/** Set default directories for images and movies */
 	void setDefaultDirectories(const QString & image_dir, const QString & movie_dir) {
@@ -168,7 +168,7 @@ private:
 
 	Q3VBox *vBox;
 	Q3HBox *hBox;
-	ImageWidget * ViewWidget;
+	ImageWidget * mpViewWidget;
 
 
 	// View selection buttons
@@ -240,6 +240,8 @@ private:
 	void slotColorThermicBlueToRedMode();
 	void slotColorIndexedMode();
 
+	void slot_mpViewWidget_signalPicker(QRgb colorRGB, int colorGrey, QPoint pt);
+
 	// mask slots
 	void slotMaskTools(int id);
 	void slotSelMask();
@@ -276,7 +278,7 @@ private:
 	int myStopX;
 	int myStopY;
 
-	unsigned char ToolMode;	/// Display tool mode
+	unsigned char mToolMode;	/// Display tool mode
 	QRect * getMaskFromPos(int x, int y);
 
 	// MASK MANAGEMENT
