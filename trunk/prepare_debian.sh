@@ -8,7 +8,7 @@ if [ "$(whoami)" == "root" ] ; then
 
 	# Install packages 
 	apt-get install -y libqt4-dev 
-	apt-get install -y libqt3-compat 
+	apt-get install -y libqt4-qt3support
 	apt-get install -y libavcodec-dev libavformat-dev libavutils-dev 
         apt-get install -y libswscale-dev 
 
