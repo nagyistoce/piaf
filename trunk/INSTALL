@@ -6,7 +6,7 @@ user$ ./build.sh
 
 	If build fails, you need to install the required packages for building piaf.
 	A script if provided for Debian/Ubuntu packages, run as root:
-root# ./prepare.sh
+root# ./prepare_debian.sh
 
 - Then, as root : create local directories and install all built
 root# ./install.sh

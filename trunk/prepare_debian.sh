@@ -15,6 +15,9 @@ if [ "$(whoami)" == "root" ] ; then
 	apt-get install -y libcv-dev libcvaux-dev libhighgui-dev
 
 	apt-get install -y libfftw3-dev sfftw-dev
+
+	# For workflow, use exiv2 to read EXIF data
+	apt-get install -y libexiv2-dev
 else
 	echo "Yoo need to be root to install packages"
 fi
