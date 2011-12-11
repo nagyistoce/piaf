@@ -1238,10 +1238,10 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path)
 		QDomElement e = n.toElement(); // try to convert the node to an element.
 		if(!e.isNull()) {
 			PIAF_MSG(SWLOG_INFO, "\tCategory '%s'", e.tagName().toAscii().data()); // the node really is an element.
-			if(e.tagName().compare("File")==0) // Read bookmarks
+			if(e.tagName().compare("File")==0) // Read file info
 			{
 				pinfo->filepath = e.attribute("fullpath");
-				pinfo->filesize = e.attribute("filesize", "0").toULong();
+				pinfo->filesize = e.attribute("filesize", "0").toULongLong();
 				pinfo->valid = e.attribute("valid", "0").toInt();
 				pinfo->width = e.attribute("width", "0").toInt();
 				pinfo->height = e.attribute("height", "0").toInt();
@@ -1287,7 +1287,11 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path)
 			if(e.tagName().compare("Movie")==0) // Read movie properties
 			{
 				pinfo->fps = e.attribute("fps").toFloat();
-				pinfo->filesize = e.attribute("filesize", "0").toULong();
+				unsigned long long fsize =
+					e.attribute("filesize", "0").toULong();
+				if(fsize > 0) {
+					pinfo->filesize = fsize;
+				}
 				strcpy(pinfo->FourCC, e.attribute("valid", "0").toAscii().data());
 			}
 

@@ -42,14 +42,12 @@ MainDisplayWidget::MainDisplayWidget(QWidget *parent) :
 	m_editBookmarksForm = NULL;
 
 	connect(&mPlayTimer, SIGNAL(timeout()), this, SLOT(on_mPlayTimer_timeout()));
-
 }
 
 MainDisplayWidget::~MainDisplayWidget()
 {
     delete ui;
 	mpFilterSequencer = NULL;
-
 }
 
 void MainDisplayWidget::setFilterSequencer(FilterSequencer * pFS)

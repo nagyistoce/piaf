@@ -38,6 +38,7 @@ ThumbImageFrame::ThumbImageFrame(QWidget *parent) :
 	mCtrl = mShift = false;
 
 	mActive = false;
+	mSelected = true; // set it to opossite of setSelected call, because it it is the same, the setSelected does nothing
 	setSelected( false );
 }
 
