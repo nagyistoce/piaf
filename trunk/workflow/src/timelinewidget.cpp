@@ -123,7 +123,13 @@ void TimeLineWidget::keyReleaseEvent ( QKeyEvent * event )
 void TimeLineWidget::mousePressEvent(QMouseEvent *e)
 {
 	if(!e) { return; }
-	if(m_image_info_struct.filesize <= 0) { return; }
+	if(m_image_info_struct.filesize == 0) {
+		fprintf(stderr, "TimeLineWidget::%s:%d invalid filesize = %llu !\n",
+				__func__, __LINE__,
+				m_image_info_struct.filesize);
+		printImageInfoStruct(&m_image_info_struct);
+
+		return; }
 
 	mLeftButton = (e->button() == Qt::LeftButton);
 	setCursorDisplayPos(e->pos().x());
@@ -135,7 +141,7 @@ void TimeLineWidget::setCursorDisplayPos(int posx)
 	if(mLeftButton) {
 		if(mMagnetic && mLeftButton) {
 			t_movie_pos found;
-			memset(&found, 0, sizeof(t_movie_pos));
+			found.nbFramesSinceKeyFrame = found.prevAbsPosition = found.prevKeyFramePosition = 0;
 
 			int dmin = 10;
 			QList<t_movie_pos>::iterator it;

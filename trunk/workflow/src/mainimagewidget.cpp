@@ -423,11 +423,15 @@ void MainImageWidget::on_grayscaleButton_toggled(bool checked)
 void MainImageWidget::slot_actNormalView_activated()
 {
 	m_ui->infoLabel->setText(tr("Normal"));
+	m_ui->globalImageLabel->setColorMode(COLORMODE_GREY);
+	m_ui->viewModeButton->setPixmap(QPixmap(":icons/icons/22x22/IconColorNormal.png"));
 }
 
 void MainImageWidget::slot_actInvertedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Inverted"));
+	m_ui->globalImageLabel->setColorMode(COLORMODE_GREY_INVERTED);
+	m_ui->viewModeButton->setPixmap(QPixmap(":icons/icons/22x22/IconColorGreyInverted.png"));
 //	m_ui->globalImageLabel->setRefImage();
 }
 
@@ -435,6 +439,8 @@ void MainImageWidget::slot_actInvertedView_activated()
 void MainImageWidget::slot_actIndexedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Indexed"));
+	m_ui->globalImageLabel->setColorMode(COLORMODE_INDEXED);
+	m_ui->viewModeButton->setPixmap(QPixmap(":icons/icons/22x22/IconColorGreyIndexed.png"));
 
 }
 
@@ -442,6 +448,8 @@ void MainImageWidget::slot_actIndexedView_activated()
 void MainImageWidget::slot_actBlack2RedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Black->red"));
+	m_ui->globalImageLabel->setColorMode(COLORMODE_THERMIC_BLACK2RED);
+	m_ui->viewModeButton->setPixmap(QPixmap(":icons/icons/22x22/IconColorThermicBlackToRed.png"));
 
 }
 
@@ -449,7 +457,8 @@ void MainImageWidget::slot_actBlack2RedView_activated()
 void MainImageWidget::slot_actBlue2RedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Blue->red"));
-
+	m_ui->viewModeButton->setPixmap(QPixmap(":icons/icons/22x22/IconColorThermicBlueToRed.png"));
+	m_ui->globalImageLabel->setColorMode(COLORMODE_THERMIC_BLUE2RED);
 }
 
 

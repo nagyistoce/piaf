@@ -43,15 +43,21 @@
     <widget class="QWidget" name="imageToolbarWidget" native="true">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
-       <number>1</number>
+       <number>0</number>
       </property>
       <property name="margin">
-       <number>1</number>
+       <number>0</number>
       </property>
       <item>
        <widget class="QPushButton" name="rotateButton">
         <property name="enabled">
          <bool>false</bool>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="toolTip">
          <string>Rotate image counter clockwise</string>
@@ -75,6 +81,12 @@
           <horstretch>0</horstretch>
           <verstretch>0</verstretch>
          </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>36</width>
+          <height>16777215</height>
+         </size>
         </property>
         <property name="toolTip">
          <string>Change view mode</string>
@@ -100,6 +112,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="zoomButton">
+        <property name="maximumSize">
+         <size>
+          <width>36</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Mouse controls viewing</string>
         </property>
@@ -109,6 +127,12 @@
         <property name="icon">
          <iconset resource="../ema.qrc">
           <normaloff>:/icons/icons/16x16/xmag.png</normaloff>:/icons/icons/16x16/xmag.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>24</width>
+          <height>24</height>
+         </size>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -126,6 +150,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="pickerButton">
+        <property name="maximumSize">
+         <size>
+          <width>36</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Get RGB or gray components on image point</string>
         </property>
@@ -149,6 +179,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="roiButton">
+        <property name="maximumSize">
+         <size>
+          <width>36</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Edits regions of interest</string>
         </property>
@@ -187,7 +223,7 @@
         </property>
         <property name="font">
          <font>
-          <pointsize>6</pointsize>
+          <pointsize>9</pointsize>
          </font>
         </property>
         <property name="toolTip">
@@ -217,6 +253,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="recordButton">
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Record output</string>
         </property>
@@ -238,6 +280,12 @@
       </item>
       <item>
        <widget class="QPushButton" name="snapButton">
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
          <string>Take a snapshot of this image</string>
         </property>
