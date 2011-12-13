@@ -16,6 +16,7 @@
  ***************************************************************************/
 #include <QPainter>
 #include "inc/timelinewidget.h"
+#include "piaf-common.h"
 
 TimeLineWidget::TimeLineWidget(QWidget *parent) :
 	QLabel(parent)
@@ -83,8 +84,17 @@ void TimeLineWidget::paintEvent( QPaintEvent * e)
 	QList<t_movie_pos>::iterator it;
 	for(it = m_image_info_struct.bookmarksList.begin(); it != m_image_info_struct.bookmarksList.end(); ++it)
 	{
-		t_movie_pos pos = (*it);
-		int disppos = computeCursorDisplayPos(pos.prevAbsPosition);
+		t_movie_pos bkmk = (*it);
+		PIAF_MSG(SWLOG_INFO, "\t\tadded bookmark name='%s' "
+				 "prevAbsPos=%lld prevKeyFrame=%lld nbFrameSinceKey=%d",
+				 bkmk.name.toAscii().data(),
+				 bkmk.prevAbsPosition,
+				 bkmk.prevKeyFramePosition,
+				 bkmk.nbFramesSinceKeyFrame
+				 ); // the node really is an element.
+
+		int disppos = computeCursorDisplayPos(bkmk.prevAbsPosition);
+
 		p.drawLine(disppos, margin, disppos, size().height()-1-margin);
 	}
 
@@ -129,7 +139,8 @@ void TimeLineWidget::mousePressEvent(QMouseEvent *e)
 				m_image_info_struct.filesize);
 		printImageInfoStruct(&m_image_info_struct);
 
-		return; }
+		return;
+	}
 
 	mLeftButton = (e->button() == Qt::LeftButton);
 	setCursorDisplayPos(e->pos().x());

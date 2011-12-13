@@ -1056,6 +1056,13 @@ int ImageInfo::processSharpness() {
 void saveImageInfoStruct(t_image_info_struct * pinfo, QString path)
 {
 	if(!pinfo) { return; }
+	if(path.isEmpty())
+	{
+		path = pinfo->cache_file;
+	}
+	fprintf(stderr, "[ImageInfo %s:%d : saving XML cache in '%s'\n",
+			__func__, __LINE__, path.toAscii().data());
+
 	QDomDocument infoDoc;
 	QDomElement elemFileInfo = infoDoc.createElement("FileInfo");
 	// Append data on file
@@ -1125,6 +1132,7 @@ void saveImageInfoStruct(t_image_info_struct * pinfo, QString path)
 		elemBookmark.setAttribute("nbFramesSinceKeyFrame", bkmk.nbFramesSinceKeyFrame);
 		elemBookmarks.appendChild(elemBookmark);
 	}
+	elemFileInfo.appendChild(elemBookmarks);
 
 
 	QDomElement elemImgProc = infoDoc.createElement("ImgProcessing");
@@ -1210,12 +1218,16 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path)
 {
 	if(!pinfo) { return -1; }
 	QFile file( path );
-	if (!file.open(QIODevice::ReadOnly)) {
+	if (!file.open(QIODevice::ReadOnly))
+	{
 		PIAF_MSG(SWLOG_ERROR, "could not open file '%s' for reading: err=%s",
 				 file.name().toAscii().data(),
 				 file.errorString().toAscii().data());
 		return -1;
 	}
+
+	pinfo->cache_file = path;
+
 	QDomDocument infoDoc;
 	QString errorMsg;
 	int errorLine = 0;
@@ -1309,6 +1321,7 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path)
 					folderNode = folderNode.nextSibling();
 				}
 			}
+
 			if(e.tagName().compare("Bookmarks")==0) // Read bookmarks
 			{
 				QDomNode folderNode = e.firstChild();
@@ -1321,6 +1334,14 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path)
 						bkmk.prevAbsPosition = folderElem.attribute("name").toLongLong();
 						bkmk.prevKeyFramePosition = folderElem.attribute("prevKeyFramePosition").toLongLong();
 						bkmk.nbFramesSinceKeyFrame = folderElem.attribute("prevAbsPosition").toInt();
+						PIAF_MSG(SWLOG_INFO, "\t\tadded bookmark name='%s' "
+								 "prevAbsPos=%lld prevKeyFrame=%lld nbFrameSinceKey=%d",
+								 bkmk.name.toAscii().data(),
+								 bkmk.prevAbsPosition,
+								 bkmk.prevKeyFramePosition,
+								 bkmk.nbFramesSinceKeyFrame
+								 ); // the node really is an element.
+						pinfo->bookmarksList.append(bkmk);
 					}
 					folderNode = folderNode.nextSibling();
 				}

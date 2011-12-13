@@ -1071,8 +1071,8 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 				ui->scrollAreaWidgetContents );
 
 		ui->scrollAreaWidgetContents->layout()->addWidget(newThumb);
-		newThumb->setImageFile(fileName, pinfo->thumbImage.iplImage);
-
+//		newThumb->setImageFile(fileName, pinfo->thumbImage.iplImage);
+		newThumb->setImageInfoStruct(pinfo);
 
 		newThumb->update();
 
@@ -1093,15 +1093,16 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 
 		ThumbImageFrame * newThumb2 = new ThumbImageFrame(ui->gridWidget);
 	//	ThumbImageWidget * newThumb2 = new ThumbImageWidget(ui->gridWidget);
-		newThumb2->setImageFile(fileName, pinfo->thumbImage.iplImage,
-								pinfo->score);
+//		newThumb2->setImageFile(fileName, pinfo->thumbImage.iplImage,
+//								pinfo->score);
+		newThumb2->setImageInfoStruct(pinfo);
 
 		// Cross-connection
 		newThumb2->setTwin(newThumb);
 		newThumb->setTwin(newThumb2);
 
 		// now delete thumb ?
-		// FIXME : check if there is no side effect of this deletion
+		/// \todo FIXME : check if there is no side effect of this deletion
 		tmReleaseImage(&pinfo->thumbImage.iplImage);
 
 		QGridLayout * grid_layout = (QGridLayout *)ui->gridWidget->layout();
