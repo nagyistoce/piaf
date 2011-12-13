@@ -60,6 +60,106 @@ void ThumbImageFrame::changeEvent(QEvent *e)
 	}
 }
 
+void ThumbImageFrame::setImageInfoStruct(t_image_info_struct * pinfo)
+{
+	if(!pinfo) { return; }
+
+	float score = pinfo->score;
+	QString imagePath = pinfo->filepath;
+	QFileInfo fi(imagePath);
+	m_ui->nameLabel->setText(fi.baseName());
+	m_ui->extLabel->setText(fi.extension(false));
+
+	QPixmap l_displayImage;// local only
+	m_imagePath = "";
+	int wdisp = m_ui->globalImageLabel->width()-2;
+	int hdisp = m_ui->globalImageLabel->height()-2;
+
+	if(score < 0) { // hide
+		m_ui->starsLabel->hide();
+	} else {
+		score --;
+		if(score > 4) score = 4;
+		QString stars = "";
+		if(score > 0)
+			for(int star = 0; star < score; star++) {
+				stars += "*";
+			}
+		else
+			score = 0;// for adding 5 x .
+
+		for(int star = score; star < 5; star++) {
+			stars += ".";
+		}
+
+		m_ui->starsLabel->setText(stars);
+	}
+
+	IplImage * img = pinfo->thumbImage.iplImage;
+	QPixmap fullImage;
+	if( img ) {
+		QImage qImg = iplImageToQImage(img);
+
+		fullImage = QPixmap::fromImage( qImg );
+		fprintf(stderr, "ThumbImageFrame::%s:%d : load '%s' : "
+				"iplImageToQImage(%dx%d) => qImg=%dx%d => pixmap=%dx%d\n",
+				__func__, __LINE__,
+				imagePath.toUtf8().data(),
+				img->width, img->height,
+				qImg.width(), qImg.height(),
+				fullImage.width(), fullImage.height()
+				);
+	} else {
+		fprintf(stderr, "ThumbImageFrame::%s:%d no IplImage => has to load '%s'\n",
+				__func__, __LINE__,
+				imagePath.toUtf8().data() );
+		fullImage.load(imagePath);
+	}
+
+	if(fullImage.isNull()
+		|| fullImage.width() == 0
+		|| fullImage.height() == 0
+		) {
+		l_displayImage.fill(127);
+	}
+	else {
+		m_imagePath = imagePath;
+		l_displayImage = fullImage.scaled( wdisp, hdisp,
+								Qt::KeepAspectRatio );
+	}
+
+	fprintf(stderr, "ThumbImageFrame::%s:%d : load '%s' : %dx%d => %dx%d\n",
+			__func__, __LINE__,
+			imagePath.toUtf8().data(),
+			fullImage.width(), fullImage.height(),
+			l_displayImage.width(), l_displayImage.height()
+			);
+
+	float Mo = pinfo->filesize / (1024.f*1024.f);
+	float ko = pinfo->filesize / (1024.f);
+
+	m_ui->globalImageLabel->setPixmap( l_displayImage );
+	QString tip = imagePath + "\n"
+			+ QString::number(pinfo->width) + " x "
+			+ QString::number(pinfo->height) + " x "
+			+ QString::number(pinfo->nChannels);
+	QString sizeStr;
+	if(Mo>=1.)
+	{
+		sizeStr.sprintf("%g", roundf(Mo*10.)/10.f);
+		tip += "\n" + tr("Size: ") + sizeStr + tr("MB");
+	}
+	else
+	{
+		sizeStr.sprintf("%g", roundf(ko*10.)/10.f);
+		tip += "\n" + tr("Size: ") + sizeStr + tr("kB");
+	}
+
+	m_ui->globalImageLabel->setToolTip(tip);
+	setToolTip(tip);
+
+}
+
 void ThumbImageFrame::setImageFile(const QString & imagePath,
 								   IplImage * img, int score )
 {
@@ -151,7 +251,11 @@ void ThumbImageFrame::setImageFile(const QString & imagePath,
 			);
 
 	m_ui->globalImageLabel->setPixmap( l_displayImage );
-	m_ui->globalImageLabel->setToolTip(imagePath);
+	QString tip = imagePath + "\n"
+			+ QString::number(fullImage.width()) + " x "
+			+ QString::number(fullImage.height());
+
+	m_ui->globalImageLabel->setToolTip(tip);
 }
 
 void ThumbImageFrame::on_globalImageLabel_signalMousePressEvent(QMouseEvent * ) {

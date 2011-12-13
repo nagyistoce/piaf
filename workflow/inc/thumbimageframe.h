@@ -43,6 +43,9 @@ public:
 	/** @set mirror twin frame */
 	void setTwin(ThumbImageFrame * pTwin) { mpTwin = pTwin; }
 
+	/** @brief Set the image info */
+	void setImageInfoStruct(t_image_info_struct * pinfo);
+
 	/** @brief Set the image */
 	void setImageFile(const QString &  imagePath, IplImage * img = NULL, int score = -1);
 

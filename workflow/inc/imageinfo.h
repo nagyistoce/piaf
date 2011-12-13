@@ -105,7 +105,7 @@ typedef struct {
 */
 typedef struct {
 	QString filepath;			/*!< Full path of image file */
-
+	QString cache_file;			/*!< Path of XML cache file */
 	unsigned char valid;		/*!< Valid info flag */
 	int width, height;
 	int nChannels;	///< Depth of images
@@ -158,7 +158,7 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path);
 
 /** @brief save a XML file containing data about the known file
 */
-void saveImageInfoStruct(t_image_info_struct * pinfo, QString path);
+void saveImageInfoStruct(t_image_info_struct * pinfo, QString path = "");
 
 
 /** @brief Image processing analyse class

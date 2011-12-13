@@ -121,10 +121,22 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 		int idx=0;
 		for(it=pinfo->bookmarksList.begin(); it!=pinfo->bookmarksList.end(); ++it, ++idx)
 		{
-			t_movie_pos pos = (*it);
-			appendBookmark(pos);
+			t_movie_pos bkmk = (*it);
+			PIAF_MSG(SWLOG_INFO, "\t\tadded bookmark name='%s' "
+					 "prevAbsPos=%lld prevKeyFrame=%lld nbFrameSinceKey=%d",
+					 bkmk.name.toAscii().data(),
+					 bkmk.prevAbsPosition,
+					 bkmk.prevKeyFramePosition,
+					 bkmk.nbFramesSinceKeyFrame
+					 ); // the node really is an element.
+
+			appendBookmark(bkmk);
 		}
 		ui->timeLineWidget->setFileInfo(*pinfo);
+	}
+	else
+	{
+
 	}
 
 	ui->timeLineWidget->setFilePosition(0);
@@ -172,6 +184,7 @@ void MainDisplayWidget::slotNewBookmarkList(QList<video_bookmark_t> list) {
 
 		appendBookmark((*it).movie_pos);
 	}
+	saveImageInfoStruct(mpImageInfoStruct);
 
 	ui->timeLineWidget->setFileInfo(*mpImageInfoStruct);
 }
@@ -375,6 +388,7 @@ void MainDisplayWidget::on_addBkmkButton_clicked()
 	appendBookmark(mFileVA.getMoviePosition());
 	if(mpImageInfoStruct) {
 		mpImageInfoStruct->bookmarksList.append(mFileVA.getMoviePosition());
+		saveImageInfoStruct(mpImageInfoStruct);
 		ui->timeLineWidget->setFileInfo(*mpImageInfoStruct);
 	}
 }
