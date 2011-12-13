@@ -125,6 +125,15 @@ void ImageWidget::setRefImage(QImage *pIm)
 		if(dImage->depth()==8) {
 			setColorMode(m_colorMode);
 		}
+		else
+		{
+			if(m_colorMode != COLORMODE_GREY)
+			{
+				m_greyImage = pIm->convertDepth(8);
+				dImage = &m_greyImage;
+				setColorMode(m_colorMode);
+			}
+		}
 	}
 
 	update();
@@ -248,7 +257,9 @@ void ImageWidget::setColorMode(int mode)
 	}
 
 	if(dImage) {
-		if(dImage->depth() > 8) return;
+		if(dImage->depth() > 8) {
+			return;
+		}
 
 		dImage->setNumColors(256);
 		QColor col;
