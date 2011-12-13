@@ -222,6 +222,7 @@ private:
 
 	QRect mCropRect; ///< Display rect in image (chen cropped)
 	QImage m_displayImage;
+	QImage m_greyImage;
 
 	int xMouseMoveStart, yMouseMoveStart; ///< Start position of mouse when moving
 	int xOriginMoveStart, yOriginMoveStart; ///< Start position of mouse when moving
