@@ -70,11 +70,11 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv,
 
 	setToolbar();
 
-	if(ImgRGB.depth()==8) {
+//	if(ImgRGB.depth()==8) {
 		aMenuColor->show();
-	} else {
-		aMenuColor->hide();
-	}
+//	} else {
+//		aMenuColor->hide();
+//	}
 
 	mToolMode = MODE_SMARTZOOM;
 	mpViewWidget->setRefImage(&ImgRGB);
@@ -147,11 +147,6 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv, QWidget *p_parent,
 	pWin->setMouseTracking(TRUE);
 	setToolbar();
 
-	// FIXME : update here later
-	if(ImgRGB.depth()==8)
-		aMenuColor->show();
-	else
-		aMenuColor->hide();
 
 	mpViewWidget->setRefImage(&ImgRGB);
 
@@ -274,10 +269,10 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 		}
 
 		if(aMenuColor) {
-			if(OrigImgRGB.depth()==8)
+//			if(OrigImgRGB.depth()==8)
 				aMenuColor->show();
-			else
-				aMenuColor->hide();
+//			else
+//				aMenuColor->hide();
 		}
 
 		ProcImgRGB = OrigImgRGB;
@@ -472,6 +467,7 @@ void WorkshopImageTool::setToolbar()
 	}
 	aMenuColor->setFlat(true);
 	aMenuColor->setToggleButton(true);
+	aMenuColor->show();
 
 	colorMenu = new QMenu(hBox);
 	aMenuColor->setPopup(colorMenu);

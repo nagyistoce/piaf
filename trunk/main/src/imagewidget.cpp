@@ -263,7 +263,7 @@ void ImageWidget::setColorMode(int mode)
 
 		dImage->setNumColors(256);
 		QColor col;
-		fprintf(stderr, "ImageWidget::%s : colorMode = %d\n", __func__, m_colorMode);
+//		fprintf(stderr, "ImageWidget::%s : colorMode = %d\n", __func__, m_colorMode);
 		// Change color mode
 		switch(m_colorMode) {
 		default:
