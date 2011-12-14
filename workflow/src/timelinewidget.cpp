@@ -85,7 +85,7 @@ void TimeLineWidget::paintEvent( QPaintEvent * e)
 	for(it = m_image_info_struct.bookmarksList.begin(); it != m_image_info_struct.bookmarksList.end(); ++it)
 	{
 		t_movie_pos bkmk = (*it);
-		PIAF_MSG(SWLOG_INFO, "\t\tadded bookmark name='%s' "
+		PIAF_MSG(SWLOG_TRACE, "\t\tadded bookmark name='%s' "
 				 "prevAbsPos=%lld prevKeyFrame=%lld nbFrameSinceKey=%d",
 				 bkmk.name.toAscii().data(),
 				 bkmk.prevAbsPosition,

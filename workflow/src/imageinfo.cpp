@@ -1146,8 +1146,7 @@ void saveImageInfoStruct(t_image_info_struct * pinfo, QString path)
 	elemFileInfo.appendChild(elemImgProc);
 
 	infoDoc.appendChild(elemFileInfo);
-
-	PIAF_MSG(SWLOG_ERROR, "saving '%s'", path.toAscii().data());
+	PIAF_MSG(SWLOG_TRACE, "saving '%s'", path.toAscii().data());
 	QFile fileout( path );
 	if( !fileout.open( IO_WriteOnly ) ) {
 		PIAF_MSG(SWLOG_ERROR, "cannot save '%s'", path.toAscii().data());
@@ -1331,9 +1330,9 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path)
 						// Read parameters
 						t_movie_pos bkmk;
 						bkmk.name = folderElem.attribute("name");
-						bkmk.prevAbsPosition = folderElem.attribute("name").toLongLong();
+						bkmk.prevAbsPosition = folderElem.attribute("prevAbsPosition").toLongLong();
 						bkmk.prevKeyFramePosition = folderElem.attribute("prevKeyFramePosition").toLongLong();
-						bkmk.nbFramesSinceKeyFrame = folderElem.attribute("prevAbsPosition").toInt();
+						bkmk.nbFramesSinceKeyFrame = folderElem.attribute("nbFramesSinceKeyFrame").toInt();
 						PIAF_MSG(SWLOG_INFO, "\t\tadded bookmark name='%s' "
 								 "prevAbsPos=%lld prevKeyFrame=%lld nbFrameSinceKey=%d",
 								 bkmk.name.toAscii().data(),

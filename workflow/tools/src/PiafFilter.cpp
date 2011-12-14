@@ -56,7 +56,7 @@
 
 #include <QWorkspace>
 bool g_debug_PiafSignalHandler = false;
-bool g_debug_FilterSequencer = false;
+bool g_debug_FilterSequencer = true;
 bool g_debug_PiafFilter = false;
 
 /// Delete a filter in manager (parameters and widgets)
@@ -609,9 +609,10 @@ void FilterSequencer::unloadAllLoaded()
 			++it)
 		{
 			PiafFilter * pv = (*it);
-			fprintf(stderr, "\tDelete loaded? filter '%s' \n",
-				pv->exec_name);
-			if(  pv->loaded() )
+			fprintf(stderr, "\tDelete loaded? filter %p = '%s' \n",
+					pv,
+					(pv ? pv->exec_name : "(null)") );
+			if( pv && pv->loaded() )
 			{
 				// then add it to selectedListView
 //#ifdef __SWPLUGIN_MANAGER__
