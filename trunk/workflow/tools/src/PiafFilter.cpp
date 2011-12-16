@@ -1446,6 +1446,7 @@ int FilterSequencer::processImage(swImageStruct * image)
 	int ret = 1;
 
 	int global_return = 0;
+	QList<PiafFilter *> crashedPlugins;
 
 	if(lockProcess) {
 		fprintf(stderr, "[FilterSequencer]::%s:%d : process is locked !! do not process\n",
@@ -1465,14 +1466,13 @@ int FilterSequencer::processImage(swImageStruct * image)
 		fprintf(stderr, "[FilterSequencer]::%s:%d : processing %d filters...\n",
 				__func__, __LINE__,
 				mLoadedFiltersList.count());
-
 		if(!mLoadedFiltersList.isEmpty())
 		{
 			bool finalreached = false;
 			QList<PiafFilter *>::iterator it;
 			int filtidx = 0;
 			for(it = mLoadedFiltersList.begin();
-				it!=mLoadedFiltersList.end()
+				it != mLoadedFiltersList.end()
 				&& ret && !finalreached;
 					++it, ++filtidx ) {
 				PiafFilter * pv = (*it);
@@ -1507,7 +1507,7 @@ int FilterSequencer::processImage(swImageStruct * image)
 					else
 					{	// Processing has one error
 						global_return --;
-
+						crashedPlugins.append(pv);
 						fprintf(stderr, "[PiafFiltersManager]::%s:%d : filter '%s' failed "
 								"=> will return %d\n",
 								__func__, __LINE__, pv->exec_name,
@@ -1552,18 +1552,31 @@ int FilterSequencer::processImage(swImageStruct * image)
 					__func__, __LINE__
 					);
 			int answer = QMessageBox::question(NULL, tr("A plugin crashed"),
-								  tr("A plugin in sequence has crashed. Do you want to reload the whole sequence ?"),
-								  QMessageBox::Yes, QMessageBox::No);
+											   tr("A plugin in sequence has crashed. "
+												  "Do you want to reload the whole sequence ? If you answer 'No', only the plugins with success will be restored"),
+												  QMessageBox::Yes, QMessageBox::No);
 			if(answer == QMessageBox::Yes)
 			{
 				/// \fixme save in /dev/shm
-				saveSequence( "/dev/shm/crashedsequence.flist");
+				saveSequence(SHM_DIRECTORY "crashedsequence.flist");
 
 				// unload previously loaded filters
 				unloadAllLoaded();
 
 				// reload same file
 				loadSequence(getPluginSequenceFile());
+			}
+			else
+			{
+				QList<PiafFilter *>::iterator pvit;
+				for(pvit = crashedPlugins.begin();
+					pvit != crashedPlugins.end(); ++pvit)
+				{
+					PiafFilter * deadpv = (*pvit);
+					fprintf(stderr, "[Sequence]::%s:%d: removing crashed plugin '%s'\n",
+							__func__, __LINE__, deadpv->name());
+					mLoadedFiltersList.remove(deadpv);
+				}
 			}
 		}
 	}
