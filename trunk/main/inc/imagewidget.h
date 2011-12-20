@@ -221,7 +221,9 @@ private:
 	float mZoomFitFactor;	///< Fit zoom to size (floating point zoom factor)
 
 	QRect mCropRect; ///< Display rect in image (chen cropped)
-	QImage m_displayImage;
+	QImage m_displayImage;	///< Image for display
+
+	QImage * m_pOriginalImage; ///< pointer to original image
 	QImage m_greyImage;
 
 	int xMouseMoveStart, yMouseMoveStart; ///< Start position of mouse when moving

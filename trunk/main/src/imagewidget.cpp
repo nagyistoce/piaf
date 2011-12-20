@@ -87,6 +87,8 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 
 	//setFocusPolicy (Qt::StrongFocus);
 	dImage=NULL;
+	m_pOriginalImage = NULL;
+
 	m_colorMode = 0;
 	mShift = mCtrl = false;
 
@@ -120,9 +122,10 @@ void ImageWidget::showGrid(int steps)
 
 void ImageWidget::setRefImage(QImage *pIm)
 {
-	dImage = pIm;
+	dImage = m_pOriginalImage = pIm;
 	if(dImage) {
 		if(dImage->depth()==8) {
+			m_greyImage = QImage();
 			setColorMode(m_colorMode);
 		}
 		else
@@ -132,6 +135,11 @@ void ImageWidget::setRefImage(QImage *pIm)
 				m_greyImage = pIm->convertDepth(8);
 				dImage = &m_greyImage;
 				setColorMode(m_colorMode);
+			}
+			else
+			{
+				// Reset image
+				m_greyImage = QImage();
 			}
 		}
 	}
@@ -254,6 +262,24 @@ void ImageWidget::setColorMode(int mode)
 		m_colorMode = mode;
 	} else {
 		m_colorMode = COLORMODE_GREY;
+		if(m_pOriginalImage != dImage && m_pOriginalImage)
+		{
+			dImage = m_pOriginalImage;
+		}
+	}
+
+	if(m_colorMode == COLORMODE_GREY) // we changed to normal/grey mode
+	{
+		if(m_pOriginalImage
+				&& m_pOriginalImage != dImage  // we were on a greyscaled image
+				&& m_pOriginalImage->depth() != 8	// and original is not greyscaled
+				)
+		{
+			// back to normal mode
+			dImage = m_pOriginalImage;
+			repaint();
+			return;
+		}
 	}
 
 	if(dImage) {
