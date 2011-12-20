@@ -39,11 +39,15 @@ AvailablePluginTreeWidgetItem::AvailablePluginTreeWidgetItem(
 	: QTreeWidgetItem(parent), mpFilter(pFilter), mIndexFunction(idx_function)
 {
 	if(!mpFilter) { setText(0, ("NULL plugin")); return; }
-	if(mIndexFunction >= mpFilter->nbfunctions()) { setText(0, ("idx > nbfunc")); return; }
+	if(mIndexFunction >= mpFilter->nbfunctions()) {
+		setText(0, ("idx > nbfunc")); return;
+	}
 
-	DEBUG_MSG("Creating AvailablePluginTreeWidgetItem([%d] = '%s')",
+	if(g_debug_FilterSequencer)
+	{
+		DEBUG_MSG("\tAvailablePluginTreeWidgetItem([%d] = '%s')",
 			  mIndexFunction, mpFilter->getFunction(mIndexFunction).name);
-
+	}
 	// Set columns
 	setText(0, QString(mpFilter->getFunction(mIndexFunction).name));
 	//setText(1, QString::number(mpFilter->getFunction(mIndexFunction).nb_params));
