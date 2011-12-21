@@ -30,6 +30,7 @@
 /*
  * redefinition of standard types
  */
+#ifndef u8
 typedef uint8_t		 	u8;
 typedef char 			i8;
 typedef uint16_t 		u16;
@@ -39,6 +40,7 @@ typedef int32_t 		i32;
 typedef float			d32;
 typedef double			d64;
 typedef long double 		d80;
+#endif
 
 /** @brief Region of interest / rectangle position and size */
 typedef struct _tBoxSize {
