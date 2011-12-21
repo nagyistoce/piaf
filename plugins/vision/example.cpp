@@ -136,7 +136,6 @@ int nb_functions = 7;
 // function circular median 
 unsigned char ** median_buf = NULL;
 unsigned char oldmedian = 0;
-int pos = 0;
 
 void median_func()
 {
@@ -144,7 +143,7 @@ void median_func()
 	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
 	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
 	unsigned char * imageOut = (unsigned char *)imOut->buffer;
-
+	int pos = 0;
 	if((!median_buf || oldmedian != median) && median > 0) {
 		if(median_buf) {
 			for(int i=0; i<oldmedian; i++)
@@ -157,7 +156,7 @@ void median_func()
 			
 			memcpy(median_buf[b], imageIn, imIn->buffer_size);
 		}
-		pos = 0;
+		int pos = 0;
 		oldmedian = median;
 	}
 	else {
