@@ -67,7 +67,7 @@
         </property>
         <property name="icon">
          <iconset resource="../ema.qrc">
-          <normaloff>:/icons/icons/16x16/object-rotate-left.png</normaloff>:/icons/icons/16x16/object-rotate-left.png</iconset>
+          <normaloff>:/icons/16x16/object-rotate-left.png</normaloff>:/icons/16x16/object-rotate-left.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -96,7 +96,7 @@
         </property>
         <property name="icon">
          <iconset resource="../ema.qrc">
-          <normaloff>:/icons/icons/22x22/IconColorNormal.png</normaloff>:/icons/icons/22x22/IconColorNormal.png</iconset>
+          <normaloff>:/icons/22x22/IconColorNormal.png</normaloff>:/icons/22x22/IconColorNormal.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>
@@ -126,7 +126,7 @@
         </property>
         <property name="icon">
          <iconset resource="../ema.qrc">
-          <normaloff>:/icons/icons/16x16/xmag.png</normaloff>:/icons/icons/16x16/xmag.png</iconset>
+          <normaloff>:/icons/16x16/xmag.png</normaloff>:/icons/16x16/xmag.png</iconset>
         </property>
         <property name="iconSize">
          <size>
@@ -164,7 +164,7 @@
         </property>
         <property name="icon">
          <iconset resource="../ema.qrc">
-          <normaloff>:/icons/icons/16x16/color-picker-grey.png</normaloff>:/icons/icons/16x16/color-picker-grey.png</iconset>
+          <normaloff>:/icons/16x16/color-picker-grey.png</normaloff>:/icons/16x16/color-picker-grey.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -193,7 +193,7 @@
         </property>
         <property name="icon">
          <iconset resource="../ema.qrc">
-          <normaloff>:/icons/icons/16x16/transform-crop.png</normaloff>:/icons/icons/16x16/transform-crop.png</iconset>
+          <normaloff>:/icons/16x16/transform-crop.png</normaloff>:/icons/16x16/transform-crop.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -267,8 +267,8 @@
         </property>
         <property name="icon">
          <iconset resource="../ema.qrc">
-          <normaloff>:/icons/icons/16x16/media-record.png</normaloff>
-          <normalon>:/icons/icons/16x16/media-playback-stop.png</normalon>:/icons/icons/16x16/media-record.png</iconset>
+          <normaloff>:/icons/16x16/media-record.png</normaloff>
+          <normalon>:/icons/16x16/media-playback-stop.png</normalon>:/icons/16x16/media-record.png</iconset>
         </property>
         <property name="checkable">
          <bool>true</bool>
@@ -294,7 +294,7 @@
         </property>
         <property name="icon">
          <iconset resource="../ema.qrc">
-          <normaloff>:/icons/icons/16x16/camera-photo.png</normaloff>:/icons/icons/16x16/camera-photo.png</iconset>
+          <normaloff>:/icons/16x16/camera-photo.png</normaloff>:/icons/16x16/camera-photo.png</iconset>
         </property>
         <property name="checkable">
          <bool>false</bool>

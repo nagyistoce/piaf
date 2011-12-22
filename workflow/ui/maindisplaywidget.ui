@@ -86,7 +86,7 @@
             </property>
             <property name="icon">
              <iconset resource="../ema.qrc">
-              <normaloff>:/icons/icons/16x16/media-seek-backward.png</normaloff>:/icons/icons/16x16/media-seek-backward.png</iconset>
+              <normaloff>:/icons/16x16/media-seek-backward.png</normaloff>:/icons/16x16/media-seek-backward.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -109,7 +109,7 @@
             </property>
             <property name="icon">
              <iconset resource="../ema.qrc">
-              <normaloff>:/icons/icons/16x16/media-skip-backward.png</normaloff>:/icons/icons/16x16/media-skip-backward.png</iconset>
+              <normaloff>:/icons/16x16/media-skip-backward.png</normaloff>:/icons/16x16/media-skip-backward.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -132,8 +132,8 @@
             </property>
             <property name="icon">
              <iconset resource="../ema.qrc">
-              <normaloff>:/icons/icons/16x16/media-playback-start.png</normaloff>
-              <normalon>:/icons/icons/16x16/media-playback-pause.png</normalon>:/icons/icons/16x16/media-playback-start.png</iconset>
+              <normaloff>:/icons/16x16/media-playback-start.png</normaloff>
+              <normalon>:/icons/16x16/media-playback-pause.png</normalon>:/icons/16x16/media-playback-start.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -159,7 +159,7 @@
             </property>
             <property name="icon">
              <iconset resource="../ema.qrc">
-              <normaloff>:/icons/icons/16x16/media-skip-forward.png</normaloff>:/icons/icons/16x16/media-skip-forward.png</iconset>
+              <normaloff>:/icons/16x16/media-skip-forward.png</normaloff>:/icons/16x16/media-skip-forward.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -182,7 +182,7 @@
             </property>
             <property name="icon">
              <iconset resource="../ema.qrc">
-              <normaloff>:/icons/icons/16x16/media-seek-forward.png</normaloff>:/icons/icons/16x16/media-seek-forward.png</iconset>
+              <normaloff>:/icons/16x16/media-seek-forward.png</normaloff>:/icons/16x16/media-seek-forward.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -328,7 +328,7 @@
             </property>
             <property name="icon">
              <iconset resource="../ema.qrc">
-              <normaloff>:/icons/icons/22x22/icon-magnet.png</normaloff>:/icons/icons/22x22/icon-magnet.png</iconset>
+              <normaloff>:/icons/22x22/icon-magnet.png</normaloff>:/icons/22x22/icon-magnet.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -357,7 +357,7 @@
             </property>
             <property name="icon">
              <iconset resource="../ema.qrc">
-              <normaloff>:/icons/icons/16x16/rating.png</normaloff>:/icons/icons/16x16/rating.png</iconset>
+              <normaloff>:/icons/16x16/rating.png</normaloff>:/icons/16x16/rating.png</iconset>
             </property>
             <property name="iconSize">
              <size>
@@ -383,7 +383,7 @@
             </property>
             <property name="icon">
              <iconset resource="../ema.qrc">
-              <normaloff>:/icons/icons/16x16/bookmark-toolbar.png</normaloff>:/icons/icons/16x16/bookmark-toolbar.png</iconset>
+              <normaloff>:/icons/16x16/bookmark-toolbar.png</normaloff>:/icons/16x16/bookmark-toolbar.png</iconset>
             </property>
             <property name="iconSize">
              <size>

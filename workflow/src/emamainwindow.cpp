@@ -573,7 +573,7 @@ void EmaMainWindow::on_actionConvert_images_to_AVI_activated()
 
 void EmaMainWindow::on_actionAbout_activated()
 {
-	QPixmap pix(":/icons/icons/ema-splash.png");
+	QPixmap pix(":/icons/piaf-about.png");
 	if(g_splash) {
 		g_splash->setPixmap(pix);
 	}

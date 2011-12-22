@@ -100,7 +100,7 @@
                <widget class="QWidget" name="inputsTabWidgetPage1">
                 <attribute name="icon">
                  <iconset resource="../ema.qrc">
-                  <normaloff>:/icons/icons/22x22/system-file-manager.png</normaloff>:/icons/icons/22x22/system-file-manager.png</iconset>
+                  <normaloff>:/icons/22x22/system-file-manager.png</normaloff>:/icons/22x22/system-file-manager.png</iconset>
                 </attribute>
                 <attribute name="title">
                  <string/>
@@ -147,7 +147,7 @@
                       </property>
                       <property name="icon">
                        <iconset resource="../ema.qrc">
-                        <normaloff>:/icons/icons/16x16/list-add.png</normaloff>:/icons/icons/16x16/list-add.png</iconset>
+                        <normaloff>:/icons/16x16/list-add.png</normaloff>:/icons/16x16/list-add.png</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -173,7 +173,7 @@
                       </property>
                       <property name="icon">
                        <iconset resource="../ema.qrc">
-                        <normaloff>:/icons/icons/16x16/list-remove.png</normaloff>:/icons/icons/16x16/list-remove.png</iconset>
+                        <normaloff>:/icons/16x16/list-remove.png</normaloff>:/icons/16x16/list-remove.png</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -206,7 +206,7 @@
                     </property>
                     <property name="icon">
                      <iconset resource="../ema.qrc">
-                      <normaloff>:/icons/icons/16x16/view-list-tree.png</normaloff>:/icons/icons/16x16/view-list-tree.png</iconset>
+                      <normaloff>:/icons/16x16/view-list-tree.png</normaloff>:/icons/16x16/view-list-tree.png</iconset>
                     </property>
                    </column>
                    <column>
@@ -221,7 +221,7 @@
                <widget class="QWidget" name="inputsTabWidgetPage2">
                 <attribute name="icon">
                  <iconset resource="../ema.qrc">
-                  <normaloff>:/icons/icons/16x16/address-book-new.png</normaloff>:/icons/icons/16x16/address-book-new.png</iconset>
+                  <normaloff>:/icons/16x16/address-book-new.png</normaloff>:/icons/16x16/address-book-new.png</iconset>
                 </attribute>
                 <attribute name="title">
                  <string/>
@@ -255,7 +255,7 @@
                       </property>
                       <property name="icon">
                        <iconset resource="../ema.qrc">
-                        <normaloff>:/icons/icons/16x16/view-close.png</normaloff>:/icons/icons/16x16/view-close.png</iconset>
+                        <normaloff>:/icons/16x16/view-close.png</normaloff>:/icons/16x16/view-close.png</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -291,7 +291,7 @@
                       </property>
                       <property name="icon">
                        <iconset resource="../ema.qrc">
-                        <normaloff>:/icons/icons/16x16/list-add.png</normaloff>:/icons/icons/16x16/list-add.png</iconset>
+                        <normaloff>:/icons/16x16/list-add.png</normaloff>:/icons/16x16/list-add.png</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -314,7 +314,7 @@
                       </property>
                       <property name="icon">
                        <iconset resource="../ema.qrc">
-                        <normaloff>:/icons/icons/16x16/list-remove.png</normaloff>:/icons/icons/16x16/list-remove.png</iconset>
+                        <normaloff>:/icons/16x16/list-remove.png</normaloff>:/icons/16x16/list-remove.png</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -347,7 +347,7 @@
                <widget class="QWidget" name="inputsTabWidgetPage3">
                 <attribute name="icon">
                  <iconset resource="../ema.qrc">
-                  <normaloff>:/icons/icons/16x16/camera-web.png</normaloff>:/icons/icons/16x16/camera-web.png</iconset>
+                  <normaloff>:/icons/16x16/camera-web.png</normaloff>:/icons/16x16/camera-web.png</iconset>
                 </attribute>
                 <attribute name="title">
                  <string/>
@@ -381,7 +381,7 @@
                       </property>
                       <property name="icon">
                        <iconset resource="../ema.qrc">
-                        <normaloff>:/icons/icons/16x16/view-refresh.png</normaloff>:/icons/icons/16x16/view-refresh.png</iconset>
+                        <normaloff>:/icons/16x16/view-refresh.png</normaloff>:/icons/16x16/view-refresh.png</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -417,7 +417,7 @@
                       </property>
                       <property name="icon">
                        <iconset resource="../ema.qrc">
-                        <normaloff>:/icons/icons/16x16/list-add.png</normaloff>:/icons/icons/16x16/list-add.png</iconset>
+                        <normaloff>:/icons/16x16/list-add.png</normaloff>:/icons/16x16/list-add.png</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -440,7 +440,7 @@
                       </property>
                       <property name="icon">
                        <iconset resource="../ema.qrc">
-                        <normaloff>:/icons/icons/16x16/list-remove.png</normaloff>:/icons/icons/16x16/list-remove.png</iconset>
+                        <normaloff>:/icons/16x16/list-remove.png</normaloff>:/icons/16x16/list-remove.png</iconset>
                       </property>
                       <property name="iconSize">
                        <size>
@@ -477,7 +477,7 @@
                     </property>
                     <property name="icon">
                      <iconset resource="../ema.qrc">
-                      <normaloff>:/icons/icons/16x16/camera-web.png</normaloff>:/icons/icons/16x16/camera-web.png</iconset>
+                      <normaloff>:/icons/16x16/camera-web.png</normaloff>:/icons/16x16/camera-web.png</iconset>
                     </property>
                    </item>
                    <item>
@@ -495,7 +495,7 @@
                     </property>
                     <property name="icon">
                      <iconset resource="../ema.qrc">
-                      <normaloff>:/icons/icons/22x22/camera-axis.png</normaloff>:/icons/icons/22x22/camera-axis.png</iconset>
+                      <normaloff>:/icons/22x22/camera-axis.png</normaloff>:/icons/22x22/camera-axis.png</iconset>
                     </property>
                     <property name="text">
                      <string>unsupported</string>
@@ -569,7 +569,7 @@
              </property>
              <property name="icon">
               <iconset resource="../ema.qrc">
-               <normaloff>:/icons/icons/22x22/view-list-icons.png</normaloff>:/icons/icons/22x22/view-list-icons.png</iconset>
+               <normaloff>:/icons/22x22/view-list-icons.png</normaloff>:/icons/22x22/view-list-icons.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -604,7 +604,7 @@
              </property>
              <property name="icon">
               <iconset resource="../ema.qrc">
-               <normaloff>:/icons/icons/22x22/view-preview.png</normaloff>:/icons/icons/22x22/view-preview.png</iconset>
+               <normaloff>:/icons/22x22/view-preview.png</normaloff>:/icons/22x22/view-preview.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -630,7 +630,7 @@
              </property>
              <property name="icon">
               <iconset resource="../ema.qrc">
-               <normaloff>:/icons/icons/16x16/view-list-tree.png</normaloff>:/icons/icons/16x16/view-list-tree.png</iconset>
+               <normaloff>:/icons/16x16/view-list-tree.png</normaloff>:/icons/16x16/view-list-tree.png</iconset>
              </property>
              <property name="iconSize">
               <size>
@@ -809,7 +809,7 @@
                      <property name="icon">
                       <iconset resource="../../main/piaf.qrc">
                        <normaloff>:/images/22x22/system-run.png</normaloff>
-                       <normalon>:/icons/icons/22x22/media-playback-pause.png</normalon>:/images/22x22/system-run.png</iconset>
+                       <normalon>:/icons/22x22/media-playback-pause.png</normalon>:/images/22x22/system-run.png</iconset>
                      </property>
                      <property name="checkable">
                       <bool>true</bool>
@@ -842,7 +842,7 @@
                      </property>
                      <property name="icon">
                       <iconset resource="../ema.qrc">
-                       <normaloff>:/icons/icons/16x16/arrow-up.png</normaloff>:/icons/icons/16x16/arrow-up.png</iconset>
+                       <normaloff>:/icons/16x16/arrow-up.png</normaloff>:/icons/16x16/arrow-up.png</iconset>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -859,7 +859,7 @@
                      </property>
                      <property name="icon">
                       <iconset resource="../ema.qrc">
-                       <normaloff>:/icons/icons/16x16/arrow-down.png</normaloff>:/icons/icons/16x16/arrow-down.png</iconset>
+                       <normaloff>:/icons/16x16/arrow-down.png</normaloff>:/icons/16x16/arrow-down.png</iconset>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -876,7 +876,7 @@
                      </property>
                      <property name="icon">
                       <iconset resource="../ema.qrc">
-                       <normaloff>:/icons/icons/16x16/trash-empty.png</normaloff>:/icons/icons/16x16/trash-empty.png</iconset>
+                       <normaloff>:/icons/16x16/trash-empty.png</normaloff>:/icons/16x16/trash-empty.png</iconset>
                      </property>
                      <property name="flat">
                       <bool>true</bool>
@@ -934,7 +934,7 @@
                    </property>
                    <property name="icon">
                     <iconset resource="../ema.qrc">
-                     <normaloff>:/icons/icons/16x16/dialog-ok-apply.png</normaloff>:/icons/icons/16x16/dialog-ok-apply.png</iconset>
+                     <normaloff>:/icons/16x16/dialog-ok-apply.png</normaloff>:/icons/16x16/dialog-ok-apply.png</iconset>
                    </property>
                   </item>
                   <item>
@@ -955,7 +955,7 @@
                    </property>
                    <property name="icon">
                     <iconset resource="../ema.qrc">
-                     <normaloff>:/icons/icons/16x16/system-software-update.png</normaloff>:/icons/icons/16x16/system-software-update.png</iconset>
+                     <normaloff>:/icons/16x16/system-software-update.png</normaloff>:/icons/16x16/system-software-update.png</iconset>
                    </property>
                   </item>
                   <item>
@@ -976,7 +976,7 @@
                    </property>
                    <property name="icon">
                     <iconset resource="../ema.qrc">
-                     <normaloff>:/icons/icons/16x16/view-history.png</normaloff>:/icons/icons/16x16/view-history.png</iconset>
+                     <normaloff>:/icons/16x16/view-history.png</normaloff>:/icons/16x16/view-history.png</iconset>
                    </property>
                   </item>
                  </widget>
@@ -1153,7 +1153,7 @@
         <widget class="QWidget" name="tabSearch">
          <attribute name="icon">
           <iconset resource="../ema.qrc">
-           <normaloff>:/icons/icons/22x22/document-properties.png</normaloff>:/icons/icons/22x22/document-properties.png</iconset>
+           <normaloff>:/icons/22x22/document-properties.png</normaloff>:/icons/22x22/document-properties.png</iconset>
          </attribute>
          <attribute name="title">
           <string>Keywords</string>
@@ -1205,7 +1205,7 @@
               </property>
               <property name="icon">
                <iconset resource="../ema.qrc">
-                <normaloff>:/icons/icons/16x16/view-filter.png</normaloff>:/icons/icons/16x16/view-filter.png</iconset>
+                <normaloff>:/icons/16x16/view-filter.png</normaloff>:/icons/16x16/view-filter.png</iconset>
               </property>
              </widget>
             </item>
@@ -1246,7 +1246,7 @@
         <widget class="QWidget" name="tab_info">
          <attribute name="icon">
           <iconset resource="../ema.qrc">
-           <normaloff>:/icons/icons/22x22/view-object-histogram-linear.png</normaloff>:/icons/icons/22x22/view-object-histogram-linear.png</iconset>
+           <normaloff>:/icons/22x22/view-object-histogram-linear.png</normaloff>:/icons/22x22/view-object-histogram-linear.png</iconset>
          </attribute>
          <attribute name="title">
           <string>Picture</string>
@@ -1276,7 +1276,7 @@
         <widget class="QWidget" name="tab_plugins">
          <attribute name="icon">
           <iconset resource="../ema.qrc">
-           <normaloff>:/icons/icons/22x22/preferences-plugin.png</normaloff>:/icons/icons/22x22/preferences-plugin.png</iconset>
+           <normaloff>:/icons/22x22/preferences-plugin.png</normaloff>:/icons/22x22/preferences-plugin.png</iconset>
          </attribute>
          <attribute name="title">
           <string>Plugins</string>
@@ -1597,7 +1597,7 @@
   <action name="actionAbout">
    <property name="icon">
     <iconset resource="../ema.qrc">
-     <normaloff>:/icons/icons/16x16/help-about.png</normaloff>:/icons/icons/16x16/help-about.png</iconset>
+     <normaloff>:/icons/16x16/help-about.png</normaloff>:/icons/16x16/help-about.png</iconset>
    </property>
    <property name="text">
     <string>About Piaf workflow</string>
@@ -1648,7 +1648,7 @@
   <action name="actionQuit">
    <property name="icon">
     <iconset resource="../ema.qrc">
-     <normaloff>:/icons/icons/16x16/application-exit.png</normaloff>:/icons/icons/16x16/application-exit.png</iconset>
+     <normaloff>:/icons/16x16/application-exit.png</normaloff>:/icons/16x16/application-exit.png</iconset>
    </property>
    <property name="text">
     <string>Quit</string>
