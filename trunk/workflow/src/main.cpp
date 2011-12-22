@@ -32,7 +32,7 @@ extern QSplashScreen * g_splash;
 int main(int argc, char *argv[])
 {
 	QApplication a(argc, argv);
-	QPixmap pixmap(":/icons/icons/ema-splash.png");
+	QPixmap pixmap(":/icons/ema-splash.png");
 	g_splash = new QSplashScreen(pixmap, Qt::WindowStaysOnTopHint);
 	g_splash->show();
 

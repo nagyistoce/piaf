@@ -419,14 +419,14 @@ void ImageInfoWidget::setImageInfo(t_image_info_struct * pinfo) {
 	if(level > 5) { level = 5; }
 
 	if(level > 0) {// don't load picture if not necessary
-		QIcon starOn(":/icons/icons/star_on.png");
+		QIcon starOn(":/icons/star_on.png");
 		for(int star = 1; star <= level; star++) {
 			m_starButtons[star]->setIcon(starOn);
 		}
 	}
 
 	if(level < 5) {
-		QIcon starOff(":/icons/icons/star_off.png");
+		QIcon starOff(":/icons/star_off.png");
 		for(int star = level+1; star < 6; star++) {
 			m_starButtons[star]->setIcon(starOff);
 		}

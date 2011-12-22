@@ -123,28 +123,8 @@ void ImageWidget::showGrid(int steps)
 void ImageWidget::setRefImage(QImage *pIm)
 {
 	dImage = m_pOriginalImage = pIm;
-	if(dImage) {
-		if(dImage->depth()==8) {
-			m_greyImage = QImage();
-			setColorMode(m_colorMode);
-		}
-		else
-		{
-			if(m_colorMode != COLORMODE_GREY)
-			{
-				m_greyImage = pIm->convertDepth(8);
-				dImage = &m_greyImage;
-				setColorMode(m_colorMode);
-			}
-			else
-			{
-				// Reset image
-				m_greyImage = QImage();
-			}
-		}
-	}
 
-	update();
+	setColorMode(m_colorMode);
 }
 
 /* Switch to smart zooming mode */
@@ -258,13 +238,31 @@ int ImageWidget::setEditMode(int mode)
 
 void ImageWidget::setColorMode(int mode)
 {
-	if(mode <= COLORMODE_MAX ) {
+	if(mode >= COLORMODE_GREY && mode <= COLORMODE_MAX ) {
 		m_colorMode = mode;
 	} else {
 		m_colorMode = COLORMODE_GREY;
-		if(m_pOriginalImage != dImage && m_pOriginalImage)
-		{
+	}
+
+	if(m_pOriginalImage) {
+		if(m_pOriginalImage->depth()==8) {
+			m_greyImage = QImage();
 			dImage = m_pOriginalImage;
+		}
+		else
+		{
+			if(m_colorMode != COLORMODE_GREY)
+			{
+				fprintf(stderr, "%s:%d : convert to grey\n", __func__, __LINE__);
+				m_greyImage = m_pOriginalImage->convertDepth(8);
+				dImage = &m_greyImage;
+			}
+			else
+			{
+				// Reset image
+				m_greyImage = QImage();
+				dImage = m_pOriginalImage;
+			}
 		}
 	}
 
@@ -275,21 +273,26 @@ void ImageWidget::setColorMode(int mode)
 				&& m_pOriginalImage->depth() != 8	// and original is not greyscaled
 				)
 		{
+			fprintf(stderr, "%s:%d : grey, back to normal\n", __func__, __LINE__);
 			// back to normal mode
 			dImage = m_pOriginalImage;
-			repaint();
-			return;
 		}
 	}
 
+	fprintf(stderr, "[ImgW]::%s:%d : Dimage=%p original=%p colormode=%d depth=%d\n",
+			__func__, __LINE__,
+			dImage, m_pOriginalImage , m_colorMode,
+			dImage ? dImage->depth() : 0
+			);
 	if(dImage) {
 		if(dImage->depth() > 8) {
+			update();
 			return;
 		}
 
 		dImage->setNumColors(256);
 		QColor col;
-//		fprintf(stderr, "ImageWidget::%s : colorMode = %d\n", __func__, m_colorMode);
+		fprintf(stderr, "ImageWidget::%s : colorMode = %d\n", __func__, m_colorMode);
 		// Change color mode
 		switch(m_colorMode) {
 		default:

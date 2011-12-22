@@ -125,7 +125,7 @@
        </property>
        <property name="icon">
         <iconset resource="../ema.qrc">
-         <normaloff>:/icons/icons/22x22/dialog-ok-apply.png</normaloff>:/icons/icons/22x22/dialog-ok-apply.png</iconset>
+         <normaloff>:/icons/22x22/dialog-ok-apply.png</normaloff>:/icons/22x22/dialog-ok-apply.png</iconset>
        </property>
       </widget>
      </item>

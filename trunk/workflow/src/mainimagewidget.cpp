@@ -55,35 +55,35 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	QIcon pixIcon;
 
 	// Normal view
-	QAction * actNormalView = viewMenu->addAction(QIcon(":icons/icons/22x22/IconColorNormal.png"),
+	QAction * actNormalView = viewMenu->addAction(QIcon(":icons/22x22/IconColorNormal.png"),
 										tr("Default colors"));
 	actNormalView->setShortcut(QKeySequence(("Ctrl+N")));
 	actNormalView->setIconVisibleInMenu(true);
 	connect(actNormalView, SIGNAL(activated()), this, SLOT(slot_actNormalView_activated()));
 
 	// Inverted view
-	QAction * actInvertedView = viewMenu->addAction(QIcon(":icons/icons/22x22/IconColorGreyInverted.png"),
+	QAction * actInvertedView = viewMenu->addAction(QIcon(":icons/22x22/IconColorGreyInverted.png"),
 										tr("Inverted colors"));
 	actInvertedView->setShortcut(QKeySequence(("Ctrl+I")));
 	actInvertedView->setIconVisibleInMenu(true);
 	connect(actInvertedView, SIGNAL(activated()), this, SLOT(slot_actInvertedView_activated()));
 
 	// Indexed view
-	QAction * actIndexedView = viewMenu->addAction(QIcon(":icons/icons/22x22/IconColorGreyIndexed.png"),
+	QAction * actIndexedView = viewMenu->addAction(QIcon(":icons/22x22/IconColorGreyIndexed.png"),
 										tr("Indexed colors"));
 	actIndexedView->setShortcut(QKeySequence(("Ctrl+8")));
 	actIndexedView->setIconVisibleInMenu(true);
 	connect(actIndexedView, SIGNAL(activated()), this, SLOT(slot_actIndexedView_activated()));
 
 	// Thermal black->red view
-	QAction * actBlack2RedView = viewMenu->addAction(QIcon(":icons/icons/22x22/IconColorThermicBlackToRed.png"),
+	QAction * actBlack2RedView = viewMenu->addAction(QIcon(":icons/22x22/IconColorThermicBlackToRed.png"),
 										tr("Thermal black->red colors"));
 	actBlack2RedView->setShortcut(QKeySequence(("Ctrl+B")));
 	actBlack2RedView->setIconVisibleInMenu(true);
 	connect(actBlack2RedView, SIGNAL(activated()), this, SLOT(slot_actBlack2RedView_activated()));
 
 	// Thermal blue->red view
-	QAction * actBlue2RedView = viewMenu->addAction(QIcon(":icons/icons/22x22/IconColorThermicBlueToRed.png"),
+	QAction * actBlue2RedView = viewMenu->addAction(QIcon(":icons/22x22/IconColorThermicBlueToRed.png"),
 										tr("Thermal blue->red colors"));
 	actBlue2RedView->setShortcut(QKeySequence(("Ctrl+T")));
 	actBlue2RedView->setIconVisibleInMenu(true);
@@ -424,14 +424,14 @@ void MainImageWidget::slot_actNormalView_activated()
 {
 	m_ui->infoLabel->setText(tr("Normal"));
 	m_ui->globalImageLabel->setColorMode(COLORMODE_GREY);
-	m_ui->viewModeButton->setPixmap(QPixmap(":icons/icons/22x22/IconColorNormal.png"));
+	m_ui->viewModeButton->setPixmap(QPixmap(":icons/22x22/IconColorNormal.png"));
 }
 
 void MainImageWidget::slot_actInvertedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Inverted"));
 	m_ui->globalImageLabel->setColorMode(COLORMODE_GREY_INVERTED);
-	m_ui->viewModeButton->setPixmap(QPixmap(":icons/icons/22x22/IconColorGreyInverted.png"));
+	m_ui->viewModeButton->setPixmap(QPixmap(":icons/22x22/IconColorGreyInverted.png"));
 //	m_ui->globalImageLabel->setRefImage();
 }
 
@@ -440,7 +440,7 @@ void MainImageWidget::slot_actIndexedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Indexed"));
 	m_ui->globalImageLabel->setColorMode(COLORMODE_INDEXED);
-	m_ui->viewModeButton->setPixmap(QPixmap(":icons/icons/22x22/IconColorGreyIndexed.png"));
+	m_ui->viewModeButton->setPixmap(QPixmap(":icons/22x22/IconColorGreyIndexed.png"));
 
 }
 
@@ -449,7 +449,7 @@ void MainImageWidget::slot_actBlack2RedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Black->red"));
 	m_ui->globalImageLabel->setColorMode(COLORMODE_THERMIC_BLACK2RED);
-	m_ui->viewModeButton->setPixmap(QPixmap(":icons/icons/22x22/IconColorThermicBlackToRed.png"));
+	m_ui->viewModeButton->setPixmap(QPixmap(":icons/22x22/IconColorThermicBlackToRed.png"));
 
 }
 
@@ -457,7 +457,7 @@ void MainImageWidget::slot_actBlack2RedView_activated()
 void MainImageWidget::slot_actBlue2RedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Blue->red"));
-	m_ui->viewModeButton->setPixmap(QPixmap(":icons/icons/22x22/IconColorThermicBlueToRed.png"));
+	m_ui->viewModeButton->setPixmap(QPixmap(":icons/22x22/IconColorThermicBlueToRed.png"));
 	m_ui->globalImageLabel->setColorMode(COLORMODE_THERMIC_BLUE2RED);
 }
 

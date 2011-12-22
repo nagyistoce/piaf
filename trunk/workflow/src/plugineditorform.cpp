@@ -396,10 +396,10 @@ LoadedPluginTreeWidgetItem::LoadedPluginTreeWidgetItem(QTreeWidget * treeWidget,
 	QString str1, str2;
 
 	if(pFilter->isEnabled()) {
-		icon1 = QIcon(":/icons/icons/16x16/network-connect.png");
+		icon1 = QIcon(":/icons/16x16/network-connect.png");
 		str1 = "T";
 	} else {
-		icon1 = QIcon(":/icons/icons/16x16/network-disconnect.png");
+		icon1 = QIcon(":/icons/16x16/network-disconnect.png");
 		str1 = "F";
 	}
 	if(!icon1.isNull())
