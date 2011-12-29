@@ -350,7 +350,7 @@
           <item>
            <widget class="QPushButton" name="addBkmkButton">
             <property name="toolTip">
-             <string>Add a new bookmark at current positin</string>
+             <string>Add a new bookmark at current position</string>
             </property>
             <property name="text">
              <string/>
