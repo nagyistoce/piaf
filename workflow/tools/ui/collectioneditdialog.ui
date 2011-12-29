@@ -14,7 +14,7 @@
    <string>Edit collection</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../ema.qrc">
+   <iconset>
     <normaloff>:/icons/icons/22x22/edit-rename.png</normaloff>:/icons/icons/22x22/edit-rename.png</iconset>
   </property>
   <layout class="QFormLayout" name="formLayout">
@@ -85,7 +85,7 @@
    <item row="3" column="1">
     <widget class="QLabel" name="nbFilesLabel">
      <property name="toolTip">
-      <string>Nomber of files in collection</string>
+      <string>Number of files in collection</string>
      </property>
      <property name="text">
       <string>0</string>
@@ -97,9 +97,7 @@
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../../ema.qrc"/>
- </resources>
+ <resources/>
  <connections>
   <connection>
    <sender>buttonBox</sender>

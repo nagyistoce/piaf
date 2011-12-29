@@ -30,8 +30,8 @@
        <rect>
         <x>0</x>
         <y>0</y>
-        <width>254</width>
-        <height>318</height>
+        <width>256</width>
+        <height>320</height>
        </rect>
       </property>
       <layout class="QGridLayout" name="gridLayout">
@@ -144,7 +144,7 @@
        <item row="3" column="0">
         <widget class="QLabel" name="label_6">
          <property name="toolTip">
-          <string>Orientatio</string>
+          <string>Orientation</string>
          </property>
          <property name="text">
           <string>Orient</string>
