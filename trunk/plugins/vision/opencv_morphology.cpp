@@ -207,7 +207,7 @@ void open()
 	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
 	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
 	unsigned char * imageOut = (unsigned char *)imOut->buffer;
-    	
+
 	initImages();
 	createStructElt();
 

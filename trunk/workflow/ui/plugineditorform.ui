@@ -268,7 +268,7 @@
          </item>
          <item>
           <widget class="QPushButton" name="removePluginButton">
-           <property name="statusTip">
+           <property name="toolTip">
             <string>Remove selected loaded plugin</string>
            </property>
            <property name="text">
