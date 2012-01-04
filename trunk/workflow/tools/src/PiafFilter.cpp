@@ -56,7 +56,7 @@
 
 #include <QWorkspace>
 bool g_debug_PiafSignalHandler = false;
-bool g_debug_FilterSequencer = true;
+bool g_debug_FilterSequencer = false;
 bool g_debug_PiafFilter = false;
 
 /// Delete a filter in manager (parameters and widgets)

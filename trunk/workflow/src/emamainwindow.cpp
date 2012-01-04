@@ -250,7 +250,7 @@ void EmaMainWindow::loadSettings()
 	}
 
 	// Concatenate configuration directories
-	QFile file( QString(home) + "/.piafsettings.xml" );
+	QFile file( QString(home) + "/" + PIAFWKFL_SETTINGS_XML );
 	if (!file.open(QIODevice::ReadOnly)) {
 		PIAF_MSG(SWLOG_ERROR, "could not open file '%s' for reading: err=%s",
 				 file.name().toAscii().data(),
@@ -457,10 +457,10 @@ void EmaMainWindow::saveSettings()
 		strcpy(home, getenv("HOME"));
 	}
 	// Concatenate configuration directories
-	QFile fileout( QString(home) + "/piafsettings.xml" );
+	QFile fileout( QString(home) + "/" + PIAFWKFL_SETTINGS_XML );
 
 	if( !fileout.open( IO_WriteOnly ) ) {
-		PIAF_MSG(SWLOG_ERROR, "cannot save piafsettings.xml");
+		PIAF_MSG(SWLOG_ERROR, "cannot save " PIAFWKFL_SETTINGS_XML);
 		return ;
 	}
 	QTextStream sout(&fileout);
@@ -469,7 +469,7 @@ void EmaMainWindow::saveSettings()
 	fileout.flush();
 	fileout.close();
 
-	PIAF_MSG(SWLOG_INFO, " saved string '%s' in $HOME/piafsettings.xml",
+	PIAF_MSG(SWLOG_INFO, " saved string '%s' in $HOME/" PIAFWKFL_SETTINGS_XML,
 			 mSettingsDoc.toString().toAscii().data()
 			 );
 }

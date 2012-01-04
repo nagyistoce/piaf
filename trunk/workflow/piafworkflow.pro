@@ -2,6 +2,7 @@
 # Project created by QtCreator 2009-07-01T21:37:51
 # -------------------------------------------------
 TEMPLATE = app
+
 # The following line was inserted by qt3to4
 QT += qt3support xml
 
@@ -10,9 +11,9 @@ CONFIG += uic3
 
 # Use lowercase name for Linux
 linux-g++: {
-TARGET = piafworkflow
+	TARGET = piafworkflow
 } else {
-TARGET=PiafWorkflow
+	TARGET = PiafWorkflow
 }
 
 CONFIG += debug

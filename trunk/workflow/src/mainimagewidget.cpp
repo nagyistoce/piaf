@@ -124,8 +124,8 @@ void MainImageWidget::setFilterSequencer(FilterSequencer * pFS)
 
 void MainImageWidget::slotUpdateImage()
 {
-	fprintf(stderr, "MainImageWidget::%s:%d update filterseq=%p!!\n", __func__, __LINE__,
-			mpFilterSequencer);
+	PIAF_MSG(SWLOG_TRACE, "update filterseq=%p !!",
+			 mpFilterSequencer);
 
 	if(mpFilterSequencer)
 	{
@@ -141,7 +141,7 @@ void MainImageWidget::slotUpdateImage()
 		image.buffer = m_displayImage.bits(); // use diplay image as processing uffer
 
 		int ret = mpFilterSequencer->processImage(&image);
-		PIAF_MSG(SWLOG_INFO, "sequence returned %d", ret);
+		PIAF_MSG(SWLOG_TRACE, "sequence returned %d", ret);
 	}
 
 	// refresh display

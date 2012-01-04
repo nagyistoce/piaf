@@ -153,6 +153,7 @@ private:
 	void saveSettings();
 	void loadSettings();
 #define PIAFWKFL_SETTINGS	"piaf-workflow"
+#define PIAFWKFL_SETTINGS_XML	"piafsettings.xml"
 	QSettings mSettings;	///< Qt Settings object for piaf workflow
 
 	t_workflow_settings m_workflow_settings;
