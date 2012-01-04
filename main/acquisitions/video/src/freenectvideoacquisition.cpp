@@ -20,7 +20,7 @@ FreenectVideoAcquisition::FreenectVideoAcquisition(int idx_device)
 	m_run = m_isRunning = false;
 	m_freenect_dev = NULL;
 	m_freenect_ctx = NULL;
-
+	m_image_mode = FREENECT_MODE_DEPTH_2CM;
 	// Freenect native images
 	m_depthRawImage16U = m_cameraIRImage8U = m_cameraRGBImage8U = NULL;
 	m_depthImage32F = NULL;
@@ -380,7 +380,8 @@ int FreenectVideoAcquisition::stopAcquisition()
 static float g_depth_LUT[FREENECT_RAW_MAX] = {-1.f };
 static u8 g_depth_grayLUT[FREENECT_RAW_MAX] = {255 };
 
-void init_depth_LUT() {
+void init_depth_LUT()
+{
 	if(g_depth_LUT[0]>=0) return;
 	/* From OpenKinect :
 	   http://openkinect.org/w/index.php?title=Imaging_Information&oldid=613
@@ -391,14 +392,14 @@ void init_depth_LUT() {
 		g_depth_LUT[raw] = (float)( 0.1236 * tan((double)raw/2842.5 + 1.1863) );
 	}
 
-	g_depth_LUT[FREENECT_RAW_UNKNOWN]=-1.f;
+	g_depth_LUT[FREENECT_RAW_UNKNOWN] = -1.f;
 
 	/* LUT for 8bit info on depth :
 	*/
 
 	for(int raw = 0; raw<FREENECT_RAW_MAX; raw++) {
 		int val = (int)round( 255. *
-							  (1. - (g_depth_grayLUT[raw] - FREENECT_DEPTH2CM_RANGE_MIN)
+							  (1. - (g_depth_LUT[raw] - FREENECT_DEPTH2CM_RANGE_MIN)
 								 / (FREENECT_DEPTH2CM_RANGE_MAX - FREENECT_DEPTH2CM_RANGE_MIN) )
 							  );
 		if(val > 255) val = 255;
@@ -418,7 +419,7 @@ void init_depth_LUT() {
 	*/
 IplImage * FreenectVideoAcquisition::readImageRGB32()
 {
-	if(!m_captureIsInitialised) return NULL;
+	if(!m_captureIsInitialised) { return NULL; }
 
 	if(!m_bgr32Image)
 	{
@@ -427,6 +428,7 @@ IplImage * FreenectVideoAcquisition::readImageRGB32()
 	}
 
 	int mode = (int)round(m_video_properties.mode);
+
 	switch(mode)
 	{
 	default:
@@ -456,7 +458,8 @@ IplImage * FreenectVideoAcquisition::readImageRGB32()
 					line8u[c] = g_depth_grayLUT[ linedepth[c] ];
 				}
 			}
-
+			fprintf(stderr, "[Freenect]::%s:%d: mode = %d => 2Cm => gray => BGR32\n",
+					__func__, __LINE__, mode);
 			cvCvtColor(m_grayImage, m_bgr32Image, CV_GRAY2BGRA);
 		}
 		break;
