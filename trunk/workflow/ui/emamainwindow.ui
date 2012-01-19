@@ -76,7 +76,7 @@
               <x>0</x>
               <y>0</y>
               <width>214</width>
-              <height>485</height>
+              <height>487</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -95,7 +95,7 @@
                 <string>Folders explorer</string>
                </property>
                <property name="currentIndex">
-                <number>2</number>
+                <number>0</number>
                </property>
                <widget class="QWidget" name="inputsTabWidgetPage1">
                 <attribute name="icon">
@@ -720,8 +720,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>439</width>
-                  <height>463</height>
+                  <width>444</width>
+                  <height>467</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1304,8 +1304,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>315</width>
-               <height>481</height>
+               <width>312</width>
+               <height>478</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1422,6 +1422,23 @@
             </widget>
            </item>
            <item>
+            <widget class="QPushButton" name="stopLoadButton">
+             <property name="toolTip">
+              <string>Stop current importation</string>
+             </property>
+             <property name="statusTip">
+              <string>Stop current importation (if there are too many files for example)</string>
+             </property>
+             <property name="text">
+              <string/>
+             </property>
+             <property name="icon">
+              <iconset resource="../../main/piaf.qrc">
+               <normaloff>:/images/16x16/dialog-close.png</normaloff>:/images/16x16/dialog-close.png</iconset>
+             </property>
+            </widget>
+           </item>
+           <item>
             <widget class="QProgressBar" name="loadProgressBar">
              <property name="sizePolicy">
               <sizepolicy hsizetype="Expanding" vsizetype="Minimum">
@@ -1503,8 +1520,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>994</width>
-             <height>126</height>
+             <width>996</width>
+             <height>123</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1539,7 +1556,7 @@
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>27</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

@@ -90,7 +90,7 @@ SOURCES += src/main.cpp \
     tools/src/batchfiltersmainwindow.cpp \
 	tools/src/vidacqsettingswindow.cpp \
 	src/imagewidget.cpp \
-    tools/src/time_histogram.cpp
+	tools/src/time_histogram.cpp
 
 # Replaced by OpenCVEncoder.cpp
 # tools/src/FFMpegEncoder.cpp  
@@ -168,15 +168,24 @@ HEADERS += inc/workshop.h \
 	inc/piaf-settings.h \
 	inc/nolinux_videodev.h \
 	inc/imagewidget.h \
-    tools/inc/time_histogram.h
+    tools/inc/time_histogram.h \
 
 exists(/usr/local/include/libfreenect/libfreenect.h) {
-	message("The system known Freenect ;)")
+	message("The system knows Freenect ;)")
 	DEFINES += HAS_FREENECT
 	INCLUDEPATH += /usr/local/include/libfreenect
 	LIBS += -L/usr/local/lib -lfreenect
 	HEADERS +=  acquisitions/video/inc/freenectvideoacquisition.h
 	SOURCES +=  acquisitions/video/src/freenectvideoacquisition.cpp
+}
+
+exists(/usr/include/ni) {
+	message("The system knows OpenNI ;)")
+	DEFINES += HAS_OPENNI
+	INCLUDEPATH += /usr/include/ni
+	LIBS += -lOpenNI
+	HEADERS +=  acquisitions/video/inc/openni_videoacquisition.h
+	SOURCES +=  acquisitions/video/src/openni_videoacquisition.cpp
 }
 
 # Obsolete because of OpenCVEncoder
@@ -312,5 +321,7 @@ message( "LIBS = $$LIBS" )
 
 RESOURCES += \
     piaf.qrc
+
+
 
 

@@ -83,6 +83,7 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	g_splash->update();
 
 	ui->loadProgressBar->hide();
+	ui->stopLoadButton->hide();
 	ui->stackedWidget->setCurrentIndex(1); // by default, the grid page
 
 	connect(&m_timer, SIGNAL(timeout()),
@@ -136,7 +137,7 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	connect(ui->mainDisplayWidget, SIGNAL(signalZoomChanged(float)),
 			ui->globalNavImageWidget, SLOT(slot_mainImageWidget_signalZoomChanged(float)));
 	connect(ui->mainDisplayWidget, SIGNAL(signalImageChanged(QImage)),
-			ui->globalNavImageWidget, SLOT(on_signalImageChanged(QImage)));
+			ui->globalNavImageWidget, SLOT(slot_signalImageChanged(QImage)));
 }
 
 EmaMainWindow::~EmaMainWindow()
@@ -626,18 +627,40 @@ void EmaMainWindow::on_zoomx2Button_clicked()
 
 /***************** FILE EXPLORER *********************/
 void EmaMainWindow::slot_filesShowCheckBox_stateChanged(int state) {
-	if(state == Qt::Checked)
+	if(state == Qt::Checked) {
 		ui->filesTreeWidget->show();
-	else
+	} else {
 		ui->filesTreeWidget->hide();
-
+	}
 
 }
 
 
-void EmaMainWindow::on_filesClearButton_clicked() {
-	m_imageList.clear();
-	ui->filesTreeWidget->clear();
+void EmaMainWindow::on_filesClearButton_clicked()
+{
+	QTreeWidgetItem * item = ui->filesTreeWidget->selectedItems().at(0);
+	if(!item) { return; }
+	//
+	DirectoryTreeWidgetItem * del_dir = (DirectoryTreeWidgetItem *)item;
+	// remove from list
+	QList<t_folder *>::iterator it;
+	for(it = m_workflow_settings.directoryList.begin();
+		it != m_workflow_settings.directoryList.end(); )
+	{
+		t_folder * folder = (*it);
+		if(folder->fullpath == del_dir->getFullPath())
+		{
+			it = m_workflow_settings.directoryList.remove(it);
+		} else {
+			++it;
+		}
+	}
+
+	mDirectoryList.remove(del_dir);
+	saveSettings();
+
+	// remove in display
+	ui->filesTreeWidget->takeTopLevelItem( ui->filesTreeWidget->indexOfTopLevelItem(item) );
 //	ui->scrollAreaWidgetContents->layout()->removeWidget();
 }
 
@@ -702,7 +725,7 @@ void EmaMainWindow::on_filesTreeWidget_itemExpanded(QTreeWidgetItem * item)
 	// add sub items
 	fprintf(stderr, "EmaMW::%s:%d : EXPAND THIS TREE '%s' !\n",
 					__func__, __LINE__,
-					curdir->fullPath.toAscii().data());
+					curdir->mFullPath.toAscii().data());
 
 	curdir->expand();
 }
@@ -732,20 +755,20 @@ QStringList DirectoryTreeWidgetItem::getFileList()
 {
 	QStringList fileList;
 
-	fileList.append(directoryFileScan(fullPath));
+	fileList.append(directoryFileScan(mFullPath));
 
 	return fileList;
 }
 
 void DirectoryTreeWidgetItem::expand()
 {
-	QDir dir(fullPath);
+	QDir dir(mFullPath);
 	QFileInfoList fiList = dir.entryInfoList();
 	QFileInfoList::iterator it;
 	for(it = fiList.begin(); it != fiList.end(); ++it)
 	{
 		QFileInfo fi = (*it);
-		if(fi.isFile() && fi.absoluteFilePath().length() > fullPath.length())
+		if(fi.isFile() && fi.absoluteFilePath().length() > mFullPath.length())
 		{
 			EMAMW_printf(EMALOG_TRACE, "\tadding FILE '%s'\n",
 					fi.absoluteFilePath().toAscii().data());
@@ -762,12 +785,12 @@ void DirectoryTreeWidgetItem::expand()
 					this,
 					new_file->fullPath);
 		}
-		else if(fi.isDir() && fi.absoluteFilePath().length() > fullPath.length())
+		else if(fi.isDir() && fi.absoluteFilePath().length() > mFullPath.length())
 		{
 			EMAMW_printf(EMALOG_TRACE, "adding subdir '%s'\n",
 					fi.absoluteFilePath().toAscii().data());
 
-			subDirsList.append(
+			mSubDirsList.append(
 					new DirectoryTreeWidgetItem(this,
 							fi.absoluteFilePath())
 					);
@@ -775,24 +798,24 @@ void DirectoryTreeWidgetItem::expand()
 	}
 
 	// delete fake "waiting" item
-	if(subItem) {
-		removeChild( subItem );
-		delete subItem;
-		subItem = NULL;
+	if(mFakeSubItem) {
+		removeChild( mFakeSubItem );
+		delete mFakeSubItem;
+		mFakeSubItem = NULL;
 	}
 
 }
 
 DirectoryTreeWidgetItem::DirectoryTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, QString path)
 	: QTreeWidgetItem(treeWidgetItemParent),
-	fullPath(path), nb_files(0)
+	mFullPath(path), mNbFiles(0)
 {
 	init();
 }
 
 DirectoryTreeWidgetItem::DirectoryTreeWidgetItem(QTreeWidget * treeWidgetParent, QString path)
 	: QTreeWidgetItem(treeWidgetParent),
-	fullPath(path), nb_files(0)
+	mFullPath(path), mNbFiles(0)
 {
 	init();
 }
@@ -804,25 +827,25 @@ DirectoryTreeWidgetItem::~DirectoryTreeWidgetItem()
 
 void DirectoryTreeWidgetItem::init()
 {
-	QFileInfo fi(fullPath);
-	name = fi.baseName();
+	QFileInfo fi(mFullPath);
+	mName = fi.baseName();
 	setText(0, fi.completeBaseName());
-	subItem = NULL;
+	mFakeSubItem = NULL;
 	mIsFile = false;
 
 	if(fi.isDir()) {
-		nb_files = 0;
-		scanDirectory(fullPath, &nb_files);
+		mNbFiles = 0;
+		scanDirectory(mFullPath, &mNbFiles);
 
-		setText(1, QString::number(nb_files));
+		setText(1, QString::number(mNbFiles));
 
-		if(nb_files > 0) {
+		if(mNbFiles > 0) {
 			// Add fake sub item "waiting"
 			QStringList columns;
 			columns.clear();
 			columns << "...";
 
-			subItem = new QTreeWidgetItem(this, columns);
+			mFakeSubItem = new QTreeWidgetItem(this, columns);
 		}
 	}
 	else if(fi.isFile())
@@ -871,6 +894,7 @@ void EmaMainWindow::appendFileList(QStringList list) {
 
 	ui->loadProgressBar->setValue(0);
 	ui->loadProgressBar->show();
+	ui->stopLoadButton->hide();
 
 	// load in manager
 	emaMngr()->appendFileList(list);
@@ -885,7 +909,7 @@ void EmaMainWindow::appendFileList(QStringList list) {
 void EmaMainWindow::slot_timer_timeout() {
 
 	int val = emaMngr()->getProgress();
-
+	ui->stopLoadButton->show();
 	EMAMW_printf(EMALOG_TRACE, "Timeout => progress = %d", val)
 
 	// update known files : appended files
@@ -933,10 +957,18 @@ void EmaMainWindow::slot_timer_timeout() {
 	if(emaMngr()->getProgress() == 100)
 	{
 		ui->loadProgressBar->hide();
+		ui->stopLoadButton->hide();
 		m_timer.stop();
 	}
 
 }
+void EmaMainWindow::on_stopLoadButton_clicked()
+{
+	m_appendFileList.clear();
+	// do not hide, let timer stop and hide
+	emaMngr()->clearImportList();
+}
+
 
 void EmaMainWindow::slot_gridWidget_signal_resizeEvent(QResizeEvent * e)
 {
@@ -1031,7 +1063,7 @@ void EmaMainWindow::on_filesTreeWidget_itemDoubleClicked (
 	DirectoryTreeWidgetItem * curdir = (DirectoryTreeWidgetItem *)item;
 	// read image file
 	if(curdir->isFile()) {
-		QString fileName = curdir->fullPath; // col 0 has the full path
+		QString fileName = curdir->mFullPath; // col 0 has the full path
 		slot_thumbImage_clicked( fileName );
 	} else {
 		// Add all its content recursively
@@ -1462,3 +1494,4 @@ void CollecTreeWidgetItem::purge()
 {
 
 }
+

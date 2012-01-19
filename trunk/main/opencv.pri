@@ -94,7 +94,7 @@ unix: {
 			CXCORE_LIB = $$CVINSTPATH/lib/libcxcore.$$LIBS_EXT
 			#message ( Testing CxCore lib = '$$CXCORE_LIB' )
 			exists( $$CXCORE_LIB ) {
-				#                      message( " => Linking with CxCore in '$$CVINSTPATH' ")
+				# message( " => Linking with CxCore in '$$CVINSTPATH' ")
 				LIBS += -lcxcore
 			}
 

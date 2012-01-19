@@ -497,7 +497,9 @@ void PluginEditorForm::on_paramsButton_clicked()
 	LoadedPluginTreeWidgetItem * item =
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
 	if(!item) { return; }
+
 	if(!mpFilterSequencer) { return; }
+	ui->selectedPluginsTreeWidget->setCurrentItem(item);
 
 	//	mpFilterSequencer->edit(item->getFilter());
 
@@ -510,6 +512,7 @@ void PluginEditorForm::on_activateButton_clicked()
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
 	if(!item) { return; }
 	mpFilterSequencer->toggleFilterDisableFlag(item->getFilter());
+	ui->selectedPluginsTreeWidget->setCurrentItem(item);
 }
 
 void PluginEditorForm::on_pluginsButton_clicked()
@@ -533,6 +536,7 @@ void PluginEditorForm::on_upButton_clicked()
 	if(!item) { return; }
 
 	mpFilterSequencer->moveUp(item->getFilter());
+	ui->selectedPluginsTreeWidget->setCurrentItem(item);
 }
 
 void PluginEditorForm::on_downButton_clicked()
@@ -544,6 +548,7 @@ void PluginEditorForm::on_downButton_clicked()
 	if(!item) { return; }
 
 	mpFilterSequencer->moveDown(item->getFilter());
+	ui->selectedPluginsTreeWidget->setCurrentItem(item);
 }
 
 /* Kill all processes running on computer (killall for all exec names) */

@@ -57,9 +57,15 @@
 // Piaf Workshop Acquisitions
 #include "videocapture.h"
 #include "opencvvideoacquisition.h"
+
 #ifdef HAS_FREENECT
 #include "freenectvideoacquisition.h"
 #endif
+
+#ifdef HAS_OPENNI
+#include "openni_videoacquisition.h"
+#endif
+
 #include "workshopvideocapture.h"
 
 #ifdef _V4L2
@@ -1719,7 +1725,7 @@ void WorkshopApp::slotOnNewVideoAcq()
 		freenect_found = false;
 
 		statusBar()->message(tr("Creating New Video Acquisition...") + tr("try Kinect"));
-		FreenectVideoAcquisition * freenectDevice = new FreenectVideoAcquisition(0);
+		FreenectVideoAcquisition * freenectDevice = new FreenectVideoAcquisition(freenect_idx);
 
 		if(freenectDevice->isDeviceReady())
 		{
@@ -1760,6 +1766,58 @@ void WorkshopApp::slotOnNewVideoAcq()
 	} while(freenect_found);
 
 #endif // HAS_FREENECT
+
+	// check if there are OpenNI supported devices are connected
+#ifdef HAS_OPENNI
+	int openni_idx = 0;
+	bool openni_found;
+	do {
+		openni_found = false;
+
+		statusBar()->message(tr("Creating New Video Acquisition...") + tr("try OpenNI"));
+		OpenNIVideoAcquisition * openniDevice = new OpenNIVideoAcquisition(openni_idx);
+
+		if(openniDevice->isDeviceReady())
+		{
+			openni_found = true;
+
+			// append to Piaf
+			statusBar()->message(tr("(VideoAcquisition) : openni device Init OK"));
+
+			sprintf(txt, "OpenNI[%d]", openni_idx);
+
+			// acquisition init
+			if(openniDevice->startAcquisition()<0)
+			{
+				statusBar()->message(tr("Error: cannot initialize acquisition !"));
+				openni_found = false;
+			}
+			else
+			{
+				openni_idx++;
+
+				if(openniDevice->isAcquisitionRunning())
+				{
+					statusBar()->message(tr("Initialization OK"));
+
+					VideoCaptureDoc * pVCD = new VideoCaptureDoc(openniDevice);
+
+					// add into explorer
+					pObjectsExplorer->addVideoAcquisition(pVCD, txt);
+				}
+				else {
+					statusBar()->showMessage(tr("Initialization FAILURE !"));
+				}
+			}
+
+		} else {
+			delete openniDevice;
+		}
+	} while(openni_found
+			&& openni_idx<1 /// \bug FIXME
+			);
+
+#endif // HAS_OPENNI
 
 	statusBar()->message(tr("Creating New Video Acquisition...") + tr("try OpenCV"));
 

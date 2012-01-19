@@ -87,6 +87,10 @@ public:
 		@return <0 if error, 0 if ok
 	*/
 	int appendFileList(QStringList filelist);
+
+	/** @brief Clear the file list which is imported now */
+	int clearImportList();
+
 	/** @brief Append a file to managed pictures
 		@return <0 if error, 0 if ok
 	*/

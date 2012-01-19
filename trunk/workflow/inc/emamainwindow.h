@@ -57,20 +57,22 @@ public:
 	/** \brief collapse contents: collapse directory and clear data */
 	void collapse();
 
+	QString getFullPath() { return mFullPath; }
+
 	bool isFile() { return mIsFile; }
 	QStringList getFileList();
 
 protected:
 	void init(); ///< init internal data and fill nb files
-	QString name;
-	QString fullPath;
-	int nb_files;
+	QString mName;
+	QString mFullPath;
+	int mNbFiles;
 	bool mIsFile;///< true if the item is a file
-	QTreeWidgetItem * subItem;///< fake item to see the content
+	QTreeWidgetItem * mFakeSubItem;///< fake item to see the content
 
 private:
-	QList<DirectoryTreeWidgetItem *> subDirsList;
-	QList<t_file *> filesList;
+	QList<DirectoryTreeWidgetItem *> mSubDirsList;
+	QList<t_file *> mFilesList;
 
 };
 
@@ -243,6 +245,7 @@ private slots:
 	void slot_newCollDialog_signalCollectionChanged(t_collection *);
 	void on_collecDeleteButton_clicked();
 	void on_collecEditButton_clicked();
+	void on_stopLoadButton_clicked();
 };
 
 #endif // EmaMAINWINDOW_H

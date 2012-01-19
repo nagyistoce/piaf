@@ -1,3 +1,20 @@
+/***************************************************************************
+	 FreenectVideoAcquisition.cpp  - Microsoft Kinect
+									 acquisition class for video capture
+							 -------------------
+	begin                : Thu Dec 9 2010
+	copyright            : (C) 2010 by Christophe Seyve (CSE)
+	email                : cseyve@free.fr
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
 
 #include "freenectvideoacquisition.h"
 
@@ -380,7 +397,7 @@ int FreenectVideoAcquisition::stopAcquisition()
 static float g_depth_LUT[FREENECT_RAW_MAX] = {-1.f };
 static u8 g_depth_grayLUT[FREENECT_RAW_MAX] = {255 };
 
-void init_depth_LUT()
+void init_freenect_depth_LUT()
 {
 	if(g_depth_LUT[0]>=0) return;
 	/* From OpenKinect :
@@ -439,7 +456,7 @@ IplImage * FreenectVideoAcquisition::readImageRGB32()
 		}
 		break;
 	case FREENECT_MODE_DEPTH_2CM: // 2CM
-		init_depth_LUT();
+		init_freenect_depth_LUT();
 
 		if(!m_grayImage)
 		{
