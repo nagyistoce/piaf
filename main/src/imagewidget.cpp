@@ -279,11 +279,11 @@ void ImageWidget::setColorMode(int mode)
 		}
 	}
 
-	fprintf(stderr, "[ImgW]::%s:%d : Dimage=%p original=%p colormode=%d depth=%d\n",
-			__func__, __LINE__,
-			dImage, m_pOriginalImage , m_colorMode,
-			dImage ? dImage->depth() : 0
-			);
+//	fprintf(stderr, "[ImgW]::%s:%d : Dimage=%p original=%p colormode=%d depth=%d\n",
+//			__func__, __LINE__,
+//			dImage, m_pOriginalImage , m_colorMode,
+//			dImage ? dImage->depth() : 0
+//			);
 	if(dImage) {
 		if(dImage->depth() > 8) {
 			update();

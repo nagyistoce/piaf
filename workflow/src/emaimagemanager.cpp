@@ -108,9 +108,20 @@ int EmaImageManager::appendFileList(QStringList list) {
 	return 0;
 }
 
+/* Clear the file list which is imported now */
+int EmaImageManager::clearImportList()
+{
+	m_appendFileListMutex.lock();
+	EMAIM_printf(EMALOG_DEBUG, "clear import list (there were %d files)...",
+				 m_appendFileList.count());
+	m_appendFileList.clear();
+	m_appendFileListMutex.unlock();
+
+	return 0;
+}
+
 t_image_info_struct * EmaImageManager::getInfo(QString filename)
 {
-
 	m_managedFileListMutex.lock();
 	if(!m_managedFileList.contains(filename)) {
 		EMAIM_printf(EMALOG_TRACE, "File '%s' not found", filename.toUtf8().data());

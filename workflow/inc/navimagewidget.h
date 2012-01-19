@@ -75,6 +75,7 @@ public slots:
 	void slot_signalImageChanged(QImage);
 	void slot_mainImageWidget_signalZoomRect(QRect);
 	void slot_mainImageWidget_signalZoomChanged(float);
+
 private slots:
 	void on_zoomSlider_sliderReleased();
 	void on_zoomSlider_sliderMoved(int position);

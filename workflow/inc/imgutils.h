@@ -58,9 +58,11 @@
 
 // DEBUG IMAGES DIRECTORY AND EXTENSION
 #ifdef LINUX //not __X11_DARWIN__
-#define TMP_DIRECTORY	"/dev/shm/"
+#define SHM_DIRECTORY	"/dev/shm/"
+#define TMP_DIRECTORY	"/tmp/"
 #define IMG_EXTENSION	".pgm"
 #else
+#define SHM_DIRECTORY	"/Users/tof/tmp/"
 #define TMP_DIRECTORY	"/Users/tof/tmp/"
 #define IMG_EXTENSION	".jpg"
 #endif
