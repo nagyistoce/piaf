@@ -18,6 +18,7 @@
  ***************************************************************************/
 
 #include "openni_videoacquisition.h"
+#include "piaf-common.h"
 
 //---------------------------------------------------------------------------
 // Macros
@@ -59,6 +60,8 @@ XnBool fileExists(const char *fn)
 OpenNIVideoAcquisition::OpenNIVideoAcquisition(int idx_device)
 {
 	m_idx_device = idx_device;
+
+	init_OpenNI_depth_LUT();
 
 	init();
 }
@@ -349,7 +352,9 @@ CvSize OpenNIVideoAcquisition::getImageSize()
 /* Stop acquisition */
 int OpenNIVideoAcquisition::stopAcquisition()
 {
-	depth.StopGenerating();
+	if(depth) {
+		depth.StopGenerating();
+	}
 
 	m_run = false;
 	while(m_isRunning)
@@ -370,6 +375,7 @@ int OpenNIVideoAcquisition::stopAcquisition()
 
 static float g_depth_LUT[OPENNI_RAW_MAX] = {-1.f };
 static u8 g_depth_grayLUT[OPENNI_RAW_MAX] = {255 };
+static float g_depth_8bit2m_LUT[256];
 
 void init_OpenNI_depth_LUT()
 {
@@ -388,6 +394,8 @@ void init_OpenNI_depth_LUT()
 
 	/* LUT for 8bit info on depth :
 	*/
+	int l_depth_8bit2m_LUT_count[256];
+	memset(l_depth_8bit2m_LUT_count, 0, sizeof(int)*256);
 
 	for(int raw = 0; raw<OPENNI_RAW_MAX; raw++) {
 		int val = (int)round( 255. *
@@ -397,7 +405,35 @@ void init_OpenNI_depth_LUT()
 		if(val > 255) val = 255;
 		else if(val < 1) val = 1;// keep 0 for unknown
 
+		//l_depth_8bit2m_LUT_count[val]++;
+		g_depth_8bit2m_LUT[val] = g_depth_LUT[raw];
+
 		g_depth_grayLUT[raw] = (u8)val;
+	}
+	g_depth_LUT[OPENNI_RAW_UNKNOWN] = -1.f;
+	g_depth_grayLUT[OPENNI_RAW_UNKNOWN] = 0;
+
+	FILE * fLUT = fopen(TMP_DIRECTORY "OpenNI-LUT_8bit_to_meters.txt", "w");
+	if(fLUT)
+	{
+		fprintf(fLUT, "# 8bit_value\tDistance in meter\tResolution\n");
+	}
+	for(int val = 0; val<256; val++)
+	{
+		if(l_depth_8bit2m_LUT_count[val] > 1)
+		{
+			g_depth_8bit2m_LUT[val] /= l_depth_8bit2m_LUT_count[val];
+		}
+		if(fLUT)
+		{
+			fprintf(fLUT, "%d\t%g\t%g\n",
+					val, g_depth_8bit2m_LUT[val],
+					val > 0 ?  g_depth_8bit2m_LUT[val-1]- g_depth_8bit2m_LUT[val]: 0);
+		}
+	}
+	if(fLUT)
+	{
+		fclose(fLUT);
 	}
 
 	g_depth_grayLUT[OPENNI_RAW_UNKNOWN] = 0;
@@ -461,7 +497,7 @@ IplImage * OpenNIVideoAcquisition::readImageRGB32()
 //		}
 		break;
 	case OPENNI_MODE_DEPTH_2CM: // 2CM
-		init_OpenNI_depth_LUT();
+
 
 		if(!m_grayImage)
 		{
