@@ -262,11 +262,16 @@ int FreenectVideoAcquisition::startAcquisition()
 		fprintf(stderr, "Freenect::%s:%d : no device : return -1\n", __func__, __LINE__);
 		return -1;
 	}
-
+#ifndef NEWER_FREENECT_API
 	freenect_set_depth_format(m_freenect_dev, FREENECT_DEPTH_11BIT);
+	freenect_set_video_format(m_freenect_dev, m_requested_format);
+#else
+	freenect_frame_mode current_mode = freenect_get_current_video_mode(m_freenect_dev);
+	freenect_frame_mode new_mode = freenect_find_depth_mode(current_mode.resolution, FREENECT_DEPTH_11BIT);
+	freenect_set_video_mode(m_freenect_dev,  new_mode);
+#endif
 	freenect_start_depth(m_freenect_dev);
 
-	freenect_set_video_format(m_freenect_dev, m_requested_format);
 	freenect_start_video(m_freenect_dev);
 
 	m_imageSize.width = FREENECT_FRAME_W;
@@ -315,8 +320,15 @@ int FreenectVideoAcquisition::processEvents()
 
 		// Restart acq
 		if (m_requested_format != m_current_format) {
+
 			freenect_stop_video(m_freenect_dev);
+#ifndef NEWER_FREENECT_API
 			freenect_set_video_format(m_freenect_dev, m_requested_format);
+#else
+			freenect_frame_mode current_mode = freenect_get_current_video_mode(m_freenect_dev);
+			freenect_frame_mode new_mode = freenect_find_video_mode(current_mode.resolution, m_requested_format);
+			freenect_set_video_mode(m_freenect_dev,  new_mode);
+#endif
 			freenect_start_video(m_freenect_dev);
 			m_current_format = m_requested_format;
 		}

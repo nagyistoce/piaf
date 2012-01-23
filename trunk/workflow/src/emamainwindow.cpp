@@ -252,7 +252,8 @@ void EmaMainWindow::loadSettings()
 
 	// Concatenate configuration directories
 	QFile file( QString(home) + "/" + PIAFWKFL_SETTINGS_XML );
-	if (!file.open(QIODevice::ReadOnly)) {
+	if (!file.open(QIODevice::ReadOnly))
+	{
 		PIAF_MSG(SWLOG_ERROR, "could not open file '%s' for reading: err=%s",
 				 file.name().toAscii().data(),
 				 file.errorString().toAscii().data());

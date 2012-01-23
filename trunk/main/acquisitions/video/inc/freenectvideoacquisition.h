@@ -22,6 +22,15 @@
 #include "virtualdeviceacquisition.h"
 
 
+// DETECT IF THE API IS A NEWER ONE OR ONE OF THE FIRST RELEASES OF FREENECT
+#ifndef FREENECT_FRAME_W
+#define FREENECT_FRAME_W	640
+#define FREENECT_FRAME_H	480
+
+#define NEWER_FREENECT_API
+#endif
+
+
 // IMAGE MODES
 /** @brief Mode for 8bit image of depth with 1 value = 2 cm (1 channel x IPL_DEPTH_8U)
 For close distance = 0.6m, the pixels are white (255) and at 5.6 m, they are black.
