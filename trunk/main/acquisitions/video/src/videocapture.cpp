@@ -172,6 +172,7 @@ bool VideoCaptureDoc::newDocument(int dev)
 	}
 
 	// start acquisition
+	fprintf(stderr, "[VidCapture]::%s:%d : myVAcq->startAcquisition...\n", __func__, __LINE__);
 	if(myVAcq->startAcquisition() < 0) {
 		fprintf(stderr, "[VidCapture]::%s:%d : Error: canot initialize acquisition !\n", __func__, __LINE__);
 		return false;
@@ -515,28 +516,35 @@ unsigned char * VideoCaptureDoc::getMaskBuffer()
 	return NULL;
 }
 
-void VideoCaptureDoc::clearMask() {
+void VideoCaptureDoc::clearMask()
+{
 	memset(mask, 255, currentPixel);
+
 	SavePPMFile("full.pgm", false, imageSize, mask);
 	setDetectionMask("full.pgm");
 
 	QRect * area;
 	for(area = pMaskList->first(); area; area = pMaskList->next())
+	{
 		pMaskList->remove(area);
+	}
 
 }
 
-void VideoCaptureDoc::saveMask() {
+void VideoCaptureDoc::saveMask()
+{
 	memset(mask, 0, currentPixel * sizeof(unsigned char));
 
 	// Add each area
 	QRect * area;
 	for(area = pMaskList->first(); area ; area = pMaskList->next())
+	{
 		for(int i=area->y(); i< area->y()+area->height(); i++)
 		{
 			int dec = i * imageSize.width + area->x();
 			memset(mask+dec, 255, area->width() * sizeof(unsigned char));
 		}
+	}
 
 	// save file in PGM image and call SwMotionDetector::LoadDetectionMask()
 	SavePPMFile("mask.pgm", false /* = grayscaled */, imageSize, mask);

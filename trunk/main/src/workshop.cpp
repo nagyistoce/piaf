@@ -429,7 +429,7 @@ void saveItem(FILE * f, ExplorerItem *item) {
 				pWim = (WorkshopImage *)itemC->getItemPtr();
 				fprintf(f, "Image:\t%s/%s\n", pWim->getPathName().latin1(), pWim->getFileName().latin1());
 				break;
-			case VIDEO_ITEM:
+			case MOVIE_ITEM:
 				pWmov = (WorkshopMovie *)itemC->getItemPtr();
 				fprintf(f, "Movie:\t%s/%s", pWmov->getPathName().latin1(), pWmov->getFileName().latin1());
 				if(pWmov->hasBookmarks()) {
@@ -848,11 +848,12 @@ void WorkshopApp::createPlot2D(WorkshopMeasure* wm)
 void WorkshopApp::createVideoCaptureView(VideoCaptureDoc * va)
 {
 	WorkshopVideoCaptureView * vcv;
-	QString basename="Video Capture window";
+	QString basename = tr("Video Capture window");
 
 	// Creating a unique name
 	filterToolName(basename);
-	printf("nom : %s\n", basename.latin1());
+	fprintf(stderr, "[Workshop]::%s:%d: create video capture with name : '%s'\n",
+			__func__, __LINE__, basename.latin1());
 
 	if(va) {
 		vcv = new WorkshopVideoCaptureView(va, NULL,basename,Qt::WA_DeleteOnClose);
@@ -881,7 +882,6 @@ void WorkshopApp::createVideoCaptureView(VideoCaptureDoc * va)
 }
 
 
-//thomas.
 void WorkshopApp::createImageView()
 {
 	WorkshopImageTool * wit;
@@ -1207,7 +1207,7 @@ void WorkshopApp::slotOnDoubleClickOnObject(Q3ListViewItem *item)
 			case VIDEO_ACQ_ITEM:
 				slotCreateVideoCaptureView();
 				break;
-			case VIDEO_ITEM: {
+			case MOVIE_ITEM: {
 					WorkshopMovie * wm = (WorkshopMovie *)pItem->getItemPtr();
 					fprintf(stderr, "WorkshopApp::%s:%d : Double click on movie ! "
 							"pWorkspace=%p WorkshopMovie * wm=%p\n",
@@ -1332,7 +1332,7 @@ void WorkshopApp::slotOnRightClickOnObject(Q3ListViewItem *item,
 
 			createSubmenu(pItem, contextMenu);
 			break;
-		case ROOT_VIDEO_ITEM:
+		case ROOT_MOVIE_ITEM:
 			caption->setText(tr("Movies"));
 			caption->setAlignment( Qt::AlignCenter );
 			contextMenu->insertItem( caption->text() , 0, 0 ); // FIXME : 0,0
@@ -1381,7 +1381,7 @@ void WorkshopApp::slotOnRightClickOnObject(Q3ListViewItem *item,
 				contextMenu->insertItem( tr("Save &As"), this, SLOT(slotFileSaveAs()));
 				break;
 
-			case VIDEO_ITEM:
+			case MOVIE_ITEM:
 				caption->setText(tr("Movie"));
 				caption->setAlignment( Qt::AlignCenter );
 				contextMenu->insertItem( caption->text() );
@@ -1453,10 +1453,10 @@ void WorkshopApp::slotOnNewObjectSelected(Q3ListViewItem *item)
 	ExplorerItem *pItem = (ExplorerItem *)item;
 	int iClass = pItem->getItemClass();
 	fprintf(stderr, "[%s] WorkshopApp::%s:%d : class is '%d' / "
-			"VIDEO_ITEM=%d VIDEO_ACQ_ITEM=%d IMAGE_ITEM=%d\n",
+			"MOVIE_ITEM=%d VIDEO_ACQ_ITEM=%d IMAGE_ITEM=%d\n",
 			__FILE__, __func__, __LINE__,
 			iClass,
-			VIDEO_ITEM, VIDEO_ACQ_ITEM, IMAGE_ITEM);
+			MOVIE_ITEM, VIDEO_ACQ_ITEM, IMAGE_ITEM);
 
 	switch(iClass)
 	{
@@ -1499,7 +1499,7 @@ void WorkshopApp::slotOnNewObjectSelected(Q3ListViewItem *item)
 				}
 			}
 			break;
-		case VIDEO_ITEM:
+		case MOVIE_ITEM:
 			fprintf(stderr, "WorkshopApp::%s:%d : slotOnNewObjectSelected : Select a video\n",
 					__func__, __LINE__);
 			if(pPImage)
@@ -1713,124 +1713,32 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 	size.width  = 320;
 	size.height = 240;
+	statusBar()->message(tr("Scanning video acquisition device ..."));
+	discoverDevices();
+}
+
+
+void WorkshopApp::discoverDevices()
+{
+	// list all video devices from :
+	// V4L2: /proc/video/dev/video*
+	// OpenCV: V4L2, GigE, FireWire...
+	// Freenect: Microsoft Kinect
+	// OpenNI: Microsoft Kinect and Asus Xtion Pro & Xtion Pro Live
+
 	char txt[512]="", name[256]="";
 
-	statusBar()->message(tr("Creating New Video Acquisition...."));
-
-	// check if there are Kinects connected
-#ifdef HAS_FREENECT
-	int freenect_idx = 0;
-	bool freenect_found;
-	do {
-		freenect_found = false;
-
-		statusBar()->message(tr("Creating New Video Acquisition...") + tr("try Kinect"));
-		FreenectVideoAcquisition * freenectDevice = new FreenectVideoAcquisition(freenect_idx);
-
-		if(freenectDevice->isDeviceReady())
-		{
-			freenect_found = true;
-
-			// append to Piaf
-			statusBar()->message(tr("(VideoAcquisition) : Freenect device Init OK"));
-
-			sprintf(txt, "Kinect[%d]", freenect_idx);
-
-			// acquisition init
-			if(freenectDevice->startAcquisition()<0)
-			{
-				statusBar()->message(tr("Error: cannot initialize acquisition !"));
-				freenect_found = false;
-			}
-			else
-			{
-				freenect_idx++;
-
-				if(freenectDevice->isAcquisitionRunning())
-				{
-					statusBar()->message(tr("Initialization OK"));
-
-					VideoCaptureDoc * pVCD = new VideoCaptureDoc(freenectDevice);
-
-					// add into explorer
-					pObjectsExplorer->addVideoAcquisition(pVCD, txt);
-				}
-				else {
-					statusBar()->showMessage(tr("Initialization FAILURE !"));
-				}
-			}
-
-		} else {
-			delete freenectDevice;
-		}
-	} while(freenect_found);
-
-#endif // HAS_FREENECT
-
-	// check if there are OpenNI supported devices are connected
-#ifdef HAS_OPENNI
-	int openni_idx = 0;
-	bool openni_found;
-	do {
-		openni_found = false;
-
-		statusBar()->message(tr("Creating New Video Acquisition...") + tr("try OpenNI"));
-		OpenNIVideoAcquisition * openniDevice = new OpenNIVideoAcquisition(openni_idx);
-
-		if(openniDevice->isDeviceReady())
-		{
-			openni_found = true;
-
-			// append to Piaf
-			statusBar()->message(tr("(VideoAcquisition) : openni device Init OK"));
-
-			sprintf(txt, "OpenNI[%d]", openni_idx);
-
-			// acquisition init
-			if(openniDevice->startAcquisition()<0)
-			{
-				statusBar()->message(tr("Error: cannot initialize acquisition !"));
-				openni_found = false;
-			}
-			else
-			{
-				openni_idx++;
-
-				if(openniDevice->isAcquisitionRunning())
-				{
-					statusBar()->message(tr("Initialization OK"));
-
-					VideoCaptureDoc * pVCD = new VideoCaptureDoc(openniDevice);
-
-					// add into explorer
-					pObjectsExplorer->addVideoAcquisition(pVCD, txt);
-				}
-				else {
-					statusBar()->showMessage(tr("Initialization FAILURE !"));
-				}
-			}
-
-		} else {
-			delete openniDevice;
-		}
-	} while(openni_found
-			&& openni_idx<1 /// \bug FIXME
-			);
-
-#endif // HAS_OPENNI
-
-	statusBar()->message(tr("Creating New Video Acquisition...") + tr("try OpenCV"));
-
-	// list all video devices from /proc/video/dev/video*
-	bool found;
+	bool found = false;
 	int dev=0, failed =0;
 
 	int dev_idx_tab[10];
 	for(dev=0; dev<10; dev++) { dev_idx_tab[dev] = -1; }
 	int dev_idx_max = 5;
 
+
 	// Find available items
 #ifdef _LINUX // for Linux, use the V4L /sys or /proc virtual file system
+	fprintf(stderr, "[Workshop]::%s:%d : scanning V4L2 devices...\n", __func__, __LINE__);
 	dev_idx_max = 0;
 	dev = 0;
 	do {
@@ -1847,7 +1755,7 @@ void WorkshopApp::slotOnNewVideoAcq()
 		char *ptname = name;
 
 		if(fv) {
-			fprintf(stderr, "Workshop::%s:%d : opened dev '%s'\n",
+			fprintf(stderr, "\tWorkshop::%s:%d : opened dev '%s'\n",
 					__func__, __LINE__, txt);
 			found = true;
 			fclose(fv);
@@ -1868,6 +1776,7 @@ void WorkshopApp::slotOnNewVideoAcq()
 		dev_idx_tab[dev] = dev;
 	}
 #endif
+
 
 	dev=0;
 	do {
@@ -1915,8 +1824,10 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 		//SwVideoAcquisition *myVAcq = new SwVideoAcquisition(dev);
 #ifndef _V4L2
+		fprintf(stderr, "[Workshop]::%s:%d : scanning OpenCV devices...\n", __func__, __LINE__);
 		OpenCVVideoAcquisition *myVAcq = new OpenCVVideoAcquisition(dev_idx);
 #else
+		fprintf(stderr, "[Workshop]::%s:%d : scanning V4L2 devices...\n", __func__, __LINE__);
 		V4L2Device * myVAcq = new V4L2Device(dev_idx);
 #endif
 
@@ -1953,7 +1864,6 @@ void WorkshopApp::slotOnNewVideoAcq()
 					statusBar()->message(tr("Initialization OK"));
 
 					VideoCaptureDoc * pVCD = new VideoCaptureDoc(myVAcq);
-
 					pObjectsExplorer->addVideoAcquisition(pVCD, txt);
 				}
 				else {
@@ -1966,12 +1876,114 @@ void WorkshopApp::slotOnNewVideoAcq()
 
 	} while( (found || dev<dev_idx_max) && dev_idx_tab[dev]>=0);
 
+	// check if there are Kinects connected
+#ifdef HAS_FREENECT
+	fprintf(stderr, "[Workshop]::%s:%d : scanning Freenect devices...\n", __func__, __LINE__);
+	int freenect_idx = 0;
+	bool freenect_found;
+	do {
+		freenect_found = false;
+
+		statusBar()->message(tr("Creating new Freenect Video Acquisition...") + tr("try Kinect"));
+		FreenectVideoAcquisition * freenectDevice = new FreenectVideoAcquisition(freenect_idx);
+
+		if(freenectDevice->isDeviceReady())
+		{
+			freenect_found = true;
+
+			// append to Piaf
+			statusBar()->message(tr("(VideoAcquisition) : Freenect device Init OK"));
+
+			sprintf(txt, "Kinect[%d]", freenect_idx);
+
+			// acquisition init
+			if(freenectDevice->startAcquisition()<0)
+			{
+				statusBar()->message(tr("Error: cannot initialize acquisition !"));
+				freenect_found = false;
+			}
+			else
+			{
+				freenect_idx++;
+
+				if(freenectDevice->isAcquisitionRunning())
+				{
+					statusBar()->message(tr("Initialization OK"));
+
+					VideoCaptureDoc * pVCD = new VideoCaptureDoc(freenectDevice);
+
+					// add into explorer
+					pObjectsExplorer->addVideoAcquisition(pVCD, txt);
+				}
+				else {
+					statusBar()->showMessage(tr("Initialization FAILURE !"));
+				}
+			}
+
+		} else {
+			delete freenectDevice;
+		}
+	} while(freenect_found);
+
+#endif // HAS_FREENECT
+
+	// check if there are OpenNI supported devices are connected
+#ifdef HAS_OPENNI
+	fprintf(stderr, "[Workshop]::%s:%d : scanning OpenNI devices...\n", __func__, __LINE__);
+	int openni_idx = 0;
+	bool openni_found;
+	do {
+		openni_found = false;
+
+		statusBar()->message(tr("Creating new OpenNI Video Acquisition...") + tr("try OpenNI"));
+		OpenNIVideoAcquisition * openniDevice = new OpenNIVideoAcquisition(openni_idx);
+
+		if(openniDevice->isDeviceReady())
+		{
+			openni_found = true;
+
+			// append to Piaf
+			statusBar()->message(tr("(VideoAcquisition) : openni device Init OK"));
+
+			sprintf(txt, "OpenNI[%d]", openni_idx);
+
+			// acquisition init
+			if(openniDevice->startAcquisition()<0)
+			{
+				statusBar()->message(tr("Error: cannot initialize acquisition !"));
+				openni_found = false;
+			}
+			else
+			{
+				openni_idx++;
+
+				if(openniDevice->isAcquisitionRunning())
+				{
+					statusBar()->message(tr("Initialization OK"));
+					VideoCaptureDoc * pVCD = new VideoCaptureDoc(openniDevice);
+
+					// add into explorer
+					pObjectsExplorer->addVideoAcquisition(pVCD, txt);
+				}
+				else {
+					statusBar()->showMessage(tr("Initialization FAILURE !"));
+				}
+			}
+
+		} else {
+			delete openniDevice;
+		}
+	} while(openni_found
+			&& openni_idx<1 /// \bug FIXME
+			);
+
+#endif // HAS_OPENNI
+
 
 	// FIXME : add Axis IP cameras
-
+	fprintf(stderr, "[Workshop]::%s:%d : scanning done.\n", __func__, __LINE__);
 
 }
-
 
 
 // -----------------------------------
@@ -2074,7 +2086,7 @@ void WorkshopApp::slotComponentClear() {
 	{
 	case ROOT_MEASURE_ITEM:
 	case ROOT_IMAGE_ITEM:
-	case ROOT_VIDEO_ITEM:
+	case ROOT_MOVIE_ITEM:
 		// clear listview branch
 		while( item->firstChild()) {
 			item->removeItem(item->firstChild());
@@ -2158,8 +2170,8 @@ void WorkshopApp::slotFileOpen()
 				}
 			}
 			}break;
-		case ROOT_VIDEO_ITEM:
-		case VIDEO_ITEM: {
+		case ROOT_MOVIE_ITEM:
+		case MOVIE_ITEM: {
 			statusBar()->message(tr("Opening movie file..."));
 			QStringList files = QFileDialog::getOpenFileNames(
 									 NULL,
@@ -2287,7 +2299,7 @@ void WorkshopApp::slotFileSaveAs()
 			else
 				statusBar()->message(tr("Error while trying to save an image..."));
 			break;
-		case VIDEO_ITEM:
+		case MOVIE_ITEM:
 			pWmov = (WorkshopMovie *)item->getItemPtr();
 			if(pWmov)
 			{
@@ -2338,7 +2350,7 @@ void WorkshopApp::slotFileClose()
 			delete item;
 			break;
 
-		case VIDEO_ITEM:
+		case MOVIE_ITEM:
 			statusBar()->message(tr("remove video !"));
 			delete item;
 			break;

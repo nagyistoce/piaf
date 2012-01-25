@@ -109,16 +109,18 @@ Q3ListView *ObjectsExplorer::initListView()
 
 	pRootImage = new ExplorerItem(lv, ROOT_ITEM, ROOT_IMAGE_ITEM);
 	pRootImage->setText(0, tr("Images"));
-	{ QPixmap iconPixmap;
+	{
+		QPixmap iconPixmap;
 		iconPixmap.load("images/pixmaps/stillimage.png");
 		pRootImage->setPixmap(0, iconPixmap);
 	}
-	pRootVideo = new ExplorerItem(lv, ROOT_ITEM, ROOT_VIDEO_ITEM);
-	pRootVideo->setText(0, tr("Videos"));
-	{ QPixmap iconPixmap;
-	iconPixmap.load("images/pixmaps/movie.png");
-	pRootVideo->setPixmap(0, iconPixmap);
-}
+	pRootVideo = new ExplorerItem(lv, ROOT_ITEM, ROOT_MOVIE_ITEM);
+	pRootVideo->setText(0, tr("Movies"));
+	{
+		QPixmap iconPixmap;
+		iconPixmap.load("images/pixmaps/movie.png");
+		pRootVideo->setPixmap(0, iconPixmap);
+	}
 	// Acquisitions items
 	pRootAcquisition = NULL;
 	pRootDataAcq = NULL;
@@ -175,7 +177,7 @@ void ObjectsExplorer::addWorkshopComponent(WorkshopComponent *wc)
 			break;
 		case CLASS_VIDEO:
 			pixmap.load("images/pixmaps/movie16.png");
-			qlvi = new ExplorerItem(pRootVideo, COMPONENT_ITEM, VIDEO_ITEM);
+			qlvi = new ExplorerItem(pRootVideo, COMPONENT_ITEM, MOVIE_ITEM);
 			qlvi->setItemPtr(wc);
 			qlvi->setText(0, label);
 			qlvi->setPixmap(0, pixmap);

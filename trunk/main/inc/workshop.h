@@ -233,9 +233,18 @@ private slots:
 	void initToolBar();
 	// setup the statusbar
 	void initStatusBar();
-	// setup the mainview
+	/// setup the mainview
 	void initView();
 
+	/** @brief Discover connected devices belong supported APIs
+
+		Discover connected devices: supported by now:
+		V4L2 : Linux only
+		OpenCV: depending on your configuration, may support GStreamer, ...
+		freenect(Kinect) : if
+		OpenNI
+		 */
+	void discoverDevices();
 	// ------------------------------------------------
 	//               Handling components list
 	// ------------------------------------------------
