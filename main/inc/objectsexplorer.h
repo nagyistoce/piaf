@@ -36,10 +36,12 @@
 #define ROOT_COMPONENT_ITEM	100
 #define ROOT_MEASURE_ITEM	110
 #define ROOT_IMAGE_ITEM		120
-#define ROOT_VIDEO_ITEM		130
+
+#define ROOT_MOVIE_ITEM		130
+
 #define MEASURE_ITEM      	111
 #define IMAGE_ITEM			121
-#define VIDEO_ITEM			131
+#define MOVIE_ITEM			131
 
 
 

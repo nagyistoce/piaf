@@ -1169,7 +1169,8 @@ void WorkshopImageTool::slotMenuMask()
 ****************************************************************/
 void WorkshopImageTool::startRecording()
 {
-	if(!mpegEncoder) {
+	if(!mpegEncoder)
+	{
 		//mpegEncoder = new MovieEncoder(CODEC_ID_MPEG1VIDEO, (int)imageSize.width, (int)imageSize.height, 10);
 		mpegEncoder = new MovieEncoder((int)imageSize.width,
 										(int)imageSize.height, 25);
