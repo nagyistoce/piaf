@@ -143,7 +143,7 @@ void PluginSettingsWidget::updateDisplay()
 					for(int item=0;item<s->nbitems;item++) {
 						fprintf(stderr, "[SwFilters] %s:%d insert item [%d/%d]='%s'\n",
 								__func__, __LINE__, item, s->nbitems, s->list[item]);
-						mComboEdit[combocount]->insertItem( s->list[item], -1);
+						mComboEdit[combocount]->insertItem( -1, s->list[item]);
 					}
 					combocount++;
 					}
@@ -181,7 +181,7 @@ void PluginSettingsWidget::on_applyButton_clicked()
 			// no problem with coherence for combo
 			// read value from combo
 			swStringListStruct *s = (swStringListStruct *)func->param_list[i].value;
-			s->curitem = mComboEdit[combocount]->currentItem();
+			s->curitem = mComboEdit[combocount]->currentIndex();
 			fprintf(stderr, "\t\t%s:%d : param[%d] = combo idx=%d stringList=%p\n",
 					__func__, __LINE__,
 					i, s->curitem, s);
@@ -190,7 +190,7 @@ void PluginSettingsWidget::on_applyButton_clicked()
 			break;
 		default:
 			if(!swGetValueFromTypeAndString(func->param_list[i].type,
-					(char *)mParamsEditLines[txtcount]->text().latin1(),
+					(char *)mParamsEditLines[txtcount]->text().toAscii().data(),
 					func->param_list[i].value))
 			{
 				fprintf(stderr, "PluginSettingsEdit::%s:%d: Error: incompatible type and value.\n",

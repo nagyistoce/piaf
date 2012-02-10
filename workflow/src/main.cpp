@@ -26,8 +26,10 @@
 #include "emamainwindow.h"
 #include <QSplashScreen>
 #include <QTranslator>
+#include <QDir>
 
 extern QSplashScreen * g_splash;
+
 
 int main(int argc, char *argv[])
 {
@@ -43,7 +45,7 @@ int main(int argc, char *argv[])
 	QString translationFile = QString("piafworkflow_") +
 							  localLang.languageToString(localLang.language()) +
 							  QString(".qm");
-	fprintf(stderr, "Translation file='%s'\n", translationFile.ascii());
+	fprintf(stderr, "Translation file='%s'\n", translationFile.toAscii().data());
 	tor.load( translationFile,
 			  dir.absolutePath() );
 
@@ -55,7 +57,10 @@ int main(int argc, char *argv[])
 	g_splash->showMessage(QObject::tr("Starting GUI..."), Qt::AlignBottom | Qt::AlignHCenter);
 
 	EmaMainWindow w;
+	a.setApplicationName(QObject::tr("Piaf workflow"));
+#ifdef PIAF_LEGACY
 	a.setMainWidget(&w);
+#endif
 	w.show();
 	g_splash->finish(&w);
 	return a.exec();

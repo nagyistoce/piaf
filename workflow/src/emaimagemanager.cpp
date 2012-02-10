@@ -67,7 +67,7 @@ void EmaImageManager::init()
 	QDir dir(home);
 	if(!dir.exists(".piafcache"))
 	{
-		dir.mkdir(".piafcache", true);
+		dir.mkdir(".piafcache");
 	}
 }
 

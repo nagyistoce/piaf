@@ -293,7 +293,7 @@ int ImageInfo::readMetadata(QString filename) {
 
 		Exiv2::ExifData &exifData = image->exifData();
 		if (exifData.empty()) {
-			std::string error(filename);
+			std::string error(filename.toStdString());
 			error += ": No Exif data found in the file";
 			throw Exiv2::Error(1, error);
 		}
@@ -1148,7 +1148,7 @@ void saveImageInfoStruct(t_image_info_struct * pinfo, QString path)
 	infoDoc.appendChild(elemFileInfo);
 	PIAF_MSG(SWLOG_TRACE, "saving '%s'", path.toAscii().data());
 	QFile fileout( path );
-	if( !fileout.open( IO_WriteOnly ) ) {
+	if( !fileout.open( QFile::WriteOnly ) ) {
 		PIAF_MSG(SWLOG_ERROR, "cannot save '%s'", path.toAscii().data());
 		return ;
 	}
@@ -1220,7 +1220,7 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path)
 	if (!file.open(QIODevice::ReadOnly))
 	{
 		PIAF_MSG(SWLOG_ERROR, "could not open file '%s' for reading: err=%s",
-				 file.name().toAscii().data(),
+				 file.fileName().toAscii().data(),
 				 file.errorString().toAscii().data());
 		return -1;
 	}
@@ -1236,7 +1236,7 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path)
 		PIAF_MSG(SWLOG_ERROR,
 				 "could not read content of file '%s' as XML doc: "
 				 "err='%s' line %d col %d",
-				 file.name().toAscii().data(),
+				 file.fileName().toAscii().data(),
 				 errorMsg.toAscii().data(),
 				 errorLine, errorColumn
 				 );

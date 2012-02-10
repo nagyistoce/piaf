@@ -28,6 +28,7 @@
 #include "PiafFilter.h"
 
 #include <QMouseEvent>
+#include <QMenu>
 
 int g_EMAMainImgW_debug_mode = EMALOG_DEBUG;
 
@@ -51,7 +52,7 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	m_ui->globalImageLabel->setEditMode(EDITMODE_ZOOM);
 
 	QMenu * viewMenu = new QMenu(m_ui->viewModeButton);
-	m_ui->viewModeButton->setPopup(viewMenu);
+	m_ui->viewModeButton->setMenu(viewMenu);
 	QIcon pixIcon;
 
 	// Normal view
@@ -424,14 +425,14 @@ void MainImageWidget::slot_actNormalView_activated()
 {
 	m_ui->infoLabel->setText(tr("Normal"));
 	m_ui->globalImageLabel->setColorMode(COLORMODE_GREY);
-	m_ui->viewModeButton->setPixmap(QPixmap(":icons/22x22/IconColorNormal.png"));
+	m_ui->viewModeButton->setIcon(QIcon(":icons/22x22/IconColorNormal.png"));
 }
 
 void MainImageWidget::slot_actInvertedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Inverted"));
 	m_ui->globalImageLabel->setColorMode(COLORMODE_GREY_INVERTED);
-	m_ui->viewModeButton->setPixmap(QPixmap(":icons/22x22/IconColorGreyInverted.png"));
+	m_ui->viewModeButton->setIcon(QIcon(":icons/22x22/IconColorGreyInverted.png"));
 //	m_ui->globalImageLabel->setRefImage();
 }
 
@@ -440,7 +441,7 @@ void MainImageWidget::slot_actIndexedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Indexed"));
 	m_ui->globalImageLabel->setColorMode(COLORMODE_INDEXED);
-	m_ui->viewModeButton->setPixmap(QPixmap(":icons/22x22/IconColorGreyIndexed.png"));
+	m_ui->viewModeButton->setIcon(QIcon(":icons/22x22/IconColorGreyIndexed.png"));
 
 }
 
@@ -449,7 +450,7 @@ void MainImageWidget::slot_actBlack2RedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Black->red"));
 	m_ui->globalImageLabel->setColorMode(COLORMODE_THERMIC_BLACK2RED);
-	m_ui->viewModeButton->setPixmap(QPixmap(":icons/22x22/IconColorThermicBlackToRed.png"));
+	m_ui->viewModeButton->setIcon(QIcon(":icons/22x22/IconColorThermicBlackToRed.png"));
 
 }
 
@@ -457,9 +458,19 @@ void MainImageWidget::slot_actBlack2RedView_activated()
 void MainImageWidget::slot_actBlue2RedView_activated()
 {
 	m_ui->infoLabel->setText(tr("Blue->red"));
-	m_ui->viewModeButton->setPixmap(QPixmap(":icons/22x22/IconColorThermicBlueToRed.png"));
 	m_ui->globalImageLabel->setColorMode(COLORMODE_THERMIC_BLUE2RED);
+	m_ui->viewModeButton->setIcon(QIcon(":icons/22x22/IconColorThermicBlueToRed.png"));
 }
 
 
+/* Show/hide plugins button */
+void MainImageWidget::showPluginsButton(bool on)
+{
+	m_ui->pluginsButton->setVisible(on);
+}
 
+
+void MainImageWidget::on_pluginsButton_clicked()
+{
+
+}

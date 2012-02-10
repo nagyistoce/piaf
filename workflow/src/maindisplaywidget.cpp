@@ -64,6 +64,9 @@ void MainDisplayWidget::setFilterSequencer(FilterSequencer * pFS)
 int MainDisplayWidget::setImageFile(QString imagePath,
 								   t_image_info_struct * pinfo )
 {
+	QFileInfo fi(imagePath);
+	setWindowTitle(fi.baseName());
+
 	m_listBookmarks.clear();
 	mpImageInfoStruct = pinfo;
 
@@ -102,6 +105,8 @@ void  MainDisplayWidget::zoomOn(int x, int y, float scale) {
 int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pinfo)
 {
 	mpImageInfoStruct = pinfo;
+	QFileInfo fi(moviePath);
+	setWindowTitle(fi.baseName());
 
 	m_listBookmarks.clear();
 	mFileVA.stopAcquisition();
@@ -196,7 +201,6 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 
 	// to update navigation image widget
 	emit signalImageChanged(m_fullImage);
-
 }
 
 void MainDisplayWidget::updateDisplay()
@@ -392,3 +396,4 @@ void MainDisplayWidget::on_addBkmkButton_clicked()
 		ui->timeLineWidget->setFileInfo(*mpImageInfoStruct);
 	}
 }
+

@@ -66,16 +66,7 @@ int TimeLineWidget::computeCursorDisplayPos(unsigned long long filepos)
 
 void TimeLineWidget::paintEvent( QPaintEvent * e)
 {
-	QRect cr;
-	if(!e) {
-		cr = rect();
-	} else {
-		// Use double-buffering
-		cr = e->rect();
-	}
-	QPixmap pix( cr.size() );
-	pix.fill( this, cr.topLeft() );
-	QPainter p( &pix);
+	QPainter p( this );
 
 	// Draw bookmarks
 	p.setPen(QColor(qRgb(255,192,0)));
@@ -104,7 +95,6 @@ void TimeLineWidget::paintEvent( QPaintEvent * e)
 	p.drawRect(mCursorDisplayPos - 1, 0, 2, size().height()-1);
 
 	p.end();
-	bitBlt( this, cr.topLeft(), &pix );
 }
 
 void TimeLineWidget::focusInEvent ( QFocusEvent * event )

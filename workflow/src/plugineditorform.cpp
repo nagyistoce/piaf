@@ -333,7 +333,7 @@ void PluginEditorForm::setWorkspace(QWorkspace * wsp) {
 		mHasGUI = true;
 
 		QPixmap winIcon = QPixmap(":images/pixmaps/IconFilters.png");
-		setIcon(winIcon);
+		setWindowIcon(winIcon);
 
 		show();
 	}

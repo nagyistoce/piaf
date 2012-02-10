@@ -3,11 +3,8 @@
 # -------------------------------------------------
 TEMPLATE = app
 
-# The following line was inserted by qt3to4
-QT += qt3support xml
+QT += xml
 
-# The following line was inserted by qt3to4
-CONFIG += uic3
 
 # Use lowercase name for Linux
 linux-g++: {
@@ -73,7 +70,9 @@ SOURCES += tools/src/PiafFilter.cpp \
     src/maindisplaywidget.cpp \
     src/timelinewidget.cpp \
     src/pluginsettingswidget.cpp \
-    tools/src/collectioneditdialog.cpp
+	tools/src/collectioneditdialog.cpp \
+	tools/src/preferencesdialog.cpp
+
 
 HEADERS += tools/inc/PiafFilter.h \
 	inc/navimagewidget.h \
@@ -95,8 +94,9 @@ HEADERS += tools/inc/PiafFilter.h \
     inc/maindisplaywidget.h \
     inc/timelinewidget.h \
     inc/pluginsettingswidget.h \
-    tools/inc/collectioneditdialog.h \
-    inc/workflowtypes.h
+	tools/inc/collectioneditdialog.h \
+    inc/workflowtypes.h \
+    tools/inc/preferencesdialog.h
 
 FORMS += ui/navimagewidget.ui \
     ui/thumbimagewidget.ui \
@@ -112,7 +112,9 @@ FORMS += ui/navimagewidget.ui \
     ../main/tools/ui/timehistogramwidget.ui \
 	ui/maindisplaywidget.ui \
     ui/pluginsettingswidget.ui \
-    tools/ui/collectioneditdialog.ui
+	tools/ui/collectioneditdialog.ui \
+    tools/ui/preferencesdialog.ui
+
 
 INCLUDEPATH += tools/inc
 INCLUDEPATH += ../main/tools/inc
@@ -166,7 +168,6 @@ win32: {
 	#LIBS += ../../release/qwt.lib
 }
 TRANSLATIONS = piaf_French.ts
-DEFINES += QT3_SUPPORT
 
 include($$LEGACYPATH/ffmpeg.pri)
 include($$LEGACYPATH/opencv.pri)
@@ -177,37 +178,91 @@ INCLUDEPATH += $$LEGACYPATH/acquisitions/inc/
 INCLUDEPATH += $$LEGACYPATH/acquisitions/video/inc/
 INCLUDEPATH += $$LEGACYPATH/components/inc/
 
-# $$LEGACYPATH/src/main.cpp \
-SOURCES += \
-	$$LEGACYPATH/src/objectsexplorer.cpp \
-	$$LEGACYPATH/src/sw_component.cpp \
-	$$LEGACYPATH/src/sw_library.cpp \
-	$$LEGACYPATH/src/workshop.cpp \
-	$$LEGACYPATH/src/workshoplist.cpp \
+exists(toto) {
+	DEFINES += QT3_SUPPORT
+
+	# The following line was inserted by qt3to4
+	QT += qt3support
+	HEADERS += $$LEGACYPATH/inc/workshop.h \
+		$$LEGACYPATH/inc/objectsexplorer.h \
+		$$LEGACYPATH/inc/sw_component.h \
+		$$LEGACYPATH/inc/sw_library.h \
+		$$LEGACYPATH/inc/sw_structure.h \
+		$$LEGACYPATH/inc/workshoplist.h \
+		$$LEGACYPATH/tools/inc/workshoptool.h \
+		$$LEGACYPATH/tools/inc/previewimage.h \
+		$$LEGACYPATH/tools/inc/workshopvideocapture.h \
+		$$LEGACYPATH/tools/inc/SwFilters.h \
+		$$LEGACYPATH/tools/inc/swtoolmainwindow.h \
+		$$LEGACYPATH/tools/inc/workshopimagetool.h \
+		$$LEGACYPATH/tools/inc/videoplayertool.h \
+		$$LEGACYPATH/tools/inc/batchfiltersmainwindow.h \
+	$$LEGACYPATH/components/inc/workshopcomponent.h \
+	$$LEGACYPATH/components/inc/workshopmeasure.h \
+	$$LEGACYPATH/components/inc/workshopimage.h \
+	$$LEGACYPATH/components/inc/workshopmovie.h \
+
+	SOURCES += \
+		$$LEGACYPATH/src/objectsexplorer.cpp \
+		$$LEGACYPATH/src/sw_component.cpp \
+		$$LEGACYPATH/src/sw_library.cpp \
+		$$LEGACYPATH/src/workshop.cpp \
+		$$LEGACYPATH/src/workshoplist.cpp \
+		$$LEGACYPATH/tools/src/workshoptool.cpp \
+		$$LEGACYPATH/tools/src/previewimage.cpp \
+		$$LEGACYPATH/tools/src/workshopvideocapture.cpp \
+		$$LEGACYPATH/tools/src/SwFilters.cpp \
+		$$LEGACYPATH/tools/src/workshopimagetool.cpp \
+		$$LEGACYPATH/tools/src/videoplayertool.cpp \
+		$$LEGACYPATH/tools/src/swtoolmainwindow.cpp \
+		$$LEGACYPATH/tools/src/batchfiltersmainwindow.cpp \
 	$$LEGACYPATH/components/src/workshopcomponent.cpp \
 	$$LEGACYPATH/components/src/workshopmeasure.cpp \
 	$$LEGACYPATH/components/src/workshopimage.cpp \
 	$$LEGACYPATH/components/src/workshopmovie.cpp \
-	$$LEGACYPATH/tools/src/workshoptool.cpp \
-	$$LEGACYPATH/tools/src/previewimage.cpp \
-	$$LEGACYPATH/tools/src/workshopvideocapture.cpp \
+
+	FORMS += $$LEGACYPATH/tools/ui/swtoolmainwindow.ui \
+
+}
+
+# $$LEGACYPATH/src/main.cpp \
+SOURCES += \
 	$$LEGACYPATH/tools/src/SwPluginCore.cpp \
-	$$LEGACYPATH/tools/src/SwFilters.cpp \
-	$$LEGACYPATH/tools/src/workshopimagetool.cpp \
-	$$LEGACYPATH/tools/src/videoplayertool.cpp \
 	$$LEGACYPATH/acquisitions/video/src/FileVideoAcquisition.cpp \
 	$$LEGACYPATH/acquisitions/video/src/videocapture.cpp \
 	$$LEGACYPATH/acquisitions/video/src/swvideodetector.cpp \
 	$$LEGACYPATH/acquisitions/video/src/uvccolor.c \
-	$$LEGACYPATH/tools/src/swtoolmainwindow.cpp \
 	$$LEGACYPATH/tools/src/OpenCVEncoder.cpp \
 	$$LEGACYPATH/tools/src/moviebookmarkform.cpp \
 	$$LEGACYPATH/acquisitions/video/src/virtualdeviceacquisition.cpp \
 	$$LEGACYPATH/acquisitions/video/src/opencvvideoacquisition.cpp \
 	$$LEGACYPATH/src/plugineditdialog.cpp \
-	$$LEGACYPATH/tools/src/batchfiltersmainwindow.cpp \
 	$$LEGACYPATH/tools/src/vidacqsettingswindow.cpp \
 	$$LEGACYPATH/src/imagewidget.cpp
+
+HEADERS += \
+	$$LEGACYPATH/inc/sw_types.h \
+	$$LEGACYPATH/inc/SwTypes.h \
+	$$LEGACYPATH/inc/SwImage.h \
+	$$LEGACYPATH/inc/piaf-common.h \
+	$$LEGACYPATH/tools/inc/SwPluginCore.h \
+	$$LEGACYPATH/tools/inc/qlistboxmarker.h \
+	$$LEGACYPATH/tools/inc/OpenCVEncoder.h \
+	$$LEGACYPATH/tools/inc/moviebookmarkform.h \
+	$$LEGACYPATH/acquisitions/video/inc/ccvt.h \
+	$$LEGACYPATH/acquisitions/video/inc/SwVideoAcquisition.h \
+	$$LEGACYPATH/acquisitions/video/inc/FileVideoAcquisition.h \
+	$$LEGACYPATH/acquisitions/video/inc/videocapture.h \
+	$$LEGACYPATH/acquisitions/video/inc/swvideodetector.h \
+	$$LEGACYPATH/acquisitions/video/inc/virtualdeviceacquisition.h \
+	$$LEGACYPATH/acquisitions/video/inc/opencvvideoacquisition.h \
+	$$LEGACYPATH/inc/plugineditdialog.h \
+	$$LEGACYPATH/tools/inc/vidacqsettingswindow.h \
+	$$LEGACYPATH/inc/piaf-settings.h \
+	$$LEGACYPATH/inc/nolinux_videodev.h \
+	$$LEGACYPATH/inc/imagewidget.h
+
+
 linux-g++: {
 	SOURCES += $$LEGACYPATH/acquisitions/video/src/v4lutils.c \
         	$$LEGACYPATH/acquisitions/video/src/jdatasrc.c  
@@ -250,44 +305,6 @@ else {
 	}
 }
 
-HEADERS += $$LEGACYPATH/inc/workshop.h \
-	$$LEGACYPATH/inc/objectsexplorer.h \
-	$$LEGACYPATH/inc/sw_component.h \
-	$$LEGACYPATH/inc/sw_library.h \
-	$$LEGACYPATH/inc/sw_structure.h \
-	$$LEGACYPATH/inc/sw_types.h \
-	$$LEGACYPATH/inc/workshoplist.h \
-	$$LEGACYPATH/inc/SwTypes.h \
-	$$LEGACYPATH/inc/SwImage.h \
-	$$LEGACYPATH/inc/piaf-common.h \
-	$$LEGACYPATH/components/inc/workshopcomponent.h \
-	$$LEGACYPATH/components/inc/workshopmeasure.h \
-	$$LEGACYPATH/components/inc/workshopimage.h \
-	$$LEGACYPATH/components/inc/workshopmovie.h \
-	$$LEGACYPATH/tools/inc/workshoptool.h \
-	$$LEGACYPATH/tools/inc/previewimage.h \
-	$$LEGACYPATH/tools/inc/workshopvideocapture.h \
-	$$LEGACYPATH/tools/inc/SwPluginCore.h \
-	$$LEGACYPATH/tools/inc/SwFilters.h \
-	$$LEGACYPATH/tools/inc/workshopimagetool.h \
-	$$LEGACYPATH/tools/inc/qlistboxmarker.h \
-	$$LEGACYPATH/tools/inc/videoplayertool.h \
-	$$LEGACYPATH/tools/inc/OpenCVEncoder.h \
-	$$LEGACYPATH/tools/inc/moviebookmarkform.h \
-	$$LEGACYPATH/acquisitions/video/inc/ccvt.h \
-	$$LEGACYPATH/acquisitions/video/inc/SwVideoAcquisition.h \
-	$$LEGACYPATH/acquisitions/video/inc/FileVideoAcquisition.h \
-	$$LEGACYPATH/acquisitions/video/inc/videocapture.h \
-	$$LEGACYPATH/acquisitions/video/inc/swvideodetector.h \
-	$$LEGACYPATH/tools/inc/swtoolmainwindow.h \
-	$$LEGACYPATH/acquisitions/video/inc/virtualdeviceacquisition.h \
-	$$LEGACYPATH/acquisitions/video/inc/opencvvideoacquisition.h \
-	$$LEGACYPATH/inc/plugineditdialog.h \
-	$$LEGACYPATH/tools/inc/batchfiltersmainwindow.h \
-	$$LEGACYPATH/tools/inc/vidacqsettingswindow.h \
-	$$LEGACYPATH/inc/piaf-settings.h \
-	$$LEGACYPATH/inc/nolinux_videodev.h \
-	$$LEGACYPATH/inc/imagewidget.h
 
 exists(/usr/local/include/libfreenect/libfreenect.h) {
 	message("The system known Freenect ;)")
@@ -379,12 +396,12 @@ unix: {
 
 INCLUDEPATH += .
 
-FORMS += $$LEGACYPATH/tools/ui/swtoolmainwindow.ui \
-		$$LEGACYPATH/tools/ui/imagetoavidialog.ui \
+FORMS += \
 		$$LEGACYPATH/tools/ui/moviebookmarkform.ui \
-	$$LEGACYPATH/ui/plugineditdialog.ui \
-	$$LEGACYPATH/tools/ui/batchfiltersmainwindow.ui \
-	$$LEGACYPATH/tools/ui/vidacqsettingswindow.ui
+		$$LEGACYPATH/ui/plugineditdialog.ui \
+		$$LEGACYPATH/tools/ui/batchfiltersmainwindow.ui \
+		$$LEGACYPATH/tools/ui/imagetoavidialog.ui \
+		$$LEGACYPATH/tools/ui/vidacqsettingswindow.ui
 
 HEADERS += $$LEGACYPATH/tools/inc/imagetoavidialog.h
 SOURCES += $$LEGACYPATH/tools/src/imagetoavidialog.cpp
@@ -393,13 +410,6 @@ HEADERS += $$LEGACYPATH/tools/inc/time_histogram.h
 SOURCES += $$LEGACYPATH/tools/src/time_histogram.cpp
 
 
-# The following line was changed from FORMS to FORMS3 by qt3to4
-#FORMS3 = ui/randsignalform.ui \
-#    ui/marker_dialog.ui \
-#    ui/curve_properties.ui
-FORMS3 = $$LEGACYPATH/ui/piafconfigurationdialog.ui
-#    ui/pluginlistdialog.ui
-TEMPLATE = app
 
 
 
@@ -441,6 +451,9 @@ message( "FINAL CONFIGURATION ==================================================
 message( "")
 message( "")
 OTHER_FILES += doc/OpenCVToolsForPhoto.txt
+
+
+
 
 
 

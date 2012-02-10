@@ -42,6 +42,10 @@ public:
 	explicit MainImageWidget(QWidget *parent = 0);
 	virtual ~MainImageWidget();
 
+
+	/** @brief Show/hide plugins button */
+	void showPluginsButton(bool on);
+
 	/** @brief Set the image */
 	int setImage(QImage imageIn, t_image_info_struct * pinfo = NULL);
 
@@ -95,14 +99,18 @@ private slots:
 	void slot_actBlack2RedView_activated();
 	void slot_actBlue2RedView_activated();
 
+	void on_pluginsButton_clicked();
+
 private:
 	Ui::MainImageWidget *m_ui;
+
 signals:
 
 	/// Signal to tell where the crop window is located
 	void signalCropRect(QRect);
 
 	/** @brief Viewed region has been updated
+
 		@param coordinates of rect in original image reference
 	 */
 	void signalZoomRect(QRect cropRect);

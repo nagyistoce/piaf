@@ -22,14 +22,18 @@
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
 
-//#include <stdlib.h>
-//#include <stdio.h>
-
 #include <sstream>
+
+// Implement global variable
+#define WORKSHOP_CPP
+
 #include "emamainwindow.h"
 #include "ui_emamainwindow.h"
 
+#include "mainimagewidget.h"
 #include "emaimagemanager.h"
+#include "piaf-common.h"
+#include "piaf-settings.h"
 
 #include "imgutils.h"
 #include "imageinfo.h"
@@ -37,16 +41,26 @@
 #include "thumbimagewidget.h"
 
 #include <QMessageBox>
+#include <QFile>
+#include <QTextStream>
+#include <QFileInfo>
 
 #include <QFileDialog>
 #include <QSplashScreen>
+#include <QMdiArea>
+
+
 
 // External tools which open new windows
 // Piaf Dialogs
-#include "piafconfigurationdialog.h"
+#include "preferencesdialog.h"
+
 //#include "pluginlistdialog.h"
 #include "plugineditdialog.h"
+#ifdef PIAF_LEGACY
+// Removed because it used the former SwToolMainWindow
 #include "batchfiltersmainwindow.h"
+#endif
 #include "imagetoavidialog.h"
 
 #include "imagewidget.h"
@@ -54,15 +68,10 @@
 #include "collectioneditdialog.h"
 
 
-// FIXME
-#include "workshopimagetool.h"
-
-
-
 
 QSplashScreen * g_splash = NULL;
 
-int g_EMAMW_debug_mode = EMALOG_DEBUG;
+int g_EMAMW_debug_mode = EMALOG_TRACE;
 
 #define EMAMW_printf(a,...)  { \
 				if(g_EMAMW_debug_mode>=(a)) { \
@@ -78,6 +87,8 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	  mSettings( PIAFWKFL_SETTINGS ),
 	  mSettingsDoc(PIAFWKFL_SETTINGS)
 {
+	g_debug_piaf = true;
+
 	ui->setupUi(this);
 	g_splash->showMessage(QObject::tr("Restore settings ..."), Qt::AlignBottom | Qt::AlignHCenter);
 	g_splash->update();
@@ -95,7 +106,8 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 
 	// For the moment, collections are not implemented
 	//ui->collecShowCheckBox->setChecked(false);
-	pWorkspace = new QWorkspace(ui->workshopFrame);
+	pWorkspace = ui->mdiArea;
+
 
 	g_splash->showMessage(QObject::tr("Restore settings ..."), Qt::AlignBottom | Qt::AlignHCenter);
 	loadSettings();
@@ -110,9 +122,10 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 //		);
 //	ui->workshopImageToolFrame->layout()->addWidget(pWorkshopImageTool->display());
 //	pWorkshopImageTool->display()->show();
+#ifdef PIAF_LEGACY
 	pWorkshopImage = NULL;
 	pWorkshopImageTool = NULL;
-
+#endif
 	g_splash->showMessage(QObject::tr("Load plugins ..."), Qt::AlignBottom | Qt::AlignHCenter);
 	g_splash->repaint();
 	ui->mainDisplayWidget->setFilterSequencer(
@@ -255,7 +268,7 @@ void EmaMainWindow::loadSettings()
 	if (!file.open(QIODevice::ReadOnly))
 	{
 		PIAF_MSG(SWLOG_ERROR, "could not open file '%s' for reading: err=%s",
-				 file.name().toAscii().data(),
+				 file.fileName().toAscii().data(),
 				 file.errorString().toAscii().data());
 		return;
 	}
@@ -270,7 +283,7 @@ void EmaMainWindow::loadSettings()
 			PIAF_MSG(SWLOG_ERROR,
 					 "could not read content of file '%s' as XML doc: "
 					 "err='%s' line %d col %d",
-					 file.name().toAscii().data(),
+					 file.fileName().toAscii().data(),
 					 errorMsg.toAscii().data(),
 					 errorLine, errorColumn
 					 );
@@ -290,6 +303,23 @@ void EmaMainWindow::loadSettings()
 		QDomElement e = n.toElement(); // try to convert the node to an element.
 		if(!e.isNull()) {
 			PIAF_MSG(SWLOG_INFO, "\tCategory '%s'", e.tagName().toAscii().data()); // the node really is an element.
+
+			if(e.tagName().compare("Directories")==0) // Read default directories
+			{
+				QDomNode folderNode = e.firstChild();
+				while(!folderNode.isNull()) {
+					QDomElement folderElem = folderNode.toElement(); // try to convert the node to an element.
+					if(!folderElem.isNull()) {
+						// Read parameters
+						m_workflow_settings.defaultImageDir = folderElem.attribute("ImageDir");
+						m_workflow_settings.defaultMovieDir = folderElem.attribute("MovieDir");
+						m_workflow_settings.defaultMeasureDir = folderElem.attribute("MeasureDir");
+					}
+
+					folderNode = folderNode.nextSibling();
+				}
+			}
+
 			if(e.tagName().compare("Folders")==0) // Read folders
 			{
 				// Clear previous list
@@ -423,6 +453,14 @@ void EmaMainWindow::saveSettings()
 //	 }
 	QDomElement elemGUI = mSettingsDoc.createElement("GUISettings");
 
+	// Append default directories
+	QDomElement elemDirectories = mSettingsDoc.createElement("Directories");
+	elemDirectories.setAttribute("ImageDir", m_workflow_settings.defaultImageDir);
+	elemDirectories.setAttribute("MovieDir", m_workflow_settings.defaultMovieDir);
+	elemDirectories.setAttribute("MeasureDir", m_workflow_settings.defaultMeasureDir);
+	elemGUI.appendChild(elemDirectories);
+
+
 	// Here we append a new element to the end of the document
 	QDomElement elemFolders = mSettingsDoc.createElement("Folders");
 	for (int i = 0; i < m_workflow_settings.directoryList.size(); ++i) {
@@ -461,7 +499,7 @@ void EmaMainWindow::saveSettings()
 	// Concatenate configuration directories
 	QFile fileout( QString(home) + "/" + PIAFWKFL_SETTINGS_XML );
 
-	if( !fileout.open( IO_WriteOnly ) ) {
+	if( !fileout.open( QFile::WriteOnly ) ) {
 		PIAF_MSG(SWLOG_ERROR, "cannot save " PIAFWKFL_SETTINGS_XML);
 		return ;
 	}
@@ -536,6 +574,14 @@ void EmaMainWindow::on_actionView_right_column_toggled(bool on)
 
 }
 
+void EmaMainWindow::on_actionView_bottom_line_toggled(bool on)
+{
+	if(on)
+		ui->bottomFrame->show();
+	else
+		ui->bottomFrame->hide();
+}
+
 
 
 
@@ -559,8 +605,10 @@ void EmaMainWindow::on_actionEdit_plugins_activated()
 
 void EmaMainWindow::on_actionBatch_processor_activated()
 {
+#ifdef PIAF_LEGACY
 	BatchFiltersMainWindow * batchProc = new BatchFiltersMainWindow();
 	batchProc->show();
+#endif //PIAF_LEGACY
 }
 
 void EmaMainWindow::on_actionConvert_images_to_AVI_activated()
@@ -651,13 +699,13 @@ void EmaMainWindow::on_filesClearButton_clicked()
 		t_folder * folder = (*it);
 		if(folder->fullpath == del_dir->getFullPath())
 		{
-			it = m_workflow_settings.directoryList.remove(it);
+			it = m_workflow_settings.directoryList.erase(it);
 		} else {
 			++it;
 		}
 	}
 
-	mDirectoryList.remove(del_dir);
+	mDirectoryList.removeOne(del_dir);
 	saveSettings();
 
 	// remove in display
@@ -854,7 +902,7 @@ void DirectoryTreeWidgetItem::init()
 		mIsFile = true;
 
 		setText(0, fi.baseName());
-		setText(1, fi.extension());
+		setText(1, fi.suffix());
 	}
 }
 
@@ -866,7 +914,7 @@ DirectoryTreeWidgetItem * EmaMainWindow::appendDirectoryToLibrary(QString path,
 
 	t_folder * folder = new t_folder;
 	folder->fullpath = path;
-	folder->extension = fi.extension();
+	folder->extension = fi.suffix();
 	folder->filename = fi.baseName();
 	folder->expanded = false;
 	m_workflow_settings.directoryList.append(folder);
@@ -1187,12 +1235,20 @@ void EmaMainWindow::slot_thumbImage_clicked(QString fileName)
 		return;
 	}
 
+	setCurrentMainFile(fileName);
+}
+
+void EmaMainWindow::setCurrentMainFile(QString fileName)
+{
+	mMainFileName = fileName;
+
 	ui->globalNavImageWidget->setImageFile(fileName);
 	t_image_info_struct * pinfo = NULL;
 
 	int retry = 0;
 
-	while(!pinfo && retry<4E6) {
+	while(!pinfo && retry<4E6 // wait for 4 s
+		  ) {
 		pinfo = emaMngr()->getInfo(fileName);
 		if(!pinfo) {
 			// Create its info
@@ -1215,16 +1271,16 @@ void EmaMainWindow::slot_thumbImage_clicked(QString fileName)
 					 ui->mainDisplayWidget->getImage().width(),
 					 ui->mainDisplayWidget->getImage().height(),
 					 ui->mainDisplayWidget->getImage().depth());
+			/*
+			  FIXME : this works !
+			  Enjoy
 
-			if(pWorkshopImage) {
-				mWorkImage.load(fileName);
-				pWorkshopImage->load(fileName);
-			}
-
-			if(pWorkshopImageTool) {
-				pWorkshopImageTool->setWorkshopImage(pWorkshopImage);
-				//pWorkshopImageTool->update();
-			}
+			MainImageWidget * newDisplay = new MainImageWidget(this);
+			ui->mdiArea->addSubWindow(newDisplay);
+			QImage imageIn(fileName);
+			newDisplay->setImage(imageIn, pinfo);
+			newDisplay->show();
+			*/
 		}
 		else // use main widget decoder to read the image
 		{
@@ -1235,6 +1291,12 @@ void EmaMainWindow::slot_thumbImage_clicked(QString fileName)
 					 ui->mainDisplayWidget->getImage().height(),
 					 ui->mainDisplayWidget->getImage().depth());
 			ui->globalNavImageWidget->setImage( ui->mainDisplayWidget->getImage() );
+/*
+			MainDisplayWidget * newDisplay = new MainDisplayWidget(this);
+			ui->mdiArea->addSubWindow(newDisplay);
+			newDisplay->setMovieFile(fileName, pinfo);
+			newDisplay->show();
+			*/
 			//
 //			ui->globalNavImageWidget->setImage( iplImageToQImage(pinfo->thumbImage.iplImage) );
 		}
@@ -1254,6 +1316,57 @@ void EmaMainWindow::slot_thumbImage_clicked(QString fileName)
 		ui->exifScrollArea->setImageInfo(pinfo);
 	}
 }
+
+/* Set the file to be added in workspace */
+void EmaMainWindow::openInWorkspace(QString fileName)
+{
+	if(fileName.isNull())
+	{
+		return;
+	}
+	t_image_info_struct * pinfo = NULL;
+
+	int retry = 0;
+	while(!pinfo && retry<4E6 // wait for 4 s
+		  ) {
+		pinfo = emaMngr()->getInfo(fileName);
+		if(!pinfo) {
+			// Create its info
+			emaMngr()->appendFile(fileName);
+			usleep(100000);
+		}
+		retry += 100000;
+	}
+
+	MainDisplayWidget * newDisplay = new MainDisplayWidget(this);
+	if(pinfo)
+	{
+		if(!pinfo->isMovie)
+		{
+			newDisplay->setImageFile(fileName, pinfo);
+		}
+		else // use main widget decoder to read the image
+		{
+			newDisplay->setMovieFile(fileName, pinfo);
+		}
+	}
+	else
+	{
+		QImage testImage(fileName);
+		if(testImage.isNull())
+		{
+			newDisplay->setMovieFile(fileName, pinfo);
+		}
+		else
+		{
+			newDisplay->setImageFile(fileName, pinfo);
+		}
+	}
+
+	ui->mdiArea->addSubWindow(newDisplay);
+	newDisplay->show();
+}
+
 
 
 void EmaMainWindow::on_globalNavImageWidget_signalZoomOn(int x, int y, float scale) {
@@ -1496,3 +1609,56 @@ void CollecTreeWidgetItem::purge()
 
 }
 
+
+
+
+
+/******************************************************************************
+			VIDEO DEVICE ACQUISITION
+*******************************************************************************/
+CaptureTreeWidgetItem::CaptureTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent,
+											 QString devname,
+											 VirtualDeviceAcquisition * pVAcq)
+	: QTreeWidgetItem(treeWidgetItemParent), mName(devname), m_pVAcq(pVAcq)
+{
+
+}
+
+/// Constructor for devices classes
+CaptureTreeWidgetItem::CaptureTreeWidgetItem(QTreeWidget * treeWidgetParent,
+											 QString category)
+	: QTreeWidgetItem(treeWidgetParent), mName(category)
+{
+	m_pVAcq = NULL;
+}
+
+CaptureTreeWidgetItem::~CaptureTreeWidgetItem()
+{
+	purge();
+}
+
+void CaptureTreeWidgetItem::purge()
+{
+	if(m_pVAcq)
+	{
+		/// FIXME : broadcast signal to stop capturing
+		m_pVAcq->stopAcquisition();
+	}
+}
+
+
+void EmaMainWindow::on_actionPreferences_activated()
+{
+	PreferencesDialog * newPrefDialog = new PreferencesDialog(NULL);
+	/// FIXME
+	newPrefDialog->setSettings(&m_workflow_settings);
+	newPrefDialog->setAttribute( Qt::WA_DeleteOnClose );
+
+	connect(newPrefDialog, SIGNAL(destroyed()), this, SLOT(saveSettings()));
+	newPrefDialog->show();
+}
+
+void EmaMainWindow::on_actionOpen_file_in_workspace_triggered()
+{
+	openInWorkspace(mMainFileName);
+}
