@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>MovieBookmarkForm</class>
+ <widget class="QWidget" name="MovieBookmarkForm">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>274</width>
+    <height>320</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Bookmarks manager</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <item>
+    <widget class="QTreeWidget" name="treeWidget">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="autoScroll">
+      <bool>true</bool>
+     </property>
+     <property name="selectionMode">
+      <enum>QAbstractItemView::ContiguousSelection</enum>
+     </property>
+     <property name="autoExpandDelay">
+      <number>-1</number>
+     </property>
+     <property name="rootIsDecorated">
+      <bool>false</bool>
+     </property>
+     <attribute name="headerDefaultSectionSize">
+      <number>50</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Mark</string>
+      </property>
+      <property name="toolTip">
+       <string>Index of bookmark</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Position</string>
+      </property>
+      <property name="toolTip">
+       <string>Position in % of movie</string>
+      </property>
+     </column>
+    </widget>
+   </item>
+   <item>
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QPushButton" name="exportButton">
+       <property name="toolTip">
+        <string>Export from first to last selected bookmarks into an AVI file</string>
+       </property>
+       <property name="text">
+        <string>Export</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../piaf.qrc">
+         <normaloff>:/images/pixmaps/movie.png</normaloff>:/images/pixmaps/movie.png</iconset>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="delButton">
+       <property name="toolTip">
+        <string>Delete selected bookmark(s)</string>
+       </property>
+       <property name="text">
+        <string>Delete</string>
+       </property>
+       <property name="icon">
+        <iconset resource="../../piaf.qrc">
+         <normaloff>:/images/16x16/trash-empty.png</normaloff>:/images/16x16/trash-empty.png</iconset>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../../piaf.qrc"/>
+ </resources>
+ <connections/>
+</ui>

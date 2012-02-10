@@ -233,7 +233,7 @@ SOURCES += \
 	$$LEGACYPATH/acquisitions/video/src/swvideodetector.cpp \
 	$$LEGACYPATH/acquisitions/video/src/uvccolor.c \
 	$$LEGACYPATH/tools/src/OpenCVEncoder.cpp \
-	$$LEGACYPATH/tools/src/moviebookmarkform.cpp \
+	tools/src/moviebookmarkform.cpp \
 	$$LEGACYPATH/acquisitions/video/src/virtualdeviceacquisition.cpp \
 	$$LEGACYPATH/acquisitions/video/src/opencvvideoacquisition.cpp \
 	$$LEGACYPATH/src/plugineditdialog.cpp \
@@ -248,7 +248,7 @@ HEADERS += \
 	$$LEGACYPATH/tools/inc/SwPluginCore.h \
 	$$LEGACYPATH/tools/inc/qlistboxmarker.h \
 	$$LEGACYPATH/tools/inc/OpenCVEncoder.h \
-	$$LEGACYPATH/tools/inc/moviebookmarkform.h \
+	tools/inc/moviebookmarkform.h \
 	$$LEGACYPATH/acquisitions/video/inc/ccvt.h \
 	$$LEGACYPATH/acquisitions/video/inc/SwVideoAcquisition.h \
 	$$LEGACYPATH/acquisitions/video/inc/FileVideoAcquisition.h \
@@ -397,7 +397,7 @@ unix: {
 INCLUDEPATH += .
 
 FORMS += \
-		$$LEGACYPATH/tools/ui/moviebookmarkform.ui \
+		tools/ui/moviebookmarkform.ui \
 		$$LEGACYPATH/ui/plugineditdialog.ui \
 		$$LEGACYPATH/tools/ui/batchfiltersmainwindow.ui \
 		$$LEGACYPATH/tools/ui/imagetoavidialog.ui \
