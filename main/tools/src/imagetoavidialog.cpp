@@ -222,7 +222,7 @@ void ImageToAVIDialog::on_dirButton_clicked()
 			files.count());
 	if(!files.isEmpty()) {
 		dir.cd(dirPath);
-		chdir(dirPath);
+		chdir(dirPath.toUtf8().data());
 		appendFileList(files);
 	}
 }
@@ -259,12 +259,12 @@ void ImageToAVIDialog::appendFileList(QStringList files) {
 		fi.setFile(fileName);
 		if(fi.exists() && fi.isFile()) {
 			fprintf(stderr, "%s:%d : Append file '%s'\n", __func__, __LINE__,
-					fi.absFilePath().toUtf8().data());
-			m_filesList.append(fi.absFilePath());
+					fi.absoluteFilePath().toUtf8().data());
+			m_filesList.append(fi.absoluteFilePath());
 		} else {
 			fprintf(stderr, "%s:%d : Missing file '%s'=>%s'\n", __func__, __LINE__,
 					fileName.toUtf8().data(),
-					fi.absFilePath().toUtf8().data()
+					fi.absoluteFilePath().toUtf8().data()
 					);
 		}
 	}
