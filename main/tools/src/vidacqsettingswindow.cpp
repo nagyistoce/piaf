@@ -99,7 +99,7 @@ void VidAcqSettingsWindow::updateVideoProperties()
 			(_slider)->blockSignals(false); \
 		}
 #define CHANGE_COMBO_INDEX(_combo,_label,_value)	\
-		if((_combo)->currentItem() != (_value)) { \
+		if((_combo)->currentIndex() != (_value)) { \
 			str.sprintf("%d", (int)(_value)); \
 			QLabel * _labelptr = (_label); \
 			if(_labelptr) _labelptr->setText(str); \
