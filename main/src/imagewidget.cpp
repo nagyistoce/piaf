@@ -73,7 +73,7 @@ unsigned char BthermicBlue2Red(int p) {
 	return B;
 }
 
-bool g_debug_ImageWidget = false;
+bool g_debug_ImageWidget = true;
 
 
 ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
@@ -254,7 +254,9 @@ void ImageWidget::setColorMode(int mode)
 			if(m_colorMode != COLORMODE_GREY)
 			{
 				fprintf(stderr, "%s:%d : convert to grey\n", __func__, __LINE__);
-				m_greyImage = m_pOriginalImage->convertDepth(8);
+				/// \todo FIXME : the colors are not exactly matched in the exact order
+				m_greyImage = m_pOriginalImage->convertToFormat(QImage::Format_Indexed8,
+															 Qt::OrderedDither | Qt::ColorOnly	);
 				dImage = &m_greyImage;
 			}
 			else
@@ -304,7 +306,8 @@ void ImageWidget::setColorMode(int mode)
 			break;
 		case COLORMODE_GREY_INVERTED:
 			for(int i=0; i<256; i++) {
-				col.setHsv(0,0,255-i);
+				//col.setRgb(255-i, 255-i, 255-i);
+				col.setHsl(0,0,255-i);
 				dImage->setColor(i, col.rgb());
 			}
 			break;
@@ -636,9 +639,9 @@ void ImageWidget::clipSmartZooming()
 
 	QRect cropRect = displayToImage(QRect(0,0, size().width(), size().height()));
 
-//	fprintf(stderr, "ImageWidget::%s:%d : emit signalZoomRect(cropRect=%d,%d+%dx%d);\n",
-//			__func__, __LINE__,
-//			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
+	fprintf(stderr, "ImageWidget::%s:%d : emit signalZoomRect(cropRect=%d,%d+%dx%d);\n",
+			__func__, __LINE__,
+			cropRect.x(), cropRect.y(), cropRect.width(), cropRect.height());
 	emit signalZoomRect(cropRect);
 
 	mCropRect = cropRect;
