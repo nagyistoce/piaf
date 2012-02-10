@@ -29,7 +29,7 @@
 #include <qlist.h>
 #include <qrect.h>
 
-#include <Q3PtrList>
+#include <QList>
 #include <QTimer>
 
 #include <QThread>
@@ -143,7 +143,7 @@ public:
     void setDetectionMask(char * maskfile);
 private:
     /// save detection mask
-    Q3PtrList<QRect> * pMaskList;
+	QList<QRect *> * pMaskList;
     unsigned char * mask;
     int currentPixel;
 

@@ -22,7 +22,7 @@
 #include <qwidget.h>
 #include <qmessagebox.h>
 #include <qtimer.h>
-#include <q3filedialog.h>
+#include <qfiledialog.h>
 
 // application specific includes
 #include "swvideodetector.h"
@@ -57,8 +57,8 @@ VideoCaptureDoc::VideoCaptureDoc(VirtualDeviceAcquisition * vAcq)
 	allocateImages();
 
 	// Area mask list
-	pMaskList = new Q3PtrList<QRect>;
-	pMaskList->setAutoDelete(false);
+	pMaskList = new QList<QRect *>;
+//	pMaskList->setAutoDelete(false);
 
 	/* For devices without select() we use a timer. */
 	int Framerate = 25;  // default value
@@ -186,8 +186,8 @@ bool VideoCaptureDoc::newDocument(int dev)
 
 
 	// Area mask list
-	pMaskList = new Q3PtrList<QRect>;
-	pMaskList->setAutoDelete(false);
+	pMaskList = new QList<QRect *>;
+//	pMaskList->setAutoDelete(false);
 
 	/* For devices without select() we use a timer. */
 	int Framerate = 20;  // default value
@@ -481,10 +481,12 @@ void VideoCaptureDoc::addMask(int x, int y, int width, int height)
 QRect * VideoCaptureDoc::getMaskFromPos(int selX, int selY)
 {
 	// search for closest QRect
-	QRect * area, *closestArea = NULL;
+	QRect *closestArea = NULL;
 	int dmin = 10000000;
-	for(area = pMaskList->first(); area; area = pMaskList->next())
+	QList<QRect *>::iterator it;
+	for(it = pMaskList->begin(); it!=pMaskList->end(); ++it)
 	{
+		QRect * area = (*it);
 		if( selX >= area->x() && selX <= area->x()+area->width()
 			&& selY >= area->y() && selY <= area->y()+area->height() )
 		{
@@ -503,7 +505,7 @@ QRect * VideoCaptureDoc::getMaskFromPos(int selX, int selY)
 
 void VideoCaptureDoc::removeMask(QRect * area)
 {
-	pMaskList->remove(area);
+	pMaskList->removeOne(area);
 	saveMask();
 }
 
@@ -523,10 +525,13 @@ void VideoCaptureDoc::clearMask()
 	SavePPMFile("full.pgm", false, imageSize, mask);
 	setDetectionMask("full.pgm");
 
-	QRect * area;
-	for(area = pMaskList->first(); area; area = pMaskList->next())
+	QList<QRect *>::iterator it;
+	for(it = pMaskList->begin(); it!=pMaskList->end(); )
 	{
-		pMaskList->remove(area);
+		QRect * area = (*it);
+
+		it = pMaskList->erase(it);
+		delete area;
 	}
 
 }
@@ -536,9 +541,10 @@ void VideoCaptureDoc::saveMask()
 	memset(mask, 0, currentPixel * sizeof(unsigned char));
 
 	// Add each area
-	QRect * area;
-	for(area = pMaskList->first(); area ; area = pMaskList->next())
+	QList<QRect *>::iterator it;
+	for(it = pMaskList->begin(); it!=pMaskList->end(); ++it)
 	{
+		QRect * area = (*it);
 		for(int i=area->y(); i< area->y()+area->height(); i++)
 		{
 			int dec = i * imageSize.width + area->x();
