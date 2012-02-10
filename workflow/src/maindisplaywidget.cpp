@@ -27,6 +27,7 @@
 
 #include "piaf-common.h"
 #include "PiafFilter.h"
+#include <QFileInfo>
 
 #include "moviebookmarkform.h"
 

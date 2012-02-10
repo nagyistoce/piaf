@@ -73,7 +73,7 @@ unsigned char BthermicBlue2Red(int p) {
 	return B;
 }
 
-bool g_debug_ImageWidget = true;
+bool g_debug_ImageWidget = false;
 
 
 ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)

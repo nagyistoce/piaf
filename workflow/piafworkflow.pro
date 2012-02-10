@@ -178,7 +178,7 @@ INCLUDEPATH += $$LEGACYPATH/acquisitions/inc/
 INCLUDEPATH += $$LEGACYPATH/acquisitions/video/inc/
 INCLUDEPATH += $$LEGACYPATH/components/inc/
 
-exists(toto) {
+exists(tototatatutu) {
 	DEFINES += QT3_SUPPORT
 
 	# The following line was inserted by qt3to4

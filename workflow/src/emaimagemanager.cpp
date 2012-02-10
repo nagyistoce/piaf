@@ -24,6 +24,8 @@
 
 #include "imgutils.h"
 #include "emaimagemanager.h"
+#include <QDir>
+#include <QString>
 
 int g_EMAImgMng_debug_mode = EMALOG_DEBUG;
 
