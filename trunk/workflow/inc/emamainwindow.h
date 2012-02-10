@@ -32,10 +32,16 @@
 #include <QWorkspace>
 #include <QSettings>
 #include <QDomDocument>
+#include <QMdiArea>
+
+#ifdef PIAF_LEGACY
 #include "workshopimagetool.h"
+#endif
 
-#include "workflowtypes.h"
 
+#include "preferencesdialog.h"
+
+#include "virtualdeviceacquisition.h"
 
 
 class EmaMainWindow;
@@ -115,24 +121,43 @@ private:
 
 
 
+/** \brief Capture device tree item */
+class CaptureTreeWidgetItem : QTreeWidgetItem
+{
+//	Q_OBJECT
+	friend class EmaMainWindow;
+public:
+	/// Constructor for main classes: IP, V4L2 ...
+	CaptureTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, QString devname, VirtualDeviceAcquisition * pVAcq);
+	/// Constructor for devices classes
+	CaptureTreeWidgetItem(QTreeWidget * treeWidgetParent, QString category);
+	~CaptureTreeWidgetItem();
+
+	VirtualDeviceAcquisition * getVideoAcquisition() { return m_pVAcq; }
+
+	bool isCategory() { return (m_pVAcq == NULL); }
+
+protected:
+	void init(); ///< init internal data and get device properties
+	void purge(); ///< stop aquisition
+	QString mName;
+
+	///< Pointer on video acquisition device
+	VirtualDeviceAcquisition * m_pVAcq;
+
+private:
+
+};
+
+
+
+
 namespace Ui
 {
 	class EmaMainWindow;
 }
 
 
-/** @brief Workflow interface settings storage */
-typedef struct {
-	/// List of input directories
-	QList<t_folder *> directoryList;
-
-	/// list of collections
-	QList<t_collection *> collectionList;
-
-	/// List of devices
-	QList<t_device *> devicesList;
-
-} t_workflow_settings ;
 
 
 /** \brief Main window for workflow app
@@ -152,13 +177,14 @@ private:
 
 	Ui::EmaMainWindow *ui;
 
-	void saveSettings();
 	void loadSettings();
 #define PIAFWKFL_SETTINGS	"piaf-workflow"
 #define PIAFWKFL_SETTINGS_XML	"piafsettings.xml"
 	QSettings mSettings;	///< Qt Settings object for piaf workflow
 
+
 	t_workflow_settings m_workflow_settings;
+
 	/// List of input directories
 	QList<DirectoryTreeWidgetItem *> mDirectoryList;
 
@@ -185,21 +211,36 @@ private:
 	void appendThumbImage(QString fileName);
 	void removeThumbImage(QString fileName);
 
+	/** @brief Set the file to be displayed in main display */
+	void setCurrentMainFile(QString fileName);
+
+	/** @brief Set the file to be added in workspace */
+	void openInWorkspace(QString fileName);
+
 private:
 	QDomDocument mSettingsDoc;
 	void addFolderToXMLSettings(QDomElement * parent_elem, t_folder folder);
 	void addCollectionToXMLSettings(QDomElement * elem, t_collection collect);
 
 	QTimer m_timer;
-	QWorkspace * pWorkspace;
+	QMdiArea * pWorkspace;
 	QImage mWorkImage;
 
+	/// Main file diplayed
+	QString mMainFileName;
+
+#ifdef PIAF_LEGACY
 	WorkshopImage * pWorkshopImage;
 	WorkshopImageTool * pWorkshopImageTool;
+#endif
+
 public slots:
 	void slot_thumbImage_clicked(QString fileName);
 	void slot_thumbImage_selected(QString);
+
 private slots:
+	void saveSettings();
+
 	void on_actionClean_activated();
 	void on_actionView_right_column_toggled(bool );
 	void on_actionView_left_column_toggled(bool );
@@ -246,6 +287,9 @@ private slots:
 	void on_collecDeleteButton_clicked();
 	void on_collecEditButton_clicked();
 	void on_stopLoadButton_clicked();
+	void on_actionView_bottom_line_toggled(bool arg1);
+	void on_actionPreferences_activated();
+	void on_actionOpen_file_in_workspace_triggered();
 };
 
 #endif // EmaMAINWINDOW_H

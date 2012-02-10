@@ -19,6 +19,12 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
+    <property name="spacing">
+     <number>2</number>
+    </property>
+    <property name="margin">
+     <number>1</number>
+    </property>
     <item>
      <widget class="QSplitter" name="splitter_2">
       <property name="orientation">
@@ -76,7 +82,7 @@
               <x>0</x>
               <y>0</y>
               <width>214</width>
-              <height>487</height>
+              <height>516</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -687,7 +693,7 @@
          <item>
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="currentIndex">
-            <number>1</number>
+            <number>2</number>
            </property>
            <widget class="QWidget" name="page_mainImage">
             <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -720,8 +726,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>444</width>
-                  <height>467</height>
+                  <width>96</width>
+                  <height>26</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -758,14 +764,7 @@
               <number>1</number>
              </property>
              <item>
-              <widget class="QFrame" name="workshopFrame">
-               <property name="frameShape">
-                <enum>QFrame::StyledPanel</enum>
-               </property>
-               <property name="frameShadow">
-                <enum>QFrame::Raised</enum>
-               </property>
-              </widget>
+              <widget class="QMdiArea" name="mdiArea"/>
              </item>
             </layout>
            </widget>
@@ -1148,7 +1147,7 @@
          <enum>QTabWidget::South</enum>
         </property>
         <property name="currentIndex">
-         <number>2</number>
+         <number>1</number>
         </property>
         <widget class="QWidget" name="tabSearch">
          <attribute name="icon">
@@ -1255,8 +1254,21 @@
           <string>Information about current picture</string>
          </attribute>
          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>1</number>
+          </property>
+          <property name="margin">
+           <number>1</number>
+          </property>
           <item>
-           <widget class="ImageInfoWidget" name="imageInfoWidget" native="true"/>
+           <widget class="ImageInfoWidget" name="imageInfoWidget" native="true">
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>60</height>
+             </size>
+            </property>
+           </widget>
           </item>
           <item>
            <spacer name="verticalSpacer">
@@ -1304,8 +1316,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>312</width>
-               <height>478</height>
+               <width>194</width>
+               <height>491</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1423,6 +1435,12 @@
            </item>
            <item>
             <widget class="QPushButton" name="stopLoadButton">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>26</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>Stop current importation</string>
              </property>
@@ -1449,7 +1467,7 @@
              <property name="maximumSize">
               <size>
                <width>250</width>
-               <height>16777215</height>
+               <height>24</height>
               </size>
              </property>
              <property name="toolTip">
@@ -1465,6 +1483,12 @@
            </item>
            <item>
             <widget class="QPushButton" name="batchButton">
+             <property name="maximumSize">
+              <size>
+               <width>16777215</width>
+               <height>26</height>
+              </size>
+             </property>
              <property name="toolTip">
               <string>Batch process selected files</string>
              </property>
@@ -1520,8 +1544,8 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>996</width>
-             <height>123</height>
+             <width>1012</width>
+             <height>118</height>
             </rect>
            </property>
            <layout class="QHBoxLayout" name="horizontalLayout_3">
@@ -1578,6 +1602,7 @@
     </property>
     <addaction name="actionView_left_column"/>
     <addaction name="actionView_right_column"/>
+    <addaction name="actionView_bottom_line"/>
    </widget>
    <widget class="QMenu" name="menuTools">
     <property name="title">
@@ -1585,6 +1610,7 @@
     </property>
     <addaction name="actionConvert_images_to_AVI"/>
     <addaction name="actionBatch_processor"/>
+    <addaction name="actionOpen_file_in_workspace"/>
    </widget>
    <widget class="QMenu" name="menuPlugins">
     <property name="title">
@@ -1711,6 +1737,32 @@
    </property>
    <property name="toolTip">
     <string>Clean (kill) all running plugins</string>
+   </property>
+  </action>
+  <action name="actionView_bottom_line">
+   <property name="checkable">
+    <bool>true</bool>
+   </property>
+   <property name="checked">
+    <bool>true</bool>
+   </property>
+   <property name="text">
+    <string>View bottom line</string>
+   </property>
+   <property name="statusTip">
+    <string>Display thumbnails line on bottom </string>
+   </property>
+  </action>
+  <action name="actionOpen_file_in_workspace">
+   <property name="icon">
+    <iconset resource="../ema.qrc">
+     <normaloff>:/icons/22x22/view-list-tree.png</normaloff>:/icons/22x22/view-list-tree.png</iconset>
+   </property>
+   <property name="text">
+    <string>Open file in workspace</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+O</string>
    </property>
   </action>
  </widget>

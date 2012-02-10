@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>444</width>
-    <height>305</height>
+    <width>323</width>
+    <height>275</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -298,6 +298,32 @@
         </property>
         <property name="checkable">
          <bool>false</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pluginsButton">
+        <property name="maximumSize">
+         <size>
+          <width>28</width>
+          <height>16777215</height>
+         </size>
+        </property>
+        <property name="toolTip">
+         <string>Show plugins window</string>
+        </property>
+        <property name="statusTip">
+         <string>Show plugins window</string>
+        </property>
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../ema.qrc">
+          <normaloff>:/icons/22x22/preferences-plugin.png</normaloff>:/icons/22x22/preferences-plugin.png</iconset>
         </property>
         <property name="flat">
          <bool>true</bool>

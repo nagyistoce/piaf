@@ -160,7 +160,7 @@ int PiafSignalHandler::removeChild(int pid) {
 		if(sigF->pid == pid) {
 			fprintf(stderr, "!! !! !! !! REMOVING CHILD %d ('%s') !! !! !! !!\n",
 				sigF->pid, sigF->pFilter->exec_name);
-			filterList.remove(sigF);
+			filterList.removeOne(sigF);
 			sigF->pFilter = NULL;
 			delete sigF;
 
@@ -363,7 +363,7 @@ int FilterSequencer::removeFilter(PiafFilter * filter)
 	if(!filter) { return -1; }
 
 	// unload child process
-	int id = mLoadedFiltersList.findIndex(filter);
+	int id = mLoadedFiltersList.indexOf(filter);
 	bool reset = false;
 
 	if(id>=0 && filter)
@@ -386,7 +386,7 @@ int FilterSequencer::removeFilter(PiafFilter * filter)
 		if(g_debug_FilterSequencer) {
 			fprintf(stderr, "%s:%d : removing from mLoadedFiltersList...\n", __func__, __LINE__);
 		}
-		mLoadedFiltersList.remove(filter);
+		mLoadedFiltersList.removeOne(filter);
 
 		if(g_debug_FilterSequencer) {
 			fprintf(stderr, "%s:%d : deleting...\n", __func__, __LINE__);
@@ -648,7 +648,7 @@ int FilterSequencer::moveUp(PiafFilter * filter)
 	// looking for filer plugin
 
 
-	int idx = mLoadedFiltersList.findIndex(filter);
+	int idx = mLoadedFiltersList.indexOf(filter);
 	if(idx < 0)
 	{
 		fprintf(stderr, "FilterSequencer::%s:%d: item not found, cannot move up !\n",
@@ -663,10 +663,10 @@ int FilterSequencer::moveUp(PiafFilter * filter)
 	}
 
 	// remove then insert at next place
-	mLoadedFiltersList.remove(filter);
+	mLoadedFiltersList.removeOne(filter);
 	mLoadedFiltersList.insert(idx-1, filter);
 
-	idEditPlugin = mLoadedFiltersList.findIndex(filter);
+	idEditPlugin = mLoadedFiltersList.indexOf(filter);
 // FIXME  : check new item index
 	fprintf(stderr, "FilterSequencer::%s:%d : new idx=%d\n", __func__, __LINE__,
 			idEditPlugin);
@@ -684,7 +684,7 @@ int FilterSequencer::moveDown(PiafFilter * filter)
 	// change order into selectedFiltersList
 	// looking for filer plugin
 
-	int idx = mLoadedFiltersList.findIndex(filter);
+	int idx = mLoadedFiltersList.indexOf(filter);
 	if(idx < 0)
 	{
 		fprintf(stderr, "FilterSequencer::%s:%d: item not found, cannot move up !\n",
@@ -706,7 +706,7 @@ int FilterSequencer::moveDown(PiafFilter * filter)
 	PIAF_MSG(SWLOG_INFO, "Insert @ index %d", idx+1);
 	mLoadedFiltersList.insert(idx+1, filter);
 
-	idEditPlugin = mLoadedFiltersList.findIndex(filter);;
+	idEditPlugin = mLoadedFiltersList.indexOf(filter);;
 	fprintf(stderr, "FilterSequencer::%s:%d : moved to %d\n",
 			__func__, __LINE__, idEditPlugin);
 	emit selectedFilterChanged();
@@ -1198,7 +1198,7 @@ void FilterSequencer::cancelEditParameters()
 
 void FilterSequencer::toggleFilterDisableFlag(PiafFilter * filter)
 {
-	idEditPlugin = mLoadedFiltersList.findIndex(filter);
+	idEditPlugin = mLoadedFiltersList.indexOf(filter);
 
 	if(idEditPlugin<0) {
 		fprintf(stderr, "Disable filter: cannot find filter.\n");
@@ -1575,7 +1575,7 @@ int FilterSequencer::processImage(swImageStruct * image)
 					PiafFilter * deadpv = (*pvit);
 					fprintf(stderr, "[Sequence]::%s:%d: removing crashed plugin '%s'\n",
 							__func__, __LINE__, deadpv->name());
-					mLoadedFiltersList.remove(deadpv);
+					mLoadedFiltersList.removeOne(deadpv);
 				}
 			}
 		}
@@ -1785,19 +1785,24 @@ int PiafFilter::destroy()
 #include <stdlib.h>
 #include <unistd.h>
 #include <signal.h>
+
+#ifdef PIAF_LEGACY
+#include "swsignalhandler.h"
 #include "SwFilters.h"
-
-PiafSignalHandler piafSigHandler;
 SwSignalHandler SigHandler;
-
 int registerChildSig(int pid, SwFilter * filter)
 {
 	//
 	fprintf(stderr, "!! !! !! !! REGISTERING PROCESS %d FOR FILTER %s !! !! !! !!\n",
-		pid, filter->exec_name);
+			pid, filter->exec_name);
 	SigHandler.registerChild(pid, filter);
 	return 0;
 }
+#endif
+
+PiafSignalHandler piafSigHandler;
+
+
 
 
 
@@ -1815,7 +1820,9 @@ int removeChildSig(int pid)
 	//
 	fprintf(stderr, "!! !! !! !! REMOVING PROCESS %d !! !! !! !!\n",
 		pid);
+#ifdef PIAF_LEGACY
 	SigHandler.removeChild(pid);
+#endif
 	piafSigHandler.removeChild(pid);
 	return 0;
 }

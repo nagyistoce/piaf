@@ -88,6 +88,8 @@ public:
 	  */
 	int indexFunction;
 
+	/** \brief Return plugin name */
+	char * name() { return exec_name; }
 
 	bool mKeepAlive; ///< if the plugin should stay loaded
 

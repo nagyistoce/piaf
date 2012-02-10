@@ -68,7 +68,7 @@ void ThumbImageFrame::setImageInfoStruct(t_image_info_struct * pinfo)
 	QString imagePath = pinfo->filepath;
 	QFileInfo fi(imagePath);
 	m_ui->nameLabel->setText(fi.baseName());
-	m_ui->extLabel->setText(fi.extension(false));
+	m_ui->extLabel->setText(fi.suffix());
 
 	QPixmap l_displayImage;// local only
 	m_imagePath = "";
@@ -184,7 +184,7 @@ void ThumbImageFrame::setImageFile(const QString & imagePath,
 
 	QFileInfo fi(imagePath);
 	m_ui->nameLabel->setText(fi.baseName());
-	m_ui->extLabel->setText(fi.extension(false));
+	m_ui->extLabel->setText(fi.suffix());
 
 	QPixmap l_displayImage;// local only
 	m_imagePath = "";
