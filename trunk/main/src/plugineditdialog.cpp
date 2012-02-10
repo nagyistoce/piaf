@@ -23,7 +23,7 @@ PluginEditDialog::PluginEditDialog(QWidget *parent) :
 	// load plugin list
 	QFile file;
 	strcat(home, "/.piaf_plugins");
-	file.setName(home);
+	file.setFileName(home);
 
 	if(file.exists()) {
 		if(file.open(QIODevice::ReadOnly)) {
@@ -31,7 +31,8 @@ PluginEditDialog::PluginEditDialog(QWidget *parent) :
 			QPixmap pixIcon;
 			while(file.readLine(str, 512) >= 0) {
 				// split
-				QStringList lst( QStringList::split( "\t", str ) );
+				QString lineStr = QString(str);
+				QStringList lst = lineStr.split( "\t" );
 				QStringList::Iterator itCmd = lst.begin();
 				QString cmd = *itCmd;
 				if(!cmd.isNull()
@@ -42,14 +43,14 @@ PluginEditDialog::PluginEditDialog(QWidget *parent) :
 
 					itCmd++;
 					QString val = *itCmd;
-					cmd = cmd.stripWhiteSpace();
+					cmd = cmd.trimmed();
 
 					if(!(cmd.isEmpty() || cmd[0] == '#' || cmd[0] == '\n'))
 					{
 						QListWidgetItem * item = new QListWidgetItem(cmd, ui->pluginListWidget);
-						val = val.stripWhiteSpace();
+						val = val.trimmed();
 						fprintf(stderr, "plugins : '%s' : '%s'\n",
-								cmd.latin1(), val.latin1());
+								cmd.toAscii().data(), val.toAscii().data());
 						if(!val.isEmpty()) {
 							if(pixIcon.load(val)) {
 								item->setIcon(pixIcon);
@@ -99,7 +100,7 @@ void PluginEditDialog::on_addButton_clicked()
 		QFileInfo fi(*it);
 		if(fi.exists() && fi.isExecutable())
 		{
-			lastPluginDir = fi.dirPath(TRUE);
+			lastPluginDir = fi.absoluteDir().absolutePath();
 
 			// check if it is not already listed
 			QList<QListWidgetItem *> found = ui->pluginListWidget->findItems(*it, Qt::MatchExactly);
@@ -157,7 +158,7 @@ void PluginEditDialog::on_saveButton_clicked()
 					fprintf(f, "%s\t\n", item->text().toAscii().data());
 				else
 					fprintf(f, "%s\t\n", item->text().toAscii().data());
-/// \todo : fixme 	fprintf(f, "%s\t%s\n", item->text(0).latin1(), item->text(1).latin1());
+/// \todo : fixme 	fprintf(f, "%s\t%s\n", item->text(0).toAscii().data(), item->text(1).toAscii().data());
 			}
 		}
 		fclose(f);
