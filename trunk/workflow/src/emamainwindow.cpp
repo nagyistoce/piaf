@@ -1661,4 +1661,5 @@ void EmaMainWindow::on_actionPreferences_activated()
 void EmaMainWindow::on_actionOpen_file_in_workspace_triggered()
 {
 	openInWorkspace(mMainFileName);
+	on_workspaceButton_clicked();
 }

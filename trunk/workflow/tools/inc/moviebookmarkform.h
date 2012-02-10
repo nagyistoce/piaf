@@ -2,10 +2,13 @@
 #define MOVIEBOOKMARKFORM_H
 
 #include <QWidget>
+
 #ifdef PIAF_LEGACY
 #include "videoplayertool.h"
-#endif
 #include "workshopmovie.h"
+#else
+#include "workflowtypes.h"
+#endif
 
 namespace Ui {
     class MovieBookmarkForm;

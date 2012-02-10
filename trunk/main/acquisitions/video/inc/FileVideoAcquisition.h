@@ -49,7 +49,12 @@
 
 #include "nolinux_videodev.h"
 #include "virtualdeviceacquisition.h"
+
+#ifdef PIAF_LEGACY
 #include "workshopmovie.h"
+#else
+#include "workflowtypes.h"
+#endif 
 
 #include "sw_types.h"
 

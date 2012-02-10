@@ -15,7 +15,8 @@ win32:DEFINES += QT_DLL
 win32:LIBS += ../../release/qwt.lib
 macx: DEFINES+= __MACOSX__
 
-
+# This is the legacy version of Piaf, with Qt3support
+DEFINES += PIAF_LEGACY
 LANGUAGE = C++
 
 unix: {
