@@ -125,6 +125,7 @@ QImage iplImageToQImage(IplImage * iplImage) {
 	case IPL_DEPTH_8U: {
 		if(!rgb24_to_bgr32 && !gray_to_bgr32) {
 			if(iplImage->nChannels != 4) {
+				//
 				for(int r=0; r<iplImage->height; r++) {
 					// NO need to swap R<->B
 					memcpy(qImage.bits() + r*orig_width*depth,
@@ -140,12 +141,12 @@ QImage iplImageToQImage(IplImage * iplImage) {
 						iplImage->imageData + r*iplImage->widthStep,
 						orig_width*depth);
 
-					for(int pos4 = 0 ; pos4<orig_width*depth; pos4+=depth,
-						buf_out+=4, buf_in+=depth
-						 ) {
-						buf_out[2] = buf_in[0];
-						buf_out[0] = buf_in[2];
-					}
+//					for(int pos4 = 0 ; pos4<orig_width*depth; pos4+=depth,
+//						buf_out+=4, buf_in+=depth
+//						 ) {
+//						buf_out[2] = buf_in[0];
+//						buf_out[0] = buf_in[2];
+//					}
 				}
 			}
 		}

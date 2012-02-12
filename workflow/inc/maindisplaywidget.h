@@ -36,6 +36,7 @@ namespace Ui {
 
 class MovieBookmarkForm;
 class FilterSequencer;
+class VideoCaptureDoc;
 
 /** @brief Main image display in middle of GUI
 
@@ -54,6 +55,9 @@ public:
 	/** @brief Set the movie file */
 	int setMovieFile(QString imagePath, t_image_info_struct * pinfo = NULL);
 
+	/** @brief Set pointer to capture document */
+	int setVideoCaptureDoc(VideoCaptureDoc * pVideoCaptureDoc);
+
 	/** @brief Get current image at full resolution */
 	QImage getImage() { return m_fullImage; }
 
@@ -64,14 +68,18 @@ public:
 
 	/** @brief Set pointer to filter sequencer */
 	void setFilterSequencer(FilterSequencer *);
+
 private:
     Ui::MainDisplayWidget *ui;
 
-	/// Video acquisition
-	FileVideoAcquisition mFileVA;
-	QTimer mPlayTimer;
-	bool mPlayGrayscale;///< if true, only decode grayscaled image (Y buffer)
-	float mPlaySpeed; ///< play speed ratio
+	/// Store source name: image or movie file, or device name
+	QString mSourceName;
+
+	/// Counter for snapshots
+	int mSnapCounter;
+	/// Counter for movies
+	int mMovieCounter;
+	void updateSnapCounter();
 
 	/// Input image
 	QImage m_fullImage;
@@ -79,10 +87,22 @@ private:
 	FilterSequencer * mpFilterSequencer;
 	t_image_info_struct * mpImageInfoStruct;
 
+	// MOVIE PLAYBACK =========================================================
+
+	/// File Video acquisition
+	FileVideoAcquisition mFileVA;
+
+	QTimer mPlayTimer;
+	bool mPlayGrayscale;///< if true, only decode grayscaled image (Y buffer)
+	float mPlaySpeed; ///< play speed ratio
+
 	// Bookmarks
 	QList<video_bookmark_t> m_listBookmarks;
 	MovieBookmarkForm * m_editBookmarksForm;
 	void appendBookmark(t_movie_pos);
+
+	// LIVE VIDEO CAPTURE ======================================================
+	VideoCaptureDoc * m_pVideoCaptureDoc;
 
 private slots:
 	void on_addBkmkButton_clicked();
@@ -104,6 +124,20 @@ private slots:
 	void on_mainImageWidget_signalZoomChanged(float zoom_scale);
 
 	void slotNewBookmarkList(QList<video_bookmark_t>);
+	void on_devicePlayButton_toggled(bool checked);
+
+	void on_limitFpsCheckBox_toggled(bool checked);
+
+	void on_limitFpsSpinBox_valueChanged(int arg1);
+
+	void on_deviceSettingsButton_clicked();
+
+	// Slots flot actions on image
+	void on_mainImageWidget_signalPluginsButtonClicked();
+	void on_mainImageWidget_signalRecordButtonToggled(bool);
+	void on_mainImageWidget_signalSnapButtonClicked();
+	void on_mainImageWidget_signalSnapshot(QImage);
+
 signals:
 	/** @brief Signal that the image has changed (when play/pause) to update navigation image widget
 	*/

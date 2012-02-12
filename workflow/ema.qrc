@@ -214,5 +214,7 @@
         <file>icons/22x22/IconColorThermicBlueToRed.png</file>
         <file>icons/22x22/IconColorNormal.png</file>
         <file>icons/22x22/camera-axis.png</file>
+        <file>icons/22x22/kinect.png</file>
+        <file>icons/22x22/openni.png</file>
     </qresource>
 </RCC>

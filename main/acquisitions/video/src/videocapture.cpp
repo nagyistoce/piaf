@@ -456,6 +456,11 @@ int VideoCaptureDoc::loadImage()
 
 	return 1;
 }
+/// \todo FIXME not thread-safe
+IplImage * VideoCaptureDoc::readImage()
+{
+	return imageRGBA;
+}
 
 unsigned char * VideoCaptureDoc::getCurrentImageRGB()
 {

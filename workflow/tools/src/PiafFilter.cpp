@@ -1437,7 +1437,7 @@ int FilterSequencer::processImage(swImageStruct * image)
 	}
 
 	if(mLoadedFiltersList.isEmpty()) {
-		fprintf(stderr, "[FilterSequencer]::%s:%d : filter list is empty\n", __func__, __LINE__);
+//		fprintf(stderr, "[FilterSequencer]::%s:%d : filter list is empty\n", __func__, __LINE__);
 		return -1;
 	}
 

@@ -379,7 +379,7 @@ CvSize FreenectVideoAcquisition::getImageSize()
 /* Stop acquisition */
 int FreenectVideoAcquisition::stopAcquisition()
 {
-	g_freenectDevices.remove(this);
+	g_freenectDevices.removeOne(this);
 
 	m_run = false;
 	while(m_isRunning)
