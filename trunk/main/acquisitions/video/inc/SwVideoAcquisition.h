@@ -27,6 +27,7 @@
 
 #include "nolinux_videodev.h"
 #include "virtualdeviceacquisition.h"
+
 // TODO : port this class with virtual device inheritance
 
 

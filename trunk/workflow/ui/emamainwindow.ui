@@ -81,8 +81,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>148</width>
-              <height>510</height>
+              <width>214</width>
+              <height>516</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -101,7 +101,7 @@
                 <string>Folders explorer</string>
                </property>
                <property name="currentIndex">
-                <number>0</number>
+                <number>2</number>
                </property>
                <widget class="QWidget" name="inputsTabWidgetPage1">
                 <attribute name="icon">
@@ -378,7 +378,7 @@
                      <number>0</number>
                     </property>
                     <item>
-                     <widget class="QPushButton" name="pushButton">
+                     <widget class="QPushButton" name="deviceRefreshButton">
                       <property name="toolTip">
                        <string>Refresh list of scannable devices</string>
                       </property>
@@ -477,36 +477,6 @@
                      <string>Status</string>
                     </property>
                    </column>
-                   <item>
-                    <property name="text">
-                     <string>V4L2</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../ema.qrc">
-                      <normaloff>:/icons/16x16/camera-web.png</normaloff>:/icons/16x16/camera-web.png</iconset>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>OpenCV</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../../main/piaf.qrc">
-                      <normaloff>:/images/16x16/digikam.png</normaloff>:/images/16x16/digikam.png</iconset>
-                    </property>
-                   </item>
-                   <item>
-                    <property name="text">
-                     <string>Axis</string>
-                    </property>
-                    <property name="icon">
-                     <iconset resource="../ema.qrc">
-                      <normaloff>:/icons/22x22/camera-axis.png</normaloff>:/icons/22x22/camera-axis.png</iconset>
-                    </property>
-                    <property name="text">
-                     <string>unsupported</string>
-                    </property>
-                   </item>
                   </widget>
                  </item>
                 </layout>
@@ -726,8 +696,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>96</width>
-                  <height>26</height>
+                  <width>98</width>
+                  <height>28</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1316,8 +1286,8 @@
               <rect>
                <x>0</x>
                <y>0</y>
-               <width>100</width>
-               <height>30</height>
+               <width>194</width>
+               <height>507</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1544,7 +1514,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1010</width>
+             <width>1012</width>
              <height>118</height>
             </rect>
            </property>
@@ -1580,7 +1550,7 @@
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>27</height>
+     <height>23</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">

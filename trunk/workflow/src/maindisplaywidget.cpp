@@ -30,7 +30,19 @@
 #include <QFileInfo>
 
 #include "moviebookmarkform.h"
+#include "videocapture.h"
+#include "vidacqsettingswindow.h"
 
+
+int g_MDW_debug_mode = EMALOG_INFO;
+
+#define MDW_printf(a,...)  { \
+				if(g_MDW_debug_mode>=(a)) { \
+					fprintf(stderr,"MainDisplayWidget::%s:%d : ",__func__,__LINE__); \
+					fprintf(stderr,__VA_ARGS__); \
+					fprintf(stderr,"\n"); \
+				} \
+			}
 MainDisplayWidget::MainDisplayWidget(QWidget *parent) :
     QWidget(parent),
     ui(new Ui::MainDisplayWidget)
@@ -42,6 +54,9 @@ MainDisplayWidget::MainDisplayWidget(QWidget *parent) :
 	mPlaySpeed = 1.f;
 	m_editBookmarksForm = NULL;
 
+	ui->stackedWidget->hide();
+	m_pVideoCaptureDoc = NULL;
+
 	connect(&mPlayTimer, SIGNAL(timeout()), this, SLOT(on_mPlayTimer_timeout()));
 }
 
@@ -49,6 +64,7 @@ MainDisplayWidget::~MainDisplayWidget()
 {
     delete ui;
 	mpFilterSequencer = NULL;
+	m_pVideoCaptureDoc = NULL;
 }
 
 void MainDisplayWidget::setFilterSequencer(FilterSequencer * pFS)
@@ -67,9 +83,12 @@ int MainDisplayWidget::setImageFile(QString imagePath,
 {
 	QFileInfo fi(imagePath);
 	setWindowTitle(fi.baseName());
+	mSourceName = fi.baseName();
 
 	m_listBookmarks.clear();
 	mpImageInfoStruct = pinfo;
+	m_pVideoCaptureDoc = NULL;
+	mPlayTimer.stop();
 
 	int ret = 0;
 	// print allocated images
@@ -108,6 +127,9 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 	mpImageInfoStruct = pinfo;
 	QFileInfo fi(moviePath);
 	setWindowTitle(fi.baseName());
+	mSourceName = fi.baseName();
+
+	m_pVideoCaptureDoc = NULL;
 
 	m_listBookmarks.clear();
 	mFileVA.stopAcquisition();
@@ -147,8 +169,8 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 
 	ui->timeLineWidget->setFilePosition(0);
 	ui->mainImageWidget->setImage(m_fullImage, pinfo);
-	ui->stackedWidget->show();
 	ui->stackedWidget->setCurrentIndex(0);
+	ui->stackedWidget->show();
 
 	if(mFileVA.getFrameRate()>0) {
 		mPlayTimer.setInterval((int)(1000.f /(mPlaySpeed * (float)mFileVA.getFrameRate())));
@@ -156,6 +178,7 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 
 	return ret;
 }
+
 void MainDisplayWidget::appendBookmark(t_movie_pos pos)
 {
 	video_bookmark_t bmk;
@@ -272,10 +295,31 @@ void MainDisplayWidget::on_goNextButton_clicked()
 
 void MainDisplayWidget::on_mPlayTimer_timeout()
 {
-	bool got_picture = mFileVA.GetNextFrame();
+	bool got_picture = false;
+	if(m_pVideoCaptureDoc) // LIVE CAPTURE MODE
+	{
+		got_picture = (m_pVideoCaptureDoc->waitForImage() >= 0);
+		if(got_picture)
+		{
+			IplImage * captureImage = m_pVideoCaptureDoc->readImage();
+//			fprintf(stderr, "MainDisplayW::%s:%d: saving /dev/shm/capture.jpg : %dx%dx%d\n",
+//					__func__, __LINE__,
+//					captureImage->width, captureImage->height, captureImage->nChannels
+//					);
+			m_fullImage = iplImageToQImage( captureImage );
+			ui->mainImageWidget->setImage( m_fullImage, NULL);
+		}
+
+	} else { // WE ARE IN MOVIE MODE
+		got_picture = mFileVA.GetNextFrame();
+		if(got_picture)
+		{
+			updateDisplay();
+		}
+	}
+
 	if(got_picture)
 	{
-		updateDisplay();
 	}
 	else if(mPlayTimer.isActive())
 	{
@@ -396,5 +440,127 @@ void MainDisplayWidget::on_addBkmkButton_clicked()
 		saveImageInfoStruct(mpImageInfoStruct);
 		ui->timeLineWidget->setFileInfo(*mpImageInfoStruct);
 	}
+}
+
+/******************************************************************************
+
+								VIDEO CAPTURE
+
+*******************************************************************************/
+void MainDisplayWidget::updateSnapCounter()
+{
+	mSnapCounter = mMovieCounter = 0;
+	// Check name
+	QString fileext;
+	QFileInfo fi;
+	do {
+		fileext.sprintf("-%03d.png", mSnapCounter);
+		QString outname = mSourceName + fileext;
+		fi.setFile(outname);
+		if(fi.exists()) { mSnapCounter++; }
+	} while(fi.exists());
+	do {
+		fileext.sprintf("-%03d.avi", mMovieCounter);
+		QString outname = mSourceName + fileext;
+		fi.setFile(outname);
+		if(fi.exists()) { mMovieCounter++; }
+	} while(fi.exists());
+}
+
+/* Set pointer to capture document */
+int MainDisplayWidget::setVideoCaptureDoc(VideoCaptureDoc * pVideoCaptureDoc)
+{
+
+	ui->stackedWidget->setCurrentIndex(1);
+
+	m_pVideoCaptureDoc = pVideoCaptureDoc;
+	if(!m_pVideoCaptureDoc)
+	{
+		ui->stackedWidget->hide();
+		mPlayTimer.stop();
+		return 0;
+	}
+
+	mSourceName = QString( m_pVideoCaptureDoc->getVideoProperties().devicename );
+
+	double fps = m_pVideoCaptureDoc->getVideoProperties().fps;
+	if(fps <= 0)
+	{
+		fps = 12.5;
+		MDW_printf(EMALOG_WARNING, "fps = %g -> force %g",
+				   m_pVideoCaptureDoc->getVideoProperties().fps, fps);
+	}
+
+	mPlayTimer.setInterval((int)(1000. / fps));
+
+	ui->devicePlayButton->setChecked(true);
+	mPlayTimer.start();
+
+	ui->stackedWidget->show();
+
+	return 0;
+}
+
+void MainDisplayWidget::on_devicePlayButton_toggled(bool checked)
+{
+	if(checked) {
+		mPlayTimer.start();
+	} else {
+		mPlayTimer.stop();
+	}
+}
+
+void MainDisplayWidget::on_limitFpsCheckBox_toggled(bool checked)
+{
+	ui->limitFpsSpinBox->setEnabled(checked);
+
+}
+
+void MainDisplayWidget::on_limitFpsSpinBox_valueChanged(int limitFps)
+{
+}
+
+void MainDisplayWidget::on_deviceSettingsButton_clicked()
+{
+	if(!m_pVideoCaptureDoc) { return; }
+
+	VidAcqSettingsWindow * settingsWidget = new VidAcqSettingsWindow(NULL);
+	settingsWidget->setVideoCaptureDoc(m_pVideoCaptureDoc);
+	settingsWidget->setAttribute(Qt::WA_DeleteOnClose);
+	settingsWidget->show();
+}
+
+
+/*******************************************************************************
+
+								RECORDING ACTIONS
+
+  ******************************************************************************/
+
+
+// Slots flot actions on image
+void MainDisplayWidget::on_mainImageWidget_signalPluginsButtonClicked()
+{
+	MDW_printf(EMALOG_INFO, "Ask for plugins");
+}
+
+void MainDisplayWidget::on_mainImageWidget_signalRecordButtonToggled(bool on)
+{
+	MDW_printf(EMALOG_INFO, "Ask for record : %c", on?'T':'F');
+}
+
+void MainDisplayWidget::on_mainImageWidget_signalSnapButtonClicked()
+{
+	MDW_printf(EMALOG_INFO, "Snapshot!");
+}
+
+
+void MainDisplayWidget::on_mainImageWidget_signalSnapshot(QImage snap)
+{
+	MDW_printf(EMALOG_INFO, "Snapshot %dx%dx%d !",
+			   snap.width(), snap.height(), snap.depth());
+	QString number;
+	number.sprintf("-%03d.png", mSnapCounter);
+	snap.save(mSourceName + number);
 }
 

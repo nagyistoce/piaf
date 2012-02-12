@@ -472,5 +472,17 @@ void MainImageWidget::showPluginsButton(bool on)
 
 void MainImageWidget::on_pluginsButton_clicked()
 {
+	emit signalPluginsButtonClicked();
+}
 
+void MainImageWidget::on_recordButton_toggled(bool checked)
+{
+	emit signalRecordButtonToggled(checked);
+}
+
+void MainImageWidget::on_snapButton_clicked()
+{
+	emit signalSnapButtonClicked();
+
+	emit signalSnapshot(m_fullImage);
 }

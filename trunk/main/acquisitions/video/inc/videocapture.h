@@ -123,8 +123,6 @@ private:
     /** the list of the views currently connected to the document */
     QList<WorkshopVideoCaptureView> *pViewList;
 
-
-
     // --- DETECTION MASK SECTION ----
 public:
     /// add a new mask into detection masks list
@@ -173,6 +171,8 @@ public:
     // change channel
     int setChannel(int ch);
 
+	/** @brief Get current image */
+	IplImage * readImage();
 
 private:
 	/// Generic acquisition module
@@ -199,9 +199,7 @@ private:
 
 signals:
 	void documentChanged();
-
 	void documentClosed(VideoCaptureDoc *);
-
 };
 
 #endif

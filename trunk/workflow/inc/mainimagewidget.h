@@ -101,6 +101,10 @@ private slots:
 
 	void on_pluginsButton_clicked();
 
+	void on_recordButton_toggled(bool checked);
+
+	void on_snapButton_clicked();
+
 private:
 	Ui::MainImageWidget *m_ui;
 
@@ -119,7 +123,10 @@ signals:
 	/** @brief The greyscale mode has been toggled */
 	void signalGreyscaleToggled(bool);
 
-
+	void signalPluginsButtonClicked();
+	void signalRecordButtonToggled(bool);
+	void signalSnapButtonClicked();
+	void signalSnapshot(QImage);
 };
 
 #endif // MAINIMAGEWIDGET_H

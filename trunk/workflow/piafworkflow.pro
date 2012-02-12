@@ -96,7 +96,8 @@ HEADERS += tools/inc/PiafFilter.h \
     inc/pluginsettingswidget.h \
 	tools/inc/collectioneditdialog.h \
     inc/workflowtypes.h \
-    tools/inc/preferencesdialog.h
+    tools/inc/preferencesdialog.h \
+    inc/piafworkflow-settings.h
 
 FORMS += ui/navimagewidget.ui \
     ui/thumbimagewidget.ui \
@@ -315,6 +316,15 @@ exists(/usr/local/include/libfreenect/libfreenect.h) {
 	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/freenectvideoacquisition.cpp
 }
 
+exists(/usr/include/ni) {
+	message("The system knows OpenNI ;)")
+	DEFINES += HAS_OPENNI
+	INCLUDEPATH += /usr/include/ni
+	LIBS += -lOpenNI
+	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h
+	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp
+}
+
 # Obsolete because of OpenCVEncoder
 # tools/inc/FFMpegEncoder.h \
 #    tools/inc/SwMpegEncoder.h \
@@ -451,6 +461,7 @@ message( "FINAL CONFIGURATION ==================================================
 message( "")
 message( "")
 OTHER_FILES += doc/OpenCVToolsForPhoto.txt
+
 
 
 

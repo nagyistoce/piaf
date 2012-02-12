@@ -42,6 +42,7 @@
 #include "preferencesdialog.h"
 
 #include "virtualdeviceacquisition.h"
+#include "videocapture.h"
 
 
 class EmaMainWindow;
@@ -128,14 +129,14 @@ class CaptureTreeWidgetItem : QTreeWidgetItem
 	friend class EmaMainWindow;
 public:
 	/// Constructor for main classes: IP, V4L2 ...
-	CaptureTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, QString devname, VirtualDeviceAcquisition * pVAcq);
+	CaptureTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, QString devname, VideoCaptureDoc * pVCapDoc);
 	/// Constructor for devices classes
 	CaptureTreeWidgetItem(QTreeWidget * treeWidgetParent, QString category);
 	~CaptureTreeWidgetItem();
 
-	VirtualDeviceAcquisition * getVideoAcquisition() { return m_pVAcq; }
+	VideoCaptureDoc * getVideoCaptureDoc() { return m_pVideoCaptureDoc; }
 
-	bool isCategory() { return (m_pVAcq == NULL); }
+	bool isCategory() { return (m_pVideoCaptureDoc == NULL); }
 
 protected:
 	void init(); ///< init internal data and get device properties
@@ -143,7 +144,7 @@ protected:
 	QString mName;
 
 	///< Pointer on video acquisition device
-	VirtualDeviceAcquisition * m_pVAcq;
+	VideoCaptureDoc * m_pVideoCaptureDoc;
 
 private:
 
@@ -183,7 +184,6 @@ private:
 	QSettings mSettings;	///< Qt Settings object for piaf workflow
 
 
-	t_workflow_settings m_workflow_settings;
 
 	/// List of input directories
 	QList<DirectoryTreeWidgetItem *> mDirectoryList;
@@ -290,6 +290,10 @@ private slots:
 	void on_actionView_bottom_line_toggled(bool arg1);
 	void on_actionPreferences_activated();
 	void on_actionOpen_file_in_workspace_triggered();
+
+	/// Refresh list of available acquisition devices
+	void on_deviceRefreshButton_clicked();
+	void on_deviceTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
 };
 
 #endif // EmaMAINWINDOW_H
