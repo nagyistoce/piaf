@@ -132,7 +132,7 @@
           <string>Max index of search for V4L2 devices</string>
          </property>
          <property name="value">
-          <number>20</number>
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -149,7 +149,7 @@
           <string>Max index of search for OpenCV devices</string>
          </property>
          <property name="value">
-          <number>5</number>
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -166,7 +166,7 @@
           <string>Max index of search for OpenNI devices</string>
          </property>
          <property name="value">
-          <number>5</number>
+          <number>0</number>
          </property>
         </widget>
        </item>
@@ -183,7 +183,7 @@
           <string>Max index of search for Freenect devices</string>
          </property>
          <property name="value">
-          <number>5</number>
+          <number>0</number>
          </property>
         </widget>
        </item>

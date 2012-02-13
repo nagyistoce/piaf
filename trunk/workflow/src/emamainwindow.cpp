@@ -287,7 +287,11 @@ void EmaMainWindow::loadSettings()
 
 
 	//================ DEFAULT SETTINGS ================
-	m_workflow_settings.maxV4L2 = 20;// because fast
+	m_workflow_settings.defaultImageDir = QString(home) + "/" + tr("Images");
+	m_workflow_settings.defaultMovieDir = QString(home) + "/" + tr("Movies");
+	m_workflow_settings.defaultMeasureDir = QString(home) + "/" + tr("Measures");
+
+	m_workflow_settings.maxV4L2 = 5;// because fast
 	m_workflow_settings.maxOpenCV = 5;// because slow: need to open devices
 	m_workflow_settings.maxOpenNI = 5;// because slow: need to open devices
 	m_workflow_settings.maxFreenect = 5;// because slow: need to open devices
@@ -333,20 +337,17 @@ void EmaMainWindow::loadSettings()
 		if(!e.isNull()) {
 			PIAF_MSG(SWLOG_INFO, "\tCategory '%s'", e.tagName().toAscii().data()); // the node really is an element.
 
-			if(e.tagName().compare("Directories")==0) // Read default directories
+			if(e.tagName().compare("General")==0) // Read default directories
 			{
-				QDomNode folderNode = e.firstChild();
-				while(!folderNode.isNull()) {
-					QDomElement folderElem = folderNode.toElement(); // try to convert the node to an element.
-					if(!folderElem.isNull()) {
-						// Read parameters
-						m_workflow_settings.defaultImageDir = folderElem.attribute("ImageDir");
-						m_workflow_settings.defaultMovieDir = folderElem.attribute("MovieDir");
-						m_workflow_settings.defaultMeasureDir = folderElem.attribute("MeasureDir");
-					}
+				m_workflow_settings.defaultImageDir = e.attribute("ImageDir", m_workflow_settings.defaultImageDir);
+				m_workflow_settings.defaultMovieDir = e.attribute("MovieDir", m_workflow_settings.defaultMovieDir);
+				m_workflow_settings.defaultMeasureDir = e.attribute("MeasureDir", m_workflow_settings.defaultMeasureDir);
 
-					folderNode = folderNode.nextSibling();
-				}
+				m_workflow_settings.maxV4L2 = e.attribute("maxV4L2", "5").toInt();
+				m_workflow_settings.maxOpenCV = e.attribute("maxOpenCV", "5").toInt();
+				m_workflow_settings.maxOpenNI = e.attribute("maxOpenNI", "5").toInt();
+				m_workflow_settings.maxFreenect = e.attribute("maxFreenect", "5").toInt();
+
 			}
 
 			if(e.tagName().compare("Folders")==0) // Read folders
@@ -366,6 +367,7 @@ void EmaMainWindow::loadSettings()
 					folderNode = folderNode.nextSibling();
 				}
 			}
+
 			if(e.tagName().compare("Collections")==0) // Read folders
 			{
 				// Clear previous list
@@ -483,10 +485,17 @@ void EmaMainWindow::saveSettings()
 	QDomElement elemGUI = mSettingsDoc.createElement("GUISettings");
 
 	// Append default directories
-	QDomElement elemDirectories = mSettingsDoc.createElement("Directories");
+	QDomElement elemDirectories = mSettingsDoc.createElement("General");
+
 	elemDirectories.setAttribute("ImageDir", m_workflow_settings.defaultImageDir);
 	elemDirectories.setAttribute("MovieDir", m_workflow_settings.defaultMovieDir);
 	elemDirectories.setAttribute("MeasureDir", m_workflow_settings.defaultMeasureDir);
+
+	elemDirectories.setAttribute("maxV4L2", m_workflow_settings.maxV4L2);
+	elemDirectories.setAttribute("maxOpenCV", m_workflow_settings.maxOpenCV);
+	elemDirectories.setAttribute("maxOpenNI", m_workflow_settings.maxOpenNI);
+	elemDirectories.setAttribute("maxFreenect", m_workflow_settings.maxFreenect);
+
 	elemGUI.appendChild(elemDirectories);
 
 
