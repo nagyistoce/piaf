@@ -127,6 +127,8 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	//ui->collecShowCheckBox->setChecked(false);
 	pWorkspace = ui->mdiArea;
 
+	// Parent items for devices tree widget items
+	mV4l2Item = mOpenNIItem = mFreenectItem = mOpenCVItem = NULL;
 
 	g_splash->showMessage(QObject::tr("Restore settings ..."), Qt::AlignBottom | Qt::AlignHCenter);
 	loadSettings();
@@ -282,6 +284,13 @@ void EmaMainWindow::loadSettings()
 	if(getenv("HOME")) {
 		strcpy(home, getenv("HOME"));
 	}
+
+
+	//================ DEFAULT SETTINGS ================
+	m_workflow_settings.maxV4L2 = 20;// because fast
+	m_workflow_settings.maxOpenCV = 5;// because slow: need to open devices
+	m_workflow_settings.maxOpenNI = 5;// because slow: need to open devices
+	m_workflow_settings.maxFreenect = 5;// because slow: need to open devices
 
 	// Concatenate configuration directories
 	QFile file( QString(home) + "/" + PIAFWKFL_SETTINGS_XML );
@@ -1705,16 +1714,14 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 	bool found = false;
 	int dev=0, failed =0;
 
-	int dev_idx_tab[10];
-	for(dev=0; dev<10; dev++) { dev_idx_tab[dev] = -1; }
-	int dev_idx_max = 5;
-
-
 	// Find available items
 	// ================================== V4L(2) ===============================
 #ifdef _LINUX // for Linux, use the V4L /sys or /proc virtual file system
-	CaptureTreeWidgetItem * v4l2Item = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("V4L2"));
-	v4l2Item->setIcon(0, QIcon(":/icons/16x16/camera-web.png"));
+	if(!mV4l2Item)
+	{
+		mV4l2Item = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("V4L2"));
+		mV4l2Item->setIcon(0, QIcon(":/icons/16x16/camera-web.png"));
+	}
 
 	fprintf(stderr, "[Workshop]::%s:%d : scanning V4L2 devices in /sys/class/video4linux/ ...\n", __func__, __LINE__);
 	int dev_idx = 0;
@@ -1755,23 +1762,22 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 			sprintf(name, "Device # %d", dev_idx);
 			sprintf(txt, "%d - %s", dev_idx, ptname);
 		}
-#endif // Linux
 
 		fprintf(stderr, "[Workshop]::%s:%d : scanning V4L2 devices...\n", __func__, __LINE__);
 		V4L2Device * myVAcq = new V4L2Device(dev_idx);
 
 		if(!myVAcq->isDeviceReady())
 		{
-			fprintf(stderr, "Workshop::%s:%d : OpenCV acquisition dev '%s' not ready\n",
+			fprintf(stderr, "Workshop::%s:%d : V4L2 acquisition dev '%s' not ready\n",
 					__func__, __LINE__, txt);
 			failed++;
-			statusBar()->showMessage(tr("(VideoAcquisition) : Video device init failed"));
+			statusBar()->showMessage(tr("V4L2 : Video device init failed for ")+ QString(txt));
 		}
 		else {
 //			QTreeWidgetItem * subv4l2Item = new QTreeWidgetItem(v4l2Item);
 //			subv4l2Item->setText(0, txt);
 
-			statusBar()->showMessage(tr("(VideoAcquisition) : Video device Init OK"));
+			statusBar()->showMessage(tr("V4L2 : Video device Init OK for ")+ QString(txt));
 
 			found = true;
 
@@ -1783,8 +1789,87 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 				fprintf(stderr, "Workshop::%s:%d : could not start acquisition on dev '%s'.\n",
 						__func__, __LINE__, txt);
 
-				statusBar()->showMessage(tr("Error: canot initialize acquisition !"));
-				return;
+				statusBar()->showMessage(tr("Error: canot initialize acquisition for ")+ QString(txt));
+				delete myVAcq;
+			}
+			else
+			{
+				fprintf(stderr, "Workshop::%s:%d : acquisition started on dev '%s' ...\n",
+						__func__, __LINE__, txt);
+
+				if(myVAcq->isAcquisitionRunning())
+				{
+					myVAcq->stopAcquisition();
+
+					fprintf(stderr, "Workshop::%s:%d : acquisition running on dev '%s' ...\n",
+							__func__, __LINE__, txt);
+
+					statusBar()->showMessage(tr("Initialization OK for ")+ QString(txt));
+
+					// Check if it's already created
+					if( ui->deviceTreeWidget->findItems(QString(txt), Qt::MatchExactly).isEmpty() )
+					{
+						VideoCaptureDoc * pVCD = new VideoCaptureDoc(myVAcq);
+
+						CaptureTreeWidgetItem * item = new CaptureTreeWidgetItem(mV4l2Item, txt, pVCD);
+						item->setIcon(0, QIcon(":/icons/16x16/camera-web.png"));
+					}
+				}
+				else {
+					statusBar()->showMessage(tr("Initialization FAILURE for ")+ QString(txt));
+					delete myVAcq;
+				}
+			}
+		}
+
+		dev_idx++;
+
+	} while( dev_idx<m_workflow_settings.maxV4L2 );
+
+	mV4l2Item->setExpanded(true);
+
+#endif // Linux
+
+
+	// ================================== OPENCV ===============================
+	if(!mOpenCVItem)
+	{
+		mOpenCVItem = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("OpenCV"));
+		mOpenCVItem->setIcon(0, QIcon(":/icons/22x22/opencv.png"));
+	}
+
+	fprintf(stderr, "[Workshop]::%s:%d : scanning OpenCV devices ...\n", __func__, __LINE__);
+	statusBar()->showMessage(tr("Scanning OpenCV devices ... please wait"));
+	int opencv_idx = 0;
+	do {
+		found = false;
+
+		fprintf(stderr, "[Workshop]::%s:%d : scanning OpenCV device [%d]...\n", __func__, __LINE__, opencv_idx);
+		OpenCVVideoAcquisition * myVAcq = new OpenCVVideoAcquisition(opencv_idx);
+		sprintf(txt, "OpenCV [%d]", opencv_idx);
+
+		if(!myVAcq->isDeviceReady())
+		{
+			fprintf(stderr, "Workshop::%s:%d : OpenCV acquisition dev '%s' not ready\n",
+					__func__, __LINE__, txt);
+			failed++;
+			statusBar()->showMessage(tr("OpenCV: Video device init failed on ") + QString(txt));
+		}
+		else {
+			statusBar()->showMessage(tr("OpenCV: Video device Init OK on ") + QString(txt));
+
+			found = true;
+
+			fprintf(stderr, "Workshop::%s:%d : starting acquisition on dev '%s' ...\n",
+					__func__, __LINE__, txt);
+			// acquisition init
+			if(myVAcq->startAcquisition()<0)
+			{
+				fprintf(stderr, "Workshop::%s:%d : could not start acquisition on dev '%s'.\n",
+						__func__, __LINE__, txt);
+
+				statusBar()->showMessage(tr("Error: canot initialize acquisition on ") + QString(txt));
+				delete myVAcq;
 			}
 			else
 			{
@@ -1794,33 +1879,31 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 				{
 					fprintf(stderr, "Workshop::%s:%d : acquisition running on dev '%s' ...\n",
 							__func__, __LINE__, txt);
-					statusBar()->showMessage(tr("Initialization OK"));
+					statusBar()->showMessage(tr("Initialization on ") + QString(txt));
+					myVAcq->stopAcquisition();
+					// Check if it's already created
+					if( ui->deviceTreeWidget->findItems(QString(txt), Qt::MatchExactly).isEmpty() )
+					{
+						VideoCaptureDoc * pVCD = new VideoCaptureDoc(myVAcq);
 
-					VideoCaptureDoc * pVCD = new VideoCaptureDoc(myVAcq);
-					CaptureTreeWidgetItem * item = new CaptureTreeWidgetItem(v4l2Item, txt, pVCD);
-					item->setIcon(0, QIcon(":/icons/16x16/camera-web.png"));
+						CaptureTreeWidgetItem * item = new CaptureTreeWidgetItem(mOpenCVItem, txt, pVCD);
+						item->setIcon(0, QIcon(":/icons/22x22/opencv.png"));
+					}
 
 		//FIXME			pObjectsExplorer->addVideoAcquisition(pVCD, txt);
 				}
 				else {
 					statusBar()->showMessage(tr("Initialization FAILURE !"));
+					delete myVAcq;
 				}
 			}
 		}
 
-		dev_idx++;
+		opencv_idx++;
 
-	} while( (found || dev_idx<dev_idx_max) );
+	} while(opencv_idx < m_workflow_settings.maxOpenCV);
 
-	v4l2Item->setExpanded(true);
-
-	// ================================== OPENCV ===============================
-
-
-
-
-
-
+	mOpenCVItem->setExpanded(true);
 
 
 
@@ -1829,8 +1912,11 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 	// check if there are Kinects connected
 #ifdef HAS_FREENECT
 	fprintf(stderr, "[Workshop]::%s:%d : scanning Freenect devices...\n", __func__, __LINE__);
-	CaptureTreeWidgetItem * freenectItem = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("Freenect"));
-	freenectItem->setIcon(0, QIcon(":/icons/22x22/kinect.png"));
+	if(!mFreenectItem)
+	{
+		mFreenectItem = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("Freenect"));
+		mFreenectItem->setIcon(0, QIcon(":/icons/22x22/kinect.png"));
+	}
 
 	int freenect_idx = 0;
 	bool freenect_found;
@@ -1862,10 +1948,13 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 				if(freenectDevice->isAcquisitionRunning())
 				{
 					statusBar()->showMessage(tr("Initialization OK"));
+					if(ui->deviceTreeWidget->findItems(QString(txt), Qt::MatchExactly).isEmpty())
+					{
 
-					VideoCaptureDoc * pVCD = new VideoCaptureDoc(freenectDevice);
-					CaptureTreeWidgetItem * item = new CaptureTreeWidgetItem(freenectItem, txt, pVCD);
-					item->setIcon(0, QIcon(":/icons/22x22/kinect.png"));
+						VideoCaptureDoc * pVCD = new VideoCaptureDoc(freenectDevice);
+						CaptureTreeWidgetItem * item = new CaptureTreeWidgetItem(mFreenectItem, txt, pVCD);
+						item->setIcon(0, QIcon(":/icons/22x22/kinect.png"));
+					}
 
 					// add into explorer
 		//FIXME			pObjectsExplorer->addVideoAcquisition(pVCD, txt);
@@ -1878,14 +1967,19 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 		} else {
 			delete freenectDevice;
 		}
-	} while(freenect_found);
+	} while(freenect_found && freenect_idx<m_workflow_settings.maxFreenect);
+	mFreenectItem->setExpanded(true);
 
 #endif // HAS_FREENECT
 
+
 	// check if there are OpenNI supported devices are connected
 #ifdef HAS_OPENNI
-	CaptureTreeWidgetItem * openniItem = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("OpenNI"));
-	openniItem->setIcon(0, QIcon(":/icons/22x22/openni.png"));
+	if(!mOpenNIItem)
+	{
+		mOpenNIItem = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("OpenNI"));
+		mOpenNIItem->setIcon(0, QIcon(":/icons/22x22/openni.png"));
+	}
 
 	fprintf(stderr, "[Workshop]::%s:%d : scanning OpenNI devices...\n", __func__, __LINE__);
 	int openni_idx = 0;
@@ -1918,12 +2012,13 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 				if(openniDevice->isAcquisitionRunning())
 				{
 					statusBar()->showMessage(tr("Initialization OK"));
-					VideoCaptureDoc * pVCD = new VideoCaptureDoc(openniDevice);
-					CaptureTreeWidgetItem * item = new CaptureTreeWidgetItem(openniItem, txt, pVCD);
-					item->setIcon(0, QIcon(":/icons/22x22/openni.png"));
-
 					// add into explorer
-			//FIXME		pObjectsExplorer->addVideoAcquisition(pVCD, txt);
+					if(ui->deviceTreeWidget->findItems(QString(txt), Qt::MatchExactly).isEmpty())
+					{
+						VideoCaptureDoc * pVCD = new VideoCaptureDoc(openniDevice);
+						CaptureTreeWidgetItem * item = new CaptureTreeWidgetItem(mOpenNIItem, txt, pVCD);
+						item->setIcon(0, QIcon(":/icons/22x22/openni.png"));
+					}
 				}
 				else {
 					statusBar()->showMessage(tr("Initialization FAILURE !"));
@@ -1932,11 +2027,12 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 		} else {
 			delete openniDevice;
+			openniDevice = NULL;
 		}
 	} while(openni_found
-			&& openni_idx<1 /// \bug FIXME
+			&& openni_idx<m_workflow_settings.maxOpenNI
 			);
-
+	mOpenNIItem->setExpanded(true);
 #endif // HAS_OPENNI
 
 	// FIXME : add opencv devices

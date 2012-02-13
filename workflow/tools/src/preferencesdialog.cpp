@@ -19,6 +19,7 @@
 #include "ui_preferencesdialog.h"
 
 #include "piaf-settings.h"
+#include "piafworkflow-settings.h"
 #include <QFileDialog>
 
 PreferencesDialog::PreferencesDialog(QWidget *parent) :
@@ -26,7 +27,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
     ui(new Ui::PreferencesDialog)
 {
     ui->setupUi(this);
-	mp_workflow_settings = NULL;
+	setSettings( &m_workflow_settings );
 }
 
 void PreferencesDialog::setSettings(t_workflow_settings * pworkflow_settings)

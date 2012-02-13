@@ -33,6 +33,11 @@
 
 extern bool g_debug_FilterSequencer;
 
+bool g_debug_PluginEditorForm = false;
+
+/******************************************************************************
+					AVAILABLE PLUGINS TREE
+  ******************************************************************************/
 AvailablePluginTreeWidgetItem::AvailablePluginTreeWidgetItem(
 		QTreeWidgetItem * parent,
 		PiafFilter * pFilter, int idx_function)
@@ -57,6 +62,34 @@ AvailablePluginTreeWidgetItem::~AvailablePluginTreeWidgetItem()
 {
 //	DEBUG_MSG("Deleting AvailablePluginTreeWidgetItem");
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/******************************************************************************
+					PLUGIN LIST EDIT WIDGET
+  ******************************************************************************/
+
 
 PluginEditorForm::PluginEditorForm(QWidget *parent) :
     QWidget(parent),
@@ -145,7 +178,10 @@ void PluginEditorForm::on_filterSequencer_signalProcessingDone()
 	if(!mpFilterSequencer) return;
 
 	// Update time histogram
-	fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
+	if(g_debug_PluginEditorForm)
+	{
+		fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
+	}
 	updateTimeHistogram();
 
 }
@@ -155,7 +191,10 @@ void PluginEditorForm::on_filterSequencer_selectedFilterChanged()
 	// Update
 	if(!mpFilterSequencer) return;
 
-	fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
+	if(g_debug_PluginEditorForm)
+	{
+		fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
+	}
 	updateSelectedView();
 }
 
@@ -216,7 +255,7 @@ void PluginEditorForm::updateSelectedView()
 			{
 				PiafFilter * curF = (*it);
 
-				//if(g_debug_FilterSequencer)
+				if(g_debug_PluginEditorForm)
 				{
 					fprintf(stderr, "PiafFilterManager:%s:%d : creating items for filter %p\n",
 							__func__, __LINE__,
@@ -372,11 +411,8 @@ void PluginEditorForm::purge()
 
 
 /********************************************************************
-
-					FILTER LIST MANAGEMENT
-
+					LOADED PLUGINS LIST MANAGEMENT
  ********************************************************************/
-
 
 LoadedPluginTreeWidgetItem::LoadedPluginTreeWidgetItem(QTreeWidget * treeWidget, PiafFilter * pFilter)
 	: QTreeWidgetItem(treeWidget), mpFilter(pFilter)

@@ -37,6 +37,10 @@ public:
 	/** @brief Stop encoding and close file */
 	void stopEncoder();
 
+
+	/** @brief Encode an IplImage */
+	int encodeImage(IplImage * image);
+
 	/** @brief Encode a new frame (YUV420P format) */
 	int encodeFrameYUV420P(unsigned char *YUV420frame);
 

@@ -33,6 +33,14 @@
 #include "videocapture.h"
 #include "vidacqsettingswindow.h"
 
+#include "piafworkflow-settings.h"
+
+#include "OpenCVEncoder.h"
+
+#include <QDir>
+
+#define FORMAT_IMG		"-%03d.png"
+#define FORMAT_AVI		"-%03d.avi"
 
 int g_MDW_debug_mode = EMALOG_INFO;
 
@@ -48,8 +56,12 @@ MainDisplayWidget::MainDisplayWidget(QWidget *parent) :
     ui(new Ui::MainDisplayWidget)
 {
     ui->setupUi(this);
+	mpegEncoder = NULL;
+	mIsRecording = false;
+
 	mpFilterSequencer = NULL;
 	mpImageInfoStruct = NULL;
+
 	mPlayGrayscale = false;
 	mPlaySpeed = 1.f;
 	m_editBookmarksForm = NULL;
@@ -63,6 +75,10 @@ MainDisplayWidget::MainDisplayWidget(QWidget *parent) :
 MainDisplayWidget::~MainDisplayWidget()
 {
     delete ui;
+	if(mpegEncoder)
+	{
+		stopRecording();
+	}
 	mpFilterSequencer = NULL;
 	m_pVideoCaptureDoc = NULL;
 }
@@ -454,13 +470,13 @@ void MainDisplayWidget::updateSnapCounter()
 	QString fileext;
 	QFileInfo fi;
 	do {
-		fileext.sprintf("-%03d.png", mSnapCounter);
+		fileext.sprintf(FORMAT_IMG, mSnapCounter);
 		QString outname = mSourceName + fileext;
 		fi.setFile(outname);
 		if(fi.exists()) { mSnapCounter++; }
 	} while(fi.exists());
 	do {
-		fileext.sprintf("-%03d.avi", mMovieCounter);
+		fileext.sprintf(FORMAT_AVI, mMovieCounter);
 		QString outname = mSourceName + fileext;
 		fi.setFile(outname);
 		if(fi.exists()) { mMovieCounter++; }
@@ -481,6 +497,10 @@ int MainDisplayWidget::setVideoCaptureDoc(VideoCaptureDoc * pVideoCaptureDoc)
 		return 0;
 	}
 
+	if(!m_pVideoCaptureDoc->isRunning())
+	{
+		m_pVideoCaptureDoc->start();
+	}
 	mSourceName = QString( m_pVideoCaptureDoc->getVideoProperties().devicename );
 
 	double fps = m_pVideoCaptureDoc->getVideoProperties().fps;
@@ -547,6 +567,59 @@ void MainDisplayWidget::on_mainImageWidget_signalPluginsButtonClicked()
 void MainDisplayWidget::on_mainImageWidget_signalRecordButtonToggled(bool on)
 {
 	MDW_printf(EMALOG_INFO, "Ask for record : %c", on?'T':'F');
+	if(on)
+	{
+		startRecording();
+	}
+	else
+	{
+		stopRecording();
+	}
+}
+/***************************************************************
+
+				VIDEO RECORDING SECTION
+
+****************************************************************/
+void MainDisplayWidget::startRecording()
+{
+	if(!mpegEncoder)
+	{
+		mpegEncoder = new OpenCVEncoder(m_fullImage.width(), m_fullImage.height(),
+										25);
+		mpegEncoder->setQuality(75);
+	}
+
+	QString fileext;
+	fileext.sprintf(FORMAT_AVI, mMovieCounter);
+	QString movieFile = mSourceName + fileext;
+
+	fprintf(stderr, "[MainDisplayWidget]::%s:%d: Starting encoding file '%s'\n",
+			__func__, __LINE__, movieFile.toUtf8().data());
+
+	if(mpegEncoder->startEncoder( movieFile.toUtf8().data() )) {
+		mIsRecording = true;
+	} else {
+		mIsRecording = false;
+	}
+
+	fprintf(stderr, "[MainDisplayWidget]::%s:%d: Starting encoding file '%s' => record=%c\n",
+			__func__, __LINE__, movieFile.toUtf8().data() ,
+			mIsRecording?'T':'F');
+}
+
+void MainDisplayWidget::stopRecording()
+{
+	if(!mIsRecording) return;
+
+	fprintf(stderr, "[MainDisplayWidget]::%s:%d : stop recording.\n", __func__, __LINE__);
+	mIsRecording = false;
+	if(mpegEncoder)
+	{
+		mpegEncoder->stopEncoder();
+		delete mpegEncoder;
+		mpegEncoder = NULL;
+	}
 }
 
 void MainDisplayWidget::on_mainImageWidget_signalSnapButtonClicked()
@@ -561,6 +634,13 @@ void MainDisplayWidget::on_mainImageWidget_signalSnapshot(QImage snap)
 			   snap.width(), snap.height(), snap.depth());
 	QString number;
 	number.sprintf("-%03d.png", mSnapCounter);
-	snap.save(mSourceName + number);
+
+	QDir savePath( m_workflow_settings.defaultImageDir );
+	QString absPath = savePath.absoluteFilePath(mSourceName + number);
+	snap.save(absPath);
+
+	MDW_printf(EMALOG_INFO, "=> saved as '%s'", absPath.toAscii().data());
+
+	mSnapCounter++;
 }
 

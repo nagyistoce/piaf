@@ -28,7 +28,7 @@
 
 #include <QThread>
 
-
+#define VIDEO_PROPS_DEVICE_NAME_LEN		256
 /** @brief Video input properties
 
 INHERITED FROM OPENCV's CAPTURE API
@@ -36,8 +36,8 @@ INHERITED FROM OPENCV's CAPTURE API
 
 */
 typedef struct {
-	char devicename[128];	/*!< Device name */
-	char devicenode[128];	/*!< Device node */
+	char devicename[VIDEO_PROPS_DEVICE_NAME_LEN];	/*!< Device name */
+	char devicenode[VIDEO_PROPS_DEVICE_NAME_LEN];	/*!< Device node */
 
 	double pos_msec;		/*!< CV_CAP_PROP_POS_MSEC Film current position in milliseconds or video capture timestamp */
 	double pos_frames;		/*!< CV_CAP_PROP_POS_FRAMES 0-based index of the frame to be decoded/captured next */

@@ -71,7 +71,9 @@ VideoCaptureDoc::VideoCaptureDoc(VirtualDeviceAcquisition * vAcq)
 	modified = false;
 
 	// start background thread
-	start();
+	if(myVAcq->isAcquisitionRunning()) {
+		start();
+	}
 }
 
 // destructor
@@ -203,7 +205,19 @@ bool VideoCaptureDoc::newDocument(int dev)
 
 void VideoCaptureDoc::run()
 {
-	if(!myVAcq) return;
+	if(!myVAcq)
+	{
+		return;
+	}
+
+	fprintf(stderr, "VideoCaptureDoc::%s:%d : started thread\n",
+					__func__, __LINE__);
+
+	// start acquisition by default
+	myVAcq->startAcquisition();
+
+	fprintf(stderr, "VideoCaptureDoc::%s:%d : starting loop\n",
+					__func__, __LINE__);
 
 	m_run = m_running = true;
 	while(m_run)
@@ -215,6 +229,8 @@ void VideoCaptureDoc::run()
 		loadImage();
 	}
 
+	fprintf(stderr, "VideoCaptureDoc::%s:%d : stopped thread\n",
+					__func__, __LINE__);
 	m_run = m_running = false;
 }
 
