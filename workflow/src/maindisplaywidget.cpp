@@ -100,6 +100,7 @@ int MainDisplayWidget::setImageFile(QString imagePath,
 	QFileInfo fi(imagePath);
 	setWindowTitle(fi.baseName());
 	mSourceName = fi.baseName();
+	updateSnapCounter();
 
 	m_listBookmarks.clear();
 	mpImageInfoStruct = pinfo;
@@ -144,6 +145,7 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 	QFileInfo fi(moviePath);
 	setWindowTitle(fi.baseName());
 	mSourceName = fi.baseName();
+	updateSnapCounter();
 
 	m_pVideoCaptureDoc = NULL;
 
@@ -245,7 +247,12 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 
 void MainDisplayWidget::updateDisplay()
 {
-	m_fullImage = iplImageToQImage( mPlayGrayscale ? mFileVA.readImageY() : mFileVA.readImageRGB32() );
+	IplImage * captureImage = ( mPlayGrayscale ? mFileVA.readImageY() : mFileVA.readImageRGB32() );
+	m_fullImage = iplImageToQImage( captureImage );
+	if(mpegEncoder && mIsRecording)
+	{
+		mpegEncoder->encodeImage(captureImage);
+	}
 
 	ui->mainImageWidget->setImage(m_fullImage, NULL);
 	ui->timeLineWidget->setFilePosition(mFileVA.getAbsolutePosition());
@@ -322,6 +329,10 @@ void MainDisplayWidget::on_mPlayTimer_timeout()
 //					__func__, __LINE__,
 //					captureImage->width, captureImage->height, captureImage->nChannels
 //					);
+			if(mpegEncoder && mIsRecording)
+			{
+				mpegEncoder->encodeImage(captureImage);
+			}
 			m_fullImage = iplImageToQImage( captureImage );
 			ui->mainImageWidget->setImage( m_fullImage, NULL);
 		}
@@ -502,6 +513,7 @@ int MainDisplayWidget::setVideoCaptureDoc(VideoCaptureDoc * pVideoCaptureDoc)
 		m_pVideoCaptureDoc->start();
 	}
 	mSourceName = QString( m_pVideoCaptureDoc->getVideoProperties().devicename );
+	updateSnapCounter();
 
 	double fps = m_pVideoCaptureDoc->getVideoProperties().fps;
 	if(fps <= 0)

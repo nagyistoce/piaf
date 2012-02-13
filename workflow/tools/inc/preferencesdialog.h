@@ -47,6 +47,14 @@ private slots:
 
 	void on_moviePushButton_clicked();
 
+	void on_v4l2SpinBox_valueChanged(int arg1);
+
+	void on_openCVSpinBox_valueChanged(int arg1);
+
+	void on_openNISpinBox_valueChanged(int arg1);
+
+	void on_freenectSpinBox_valueChanged(int arg1);
+
 private:
     Ui::PreferencesDialog *ui;
 };

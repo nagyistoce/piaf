@@ -37,6 +37,11 @@ void PreferencesDialog::setSettings(t_workflow_settings * pworkflow_settings)
 	ui->defaultMeasureLineEdit->setText(mp_workflow_settings->defaultMeasureDir);
 	ui->defaultImageLineEdit->setText(mp_workflow_settings->defaultImageDir);
 	ui->defaultMovieLineEdit->setText(mp_workflow_settings->defaultMovieDir);
+
+	ui->v4l2SpinBox->setValue(mp_workflow_settings->maxV4L2);
+	ui->openCVSpinBox->setValue(mp_workflow_settings->maxOpenCV);
+	ui->openNISpinBox->setValue(mp_workflow_settings->maxOpenNI);
+	ui->freenectSpinBox->setValue(mp_workflow_settings->maxFreenect);
 }
 
 PreferencesDialog::~PreferencesDialog()
@@ -95,3 +100,23 @@ void PreferencesDialog::on_moviePushButton_clicked()
 	ui->defaultMovieLineEdit->setText(mp_workflow_settings->defaultMovieDir);
 }
 
+
+void PreferencesDialog::on_v4l2SpinBox_valueChanged(int arg1)
+{
+	mp_workflow_settings->maxV4L2 = arg1;
+}
+
+void PreferencesDialog::on_openCVSpinBox_valueChanged(int arg1)
+{
+	mp_workflow_settings->maxOpenCV = arg1;
+}
+
+void PreferencesDialog::on_openNISpinBox_valueChanged(int arg1)
+{
+	mp_workflow_settings->maxOpenNI = arg1;
+}
+
+void PreferencesDialog::on_freenectSpinBox_valueChanged(int arg1)
+{
+	mp_workflow_settings->maxFreenect = arg1;
+}

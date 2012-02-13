@@ -982,10 +982,13 @@ int FilterSequencer::processImage(swImageStruct * image)
 
 		// Time accumulation in us
 		float total_time_us = 0.f;
+		if(g_debug_FilterSequencer)
+		{
+			fprintf(stderr, "[FilterSequencer]::%s:%d : processing %d filters...\n",
+					__func__, __LINE__,
+					mLoadedFiltersList.count());
+		}
 
-		fprintf(stderr, "[FilterSequencer]::%s:%d : processing %d filters...\n",
-				__func__, __LINE__,
-				mLoadedFiltersList.count());
 		if(!mLoadedFiltersList.isEmpty())
 		{
 			bool finalreached = false;
@@ -1000,7 +1003,7 @@ int FilterSequencer::processImage(swImageStruct * image)
 
 				// process
 				if( pv->enabled ) {
-					//if(g_debug_FilterSequencer)
+					if(g_debug_FilterSequencer)
 					{
 						fprintf(stderr, "FilterSequencer::%s:%d processing filter [%d] func[%d]=%s\n",
 								__func__, __LINE__,
