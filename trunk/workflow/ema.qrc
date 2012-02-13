@@ -216,5 +216,6 @@
         <file>icons/22x22/camera-axis.png</file>
         <file>icons/22x22/kinect.png</file>
         <file>icons/22x22/openni.png</file>
+        <file>icons/22x22/opencv.png</file>
     </qresource>
 </RCC>

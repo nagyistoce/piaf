@@ -30,6 +30,7 @@
 
 #include "FileVideoAcquisition.h"
 
+
 namespace Ui {
     class MainDisplayWidget;
 }
@@ -37,6 +38,7 @@ namespace Ui {
 class MovieBookmarkForm;
 class FilterSequencer;
 class VideoCaptureDoc;
+class OpenCVEncoder;
 
 /** @brief Main image display in middle of GUI
 
@@ -103,6 +105,11 @@ private:
 
 	// LIVE VIDEO CAPTURE ======================================================
 	VideoCaptureDoc * m_pVideoCaptureDoc;
+	OpenCVEncoder * mpegEncoder;
+	bool mIsRecording;
+
+	void startRecording(); ///< start recording AVI
+	void stopRecording(); ///< stop recording AVI
 
 private slots:
 	void on_addBkmkButton_clicked();

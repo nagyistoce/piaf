@@ -135,6 +135,8 @@ int convertFromRGB32(uint8_t * src, IplImage * destImage)
 	}
 	return 0;
 }
+
+
 int OpenCVEncoder::encodeFrameY(unsigned char * Yframe) {
 	if(!imgHeader) {
 		imgHeader = cvCreateImageHeader(cvSize(m_width, m_height), IPL_DEPTH_8U, 1);
@@ -174,7 +176,8 @@ int OpenCVEncoder::encodeFrameY(unsigned char * Yframe) {
 }
 
 // Convert RGB32 frame to YUV420P then encode it
-int OpenCVEncoder::encodeFrameRGB32(unsigned char *RGB32frame) {
+int OpenCVEncoder::encodeFrameRGB32(unsigned char *RGB32frame)
+{
 	if(!writer) return 0;
 
 	if(!imgHeader) {
@@ -211,6 +214,46 @@ int OpenCVEncoder::encodeFrameRGB32(unsigned char *RGB32frame) {
 	return 1;
 }
 
+int OpenCVEncoder::encodeImage(IplImage * image)
+{
+	if(!image) { return -1; }
+
+	if(image->nChannels != 3) {
+		// Convert to RGB24
+		if(imgRgb24 && (imgRgb24->width != image->width
+						|| imgRgb24->height != image->height ) )
+		{
+			swReleaseImage(&imgRgb24);
+		}
+		if(!imgRgb24) {
+			imgRgb24 = swCreateImage(cvGetSize(image), IPL_DEPTH_8U, 3);
+		}
+
+		// Convert
+		switch(image->nChannels)
+		{
+		default:
+			fprintf(stderr, "OpenCVEncoder::%s:%d : unsupported nChannels=%d", __func__, __LINE__, image->nChannels);
+			break;
+		case 1:
+			cvCvtColor(image, imgRgb24, CV_GRAY2RGB);
+			break;
+		case 3:
+			cvCopy(image, imgRgb24);
+			break;
+		case 4:
+			cvCvtColor(image, imgRgb24, CV_BGRA2RGB);
+			break;
+		}
+
+	}
+	else
+	{
+		cvWriteFrame(writer, image);
+	 }
+
+	return 1;
+}
 
 // Encode directly RGB24 frame
 int OpenCVEncoder::encodeFrameRGB24(unsigned char *RGB24frame) {

@@ -6,14 +6,6 @@
 
 /** @brief Workflow interface settings storage */
 typedef struct {
-	/// List of input directories
-	QList<t_folder *> directoryList;
-
-	/// list of collections
-	QList<t_collection *> collectionList;
-
-	/// List of devices
-	QList<t_device *> devicesList;
 
 	/// Default measure directory to save measures;
 	QString defaultMeasureDir;
@@ -23,6 +15,24 @@ typedef struct {
 
 	/// Default movie directory for saving capture sequences
 	QString defaultMovieDir;
+
+
+
+	/// List of input directories
+	QList<t_folder *> directoryList;
+
+	/// list of collections
+	QList<t_collection *> collectionList;
+
+	// ======== DEVICES =========
+	/// List of devices
+	QList<t_device *> devicesList;
+	int maxV4L2;///< Max index for search
+	int maxOpenCV;///< Max index for search
+	int maxOpenNI;///< Max index for search
+	int maxFreenect;///< Max index for search
+
+
 
 } t_workflow_settings ;
 

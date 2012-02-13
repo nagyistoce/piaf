@@ -159,11 +159,9 @@ void V4L2Device::init()
 		return;
 	}
 
-	mVideoDevice = new char [strlen(device)+1];
-	strcpy(mVideoDevice, device);
 	fprintf(stderr, "V4L2::%s:%d : VDOpen('%s', %dx%d) successed.\n",
 			__func__, __LINE__,
-			device,
+			mVideoDevice,
 			(int)newSize.width, (int)newSize.height);
 
 }
@@ -349,6 +347,7 @@ int V4L2Device::close_device()
 	{
 		V4L2_printf("closing opened device fd=%d\n", vd.fd);
 		int ret = close(vd.fd);
+		vd.fd = 0;
 		int errnum = errno;
 		V4L2_printf("closing fd=%d returned %d with err=%d='%s'\n",
 					vd.fd,
@@ -982,10 +981,11 @@ int V4L2Device::convert2Y(unsigned char * src, unsigned char * dest)
 
 	return 0;
 }
+
 /* Stop acquisition */
 int V4L2Device::stopAcquisition()
 {
-
+	V4L2_printf("Call VDClose...");
 	return VDclose();
 }
 
@@ -1018,10 +1018,10 @@ int V4L2Device::init_mmap()
 		}
 	}
 
-	if (req.count < 2) {
-		fprintf (stderr, "Insufficient buffer memory on %s\n",
-				 mVideoDevice);
-		exit (EXIT_FAILURE);
+	if (req.count < 2 || req.count>100) {
+		V4L2_printf("Insufficient buffer memory on '%s' => req.count=%d",
+				 mVideoDevice, req.count);
+		return -1;
 	}
 
 	buffers = (t_v4l2_buffer *)calloc(req.count, sizeof (*buffers));
@@ -1064,6 +1064,31 @@ int V4L2Device::init_mmap()
 
 
 int V4L2Device::start_capturing() {
+	if(vd.fd <=0 )
+	{
+		// Reopen device
+		V4L2_printf("fd=%d <=0 => reopen device", vd.fd);
+		tBoxSize newSize;
+		char device[256]="";
+		if(mVideoDevice)
+		{
+			strcpy(device, mVideoDevice);
+		}
+		newSize.width = m_imageSize.width;
+		newSize.height = m_imageSize.height;
+
+		V4L2_printf("================== open_device()...\n");
+		open_device();
+
+		V4L2_printf("================== init_device()...\n");
+		init_device(m_imageSize.width, m_imageSize.height);
+
+		// Init memory map
+		V4L2_printf("================== init_mmap()...\n");
+		init_mmap();
+
+	//	VDopen(device, &newSize);
+	}
 
 	/* set framerate */
 	struct v4l2_streamparm* setfps;  
@@ -1119,11 +1144,12 @@ int V4L2Device::start_capturing() {
 		buf.memory      = V4L2_MEMORY_MMAP;
 		buf.index       = i;
 		
-		
 		if (-1 == xioctl(vd.fd, VIDIOC_QBUF, &buf)) {
 			int errnum = errno;
 			V4L2_printf("error in xioctl(vd.fd, VIDIOC_QBUF, &buf) i=%d err=%d='%s'\n",
 						i, errnum, strerror(errnum));
+			usleep(100000);
+			return -1;
 		}
 	}
 	
@@ -1135,6 +1161,7 @@ int V4L2Device::start_capturing() {
 		int errnum = errno;
 		V4L2_printf("error in xioctl(vd.fd, VIDIOC_STREAMON, &buf) err=%d=%s\n",
 					errnum, strerror(errnum));
+		return -1;
 	}
 
 	mGrabEnabled = true;
@@ -1151,7 +1178,9 @@ int V4L2Device::start_capturing() {
 
 int V4L2Device::changeSize(tBoxSize * newSize) 
 {
-	if(!newSize) return -1;
+	if(!newSize) {
+		return -1;
+	}
 	int w=0, h=0;
 	
 	if(newSize->width <= 0 || newSize->height <= 0) {
@@ -1202,10 +1231,11 @@ int V4L2Device::changeSize(tBoxSize * newSize)
 	newSize->width  = w;
 	newSize->height = h;
 	
-
-	
-	start_capturing();
-	
+//	int retstart = start_capturing();
+//	if(retstart < 0)
+//	{
+//		V4L2_printf("start_capturing failed with err=%d\n", retstart);
+//	}
 	return 0;
 }
 
@@ -1581,14 +1611,14 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 	open_device();
 
 	// then query its properties
-	struct v4l2_input       v4l2Input ; 
-		memset(&v4l2Input, 0, sizeof(struct v4l2_input));
-	struct v4l2_fmtdesc     v4l2Fmtdesc ;      // image formats	
-		memset(&v4l2Fmtdesc, 0, sizeof(struct v4l2_fmtdesc));
+	struct v4l2_input       v4l2Input ;
+	memset(&v4l2Input, 0, sizeof(struct v4l2_input));
+	struct v4l2_fmtdesc     v4l2Fmtdesc ;      // image formats
+	memset(&v4l2Fmtdesc, 0, sizeof(struct v4l2_fmtdesc));
 	struct v4l2_standard    v4l2Standard ;     // video standards
-		memset(&v4l2Standard, 0, sizeof(struct v4l2_standard));
+	memset(&v4l2Standard, 0, sizeof(struct v4l2_standard));
 	struct v4l2_format      v4l2Format;        // format use to set the device
-		memset(&v4l2Format, 0, sizeof(struct v4l2_format));
+	memset(&v4l2Format, 0, sizeof(struct v4l2_format));
 	char device_node[512];
 	strcpy(device_node, mVideoDevice);
 
@@ -1731,7 +1761,7 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 			fsize.index++;
 			if (fsize.type == V4L2_FRMSIZE_TYPE_DISCRETE)
 			{
-				V4L2_printf("\t\t'%s'\t{ discrete: width = %u, height = %u }",
+				V4L2_printf("\t\t'%s'\t{ discrete: width = %u, height = %u }\n",
 							fourcc,
 							fsize.discrete.width, fsize.discrete.height);
 			}
@@ -1787,7 +1817,7 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 		v4l2Standard.index ++ ;
 	}
 	
-	vd.frame_rate = 0;
+	vd.frame_rate = 25;
 	vd.frame_period_ms = 0;
 	
 	max_width = max_height = min_width = min_height = 0;
@@ -1913,7 +1943,13 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 	}
 	
 	// set acquisition size
-	changeSize(newSize);
+	int retsize = changeSize(newSize);
+	if(retsize < 0)
+	{
+		V4L2_printf("changeSize failed with return code=%d", retsize);
+		usleep(100000);
+		return -1;
+	}
 
 	initialised = true;
 //    echo();
@@ -1944,15 +1980,16 @@ int V4L2Device::VDclose()
 		return -1;
 	}
 
-	fprintf(stderr, "\t\t[V4L2] : Closing device...\n");
+	V4L2_printf("Closing device...");
 	initialised = false;
 	
 	// Stop_capturing
+	V4L2_printf("Stop_capturing...");
 	stop_capturing();
 	
+	// close device node
+	V4L2_printf("close device node...");
 	close_device();
-
-
 	
 	return 1;
 }

@@ -252,7 +252,11 @@ int OpenNIVideoAcquisition::startAcquisition()
 		OPENNI_PRINTF("Could not start acquisition ...");
 		return -1;
 	}
-
+	if(!depth)
+	{
+		OPENNI_PRINTF("Could not start depth ...");
+		return -1;
+	}
 	m_run = true;
 
 	depth.StartGenerating();
@@ -416,6 +420,10 @@ void init_OpenNI_depth_LUT()
 	FILE * fLUT = fopen(TMP_DIRECTORY "OpenNI-LUT_8bit_to_meters.txt", "w");
 	if(fLUT)
 	{
+		fprintf(fLUT, "# Recorded with Piaf with 8bit depth from %g m (gray=255) to %g meters (gray=1), unknonw depth is gray=0\n",
+				(float)OPENNI_DEPTH2CM_RANGE_MIN, (float)OPENNI_DEPTH2CM_RANGE_MAX);
+		fprintf(fLUT, "#  Project homepage & Source code: http://code.google.com/p/piaf/\n#\n");
+
 		fprintf(fLUT, "# 8bit_value\tDistance in meter\tResolution\n");
 	}
 	for(int val = 0; val<256; val++)

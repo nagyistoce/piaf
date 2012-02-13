@@ -17,6 +17,8 @@
 #include "opencvvideoacquisition.h"
 #include "swvideodetector.h"
 
+#define OpenCVAcq_printf(...) fprintf( stderr,"[OpenCV %d]::%s:%d: ", m_idx_device, __func__, __LINE__); fprintf( stderr, __VA_ARGS__);
+
 OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 {
 	m_capture = NULL;
@@ -26,7 +28,7 @@ OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 	memset(&m_video_properties, 0, sizeof(t_video_properties));
 	m_imageSize = cvSize(0,0);
 
-	fprintf(stderr, "OpenCVAcq::%s:%d : create device # %d\n",
+	OpenCVAcq_printf( "OpenCVAcq::%s:%d : create device # %d\n",
 			__func__, __LINE__, idx_device);
 
 	// open any type of device and index of desired device
@@ -34,7 +36,7 @@ OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 	try {
 		m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
 	} catch (cv::Exception e) {
-		fprintf(stderr, "[VidAcq] : VDopen ERROR : CAUGHT EXCEPTION WHILE OPENING DEVICE  [%d]\n",
+		OpenCVAcq_printf( "[VidAcq] : VDopen ERROR : CAUGHT EXCEPTION WHILE OPENING DEVICE  [%d]\n",
 				idx_device
 				); fflush(stderr);
 
@@ -43,7 +45,7 @@ OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 #else
 	m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
 #endif
-	fprintf(stderr, "OpenCVAcq::%s:%d : create device # %d =W capture=%p\n",
+	OpenCVAcq_printf( "OpenCVAcq::%s:%d : create device # %d =W capture=%p\n",
 			__func__, __LINE__,
 			idx_device, m_capture);
 	if(m_capture) {
@@ -61,7 +63,7 @@ OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 			double cur_height = cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_HEIGHT);
 
 			//
-			fprintf(stderr, "OpenCVCap::%s:%d : setprop (%dx%d) returned %d,%d => cur size=%gx%g\n",
+			OpenCVAcq_printf( "OpenCVCap::%s:%d : setprop (%dx%d) returned %d,%d => cur size=%gx%g\n",
 					__func__, __LINE__,
 					acq_widths[acq_idx], acq_heights[acq_idx],
 					retwidth, retheight,
@@ -103,28 +105,45 @@ void OpenCVVideoAcquisition::setSequentialMode(bool on)
 int OpenCVVideoAcquisition::startAcquisition()
 {
 	m_imageSize.width = m_imageSize.height = 0;
+	if(!m_capture)
+	{
+		// open any type of device and index of desired device
+#ifdef OPENCV_22
+		try {
+			m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
+		} catch (cv::Exception e) {
+			OpenCVAcq_printf( "[VidAcq] : VDopen ERROR : CAUGHT EXCEPTION WHILE OPENING DEVICE  [%d]\n",
+							  m_idx_device
+							  ); fflush(stderr);
 
-	fprintf(stderr, "[VAcq]::%s:%d : m_capture=%p\n", __func__, __LINE__,
+			return -1;
+		}
+#else
+		m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
+#endif
+	}
+
+	OpenCVAcq_printf( "[VAcq]::%s:%d : m_capture=%p\n", __func__, __LINE__,
 			m_capture);
 	if(m_capture) {
-		fprintf(stderr, "[VidAcq] : VDopen SUCCESS : OPEN DEVICE  [%d]\n",
+		OpenCVAcq_printf( "[VidAcq] : VDopen SUCCESS : OPEN DEVICE  [%d]\n",
 				m_idx_device
 				); fflush(stderr);
-
 	} else {
-		fprintf(stderr, "[VidAcq] : VDopen ERROR : CANNOT OPEN DEVICE  [%d]\n",
+		OpenCVAcq_printf( "[VidAcq] : VDopen ERROR : CANNOT OPEN DEVICE  [%d]\n",
 				m_idx_device
 				); fflush(stderr);
 		return -1;
 	}
 
 
-	fprintf(stderr, "[VidAcq] : VDopen : capture first frame to see if it's possible\n"); fflush(stderr);
+	OpenCVAcq_printf( "[VidAcq] : VDopen : capture first frame to see if it's possible\n"); fflush(stderr);
 	int ret = grab();
 	if(ret >= 0) {
-		fprintf(stderr, "[VidAcq] : VDIsInitialised...\n"); fflush(stderr);
+		OpenCVAcq_printf( "[VidAcq] : grab success =>  VDIsInitialised...\n"); fflush(stderr);
 		m_captureIsInitialised = 1;
 	} else {
+		OpenCVAcq_printf( "[VidAcq] : grab failed => not initialized\n"); fflush(stderr);
 		m_captureIsInitialised = 0;
 	}
 
@@ -138,6 +157,9 @@ int OpenCVVideoAcquisition::grab()
 {
 	if(!m_capture)
 	{
+		OpenCVAcq_printf( "[VA ] %s:%d : capture=%p FAILED\n", __func__, __LINE__,
+				m_capture);
+		startAcquisition();
 		return -1;
 	}
 
@@ -146,11 +168,12 @@ int OpenCVVideoAcquisition::grab()
 
 	// Grab image
 	if( !cvGrabFrame( m_capture ) ) {
-		fprintf(stderr, "[VA ] %s:%d : capture=%p FAILED\n", __func__, __LINE__,
+		OpenCVAcq_printf( "[VA ] %s:%d : capture=%p FAILED\n", __func__, __LINE__,
 				m_capture);
 
 		mGrabMutex.unlock();
 		return -1;
+
 	} else {
 		IplImage * frame = cvRetrieveFrame( m_capture );
 		if(frame) {
@@ -160,13 +183,13 @@ int OpenCVVideoAcquisition::grab()
 				m_imageSize.width = frame->width;
 				m_imageSize.height = frame->height;
 
-				fprintf(stderr, "[OpenCVVA]::%s:%d : capture=%p size changed => %dx%d\n",
+				OpenCVAcq_printf( "[OpenCVVA]::%s:%d : capture=%p size changed => %dx%d\n",
 						__func__, __LINE__,
 						m_capture,
 						m_imageSize.width, m_imageSize.height);
 			}
 		} else {
-			fprintf(stderr, "[OpenCVVA]::%s:%d : capture=%p cvRetrieveFrame FAILED\n",
+			OpenCVAcq_printf( "[OpenCVVA]::%s:%d : capture=%p cvRetrieveFrame FAILED\n",
 					__func__, __LINE__,
 					m_capture);
 		}
@@ -213,20 +236,20 @@ IplImage * OpenCVVideoAcquisition::readImageRGB32()
 
 	int ret = cvGrabFrame( m_capture );
 	if(ret == 0) {
-		fprintf(stderr, "[VidAcq]::%s:%d : ERROR : cvGrabFrame returned %d !\n",
+		OpenCVAcq_printf( "[VidAcq]::%s:%d : ERROR : cvGrabFrame returned %d !\n",
 				__func__, __LINE__, ret);
 		return NULL;
 	}
 	IplImage * frame = cvRetrieveFrame( m_capture );
 	if(!m_iplImage && frame) {
-		fprintf(stderr, "[VidAcq]::%s:%d : created m_iplImage %d x %d x %d !\n",
+		OpenCVAcq_printf( "[VidAcq]::%s:%d : created m_iplImage %d x %d x %d !\n",
 				__func__, __LINE__,
 				frame->width, frame->height, frame->nChannels);
 
 		m_iplImage = swCreateImage(cvGetSize(frame), IPL_DEPTH_8U,
 								   frame->nChannels );//== 1 ? 1 : 4);
 
-		fprintf(stderr, "[VidAcq]::%s:%d : created m_iplImage %d x %d x %d !\n",
+		OpenCVAcq_printf( "[VidAcq]::%s:%d : created m_iplImage %d x %d x %d !\n",
 				__func__, __LINE__,
 				m_iplImage->width, m_iplImage->height, m_iplImage->nChannels);
 // FIXME : fourcc
@@ -329,7 +352,7 @@ t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
 		/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
 		– Property identifier. Can be one of the following:*/
 
-	fprintf(stderr, "OpenCVVideoAcquisition::%s:%d : props=\n", __func__, __LINE__);
+	OpenCVAcq_printf( "OpenCVVideoAcquisition::%s:%d : props=\n", __func__, __LINE__);
 	printVideoProperties(&m_video_properties);
 
 	return m_video_properties;
@@ -347,13 +370,13 @@ t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
 int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 {
 	if(!m_capture) {
-		fprintf(stderr, "OpenCVVidAcq::%s:%d : device not opened "
+		OpenCVAcq_printf( "OpenCVVidAcq::%s:%d : device not opened "
 				"=> cannot change video properties:", __func__, __LINE__);
 
 		return -1;
 	}
 
-	fprintf(stderr, "OpenCVVidAcq::%s:%d : change video properties:", __func__, __LINE__);
+	OpenCVAcq_printf( "OpenCVVidAcq::%s:%d : change video properties:", __func__, __LINE__);
 	printVideoProperties(&props);
 
 
@@ -367,7 +390,7 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 
 	if(props.frame_width != m_video_properties.frame_width
 	   || props.frame_height != m_video_properties.frame_height) {
-		fprintf(stderr, "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE  [%d] => Stop acquisition...\n",
+		OpenCVAcq_printf( "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE  [%d] => Stop acquisition...\n",
 				__func__, __LINE__, m_idx_device
 				); fflush(stderr);
 
@@ -375,7 +398,7 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 		//stopAcquisition();
 		cvReleaseCapture(&m_capture);
 
-		fprintf(stderr, "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE [%d] => recreate capture...\n",
+		OpenCVAcq_printf( "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE [%d] => recreate capture...\n",
 				__func__, __LINE__, m_idx_device
 				); fflush(stderr);
 #ifdef OPENCV_22
@@ -386,14 +409,14 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 		m_capture = cvCreateCameraCapture(CV_CAP_ANY + m_idx_device );
 		if(!m_capture) {
 #endif
-			fprintf(stderr, "[VidAcq] : VDopen ERROR : CAUGHT EXCEPTION WHILE OPENING DEVICE  [%d]\n",
+			OpenCVAcq_printf( "[VidAcq] : VDopen ERROR : CAUGHT EXCEPTION WHILE OPENING DEVICE  [%d]\n",
 					m_idx_device
 					); fflush(stderr);
 
 			return -1;
 		}
 
-		fprintf(stderr, "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE  [%d] : "
+		OpenCVAcq_printf( "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE  [%d] : "
 				"=> capture=%p / change properties to %dx%d\n",
 				__func__, __LINE__, m_idx_device,
 				m_capture,
@@ -405,7 +428,7 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 		// unlock grab mutex
 //		mGrabMutex.unlock();
 
-//		fprintf(stderr, "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE [%d] => restart acquisition\n",
+//		OpenCVAcq_printf( "[OpenCVVidAcq]::%s:%d : SIZE CHANGED FOR DEVICE [%d] => restart acquisition\n",
 //				__func__, __LINE__, m_idx_device
 //				); fflush(stderr);
 //		startAcquisition();

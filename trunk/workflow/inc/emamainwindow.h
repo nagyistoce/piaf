@@ -229,6 +229,12 @@ private:
 	/// Main file diplayed
 	QString mMainFileName;
 
+	// Parent items for devices tree widget items
+	CaptureTreeWidgetItem * mV4l2Item;
+	CaptureTreeWidgetItem * mOpenNIItem;
+	CaptureTreeWidgetItem * mFreenectItem;
+	CaptureTreeWidgetItem * mOpenCVItem;
+
 #ifdef PIAF_LEGACY
 	WorkshopImage * pWorkshopImage;
 	WorkshopImageTool * pWorkshopImageTool;

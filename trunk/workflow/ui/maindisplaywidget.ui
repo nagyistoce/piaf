@@ -57,7 +57,7 @@
       </size>
      </property>
      <property name="currentIndex">
-      <number>1</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="pageMovie">
       <property name="sizePolicy">
@@ -161,6 +161,9 @@
               <width>22</width>
               <height>22</height>
              </size>
+            </property>
+            <property name="shortcut">
+             <string>Space</string>
             </property>
             <property name="checkable">
              <bool>true</bool>

@@ -1851,7 +1851,6 @@ void WorkshopApp::discoverDevices()
 						__func__, __LINE__, txt);
 
 				statusBar()->message(tr("Error: canot initialize acquisition !"));
-				return;
 			}
 			else
 			{
