@@ -631,7 +631,11 @@ void PluginEditorForm::updateTimeHistogram()
 	LoadedPluginTreeWidgetItem * loaded = // load first selected item
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
 	if(!loaded) { return; }
-	fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
+
+	if(g_debug_PluginEditorForm)
+	{
+		fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
+	}
 
 	// Show its histogram
 	if(loaded->getFilter()) {

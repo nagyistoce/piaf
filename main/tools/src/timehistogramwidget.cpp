@@ -27,7 +27,6 @@
 #include "timehistogramwidget.h"
 #include "ui_timehistogramwidget.h"
 
-#include "swvideodetector.h"
 
 
 TimeHistogramWidget::TimeHistogramWidget(QWidget *parent) :
@@ -35,11 +34,13 @@ TimeHistogramWidget::TimeHistogramWidget(QWidget *parent) :
     ui(new Ui::TimeHistogramWidget)
 {
     ui->setupUi(this);
+	mHistoImg = NULL;
 }
 
 TimeHistogramWidget::~TimeHistogramWidget()
 {
     delete ui;
+	swReleaseImage(&mHistoImg);
 }
 
 void TimeHistogramWidget::changeEvent(QEvent *e)
@@ -57,8 +58,22 @@ void TimeHistogramWidget::changeEvent(QEvent *e)
 void TimeHistogramWidget::displayHisto(t_time_histogram time_histo)
 {
 	if(time_histo.nb_iter > 0) {
-		IplImage * histoImg = swCreateImage(cvSize(time_histo.max_histogram, ui->histogramLabel->height()-2),
-											IPL_DEPTH_8U, 4);
+		if(mHistoImg && mHistoImg->height != ui->histogramLabel->height()-2)
+		{
+			swReleaseImage(&mHistoImg);
+		}
+
+		if(!mHistoImg)
+		{
+			mHistoImg = swCreateImage(cvSize(time_histo.max_histogram,
+											ui->histogramLabel->height()-2),
+										 IPL_DEPTH_8U, 4);
+		}
+		else
+		{
+			cvZero(mHistoImg);
+		}
+
 		// get max
 		time_histo.index_max = 0;
 		time_histo.value_max = time_histo.histogram[0];
@@ -76,7 +91,7 @@ void TimeHistogramWidget::displayHisto(t_time_histogram time_histo)
 		}
 
 		if(time_histo.value_max == 0) {
-			swReleaseImage(&histoImg);
+			swReleaseImage(&mHistoImg);
 			return;
 		}
 		if(time_histo.value_max < time_histo.overflow_count) {
@@ -85,22 +100,22 @@ void TimeHistogramWidget::displayHisto(t_time_histogram time_histo)
 
 
 		// Draw log of histogram
-		float scale_log = histoImg->height / log(time_histo.value_max);
+		float scale_log = mHistoImg->height / log(time_histo.value_max);
 		float max_ms = time_histo.max_histogram / time_histo.time_scale / 1000.f;
 
 
 		for(int ms = 10; ms<max_ms; ms+=10) {
 			int h = roundf(time_histo.time_scale * ms * 1000.f);
-			cvLine(histoImg,
-				   cvPoint(h, histoImg->height-1),
+			cvLine(mHistoImg,
+				   cvPoint(h, mHistoImg->height-1),
 				   cvPoint(h, 0),
 				   cvScalarAll(64), 1);
 		}
 
 		for(int ms = 50; ms<max_ms; ms+=50) {
 			int h = roundf(time_histo.time_scale * ms * 1000.f);
-			cvLine(histoImg,
-				   cvPoint(h, histoImg->height-1),
+			cvLine(mHistoImg,
+				   cvPoint(h, mHistoImg->height-1),
 				   cvPoint(h, 0),
 				   cvScalarAll(192), 1);
 		}
@@ -139,9 +154,9 @@ void TimeHistogramWidget::displayHisto(t_time_histogram time_histo)
 					}
 
 				}
-				cvLine(histoImg,
-					   cvPoint(h, histoImg->height-1),
-					   cvPoint(h, histoImg->height-1 - (int)log(time_histo.histogram[h]) * scale_log),
+				cvLine(mHistoImg,
+					   cvPoint(h, mHistoImg->height-1),
+					   cvPoint(h, mHistoImg->height-1 - (int)log(time_histo.histogram[h]) * scale_log),
 					   drawColor, 1);
 			}
 		}
@@ -176,40 +191,39 @@ void TimeHistogramWidget::displayHisto(t_time_histogram time_histo)
 		int hmean = time_histo.time_scale * mean_ms * 1000.f;
 		int hstddev = time_histo.time_scale * stddev_cumul * 1000.f;
 
-		cvLine(histoImg,
+		cvLine(mHistoImg,
 			   cvPoint(hmean-hstddev , 1),
 			   cvPoint(hmean+hstddev , 1),
 			   CV_RGB(60,60,190), 3);
-		cvLine(histoImg,
-			   cvPoint(hmean, histoImg->height-1),
+		cvLine(mHistoImg,
+			   cvPoint(hmean, mHistoImg->height-1),
 			   cvPoint(hmean, 0),
 			   CV_RGB(0,0,255), 1);
 
 		hmean = median_idx;
-		cvLine(histoImg,
-			   cvPoint(hmean, histoImg->height-1),
+		cvLine(mHistoImg,
+			   cvPoint(hmean, mHistoImg->height-1),
 			   cvPoint(hmean, 0),
 			   CV_RGB(255,0,255), 1);
 
 		// Draw overflow indicator
 		if(time_histo.overflow_count>0) {
-			cvLine(histoImg,
-				   cvPoint(histoImg->width-1, histoImg->height-1),
-				   cvPoint(histoImg->width-2,
-						   histoImg->height-1
+			cvLine(mHistoImg,
+				   cvPoint(mHistoImg->width-1, mHistoImg->height-1),
+				   cvPoint(mHistoImg->width-2,
+						   mHistoImg->height-1
 						   - (int)log(time_histo.overflow_count) * scale_log),
 				   CV_RGB(255,0,0), 1);
 		}
-		QImage qImage( (uchar*)histoImg->imageData,
-					   histoImg->width, histoImg->height, histoImg->widthStep,
-					   ( histoImg->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
+		QImage qImage( (uchar*)mHistoImg->imageData,
+					   mHistoImg->width, mHistoImg->height, mHistoImg->widthStep,
+					   ( mHistoImg->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
 						 QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
 						 )
 					   );
 		QPixmap pixImage = QPixmap::fromImage(qImage);
 		ui->histogramLabel->setPixmap(pixImage);
 
-		swReleaseImage(&histoImg);
 	}
 }
 

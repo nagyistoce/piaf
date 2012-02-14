@@ -28,6 +28,7 @@
 
 #include <QWidget>
 #include "time_histogram.h"
+#include "swvideodetector.h"
 
 namespace Ui {
     class TimeHistogramWidget;
@@ -51,6 +52,8 @@ protected:
 
 private:
     Ui::TimeHistogramWidget *ui;
+	/// IplImage used to draw histogram
+	IplImage * mHistoImg;
 };
 
 #endif // TIMEHISTOGRAMWIDGET_H
