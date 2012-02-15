@@ -29,6 +29,7 @@
 #include <SwImage.h>
 
 #include "SwPluginCore.h"
+
 #include "time_histogram.h"
 
 #define PIAFFILTER_MSG(...)	{ \

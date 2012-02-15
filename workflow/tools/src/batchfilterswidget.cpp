@@ -1,5 +1,5 @@
 /***************************************************************************
-	batchfiltersmainwindow.cpp  -  Movie / Image batch processor
+	batchfiltersWidget.cpp  -  Movie / Image batch processor
 								to process a list of file using a pre-saved
 								plugins list + parameters
 							 -------------------
@@ -17,47 +17,48 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "batchfiltersmainwindow.h"
-#include "ui_batchfiltersmainwindow.h"
+#include "batchfilterswidget.h"
+#include "ui_batchfilterswidget.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
+
 #include "FileVideoAcquisition.h"
+
 #include "piaf-settings.h"
 #include "OpenCVEncoder.h"
 
 #include "timehistogramwidget.h"
 
 
-BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
-	QMainWindow(parent),
-	ui(new Ui::BatchFiltersMainWindow),
+BatchFiltersWidget::BatchFiltersWidget(QWidget *parent) :
+	QWidget(parent),
+	ui(new Ui::BatchFiltersWidget),
 	mSettings(PIAFBATCHSETTINGS)
 {
+	ui->setupUi(this);
+
 	this->setAttribute(Qt::WA_DeleteOnClose, true);
-    ui->setupUi(this);
 
 	// dont' show warning on plugin crash
-	mFilterManager.hide();
-	mFilterManager.enableWarning(false);
-	mFilterManager.enableAutoReloadSequence(true);
+	mFilterSequencer.enableWarning(false);
+	mFilterSequencer.enableAutoReloadSequence(true);
 
 
-	mPreviewFilterManager.hide();
-	mPreviewFilterManager.enableWarning(false);
-	mPreviewFilterManager.enableAutoReloadSequence(true);
+	mPreviewFilterSequencer.enableWarning(false);
+	mPreviewFilterSequencer.enableAutoReloadSequence(true);
 
 	ui->controlGroupBox->setEnabled(false);
 
 	mBatchOptions.reload_at_change = ui->reloadPluginCheckBox->isChecked();
-	mBatchOptions.use_grey = ui->greyButton->isOn();
-	mBatchOptions.record_output = ui->recordButton->isOn();
-	mBatchOptions.view_image = ui->viewButton->isOn() ;
+	mBatchOptions.use_grey = ui->greyButton->isChecked();
+	mBatchOptions.record_output = ui->recordButton->isChecked();
+	mBatchOptions.view_image = ui->viewButton->isChecked() ;
 
 	mBatchThread.setOptions(mBatchOptions);
 
 	// assign a filter manager to background processing thread
-	mBatchThread.setFilterManager(&mFilterManager);
+	mBatchThread.setFilterSequencer(&mFilterSequencer);
 	mBatchThread.setFileList(&mFileList);
 
 	connect(&mDisplayTimer, SIGNAL(timeout()), this, SLOT(on_mDisplayTimer_timeout()));
@@ -70,33 +71,37 @@ BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
 	loadSettings();
 }
 
+void BatchFiltersWidget::changeEvent(QEvent *e)
+{
+	QWidget::changeEvent(e);
+	switch (e->type()) {
+	case QEvent::LanguageChange:
+		ui->retranslateUi(this);
+		break;
+	default:
+		break;
+	}
+}
+
 #define BATCHSETTING_LASTPLUGINDIR "batch.lastPluginDir"
 #define BATCHSETTING_LASTFILEDIR "batch.lastFileDir"
 
-void BatchFiltersMainWindow::loadSettings()
+void BatchFiltersWidget::loadSettings()
 {
 	// overwrite with batch settings
-	QString entry = mSettings.readEntry(BATCHSETTING_LASTPLUGINDIR);
-	if(!entry.isNull())
-	{
-		mLastPluginsDirName = entry;
-	}
-
-	entry = mSettings.readEntry(BATCHSETTING_LASTFILEDIR);
-	if(!entry.isNull())
-	{
-		mLastDirName = entry;
-	}
+	mLastPluginsDirName = mSettings.value(BATCHSETTING_LASTPLUGINDIR, mLastPluginsDirName).toString();
+	mLastDirName = mSettings.value(BATCHSETTING_LASTFILEDIR, mLastDirName).toString();
 }
 
-void BatchFiltersMainWindow::saveSettings() {
+void BatchFiltersWidget::saveSettings()
+{
 	// overwrite with batch settings
-	mSettings.writeEntry(BATCHSETTING_LASTPLUGINDIR, mLastPluginsDirName);
-	mSettings.writeEntry(BATCHSETTING_LASTFILEDIR, mLastDirName);
+	mSettings.setValue(BATCHSETTING_LASTPLUGINDIR, mLastPluginsDirName);
+	mSettings.setValue(BATCHSETTING_LASTFILEDIR, mLastDirName);
 }
 
 
-BatchFiltersMainWindow::~BatchFiltersMainWindow()
+BatchFiltersWidget::~BatchFiltersWidget()
 {
 	if(mDisplayIplImage) {
 		cvReleaseImage(&mDisplayIplImage);
@@ -105,20 +110,8 @@ BatchFiltersMainWindow::~BatchFiltersMainWindow()
 }
 
 
-void BatchFiltersMainWindow::changeEvent(QEvent *e)
-{
-    QMainWindow::changeEvent(e);
-    switch (e->type()) {
-    case QEvent::LanguageChange:
-        ui->retranslateUi(this);
-        break;
-    default:
-        break;
-    }
-}
 
-
-void BatchFiltersMainWindow::on_loadButton_clicked()
+void BatchFiltersWidget::on_loadButton_clicked()
 {
 	QString fileName = QFileDialog::getOpenFileName(this, tr("Open plugin sequence file"),
 													 mLastPluginsDirName,
@@ -128,7 +121,7 @@ void BatchFiltersMainWindow::on_loadButton_clicked()
 	{
 		mLastPluginsDirName = fi.absoluteDir().absolutePath();
 
-		if(mFilterManager.loadFilterList(fi.absoluteFilePath().toUtf8().data()) < 0)
+		if(mFilterSequencer.loadFilterList(fi.absoluteFilePath().toUtf8().data()) < 0)
 		{
 			ui->sequenceLabel->setText(tr("Invalid file"));
 			ui->controlGroupBox->setEnabled(false);
@@ -138,14 +131,14 @@ void BatchFiltersMainWindow::on_loadButton_clicked()
 			mBatchOptions.sequence_name = fi.baseName();
 			mBatchThread.setOptions(mBatchOptions);
 
-			mPreviewFilterManager.loadFilterList(fi.absoluteFilePath().toUtf8().data());
+			mPreviewFilterSequencer.loadFilterList(fi.absoluteFilePath().toUtf8().data());
 		}
 
 		saveSettings();
 	}
 }
 
-void BatchFiltersMainWindow::on_addButton_clicked()
+void BatchFiltersWidget::on_addButton_clicked()
 {
 	QStringList files = QFileDialog::getOpenFileNames(
 							 NULL,
@@ -193,7 +186,7 @@ void BatchFiltersMainWindow::on_addButton_clicked()
 
 }
 
-void BatchFiltersMainWindow::on_resetButton_clicked()
+void BatchFiltersWidget::on_resetButton_clicked()
 {
 	QList<t_batch_item *>::iterator it;
 	for(it = mFileList.begin(); it != mFileList.end(); ++it)
@@ -212,7 +205,7 @@ void BatchFiltersMainWindow::on_resetButton_clicked()
 
 }
 
-void BatchFiltersMainWindow::on_delButton_clicked()
+void BatchFiltersWidget::on_delButton_clicked()
 {
 	QList<t_batch_item *>::iterator it;
 	int idx = 0;
@@ -230,13 +223,13 @@ void BatchFiltersMainWindow::on_delButton_clicked()
 	}
 }
 
-void BatchFiltersMainWindow::on_recordButton_toggled(bool checked)
+void BatchFiltersWidget::on_recordButton_toggled(bool checked)
 {
 	mBatchOptions.record_output = checked;
 	mBatchThread.setOptions(mBatchOptions);
 }
 
-void BatchFiltersMainWindow::on_viewButton_toggled(bool checked)
+void BatchFiltersWidget::on_viewButton_toggled(bool checked)
 {
 	mBatchOptions.view_image = checked;
 
@@ -246,7 +239,7 @@ void BatchFiltersMainWindow::on_viewButton_toggled(bool checked)
 	mBatchThread.setOptions(mBatchOptions);
 }
 
-void BatchFiltersMainWindow::on_greyButton_toggled(bool checked)
+void BatchFiltersWidget::on_greyButton_toggled(bool checked)
 {
 	mBatchOptions.use_grey = checked;
 	if(checked)
@@ -261,7 +254,7 @@ void BatchFiltersMainWindow::on_greyButton_toggled(bool checked)
 	mBatchThread.setOptions(mBatchOptions);
 }
 
-void BatchFiltersMainWindow::on_playPauseButton_toggled(bool checked)
+void BatchFiltersWidget::on_playPauseButton_toggled(bool checked)
 {
 	ui->recordButton->setEnabled(!checked);
 	ui->greyButton->setEnabled(!checked);
@@ -289,7 +282,7 @@ void BatchFiltersMainWindow::on_playPauseButton_toggled(bool checked)
 }
 
 
-void BatchFiltersMainWindow::on_reloadPluginCheckBox_stateChanged(int )
+void BatchFiltersWidget::on_reloadPluginCheckBox_stateChanged(int )
 {
 	mBatchOptions.reload_at_change = ui->reloadPluginCheckBox->isChecked();
 	mBatchThread.setOptions(mBatchOptions);
@@ -297,7 +290,7 @@ void BatchFiltersMainWindow::on_reloadPluginCheckBox_stateChanged(int )
 
 
 
-void BatchFiltersMainWindow::on_filesTreeWidget_itemSelectionChanged()
+void BatchFiltersWidget::on_filesTreeWidget_itemSelectionChanged()
 {
 	fprintf(stderr, "[Batch] %s:%d \n",	__func__, __LINE__);
 
@@ -311,7 +304,7 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemSelectionChanged()
 	on_filesTreeWidget_itemClicked(selectedItems.at(0), 0);
 }
 
-void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
+void BatchFiltersWidget::on_filesTreeWidget_itemClicked(
 		QTreeWidgetItem* treeItem, int /*column*/)
 {
 	if(!ui->viewButton->isChecked()) { return; }
@@ -338,7 +331,7 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 				ui->imageLabel->setRefImage(&mLoadImage);
 				ui->imageLabel->switchToSmartZoomMode();// reset zooming
 
-				if(strlen(mPreviewFilterManager.getPluginSequenceFile())>0)
+				if(strlen(mPreviewFilterSequencer.getPluginSequenceFile())>0)
 				{
 					// TODO : process image
 					QImage loadedQImage;
@@ -370,9 +363,9 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 									loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
 									);
 							// unload previously loaded filters
-							mPreviewFilterManager.slotUnloadAll();
+							mPreviewFilterSequencer.unloadAllLoaded();
 							// reload same file
-							mPreviewFilterManager.loadFilterList(mPreviewFilterManager.getPluginSequenceFile());
+							mPreviewFilterSequencer.loadFilterList(mPreviewFilterSequencer.getPluginSequenceFile());
 						}
 
 						oldSize.width = loadedQImage.width();
@@ -390,16 +383,16 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 
 						fprintf(stderr, "[Batch] %s:%d : process sequence '%s' on image '%s' (%dx%dx%d)\n",
 								__func__, __LINE__,
-								mPreviewFilterManager.getPluginSequenceFile(),
+								mPreviewFilterSequencer.getPluginSequenceFile(),
 								item->absoluteFilePath.toAscii().data(),
 								loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
 								);
 						// Process this image with filters
-						mPreviewFilterManager.processImage(&image);
+						mPreviewFilterSequencer.processImage(&image);
 
 						fprintf(stderr, "[Batch] %s:%d : processd sequence '%s' => display image '%s' (%dx%dx%d)\n",
 								__func__, __LINE__,
-								mPreviewFilterManager.getPluginSequenceFile(),
+								mPreviewFilterSequencer.getPluginSequenceFile(),
 								item->absoluteFilePath.toAscii().data(),
 								loadedQImage.width(), loadedQImage.height(), loadedQImage.depth());
 
@@ -429,13 +422,13 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 	}
 }
 
-void BatchFiltersMainWindow::on_filesTreeWidget_itemActivated(QTreeWidgetItem* item, int column)
+void BatchFiltersWidget::on_filesTreeWidget_itemActivated(QTreeWidgetItem* item, int column)
 {
 	fprintf(stderr, "[Batch] %s:%d \n",	__func__, __LINE__);
 	on_filesTreeWidget_itemClicked(item, column);
 }
 
-void BatchFiltersMainWindow::on_filesTreeWidget_itemChanged(QTreeWidgetItem* /*item*/, int /*column*/)
+void BatchFiltersWidget::on_filesTreeWidget_itemChanged(QTreeWidgetItem* /*item*/, int /*column*/)
 {
 //	fprintf(stderr, "[Batch] %s:%d %p column=%d\n",	__func__, __LINE__, item,column );
 //	on_filesTreeWidget_itemClicked(item, column);
@@ -451,7 +444,7 @@ typedef struct {
 } t_batch_progress;
 
 
-void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
+void BatchFiltersWidget::on_mDisplayTimer_timeout()
 {
 	QList<t_batch_item *>::iterator it;
 	t_batch_progress progress;
@@ -555,7 +548,7 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 
 	if(progress.nb_unprocessed == 0) {
 		// we're done
-		ui->playPauseButton->setOn(false);
+		ui->playPauseButton->setChecked(false);
 	}
 
 	// display current processed image if needed
@@ -646,7 +639,7 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 BatchFiltersThread::BatchFiltersThread()
 {
 	mRun = mRunning = mProcessing = false;
-	mpFilterManager = NULL;
+	mpFilterSequencer = NULL;
 	mpFileList = NULL;
 
 	memset(&mTimeHistogram, 0, sizeof(t_time_histogram));
@@ -842,9 +835,9 @@ void BatchFiltersThread::run()
 								if(encoder) { delete encoder; encoder = NULL; }
 
 								// unload previously loaded filters
-								mpFilterManager->slotUnloadAll();
+								mpFilterSequencer->unloadAllLoaded();
 								// reload same file
-								mpFilterManager->loadFilterList(mpFilterManager->getPluginSequenceFile());
+								mpFilterSequencer->loadFilterList(mpFilterSequencer->getPluginSequenceFile());
 							}
 
 							//
@@ -860,7 +853,7 @@ void BatchFiltersThread::run()
 							image.buffer = loadedQImage.bits(); // Buffer
 
 							// Process this image with filters
-							int retproc = mpFilterManager->processImage(&image);
+							int retproc = mpFilterSequencer->processImage(&image);
 							if(retproc < 0)
 							{
 								item->processing_state = ERROR_PROCESS;
@@ -873,7 +866,7 @@ void BatchFiltersThread::run()
 								if(mBatchOptions.record_output) {
 									QFileInfo fi(item->absoluteFilePath);
 									QString outFile = item->absoluteFilePath
-													  + "-" + mBatchOptions.sequence_name + "." + fi.extension();
+													  + "-" + mBatchOptions.sequence_name + "." + fi.suffix();
 									loadedQImage.save(outFile);
 								}
 
@@ -953,7 +946,7 @@ void BatchFiltersThread::run()
 										}
 
 										// if the item is no more in processing list
-										if(mpFileList->findIndex(item) < 0) {
+										if(mpFileList->indexOf(item) < 0) {
 											was_paused = true;
 											still_processing = true;
 											// Forget this item because it may have been destroyed
@@ -987,7 +980,7 @@ void BatchFiltersThread::run()
 										}
 										resume = false;
 									} else {
-										int retproc = mpFilterManager->processImage(&image);
+										int retproc = mpFilterSequencer->processImage(&image);
 
 										if(retproc < 0) {
 											// Set the state to processing error
@@ -1102,13 +1095,13 @@ void BatchFiltersThread::run()
 			} // while still_processing
 
 			// Unload plugins at end of list
-			if(mpFilterManager) {
+			if(mpFilterSequencer) {
 				if(g_debug_BatchFiltersThread) {
 					fprintf(stderr, "BatchFiltersThread::%s:%d: Unloading plugins on %p...\n", __func__, __LINE__,
-						mpFilterManager);
+						mpFilterSequencer);
 				}
 
-				mpFilterManager->slotUnloadAll();
+				mpFilterSequencer->unloadAllLoaded();
 
 				if(g_debug_BatchFiltersThread) {
 					fprintf(stderr, "BatchFiltersThread::%s:%d: Unloaded plugins.\n", __func__, __LINE__); fflush(stderr);

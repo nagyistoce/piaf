@@ -44,7 +44,11 @@
 #include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
+
+#ifndef WINDOWS
 #include <sys/wait.h>
+#endif
+
 #include <unistd.h>
 #include <signal.h>
 #include <fcntl.h>
@@ -87,12 +91,15 @@ int PiafSignalHandler::killChild() {
 		fprintf(stderr, "PiafSignalHandler::%s:%d : nothing in list => return 0 !\n", __func__, __LINE__);
 		return 0;
 	}
-
+#ifndef WINDOWS
 	while(waitpid(-1, NULL, WNOHANG) >0) {
 		if(g_debug_PiafSignalHandler)  {
 			fprintf(stderr, "PiafSignalHandler::%s:%d : waitpid>0 !\n", __func__, __LINE__);
 		}
 	}
+#else
+        /// \todo FIXME
+#endif
 
 	QList<sigPiafFilter *>::iterator it;
 	for(it = filterList.begin(); it != filterList.end(); ++it) {
@@ -102,6 +109,7 @@ int PiafSignalHandler::killChild() {
 				__func__, __LINE__,
 				sigF->pFilter->exec_name, sigF->pid);
 		}
+#ifndef WINDOWS
 
 		if( kill(sigF->pid, SIGUSR1)<0)
 		{
@@ -135,6 +143,9 @@ int PiafSignalHandler::killChild() {
 
 			return 1;
 		}
+#else
+                /// \todo FIXME
+#endif
 	}
 
 	if(g_debug_PiafSignalHandler) {
@@ -815,6 +826,11 @@ int FilterSequencer::saveSequence(char * filename)
 }
 
 
+int FilterSequencer::loadFilterList(char * filename)
+{
+	return loadSequence(filename);
+}
+
 /* read configuration file for filters order
 */
 int FilterSequencer::loadSequence(char * filename)
@@ -1461,12 +1477,14 @@ int PiafFilter::loadChildProcess()
 	}
 	// fork and
 	// Commmunication processing
-	if( pipe( pipeOut ) == -1 || pipe( pipeIn ) == -1)
+#ifndef WINDOWS
+        if( pipe( pipeOut ) == -1 || pipe( pipeIn ) == -1)
 	{
 		int errnum = errno;
 		fprintf(stderr, "PiafFilter::%s:%d : Error in pipe() : err=%d='%s'\n",
 				__func__, __LINE__, errnum, strerror(errnum));
 	}
+
 	else
 	{
 		struct timeval tv1, tv2;
@@ -1560,7 +1578,13 @@ int PiafFilter::loadChildProcess()
 			writeFlag = false;
 		}
 	}
+#else
+        /// \todo
+        if(0)
+        {
 
+        }
+#endif
 	return 1;
 }
 
@@ -1609,11 +1633,14 @@ int PiafFilter::unloadChildProcess()
 	fflush(stderr);
 //#endif
 
-
+#ifndef WINDOWS
 	while(waitpid(childpid, NULL, WNOHANG) >0) {
 		fprintf(stderr, "%s:%d : waitpid(%d, WNOHANG) !\n", __func__, __LINE__,
 				childpid);
 	}
+#else
+        /// \todo
+#endif
 	fprintf(stderr, "PiafFilter::%s:%d : OK. Killed child '%s'\n",
 			__func__, __LINE__, exec_name);
 

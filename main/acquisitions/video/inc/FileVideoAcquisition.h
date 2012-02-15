@@ -29,7 +29,7 @@
 
 #else
 
-#include <win32_videodev.h>
+//#include <win32_videodev.h>
 
 #endif
 

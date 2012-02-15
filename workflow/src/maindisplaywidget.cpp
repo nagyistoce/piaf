@@ -437,7 +437,6 @@ void MainDisplayWidget::on_timeLineWidget_signalCursorPositionChanged(unsigned l
 	fprintf(stderr, "MainDisplayWidget::%s:%d received !\n", __func__, __LINE__);
 	mFileVA.setAbsolutePosition(filepos);
 	on_goNextButton_clicked();
-
 }
 
 void MainDisplayWidget::on_magneticButton_toggled(bool on)
