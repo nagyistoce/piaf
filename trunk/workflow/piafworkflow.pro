@@ -17,13 +17,19 @@ CONFIG += debug
 
 DEFINES += PIAFWORKFLOW
 
-unix::DEFINES += VERSION_YY="`date +%Y`" \
-    VERSION_MM="`date +%m | sed 's/0//'`" \
-    VERSION_DD="`date +%d | sed 's/0//'`" \
-    __LINUX__
-win32:DEFINES += VERSION_YY="2011" \
+unix: {
+    DEFINES += VERSION_YY="`date +%Y`" \
+        VERSION_MM="`date +%m | sed 's/0//'`" \
+        VERSION_DD="`date +%d | sed 's/0//'`" \
+	__LINUX__ LINUX _LINUX
+}
+
+win32: {
+    DEFINES += VERSION_YY="2011" \
 	VERSION_MM="08" \
 	VERSION_DD="29"
+    DEFINES += __WINDOWS__ WINDOWS
+}
 
 # icon
 # reference : file:///usr/share/qt4/doc/html/appicon.html
@@ -197,7 +203,6 @@ exists(tototatatutu) {
 		$$LEGACYPATH/tools/inc/swtoolmainwindow.h \
 		$$LEGACYPATH/tools/inc/workshopimagetool.h \
 		$$LEGACYPATH/tools/inc/videoplayertool.h \
-		$$LEGACYPATH/tools/inc/batchfiltersmainwindow.h \
 	$$LEGACYPATH/components/inc/workshopcomponent.h \
 	$$LEGACYPATH/components/inc/workshopmeasure.h \
 	$$LEGACYPATH/components/inc/workshopimage.h \
@@ -216,7 +221,6 @@ exists(tototatatutu) {
 		$$LEGACYPATH/tools/src/workshopimagetool.cpp \
 		$$LEGACYPATH/tools/src/videoplayertool.cpp \
 		$$LEGACYPATH/tools/src/swtoolmainwindow.cpp \
-		$$LEGACYPATH/tools/src/batchfiltersmainwindow.cpp \
 	$$LEGACYPATH/components/src/workshopcomponent.cpp \
 	$$LEGACYPATH/components/src/workshopmeasure.cpp \
 	$$LEGACYPATH/components/src/workshopimage.cpp \
@@ -239,6 +243,7 @@ SOURCES += \
 	$$LEGACYPATH/acquisitions/video/src/opencvvideoacquisition.cpp \
 	$$LEGACYPATH/src/plugineditdialog.cpp \
 	$$LEGACYPATH/tools/src/vidacqsettingswindow.cpp \
+		tools/src/batchfilterswidget.cpp \
 	$$LEGACYPATH/src/imagewidget.cpp
 
 HEADERS += \
@@ -259,6 +264,7 @@ HEADERS += \
 	$$LEGACYPATH/acquisitions/video/inc/opencvvideoacquisition.h \
 	$$LEGACYPATH/inc/plugineditdialog.h \
 	$$LEGACYPATH/tools/inc/vidacqsettingswindow.h \
+		tools/inc/batchfilterswidget.h \
 	$$LEGACYPATH/inc/piaf-settings.h \
 	$$LEGACYPATH/inc/nolinux_videodev.h \
 	$$LEGACYPATH/inc/imagewidget.h
@@ -409,7 +415,7 @@ INCLUDEPATH += .
 FORMS += \
 		tools/ui/moviebookmarkform.ui \
 		$$LEGACYPATH/ui/plugineditdialog.ui \
-		$$LEGACYPATH/tools/ui/batchfiltersmainwindow.ui \
+		tools/ui/batchfilterswidget.ui \
 		$$LEGACYPATH/tools/ui/imagetoavidialog.ui \
 		$$LEGACYPATH/tools/ui/vidacqsettingswindow.ui
 

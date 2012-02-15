@@ -663,7 +663,7 @@
          <item>
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="currentIndex">
-            <number>2</number>
+            <number>3</number>
            </property>
            <widget class="QWidget" name="page_mainImage">
             <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -696,8 +696,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>98</width>
-                  <height>28</height>
+                  <width>96</width>
+                  <height>26</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -738,9 +738,18 @@
              </item>
             </layout>
            </widget>
-           <widget class="QWidget" name="pageBatch">
-            <layout class="QVBoxLayout" name="verticalLayout_17">
-             <property name="margin">
+           <widget class="QWidget" name="page_batch">
+            <layout class="QVBoxLayout" name="verticalLayout_19">
+             <property name="leftMargin">
+              <number>10</number>
+             </property>
+             <property name="topMargin">
+              <number>2</number>
+             </property>
+             <property name="rightMargin">
+              <number>2</number>
+             </property>
+             <property name="bottomMargin">
               <number>2</number>
              </property>
              <item>
@@ -954,135 +963,34 @@
               </widget>
              </item>
              <item>
-              <widget class="QGroupBox" name="batchCurProcessGroupBox">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
+              <widget class="QScrollArea" name="scrollArea_3">
+               <property name="widgetResizable">
+                <bool>true</bool>
                </property>
-               <property name="title">
-                <string>Current process</string>
-               </property>
-               <layout class="QGridLayout" name="gridLayout">
-                <property name="margin">
-                 <number>4</number>
+               <widget class="QWidget" name="scrollAreaWidgetContents_5">
+                <property name="geometry">
+                 <rect>
+                  <x>0</x>
+                  <y>0</y>
+                  <width>568</width>
+                  <height>218</height>
+                 </rect>
                 </property>
-                <item row="0" column="0" rowspan="2">
-                 <widget class="QWidget" name="widget_4" native="true">
-                  <layout class="QGridLayout" name="gridLayout_3">
-                   <property name="margin">
-                    <number>0</number>
-                   </property>
-                   <item row="0" column="0">
-                    <widget class="QLabel" name="label">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Files:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="1">
-                    <widget class="QLabel" name="nbFilesLabel_2">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="toolTip">
-                      <string>Number of files in process list</string>
-                     </property>
-                     <property name="text">
-                      <string>--</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="2">
-                    <widget class="QLabel" name="label_3">
-                     <property name="text">
-                      <string>Proc:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="3">
-                    <widget class="QLabel" name="nbProcLabel">
-                     <property name="toolTip">
-                      <string>Number of files with processed</string>
-                     </property>
-                     <property name="text">
-                      <string>--</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="4">
-                    <widget class="QLabel" name="label_4">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Minimum">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="text">
-                      <string>Err:</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="0" column="5">
-                    <widget class="QLabel" name="nbErrLabel">
-                     <property name="toolTip">
-                      <string>Number of files with errors</string>
-                     </property>
-                     <property name="text">
-                      <string>--</string>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="1" column="0" colspan="6">
-                    <widget class="QProgressBar" name="progressBar">
-                     <property name="value">
-                      <number>0</number>
-                     </property>
-                    </widget>
-                   </item>
-                   <item row="2" column="0" colspan="6">
-                    <widget class="TimeHistogramWidget" name="timeHistoWidget" native="true">
-                     <property name="sizePolicy">
-                      <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                       <horstretch>0</horstretch>
-                       <verstretch>0</verstretch>
-                      </sizepolicy>
-                     </property>
-                     <property name="minimumSize">
-                      <size>
-                       <width>0</width>
-                       <height>80</height>
-                      </size>
-                     </property>
-                    </widget>
-                   </item>
-                  </layout>
-                 </widget>
-                </item>
-                <item row="0" column="1" rowspan="2">
-                 <widget class="ImageWidget" name="imageLabel" native="true">
-                  <property name="sizePolicy">
-                   <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-                    <horstretch>0</horstretch>
-                    <verstretch>0</verstretch>
-                   </sizepolicy>
-                  </property>
-                  <property name="styleSheet">
-                   <string notr="true">background-color: rgb(0, 0, 0);</string>
-                  </property>
-                 </widget>
-                </item>
-               </layout>
+                <layout class="QVBoxLayout" name="verticalLayout_17">
+                 <property name="leftMargin">
+                  <number>2</number>
+                 </property>
+                 <property name="topMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="rightMargin">
+                  <number>0</number>
+                 </property>
+                 <property name="bottomMargin">
+                  <number>0</number>
+                 </property>
+                </layout>
+               </widget>
               </widget>
              </item>
             </layout>
@@ -1738,18 +1646,6 @@
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
-  <customwidget>
-   <class>ImageWidget</class>
-   <extends>QWidget</extends>
-   <header>imagewidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>TimeHistogramWidget</class>
-   <extends>QWidget</extends>
-   <header>timehistogramwidget.h</header>
-   <container>1</container>
-  </customwidget>
   <customwidget>
    <class>NavImageWidget</class>
    <extends>QWidget</extends>

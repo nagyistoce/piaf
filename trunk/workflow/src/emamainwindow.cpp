@@ -59,10 +59,9 @@
 
 //#include "pluginlistdialog.h"
 #include "plugineditdialog.h"
-#ifdef PIAF_LEGACY
-// Removed because it used the former SwToolMainWindow
-#include "batchfiltersmainwindow.h"
-#endif
+
+#include "batchfilterswidget.h"
+
 #include "imagetoavidialog.h"
 
 #include "imagewidget.h"
@@ -643,10 +642,9 @@ void EmaMainWindow::on_actionEdit_plugins_activated()
 
 void EmaMainWindow::on_actionBatch_processor_activated()
 {
-#ifdef PIAF_LEGACY
-	BatchFiltersMainWindow * batchProc = new BatchFiltersMainWindow();
+	statusBar()->showMessage( tr("Starting batch in new window") );
+	BatchFiltersWidget * batchProc = new BatchFiltersWidget();
 	batchProc->show();
-#endif //PIAF_LEGACY
 }
 
 void EmaMainWindow::on_actionConvert_images_to_AVI_activated()

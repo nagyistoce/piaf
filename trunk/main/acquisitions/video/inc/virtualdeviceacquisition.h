@@ -18,8 +18,9 @@
 #ifndef VIRTUALDEVICEACQUISITION_H
 #define VIRTUALDEVICEACQUISITION_H
 
-#include <sys/mman.h>
-
+//#ifndef WINDOWS
+//#include <sys/mman.h>
+//#endif
 #include "ccvt.h"
 #include "sw_types.h"
 
