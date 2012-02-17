@@ -6,31 +6,131 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
-    <height>480</height>
+    <width>668</width>
+    <height>341</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>Piaf - Batch processor</string>
   </property>
   <property name="windowIcon">
-   <iconset resource="../../piaf.qrc">
+   <iconset resource="../../../main/piaf.qrc">
     <normaloff>:/images/22x22/system-run.png</normaloff>:/images/22x22/system-run.png</iconset>
   </property>
-  <widget class="QWidget" name="centralwidget">
-   <layout class="QGridLayout" name="gridLayout">
-    <item row="0" column="0">
-     <widget class="QGroupBox" name="groupBox">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="title">
-       <string>Batch files</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_3">
+  <layout class="QGridLayout" name="gridLayout">
+   <item row="0" column="0">
+    <widget class="QTabWidget" name="tabWidget">
+     <property name="currentIndex">
+      <number>1</number>
+     </property>
+     <widget class="QWidget" name="tab_3">
+      <attribute name="title">
+       <string>Files</string>
+      </attribute>
+      <layout class="QHBoxLayout" name="horizontalLayout_3">
+       <item>
+        <widget class="QWidget" name="buttonsWidget" native="true">
+         <layout class="QVBoxLayout" name="verticalLayout_4">
+          <property name="spacing">
+           <number>1</number>
+          </property>
+          <property name="leftMargin">
+           <number>0</number>
+          </property>
+          <property name="topMargin">
+           <number>1</number>
+          </property>
+          <property name="rightMargin">
+           <number>0</number>
+          </property>
+          <property name="bottomMargin">
+           <number>1</number>
+          </property>
+          <item>
+           <widget class="QPushButton" name="delButton">
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Remove selected files</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../main/piaf.qrc">
+              <normaloff>:/images/22x22/list-remove.png</normaloff>:/images/22x22/list-remove.png</iconset>
+            </property>
+            <property name="shortcut">
+             <string>Del</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="resetButton">
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Reset state to unprocessed</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../main/piaf.qrc">
+              <normaloff>:/images/22x22/edit-undo.png</normaloff>:/images/22x22/edit-undo.png</iconset>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+R</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPushButton" name="addButton">
+            <property name="maximumSize">
+             <size>
+              <width>32</width>
+              <height>16777215</height>
+             </size>
+            </property>
+            <property name="toolTip">
+             <string>Add new files</string>
+            </property>
+            <property name="text">
+             <string/>
+            </property>
+            <property name="icon">
+             <iconset resource="../../../main/piaf.qrc">
+              <normaloff>:/images/22x22/list-add.png</normaloff>:/images/22x22/list-add.png</iconset>
+            </property>
+            <property name="shortcut">
+             <string>Ctrl+O</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+         </layout>
+        </widget>
+       </item>
        <item>
         <widget class="QTreeWidget" name="filesTreeWidget">
          <property name="toolTip">
@@ -53,7 +153,7 @@
            <string>File</string>
           </property>
           <property name="icon">
-           <iconset resource="../../piaf.qrc">
+           <iconset resource="../../../main/piaf.qrc">
             <normaloff>:/images/pixmaps/movie.png</normaloff>:/images/pixmaps/movie.png</iconset>
           </property>
          </column>
@@ -64,103 +164,38 @@
          </column>
         </widget>
        </item>
-       <item>
-        <widget class="QWidget" name="buttonsWidget" native="true">
-         <layout class="QHBoxLayout" name="horizontalLayout_2">
-          <item>
-           <widget class="QPushButton" name="addButton">
-            <property name="toolTip">
-             <string>Add new files</string>
-            </property>
-            <property name="text">
-             <string>Add</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../../piaf.qrc">
-              <normaloff>:/images/22x22/list-add.png</normaloff>:/images/22x22/list-add.png</iconset>
-            </property>
-            <property name="shortcut">
-             <string>Ctrl+O</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="resetButton">
-            <property name="toolTip">
-             <string>Reset state to unprocessed</string>
-            </property>
-            <property name="text">
-             <string>Reset</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../../piaf.qrc">
-              <normaloff>:/images/22x22/edit-undo.png</normaloff>:/images/22x22/edit-undo.png</iconset>
-            </property>
-            <property name="shortcut">
-             <string>Ctrl+R</string>
-            </property>
-           </widget>
-          </item>
-          <item>
-           <widget class="QPushButton" name="delButton">
-            <property name="toolTip">
-             <string>Remove selected files</string>
-            </property>
-            <property name="text">
-             <string>Del</string>
-            </property>
-            <property name="icon">
-             <iconset resource="../../piaf.qrc">
-              <normaloff>:/images/22x22/list-remove.png</normaloff>:/images/22x22/list-remove.png</iconset>
-            </property>
-            <property name="shortcut">
-             <string>Del</string>
-            </property>
-           </widget>
-          </item>
-         </layout>
-        </widget>
-       </item>
       </layout>
      </widget>
-    </item>
-    <item row="0" column="1">
-     <widget class="QGroupBox" name="groupBox_2">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="title">
-       <string>Plugins</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
+     <widget class="QWidget" name="tab_4">
+      <attribute name="title">
+       <string>Status</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_3">
        <item>
         <widget class="QWidget" name="widget" native="true">
          <layout class="QHBoxLayout" name="horizontalLayout">
-          <property name="leftMargin">
-           <number>0</number>
-          </property>
-          <property name="rightMargin">
-           <number>0</number>
-          </property>
           <item>
            <widget class="QPushButton" name="loadButton">
             <property name="toolTip">
              <string>Load plugin sequence</string>
             </property>
             <property name="text">
-             <string>Plugin sequence</string>
+             <string/>
             </property>
             <property name="icon">
-             <iconset resource="../../piaf.qrc">
+             <iconset resource="../../../main/piaf.qrc">
               <normaloff>:/images/16x16/document-open.png</normaloff>:/images/16x16/document-open.png</iconset>
             </property>
            </widget>
           </item>
           <item>
            <widget class="QLabel" name="sequenceLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
             <property name="text">
              <string>--</string>
             </property>
@@ -170,6 +205,212 @@
            </widget>
           </item>
          </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widget_3" native="true">
+         <layout class="QHBoxLayout" name="horizontalLayout_4">
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="text">
+             <string>Files:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="nbFilesLabel">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="toolTip">
+             <string>Number of files in process list</string>
+            </property>
+            <property name="text">
+             <string>--</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Proc:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="nbProcLabel">
+            <property name="text">
+             <string>--</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>Err:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="nbErrLabel">
+            <property name="text">
+             <string>--</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QProgressBar" name="progressBar">
+         <property name="value">
+          <number>0</number>
+         </property>
+        </widget>
+       </item>
+       <item>
+        <widget class="QWidget" name="widget_4" native="true">
+         <widget class="QCheckBox" name="reloadPluginCheckBox">
+          <property name="geometry">
+           <rect>
+            <x>210</x>
+            <y>30</y>
+            <width>89</width>
+            <height>20</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string>Reload plugins at every change of file</string>
+          </property>
+          <property name="statusTip">
+           <string>Reload the plugins at every change of file. If unchecked, all the images will be processed by the same plugin processus (beware of image size changes).</string>
+          </property>
+          <property name="text">
+           <string>1 plug/file</string>
+          </property>
+          <property name="checked">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="playPauseButton">
+          <property name="geometry">
+           <rect>
+            <x>2</x>
+            <y>23</y>
+            <width>46</width>
+            <height>34</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string>Start processing or pause it</string>
+          </property>
+          <property name="statusTip">
+           <string>Start processing or pause it</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../ema.qrc">
+            <normaloff>:/icons/22x22/media-playback-start.png</normaloff>
+            <disabledoff>:/icons/22x22/media-playback-pause.png</disabledoff>:/icons/22x22/media-playback-start.png</iconset>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="greyButton">
+          <property name="geometry">
+           <rect>
+            <x>54</x>
+            <y>23</y>
+            <width>46</width>
+            <height>34</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string>if down, the images will be converted to grayscale before processing</string>
+          </property>
+          <property name="statusTip">
+           <string>Process input files in color or in grayscale: conversion is done before sending the images to plugins</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../main/piaf.qrc">
+            <normaloff>:/images/22x22/view-color.png</normaloff>
+            <activeon>:/images/22x22/view-gray.png</activeon>:/images/22x22/view-color.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+         <widget class="QPushButton" name="recordButton">
+          <property name="geometry">
+           <rect>
+            <x>106</x>
+            <y>23</y>
+            <width>46</width>
+            <height>34</height>
+           </rect>
+          </property>
+          <property name="toolTip">
+           <string>Record output image or movies</string>
+          </property>
+          <property name="statusTip">
+           <string>Record output image when inputs are still images or movies when inputs are movies</string>
+          </property>
+          <property name="whatsThis">
+           <string>Record output image or movies</string>
+          </property>
+          <property name="text">
+           <string/>
+          </property>
+          <property name="icon">
+           <iconset resource="../../../main/piaf.qrc">
+            <normaloff>:/images/22x22/media-record.png</normaloff>:/images/22x22/media-record.png</iconset>
+          </property>
+          <property name="checkable">
+           <bool>true</bool>
+          </property>
+         </widget>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="tab_6">
+      <attribute name="title">
+       <string>Image</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <item>
+        <widget class="QPushButton" name="viewButton">
+         <property name="toolTip">
+          <string>Display the image output once per second</string>
+         </property>
+         <property name="text">
+          <string/>
+         </property>
+         <property name="icon">
+          <iconset resource="../../../main/piaf.qrc">
+           <normaloff>:/images/16x16/layer-visible-on.png</normaloff>:/images/16x16/layer-visible-on.png</iconset>
+         </property>
+         <property name="shortcut">
+          <string>F5</string>
+         </property>
+         <property name="checkable">
+          <bool>true</bool>
+         </property>
+         <property name="checked">
+          <bool>true</bool>
+         </property>
         </widget>
        </item>
        <item>
@@ -187,150 +428,11 @@
        </item>
       </layout>
      </widget>
-    </item>
-    <item row="2" column="0">
-     <widget class="QGroupBox" name="controlGroupBox">
-      <property name="enabled">
-       <bool>true</bool>
-      </property>
-      <property name="title">
-       <string>Control</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_2">
-       <item row="0" column="4">
-        <widget class="QPushButton" name="recordButton">
-         <property name="toolTip">
-          <string>Record output image or movies</string>
-         </property>
-         <property name="statusTip">
-          <string>Record output image when inputs are still images or movies when inputs are movies</string>
-         </property>
-         <property name="whatsThis">
-          <string>Record output image or movies</string>
-         </property>
-         <property name="text">
-          <string>Record</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../../piaf.qrc">
-           <normaloff>:/images/22x22/media-record.png</normaloff>:/images/22x22/media-record.png</iconset>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3">
-        <widget class="QPushButton" name="greyButton">
-         <property name="toolTip">
-          <string>if down, the images will be converted to grayscale before processing</string>
-         </property>
-         <property name="statusTip">
-          <string>Process input files in color or in grayscale: conversion is done before sending the images to plugins</string>
-         </property>
-         <property name="text">
-          <string>Color</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../../piaf.qrc">
-           <normaloff>:/images/22x22/view-color.png</normaloff>
-           <activeon>:/images/22x22/view-gray.png</activeon>:/images/22x22/view-color.png</iconset>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1" rowspan="2">
-        <widget class="QPushButton" name="playPauseButton">
-         <property name="enabled">
-          <bool>true</bool>
-         </property>
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="statusTip">
-          <string>Start processing or pause it</string>
-         </property>
-         <property name="text">
-          <string>Start</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../../piaf.qrc">
-           <normaloff>:/images/32x32/media-playback-start.png</normaloff>
-           <activeoff>:/images/32x32/media-playback-pause.png</activeoff>:/images/32x32/media-playback-start.png</iconset>
-         </property>
-         <property name="iconSize">
-          <size>
-           <width>32</width>
-           <height>32</height>
-          </size>
-         </property>
-         <property name="shortcut">
-          <string>Space</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="4">
-        <widget class="QPushButton" name="viewButton">
-         <property name="toolTip">
-          <string>Display the image output once per second</string>
-         </property>
-         <property name="text">
-          <string>View</string>
-         </property>
-         <property name="icon">
-          <iconset resource="../../piaf.qrc">
-           <normaloff>:/images/16x16/layer-visible-on.png</normaloff>:/images/16x16/layer-visible-on.png</iconset>
-         </property>
-         <property name="shortcut">
-          <string>F5</string>
-         </property>
-         <property name="checkable">
-          <bool>true</bool>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="3">
-        <widget class="QCheckBox" name="reloadPluginCheckBox">
-         <property name="toolTip">
-          <string>Reload plugins at every change of file</string>
-         </property>
-         <property name="statusTip">
-          <string>Reload the plugins at every change of file. If unchecked, all the images will be processed by the same plugin processus (beware of image size changes).</string>
-         </property>
-         <property name="text">
-          <string>1 plug/file</string>
-         </property>
-         <property name="checked">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-    <item row="1" column="1" rowspan="2">
-     <widget class="QGroupBox" name="timeHistoGroupBox">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Preferred" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="title">
-       <string>Processing time histogram</string>
-      </property>
-      <layout class="QVBoxLayout" name="verticalLayout_2">
+     <widget class="QWidget" name="tab_5">
+      <attribute name="title">
+       <string>Histogram</string>
+      </attribute>
+      <layout class="QVBoxLayout" name="verticalLayout_6">
        <item>
         <widget class="TimeHistogramWidget" name="timeHistoWidget" native="true">
          <property name="toolTip">
@@ -343,83 +445,9 @@
        </item>
       </layout>
      </widget>
-    </item>
-    <item row="1" column="0">
-     <widget class="QGroupBox" name="groupBox_4">
-      <property name="title">
-       <string>Status</string>
-      </property>
-      <layout class="QGridLayout" name="gridLayout_3">
-       <item row="0" column="0">
-        <widget class="QLabel" name="label">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Minimum" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="text">
-          <string>Files:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="1">
-        <widget class="QLabel" name="nbFilesLabel">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Preferred" vsizetype="Preferred">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="toolTip">
-          <string>Number of files in process list</string>
-         </property>
-         <property name="text">
-          <string>--</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="2">
-        <widget class="QLabel" name="label_2">
-         <property name="text">
-          <string>Proc:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="3">
-        <widget class="QLabel" name="nbProcLabel">
-         <property name="text">
-          <string>--</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="4">
-        <widget class="QLabel" name="label_3">
-         <property name="text">
-          <string>Err:</string>
-         </property>
-        </widget>
-       </item>
-       <item row="0" column="5">
-        <widget class="QLabel" name="nbErrLabel">
-         <property name="text">
-          <string>--</string>
-         </property>
-        </widget>
-       </item>
-       <item row="1" column="0" colspan="6">
-        <widget class="QProgressBar" name="progressBar">
-         <property name="value">
-          <number>0</number>
-         </property>
-        </widget>
-       </item>
-      </layout>
-     </widget>
-    </item>
-   </layout>
-  </widget>
-  <widget class="QStatusBar" name="statusbar"/>
+    </widget>
+   </item>
+  </layout>
  </widget>
  <customwidgets>
   <customwidget>
@@ -436,7 +464,8 @@
   </customwidget>
  </customwidgets>
  <resources>
-  <include location="../../piaf.qrc"/>
+  <include location="../../ema.qrc"/>
+  <include location="../../../main/piaf.qrc"/>
  </resources>
  <connections/>
 </ui>
