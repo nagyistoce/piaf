@@ -48,7 +48,7 @@ BatchFiltersWidget::BatchFiltersWidget(QWidget *parent) :
 	mPreviewFilterSequencer.enableWarning(false);
 	mPreviewFilterSequencer.enableAutoReloadSequence(true);
 
-	ui->controlGroupBox->setEnabled(false);
+//	ui->controlGroupBox->setEnabled(false);
 
 	mBatchOptions.reload_at_change = ui->reloadPluginCheckBox->isChecked();
 	mBatchOptions.use_grey = ui->greyButton->isChecked();
@@ -124,9 +124,9 @@ void BatchFiltersWidget::on_loadButton_clicked()
 		if(mFilterSequencer.loadFilterList(fi.absoluteFilePath().toUtf8().data()) < 0)
 		{
 			ui->sequenceLabel->setText(tr("Invalid file"));
-			ui->controlGroupBox->setEnabled(false);
+			//ui->controlGroupBox->setEnabled(false);
 		} else {
-			ui->controlGroupBox->setEnabled(true);
+			//ui->controlGroupBox->setEnabled(true);
 			ui->sequenceLabel->setText(fi.baseName());
 			mBatchOptions.sequence_name = fi.baseName();
 			mBatchThread.setOptions(mBatchOptions);
