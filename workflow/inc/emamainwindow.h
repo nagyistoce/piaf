@@ -46,7 +46,7 @@
 
 
 class EmaMainWindow;
-
+class BatchProgressWidget;
 
 
 /** \brief Directory tree item */
@@ -234,6 +234,8 @@ private:
 	CaptureTreeWidgetItem * mOpenNIItem;
 	CaptureTreeWidgetItem * mFreenectItem;
 	CaptureTreeWidgetItem * mOpenCVItem;
+
+	BatchProgressWidget * mpBatchProgressWidget;
 
 #ifdef PIAF_LEGACY
 	WorkshopImage * pWorkshopImage;

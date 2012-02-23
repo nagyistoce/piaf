@@ -740,24 +740,21 @@
            </widget>
            <widget class="QWidget" name="page_batch">
             <layout class="QVBoxLayout" name="verticalLayout_19">
-             <property name="leftMargin">
-              <number>10</number>
-             </property>
-             <property name="topMargin">
+             <property name="spacing">
               <number>2</number>
              </property>
-             <property name="rightMargin">
-              <number>2</number>
-             </property>
-             <property name="bottomMargin">
+             <property name="margin">
               <number>2</number>
              </property>
              <item>
-              <widget class="QGroupBox" name="batchQueueGroupBox">
-               <property name="title">
-                <string>Batch queue</string>
-               </property>
+              <widget class="QFrame" name="batchQueueFrame">
                <layout class="QVBoxLayout" name="verticalLayout_18">
+                <property name="spacing">
+                 <number>2</number>
+                </property>
+                <property name="margin">
+                 <number>0</number>
+                </property>
                 <item>
                  <widget class="QWidget" name="widget_4" native="true">
                   <layout class="QHBoxLayout" name="horizontalLayout_5">
@@ -865,7 +862,19 @@
                  </widget>
                 </item>
                 <item>
-                 <widget class="QTreeWidget" name="treeWidget">
+                 <widget class="QTreeWidget" name="batchQueueTreeWidget">
+                  <property name="sizePolicy">
+                   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+                    <horstretch>0</horstretch>
+                    <verstretch>0</verstretch>
+                   </sizepolicy>
+                  </property>
+                  <property name="maximumSize">
+                   <size>
+                    <width>16777215</width>
+                    <height>100</height>
+                   </size>
+                  </property>
                   <property name="allColumnsShowFocus">
                    <bool>true</bool>
                   </property>
@@ -963,7 +972,7 @@
               </widget>
              </item>
              <item>
-              <widget class="QScrollArea" name="scrollArea_3">
+              <widget class="QScrollArea" name="batchProgressScrollArea">
                <property name="verticalScrollBarPolicy">
                 <enum>Qt::ScrollBarAlwaysOn</enum>
                </property>
@@ -973,13 +982,13 @@
                <property name="widgetResizable">
                 <bool>true</bool>
                </property>
-               <widget class="QWidget" name="scrollAreaWidgetContents_5">
+               <widget class="QWidget" name="batchProgressScrollAreaContents">
                 <property name="geometry">
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>553</width>
-                  <height>203</height>
+                  <width>561</width>
+                  <height>339</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_17">
