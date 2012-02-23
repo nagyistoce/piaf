@@ -60,7 +60,7 @@
 //#include "pluginlistdialog.h"
 #include "plugineditdialog.h"
 
-#include "batchfilterswidget.h"
+#include "batch_progress_widget.h"
 
 #include "imagetoavidialog.h"
 
@@ -164,6 +164,12 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 //		g_splash->hide();
 	}
 
+
+	// =================== Create batch status progress widget =================
+	mpBatchProgressWidget = new BatchProgressWidget(ui->page_batch);
+	ui->batchProgressScrollAreaContents->layout()->addWidget(mpBatchProgressWidget);
+	// Disable interactions for user to show only the state of progress of batch
+	mpBatchProgressWidget->enableInteractive(false);
 
 
 	connect(ui->mainDisplayWidget, SIGNAL(signalZoomRect(QRect)),
@@ -643,7 +649,7 @@ void EmaMainWindow::on_actionEdit_plugins_activated()
 void EmaMainWindow::on_actionBatch_processor_activated()
 {
 	statusBar()->showMessage( tr("Starting batch in new window") );
-	BatchFiltersWidget * batchProc = new BatchFiltersWidget();
+	BatchProgressWidget * batchProc = new BatchProgressWidget(NULL);
 	batchProc->show();
 }
 
@@ -723,6 +729,8 @@ void EmaMainWindow::slot_filesShowCheckBox_stateChanged(int state) {
 
 void EmaMainWindow::on_filesClearButton_clicked()
 {
+	if(ui->filesTreeWidget->selectedItems().isEmpty()) { return; }
+
 	QTreeWidgetItem * item = ui->filesTreeWidget->selectedItems().at(0);
 	if(!item) { return; }
 	//

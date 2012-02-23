@@ -85,9 +85,9 @@ void ThumbImageFrame::setImageInfoStruct(t_image_info_struct * pinfo)
 			for(int star = 0; star < score; star++) {
 				stars += "*";
 			}
-		else
+		else {
 			score = 0;// for adding 5 x .
-
+		}
 		for(int star = score; star < 5; star++) {
 			stars += ".";
 		}
@@ -102,9 +102,10 @@ void ThumbImageFrame::setImageInfoStruct(t_image_info_struct * pinfo)
 
 		fullImage = QPixmap::fromImage( qImg );
 		fprintf(stderr, "ThumbImageFrame::%s:%d : load '%s' : "
-				"iplImageToQImage(%dx%d) => qImg=%dx%d => pixmap=%dx%d\n",
+				"widg=%dx%d iplImageToQImage(%dx%d) => qImg=%dx%d => pixmap=%dx%d\n",
 				__func__, __LINE__,
 				imagePath.toUtf8().data(),
+				wdisp, hdisp,
 				img->width, img->height,
 				qImg.width(), qImg.height(),
 				fullImage.width(), fullImage.height()
@@ -128,9 +129,10 @@ void ThumbImageFrame::setImageInfoStruct(t_image_info_struct * pinfo)
 								Qt::KeepAspectRatio );
 	}
 
-	fprintf(stderr, "ThumbImageFrame::%s:%d : load '%s' : %dx%d => %dx%d\n",
+	fprintf(stderr, "ThumbImageFrame::%s:%d : load '%s' : widg=%dx%d & full=%dx%d => display=%dx%d\n",
 			__func__, __LINE__,
 			imagePath.toUtf8().data(),
+			wdisp, hdisp,
 			fullImage.width(), fullImage.height(),
 			l_displayImage.width(), l_displayImage.height()
 			);

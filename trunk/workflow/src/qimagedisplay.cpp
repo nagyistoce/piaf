@@ -32,6 +32,8 @@ unsigned char g_debug_QImageDisplay = 0;
 QImageDisplay::QImageDisplay(QWidget * l_parent)
 	: QLabel(l_parent) {
 	setMouseTracking(true);
+
+	setStyleSheet("background-color: rgb(0,0,255);");
 }
 
 /** @brief Overloaded paintEvent */
@@ -41,8 +43,8 @@ void QImageDisplay::paintEvent( QPaintEvent * )
 	int xoff = 0, yoff = 0;
 	if(pixmap() && !pixmap()->isNull())
 	{
-		xoff = (rect().width() - pixmap()->width())/2;
-		yoff = (rect().height() - pixmap()->height())/2;
+		xoff = ( width() - pixmap()->width() )/2;
+		yoff = ( height() - pixmap()->height() )/2;
 		QImage dispImage = pixmap()->toImage();
 		p.drawImage(xoff, yoff, dispImage.copy());
 //		fprintf(stderr, "QImageDisplay::%s:%d : pixmap()=%p => %dx%d\n",

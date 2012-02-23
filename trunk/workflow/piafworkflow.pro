@@ -77,7 +77,8 @@ SOURCES += tools/src/PiafFilter.cpp \
     src/timelinewidget.cpp \
     src/pluginsettingswidget.cpp \
 	tools/src/collectioneditdialog.cpp \
-	tools/src/preferencesdialog.cpp
+	tools/src/preferencesdialog.cpp \
+    tools/src/batch_progress_widget.cpp
 
 
 HEADERS += tools/inc/PiafFilter.h \
@@ -103,7 +104,8 @@ HEADERS += tools/inc/PiafFilter.h \
 	tools/inc/collectioneditdialog.h \
     inc/workflowtypes.h \
     tools/inc/preferencesdialog.h \
-    inc/piafworkflow-settings.h
+    inc/piafworkflow-settings.h \
+    tools/inc/batch_progress_widget.h
 
 FORMS += ui/navimagewidget.ui \
     ui/thumbimagewidget.ui \
@@ -120,7 +122,8 @@ FORMS += ui/navimagewidget.ui \
 	ui/maindisplaywidget.ui \
     ui/pluginsettingswidget.ui \
 	tools/ui/collectioneditdialog.ui \
-    tools/ui/preferencesdialog.ui
+    tools/ui/preferencesdialog.ui \
+    tools/ui/batch_progress_widget.ui
 
 
 INCLUDEPATH += tools/inc
@@ -243,7 +246,6 @@ SOURCES += \
 	$$LEGACYPATH/acquisitions/video/src/opencvvideoacquisition.cpp \
 	$$LEGACYPATH/src/plugineditdialog.cpp \
 	$$LEGACYPATH/tools/src/vidacqsettingswindow.cpp \
-		tools/src/batchfilterswidget.cpp \
 	$$LEGACYPATH/src/imagewidget.cpp
 
 HEADERS += \
@@ -264,7 +266,6 @@ HEADERS += \
 	$$LEGACYPATH/acquisitions/video/inc/opencvvideoacquisition.h \
 	$$LEGACYPATH/inc/plugineditdialog.h \
 	$$LEGACYPATH/tools/inc/vidacqsettingswindow.h \
-		tools/inc/batchfilterswidget.h \
 	$$LEGACYPATH/inc/piaf-settings.h \
 	$$LEGACYPATH/inc/nolinux_videodev.h \
 	$$LEGACYPATH/inc/imagewidget.h
@@ -415,7 +416,6 @@ INCLUDEPATH += .
 FORMS += \
 		tools/ui/moviebookmarkform.ui \
 		$$LEGACYPATH/ui/plugineditdialog.ui \
-		tools/ui/batchfilterswidget.ui \
 		$$LEGACYPATH/tools/ui/imagetoavidialog.ui \
 		$$LEGACYPATH/tools/ui/vidacqsettingswindow.ui
 
@@ -467,6 +467,9 @@ message( "FINAL CONFIGURATION ==================================================
 message( "")
 message( "")
 OTHER_FILES += doc/OpenCVToolsForPhoto.txt
+
+
+
 
 
 
