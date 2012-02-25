@@ -36,11 +36,11 @@
 #define MAX_EXIF_LEN	64
 
 // Debug modes
-#define EMALOG_TRACE	5
-#define EMALOG_DEBUG	4
-#define EMALOG_INFO		-1
-#define EMALOG_WARNING	-2
-#define EMALOG_ERROR	-3
+#define EMALOG_TRACE	SWLOG_TRACE
+#define EMALOG_DEBUG	SWLOG_DEBUG
+#define EMALOG_INFO		SWLOG_INFO
+#define EMALOG_WARNING	SWLOG_WARNING
+#define EMALOG_ERROR	SWLOG_ERROR
 
 #include <QImage>
 #include <QString>
@@ -50,7 +50,7 @@
 #include "FileVideoAcquisition.h"
 
 /** @breif Convert an OpenCV IplIMage to a QImage */
-QImage iplImageToQImage(IplImage * iplImage);
+QImage iplImageToQImage(IplImage * iplImage, bool swap_RB = true);
 
 typedef struct {
 	char * fullpath;				/*!< full path of original image */

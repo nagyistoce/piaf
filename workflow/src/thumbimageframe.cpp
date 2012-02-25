@@ -29,6 +29,21 @@
 #include <QToolTip>
 #include <QFileInfo>
 
+int g_debug_ThumbImageFrame = SWLOG_DEBUG;
+
+
+
+#define THUMBIMGFR_MSG(a,...)       { \
+			if( (a)>=g_debug_ThumbImageFrame ) { \
+					struct timeval l_nowtv; gettimeofday (&l_nowtv, NULL); \
+					fprintf(stderr,"%03d.%03d %s [ThumbFrame %p] [%s] %s:%d : ", \
+							(int)(l_nowtv.tv_sec%1000), (int)(l_nowtv.tv_usec/1000), \
+							SWLOG_MSG((a)), this, __FILE__,__func__,__LINE__); \
+					fprintf(stderr,__VA_ARGS__); \
+					fprintf(stderr,"\n"); \
+			} \
+		}
+
 ThumbImageFrame::ThumbImageFrame(QWidget *parent) :
 	QFrame(parent),
 	m_ui(new Ui::ThumbImageFrame)
@@ -36,6 +51,8 @@ ThumbImageFrame::ThumbImageFrame(QWidget *parent) :
 	m_ui->setupUi(this);
 	mpTwin = NULL;
 	mCtrl = mShift = false;
+
+//	setFocusPolicy(Qt::WheelFocus);
 
 	mActive = false;
 	mSelected = true; // set it to opossite of setSelected call, because it it is the same, the setSelected does nothing
@@ -157,7 +174,7 @@ void ThumbImageFrame::setImageInfoStruct(t_image_info_struct * pinfo)
 		tip += "\n" + tr("Size: ") + sizeStr + tr("kB");
 	}
 
-	m_ui->globalImageLabel->setToolTip(tip);
+//	m_ui->globalImageLabel->setToolTip(tip);
 	setToolTip(tip);
 
 }
@@ -259,10 +276,15 @@ void ThumbImageFrame::setImageFile(const QString & imagePath,
 
 	m_ui->globalImageLabel->setToolTip(tip);
 }
+void ThumbImageFrame::on_globalImageLabel_signalMouseDoubleClickEvent ( QMouseEvent * )
+{
+	emit signalThumbDoubleClicked(m_imagePath);
+}
 
-void ThumbImageFrame::on_globalImageLabel_signalMousePressEvent(QMouseEvent * ) {
+void ThumbImageFrame::on_globalImageLabel_signalMousePressEvent(QMouseEvent * e) {
 	emit signalThumbClicked(m_imagePath);
 }
+
 void ThumbImageFrame::on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * ) {
 	//emit signalThumbSelected(m_imagePath);
 }
@@ -286,10 +308,13 @@ void ThumbImageFrame::mouseMoveEvent ( QMouseEvent * event ) {
 /* set the selected flag */
 void ThumbImageFrame::setSelected(bool selected)
 {
-	PIAF_MSG(SWLOG_INFO, "this=%p Thumb '%s' set selected='%c'",
+	THUMBIMGFR_MSG(SWLOG_INFO, "this=%p Thumb '%s' set selected='%c' shift=%c ctrl=%c",
 			 this,
 			 m_imagePath.toAscii().data(),
-			 selected ? 'T':'F');
+			 selected ? 'T':'F',
+			 mShift ? 'T':'F',
+			 mCtrl ? 'T':'F'
+			 );
 
 	if(mSelected == selected)
 	{
@@ -303,48 +328,18 @@ void ThumbImageFrame::setSelected(bool selected)
 		}
 	}
 
-	// Toggle state
-	if(mSelected) {
-		PIAF_MSG(SWLOG_INFO, "this=%p Thumb '%s' selected='%c' active='%c' => changed background",
-				 this,
-				 m_imagePath.toAscii().data(),
-				 mSelected ? 'T':'F',
-				 mActive ? 'T':'F' );
-		if(mActive) {
-			setStyleSheet("background-color: rgb(190, 200, 255);");
-		} else {
-			setStyleSheet("background-color: rgb(60, 70, 255);");
-		}
-		if(mShift) {
-			fprintf(stderr, "ThumbImageFrame %p::%s:%d : shift+click this=%p\n",
-					this, __func__, __LINE__, this);
-
-			emit signal_shiftClick(this);
-		}
-		if(mCtrl) {
-			fprintf(stderr, "ThumbImageFrame %p::%s:%d : Ctrl+click this=%p\n",
-					this, __func__, __LINE__, this);
-			emit signal_ctrlClick(this);
-		}
-
-	} else {
-		PIAF_MSG(SWLOG_INFO, "this=%p Thumb '%s' selected='%c' active='%c' => changed background",
-				 this,
-				 m_imagePath.toAscii().data(),
-				 mSelected ? 'T':'F',
-				 mActive ? 'T':'F' );
-//		if(mActive) {
-//			setStyleSheet("background-color: rgba(128, 128, 128, 255);");
-//		} else {
-			setStyleSheet("background-color: rgba(128, 128, 128, 0);");
-//		}
-	}
-
-	repaint();
+	updateBackground();
 }
 
 void ThumbImageFrame::setActive(bool active)
 {
+	if(active)
+	{
+		THUMBIMGFR_MSG(SWLOG_DEBUG, "this=%p Thumb '%s' active=%c",
+					   this,
+					   m_imagePath.toAscii().data(),
+					   active ? 'T':'F');
+	}
 	mActive = active;
 	if(mpTwin)
 	{
@@ -352,38 +347,86 @@ void ThumbImageFrame::setActive(bool active)
 			mpTwin->setActive(mActive);
 		}
 	}
-
-	// Toggle state
-//	if(mActive)
-//	{
-//		if(mSelected) {
-//			setStyleSheet("background-color: rgb(60, 70, 255);");
+	updateBackground();
+}
+// update background color depending on mActive and mSelected
+void ThumbImageFrame::updateBackground()
+{
+	if(mSelected) {
+		THUMBIMGFR_MSG(SWLOG_INFO, "this=%p Thumb '%s' selected='%c' active='%c' "
+					   "shift=%c ctrl=%c "
+					   "=> changed background",
+				 this,
+				 m_imagePath.toAscii().data(),
+				 mSelected ? 'T':'F',
+				 mActive ? 'T':'F',
+					   mShift? 'T':'F',
+					   mCtrl ? 'T':'F');
+		//if(mActive) {
+			setStyleSheet("background-color: rgb(60, 70, 255);");
+	//	} else
+//		{
+			setStyleSheet("background-color: rgb(190, 200, 255);");
 //		}
-//		if(mShift) {
-//			fprintf(stderr, "ThumbImageFrame %p::%s:%d : shift+click this=%p\n",
-//					this, __func__, __LINE__, this);
 
-//			emit signal_shiftClick(this);
-//		}
-//		if(mCtrl) {
-//			fprintf(stderr, "ThumbImageFrame %p::%s:%d : Ctrl+click this=%p\n",
-//					this, __func__, __LINE__, this);
-//			emit signal_ctrlClick(this);
-//		}
+	} else {
+		THUMBIMGFR_MSG(SWLOG_INFO, "this=%p Thumb '%s' selected='%c' active='%c' => changed background",
+				 this,
+				 m_imagePath.toAscii().data(),
+				 mSelected ? 'T':'F',
+				 mActive ? 'T':'F' );
+		setStyleSheet("background-color: rgba(128, 128, 128, 0);");
 
-//	} else {
-//		//		refresh selection
-//		setSelected(mSelected);
-//	}
-//	update();
+		//		if(mActive) {
+//			m_ui->setStyleSheet("background-color: rgb(60, 70, 255);");
+//		}
+//		else {
+////			setStyleSheet("background-color: rgb(60, 70, 255);");
+//			setStyleSheet("background-color: rgba(128, 128, 128, 0);");
+//		}
+	}
+	if(mActive) {
+		m_ui->globalImageLabel->setStyleSheet("border: 2px solid rgb(60, 70, 255); ");
+	}
+	else
+	{
+		m_ui->globalImageLabel->setStyleSheet("border: 0px;");
+	}
+
+	repaint();
+
 }
 
 
-void ThumbImageFrame::mousePressEvent ( QMouseEvent * e )
+void ThumbImageFrame::mousePressEvent( QMouseEvent * e )
 {
+	fprintf(stderr, "ThumbImageFrame %p::%s:%d : received event=%p selected=%c\n",
+			this, __func__, __LINE__,
+			e,
+			mSelected ? 'T' : 'F'
+						);
+
 	bool invert = !mSelected;
-	setActive( true );
+//	setActive( true );
 	setSelected( invert );
+
+	if( (e->modifiers() == Qt::ShiftModifier) )
+	{
+		THUMBIMGFR_MSG(SWLOG_DEBUG, "Shift modifier");
+		mShift = true;
+		emit signal_shiftClick(this);
+	}
+	else if( (e->modifiers() == Qt::ControlModifier) )
+	{
+		THUMBIMGFR_MSG(SWLOG_DEBUG, "Ctrl modifier");
+		mCtrl = true;
+		emit signal_ctrlClick(this);
+	}
+	else
+	{
+		THUMBIMGFR_MSG(SWLOG_DEBUG, "click with no modifier");
+		emit signal_click(this);
+	}
 
 	emit signal_mousePressEvent ( e );
 }
@@ -393,16 +436,20 @@ void ThumbImageFrame::mouseReleaseEvent ( QMouseEvent * e ) {
 
 void ThumbImageFrame::focusInEvent ( QFocusEvent * event )
 {
+	fprintf(stderr, "ThumbImageFrame %p::%s:%d : received event=%p\n",
+			this, __func__, __LINE__, event);
 	grabKeyboard();
 }
 
 void ThumbImageFrame::focusOutEvent ( QFocusEvent * event )
 {
+	fprintf(stderr, "ThumbImageFrame %p::%s:%d : received event=%p\n",
+			this, __func__, __LINE__, event);
 	releaseKeyboard();
 }
 void ThumbImageFrame::keyReleaseEvent ( QKeyEvent * e )
 {
-	fprintf(stderr, "ThumbImageFrame %p::%s:%d : received event=%p\n",
+	fprintf(stderr, "ThumbImageFrame %p::%s:%d : release event=%p => shift=ctrl=false\n",
 			this, __func__, __LINE__, e);
 	mCtrl = mShift = false;
 	emit signal_keyReleaseEvent ( e );
@@ -422,17 +469,16 @@ void ThumbImageFrame::keyPressEvent ( QKeyEvent * e )
 					e->text().toUtf8().data(),
 					e->key());
 		}
+
 		if(key == Qt::Key_Shift)
 		{
-//			fprintf(stderr, "ThumbImageFrame::%s:%d : Shift !\n",
-//					__func__, __LINE__);
+			THUMBIMGFR_MSG(SWLOG_DEBUG, "Shift !");
 			mShift = true;
 		}
 
 		if(key  == Qt::Key_Control)
 		{
-//			fprintf(stderr, "ThumbImageFrame::%s:%d : Ctrl !\n",
-//					__func__, __LINE__);
+			THUMBIMGFR_MSG(SWLOG_DEBUG, "Ctrl !");
 			mCtrl = true;
 		}
 	}

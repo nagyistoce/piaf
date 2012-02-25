@@ -47,7 +47,7 @@
 
 class EmaMainWindow;
 class BatchProgressWidget;
-
+class ThumbImageFrame;
 
 /** \brief Directory tree item */
 class DirectoryTreeWidgetItem : QTreeWidgetItem
@@ -211,6 +211,14 @@ private:
 	void appendThumbImage(QString fileName);
 	void removeThumbImage(QString fileName);
 
+	/// List of frames for Grid
+	QList<ThumbImageFrame *> mGridThumbImageFrameList;
+	/// List of frames for bottom line
+	QList<ThumbImageFrame *> mBottomThumbImageFrameList;
+
+	/// Selected image frame on bottom line
+	ThumbImageFrame * mSelectedThumbImageFrame;
+
 	/** @brief Set the file to be displayed in main display */
 	void setCurrentMainFile(QString fileName);
 
@@ -244,7 +252,14 @@ private:
 
 public slots:
 	void slot_thumbImage_clicked(QString fileName);
+	void slot_thumbImage_doubleClicked(QString fileName);
 	void slot_thumbImage_selected(QString);
+
+
+	void slot_thumbImage_signal_click(ThumbImageFrame *);
+	void slot_thumbImage_signal_shiftClick(ThumbImageFrame *);
+	void slot_thumbImage_signal_ctrlClick(ThumbImageFrame *);
+
 
 private slots:
 	void saveSettings();
@@ -277,6 +292,7 @@ private slots:
 	void on_globalNavImageWidget_signalZoomOn(int, int, float);
 
 	//void on_mainDisplayWidget_signalGreyscaleToggled(bool);
+	void on_mainDisplayWidget_signalPluginsButtonClicked();
 
 	// MAIN MENU ACTION
 	void on_actionQuit_activated();

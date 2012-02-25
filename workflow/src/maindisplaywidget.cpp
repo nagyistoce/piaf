@@ -573,6 +573,7 @@ void MainDisplayWidget::on_deviceSettingsButton_clicked()
 void MainDisplayWidget::on_mainImageWidget_signalPluginsButtonClicked()
 {
 	MDW_printf(EMALOG_INFO, "Ask for plugins");
+	emit signalPluginsButtonClicked();
 }
 
 void MainDisplayWidget::on_mainImageWidget_signalRecordButtonToggled(bool on)

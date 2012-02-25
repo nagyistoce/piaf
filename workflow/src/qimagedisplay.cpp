@@ -62,6 +62,14 @@ void QImageDisplay::paintEvent( QPaintEvent * )
 	p.end();
 }
 
+void QImageDisplay::mouseDoubleClickEvent ( QMouseEvent * e)
+{
+	if(g_debug_QImageDisplay) {
+		fprintf(stderr, "QImageDisplay::%s:%d : e=%p\n", __func__, __LINE__, e);
+	}
+	emit signalMouseDoubleClickEvent(e);
+}
+
 void QImageDisplay::mousePressEvent(QMouseEvent * e)
 {
 	if(g_debug_QImageDisplay) {
