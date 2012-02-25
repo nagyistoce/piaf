@@ -57,10 +57,13 @@ private:
 	void focusInEvent ( QFocusEvent * event );
 	void mouseReleaseEvent(QMouseEvent * e);
 	void mousePressEvent(QMouseEvent * e);
+	void mouseDoubleClickEvent ( QMouseEvent * );
+
 	void mouseMoveEvent(QMouseEvent * e);
 	void wheelEvent ( QWheelEvent * e );
 
 signals:
+	void signalMouseDoubleClickEvent ( QMouseEvent * );
 	void signalMousePressEvent(QMouseEvent * e);
 	void signalMouseReleaseEvent(QMouseEvent * e);
 	void signalMouseMoveEvent(QMouseEvent * e);

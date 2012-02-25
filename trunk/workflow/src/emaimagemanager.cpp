@@ -23,7 +23,11 @@
  */
 
 #include "imgutils.h"
+
+#include "piaf-common.h"
+
 #include "emaimagemanager.h"
+
 #include <QDir>
 #include <QString>
 

@@ -151,6 +151,7 @@ signals:
 	void signalImageChanged(QImage);
 	void signalZoomRect(QRect);
 	void signalZoomChanged(float);
+	void signalPluginsButtonClicked();
 };
 
 #endif // MAINDISPLAYWIDGET_H

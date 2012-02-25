@@ -84,15 +84,17 @@
 #include "V4L2Device.h"
 #endif
 
+#include "piaf-common.h"
+
 // anyway, inclue CpenCV for many kind of devices
 #include "opencvvideoacquisition.h"
 
 QSplashScreen * g_splash = NULL;
 
-int g_EMAMW_debug_mode = EMALOG_INFO;
+int g_EMAMW_debug_mode = SWLOG_DEBUG;
 
 #define EMAMW_printf(a,...)  { \
-				if(g_EMAMW_debug_mode>=(a)) { \
+				if((a) >= g_EMAMW_debug_mode) { \
 					fprintf(stderr,"EmaMainWindow::%s:%d : ",__func__,__LINE__); \
 					fprintf(stderr,__VA_ARGS__); \
 					fprintf(stderr,"\n"); \
@@ -128,6 +130,8 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 
 	// Parent items for devices tree widget items
 	mV4l2Item = mOpenNIItem = mFreenectItem = mOpenCVItem = NULL;
+
+	mSelectedThumbImageFrame = NULL;
 
 	g_splash->showMessage(QObject::tr("Restore settings ..."), Qt::AlignBottom | Qt::AlignHCenter);
 	loadSettings();
@@ -625,7 +629,11 @@ void EmaMainWindow::on_actionView_bottom_line_toggled(bool on)
 		ui->bottomFrame->hide();
 }
 
-
+void EmaMainWindow::on_mainDisplayWidget_signalPluginsButtonClicked()
+{
+	ui->toolsTabWidget->setCurrentIndex(2);
+	ui->actionView_right_column->setChecked(true);
+}
 
 
 
@@ -637,7 +645,8 @@ void EmaMainWindow::on_actionView_bottom_line_toggled(bool on)
 
 void EmaMainWindow::on_actionQuit_activated()
 {
-	exit(0);
+	saveSettings();
+	close();
 }
 
 void EmaMainWindow::on_actionEdit_plugins_activated()
@@ -1158,6 +1167,9 @@ void EmaMainWindow::on_filesTreeWidget_itemDoubleClicked (
 	if(curdir->isFile()) {
 		QString fileName = curdir->mFullPath; // col 0 has the full path
 		slot_thumbImage_clicked( fileName );
+
+		// display main widget
+		ui->stackedWidget->setCurrentIndex(0);
 	} else {
 		// Add all its content recursively
 		appendFileList(curdir->getFileList());
@@ -1194,6 +1206,7 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 		ThumbImageFrame * newThumb = new ThumbImageFrame(
 				//ui->imageScrollArea);
 				ui->scrollAreaWidgetContents );
+		mGridThumbImageFrameList.append(newThumb);
 
 		ui->scrollAreaWidgetContents->layout()->addWidget(newThumb);
 //		newThumb->setImageFile(fileName, pinfo->thumbImage.iplImage);
@@ -1220,6 +1233,7 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 	//	ThumbImageWidget * newThumb2 = new ThumbImageWidget(ui->gridWidget);
 //		newThumb2->setImageFile(fileName, pinfo->thumbImage.iplImage,
 //								pinfo->score);
+		mBottomThumbImageFrameList.append(newThumb2);
 		newThumb2->setImageInfoStruct(pinfo);
 
 		// Cross-connection
@@ -1234,13 +1248,28 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 		grid_layout->addWidget( newThumb2, row, col );
 
 		// connect this signal
+		connect(newThumb, SIGNAL(signalThumbDoubleClicked(QString)), this, SLOT(slot_thumbImage_doubleClicked(QString)));
 		connect(newThumb, SIGNAL(signalThumbClicked(QString)), this, SLOT(slot_thumbImage_clicked(QString)));
+
 		connect(newThumb, SIGNAL(signalThumbSelected(QString)), this, SLOT(slot_thumbImage_selected(QString)));
+
+		connect(newThumb, SIGNAL(signal_click(ThumbImageFrame *)), this, SLOT(slot_thumbImage_signal_click(ThumbImageFrame *)));
+		connect(newThumb, SIGNAL(signal_shiftClick(ThumbImageFrame *)), this, SLOT(slot_thumbImage_signal_shiftClick(ThumbImageFrame *)));
+		connect(newThumb, SIGNAL(signal_ctrlClick(ThumbImageFrame *)), this, SLOT(slot_thumbImage_signal_ctrlClick(ThumbImageFrame *)));
+
 		if(newThumb2) {
+			connect(newThumb2, SIGNAL(signalThumbDoubleClicked(QString)), this, SLOT(slot_thumbImage_doubleClicked(QString)));
 			connect(newThumb2, SIGNAL(signalThumbClicked(QString)), this, SLOT(slot_thumbImage_clicked(QString)));
+
 			connect(newThumb2, SIGNAL(signalThumbSelected(QString)), this, SLOT(slot_thumbImage_selected(QString)));
+
+			connect(newThumb2, SIGNAL(signal_click(ThumbImageFrame *)), this, SLOT(slot_thumbImage_signal_click(ThumbImageFrame *)));
+			connect(newThumb2, SIGNAL(signal_shiftClick(ThumbImageFrame *)), this, SLOT(slot_thumbImage_signal_shiftClick(ThumbImageFrame *)));
+			connect(newThumb2, SIGNAL(signal_ctrlClick(ThumbImageFrame *)), this, SLOT(slot_thumbImage_signal_ctrlClick(ThumbImageFrame *)));
 		}
+
 	}
+
 }
 
 void EmaMainWindow::slot_mainGroupBox_resizeEvent(QResizeEvent * e) {
@@ -1269,6 +1298,23 @@ void EmaMainWindow::slot_thumbImage_selected(QString fileName)
 	}
 }
 
+void EmaMainWindow::slot_thumbImage_signal_click(ThumbImageFrame * thumb)
+{
+	EMAMW_printf(EMALOG_INFO, "simple-click on %p = '%s'", thumb,
+				 thumb ? thumb->getFilename().toAscii().data():"null");
+	mSelectedThumbImageFrame = thumb;
+
+	if(mGridThumbImageFrameList.contains(thumb))
+	{
+		// use pointer on bottom line
+		if(thumb->getTwin())
+		{
+			mSelectedThumbImageFrame = thumb->getTwin();
+		}
+	}
+
+}
+
 
 void EmaMainWindow::slot_thumbImage_clicked(QString fileName)
 {
@@ -1279,12 +1325,109 @@ void EmaMainWindow::slot_thumbImage_clicked(QString fileName)
 		return;
 	}
 
+
 	setCurrentMainFile(fileName);
 }
+
+void EmaMainWindow::slot_thumbImage_doubleClicked(QString fileName)
+{
+	EMAMW_printf(EMALOG_INFO, "double-click on '%s'", fileName.toUtf8().data());
+	QFileInfo fi(fileName);
+	if(!fi.exists()) {
+		PIAF_MSG(SWLOG_ERROR, "File '%s' does not exists",
+				 fileName.toAscii().data());
+		return;
+	}
+
+	setCurrentMainFile(fileName);
+
+	ui->stackedWidget->setCurrentIndex(0);
+}
+
+void EmaMainWindow::slot_thumbImage_signal_shiftClick(ThumbImageFrame * thumb)
+{
+	EMAMW_printf(SWLOG_INFO, "Selected thumb %p with Shift", thumb);
+	if(mGridThumbImageFrameList.contains(thumb))
+	{
+		EMAMW_printf(SWLOG_INFO, "Selected thumb %p from grid with Shift", thumb);
+		// consider its twin in bottom line
+		if(thumb->getTwin())
+		{
+			thumb = thumb->getTwin();
+		}
+	}
+
+	if(mBottomThumbImageFrameList.contains(thumb))
+	{
+		EMAMW_printf(SWLOG_INFO, "Selected thumb %p from bottom with Shift", thumb);
+		if(mSelectedThumbImageFrame)
+		{
+			bool activated = false;
+			QList<ThumbImageFrame *>::iterator it;
+			for(it = mBottomThumbImageFrameList.begin();
+				it !=mBottomThumbImageFrameList.end();
+				++it)
+			{
+				ThumbImageFrame * curIt = (*it);
+				if(activated)
+				{
+					curIt->setSelected(mSelectedThumbImageFrame->isSelected());
+					if(curIt == thumb || curIt == mSelectedThumbImageFrame)
+					{
+						EMAMW_printf(SWLOG_INFO, "thumb %p => disactivated", curIt);
+
+						activated = false;
+					}
+				}
+				else
+				{
+					if(curIt == thumb || curIt == mSelectedThumbImageFrame)
+					{
+						EMAMW_printf(SWLOG_INFO, "thumb %p => activated", curIt);
+
+						activated = true;
+					}
+
+				}
+
+			}
+		}
+	}
+}
+
+void EmaMainWindow::slot_thumbImage_signal_ctrlClick(ThumbImageFrame * thumb)
+{
+	EMAMW_printf(SWLOG_INFO, "Selected thumb %p with Ctrl", thumb);
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
 
 void EmaMainWindow::setCurrentMainFile(QString fileName)
 {
 	mMainFileName = fileName;
+	QList<ThumbImageFrame *>::iterator it;
+	for(it = mBottomThumbImageFrameList.begin();
+		it !=mBottomThumbImageFrameList.end();
+		++it)
+	{
+		ThumbImageFrame * frame = (*it);
+		if( frame )
+		{
+			frame->setActive( frame->getFilename() == fileName);
+			// twin is toggled automatically
+		}
+	}
 
 	ui->globalNavImageWidget->setImageFile(fileName);
 	t_image_info_struct * pinfo = NULL;

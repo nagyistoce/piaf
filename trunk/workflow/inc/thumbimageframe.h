@@ -40,8 +40,14 @@ public:
 	explicit ThumbImageFrame(QWidget *parent = 0);
 	virtual ~ThumbImageFrame();
 
-	/** @set mirror twin frame */
+	/** @brief set mirror twin frame */
 	void setTwin(ThumbImageFrame * pTwin) { mpTwin = pTwin; }
+
+	/** @brief get mirror twin frame */
+	ThumbImageFrame * getTwin() { return mpTwin ; }
+
+	/** @brief Get file name */
+	QString getFilename() { return m_imagePath; }
 
 	/** @brief Set the image info */
 	void setImageInfoStruct(t_image_info_struct * pinfo);
@@ -61,10 +67,10 @@ public:
 	/** @brief tell if the frame is selected */
 	bool isActive() { return mActive; }
 
-	/** @brief Shift key is pressed */
-	bool shiftPressed() { return mShift; }
-	/** @brief Ctrl key is pressed */
-	bool ctrlPressed() { return mCtrl; }
+//	/** @brief Shift key is pressed */
+//	bool shiftPressed() { return mShift; }
+//	/** @brief Ctrl key is pressed */
+//	bool ctrlPressed() { return mCtrl; }
 
 protected:
 	virtual void changeEvent(QEvent *e);
@@ -79,18 +85,22 @@ private:
 	Ui::ThumbImageFrame *m_ui;
 	bool mSelected; ///< user selection flag
 	bool mActive; ///< active file flag: this is the file seen in main display
+	bool mCtrl, mShift;
 
 private slots:
 	void on_globalImageLabel_signalMousePressEvent(QMouseEvent * e);
 	void on_globalImageLabel_signalMouseMoveEvent(QMouseEvent * e);
+	void on_globalImageLabel_signalMouseDoubleClickEvent ( QMouseEvent * );
 
 signals:
+	void signalThumbDoubleClicked(QString);
 	void signalThumbClicked(QString);
 	void signalThumbSelected(QString);
 
 private:
-	QString m_filename;
-	bool mCtrl, mShift;
+//	QString m_filename;
+	/// update background color depending on mActive and mSelected
+	void updateBackground();
 
 protected:
 	virtual void mouseDoubleClickEvent ( QMouseEvent * event );
@@ -110,6 +120,7 @@ signals:
 	void signal_keyPressEvent ( QKeyEvent * e );
 	void signal_keyReleaseEvent ( QKeyEvent * e );
 
+	void signal_click(ThumbImageFrame *);
 	void signal_shiftClick(ThumbImageFrame *);
 	void signal_ctrlClick(ThumbImageFrame *);
 

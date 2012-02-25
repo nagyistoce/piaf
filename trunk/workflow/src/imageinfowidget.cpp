@@ -84,7 +84,7 @@ static void init_grayToBGR32()
 
 }
 
-QImage iplImageToQImage(IplImage * iplImage) {
+QImage iplImageToQImage(IplImage * iplImage, bool swap_RB) {
 	if(!iplImage) {
 		PIAF_MSG(SWLOG_ERROR, "IplImage is null");
 		return QImage();
@@ -100,6 +100,7 @@ QImage iplImageToQImage(IplImage * iplImage) {
 
 	u32 * grayToBGR32palette = grayToBGR32;
 	bool gray_to_bgr32 = false;
+
 
 	if(depth == 1) {// GRAY is obsolete on Qt => use 32bit instead
 		depth = 4;
@@ -133,6 +134,7 @@ QImage iplImageToQImage(IplImage * iplImage) {
 						orig_width*depth);
 				}
 			} else {
+
 				for(int r=0; r<iplImage->height; r++) {
 					// need to swap R<->B
 					u8 * buf_out = (u8 *)(qImage.bits()) + r*orig_width*depth;
@@ -141,11 +143,13 @@ QImage iplImageToQImage(IplImage * iplImage) {
 						iplImage->imageData + r*iplImage->widthStep,
 						orig_width*depth);
 
-					for(int pos4 = 0 ; pos4<orig_width*depth; pos4+=depth,
-						buf_out+=4, buf_in+=depth
-						 ) {
-						buf_out[2] = buf_in[0];
-						buf_out[0] = buf_in[2];
+					if(swap_RB) {
+						for(int pos4 = 0 ; pos4<orig_width*depth; pos4+=depth,
+							buf_out+=4, buf_in+=depth
+							 ) {
+							buf_out[2] = buf_in[0];
+							buf_out[0] = buf_in[2];
+						}
 					}
 				}
 			}
