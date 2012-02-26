@@ -78,7 +78,8 @@ SOURCES += tools/src/PiafFilter.cpp \
     src/pluginsettingswidget.cpp \
 	tools/src/collectioneditdialog.cpp \
 	tools/src/preferencesdialog.cpp \
-    tools/src/batch_progress_widget.cpp
+    tools/src/batch_progress_widget.cpp \
+    src/workflowtypes.cpp
 
 
 HEADERS += tools/inc/PiafFilter.h \
@@ -467,6 +468,7 @@ message( "FINAL CONFIGURATION ==================================================
 message( "")
 message( "")
 OTHER_FILES += doc/OpenCVToolsForPhoto.txt
+
 
 
 

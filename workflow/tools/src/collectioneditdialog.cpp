@@ -32,7 +32,7 @@ CollectionEditDialog::CollectionEditDialog(QWidget *parent) :
     ui->setupUi(this);
 	mpCollec = NULL;
 }
-void CollectionEditDialog::setCollection(t_collection * pcollec)
+void CollectionEditDialog::setCollection(EmaCollection * pcollec)
 {
 	if(!pcollec) return;
 	mpCollec = pcollec;
@@ -70,7 +70,7 @@ void CollectionEditDialog::on_buttonBox_accepted()
 
 		return;
 	}
-	t_collection collec;
+	EmaCollection collec;
 	collec.title = ui->titleLineEdit->text();
 	collec.comment = ui->commentLineEdit->text();
 

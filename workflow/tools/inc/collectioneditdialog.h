@@ -40,7 +40,7 @@ class CollectionEditDialog : public QDialog
 public:
     explicit CollectionEditDialog(QWidget *parent = 0);
     ~CollectionEditDialog();
-	void setCollection(t_collection *);
+	void setCollection(EmaCollection *);
 protected:
     void changeEvent(QEvent *e);
 
@@ -48,12 +48,12 @@ private slots:
 	void on_buttonBox_accepted();
 
 private:
-	t_collection * mpCollec;
+	EmaCollection * mpCollec;
     Ui::CollectionEditDialog *ui;
 
 signals:
-	void signalNewCollection(t_collection);
-	void signalCollectionChanged(t_collection *);
+	void signalNewCollection(EmaCollection);
+	void signalCollectionChanged(EmaCollection *);
 };
 
 #endif // COLLECTIONEDITDIALOG_H

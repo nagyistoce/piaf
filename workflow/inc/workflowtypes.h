@@ -64,25 +64,37 @@ typedef struct {
 	QTreeWidgetItem * treeViewItem;
 } t_folder;
 
+class EmaCollection;
+
 /** @brief File known in collection */
 typedef struct {
 	QString fullpath;	///< Full path to file
 	QString filename;	///< basename
 	int type;			///< Type: movie, image
-	struct _t_collection * pCollection; ///< Reverse pointer to its collection
+	EmaCollection * pCollection; ///< Reverse pointer to its collection
 
 	QTreeWidgetItem * treeViewItem;
 } t_collection_file;
 
 /** @brief Collection storage */
-typedef struct _t_collection {
+class EmaCollection
+{
+public:
+	EmaCollection();
+	~EmaCollection();
+
+	void clearFiles();
+	void appendFiles(QStringList listOfFiles);
+	void removeFiles(QStringList listOfFiles);
+	void appendSubCollection(EmaCollection * sub);
+
 	QString title;
 	QString comment;
 	QList<t_collection_file *> filesList;	///< List of full path to their images
-	QList<struct _t_collection *> subCollectionsList;
+	QList<EmaCollection *> subCollectionsList;
 
 	QTreeWidgetItem * treeViewItem;
-} t_collection;
+};
 
 typedef struct {
 	QString node;
