@@ -101,7 +101,7 @@
                 <string>Folders explorer</string>
                </property>
                <property name="currentIndex">
-                <number>2</number>
+                <number>1</number>
                </property>
                <widget class="QWidget" name="inputsTabWidgetPage1">
                 <attribute name="icon">
@@ -344,6 +344,11 @@
                    <column>
                     <property name="text">
                      <string>Collections</string>
+                    </property>
+                   </column>
+                   <column>
+                    <property name="text">
+                     <string>Elements</string>
                     </property>
                    </column>
                   </widget>
@@ -663,7 +668,7 @@
          <item>
           <widget class="QStackedWidget" name="stackedWidget">
            <property name="currentIndex">
-            <number>0</number>
+            <number>1</number>
            </property>
            <widget class="QWidget" name="page_mainImage">
             <layout class="QVBoxLayout" name="verticalLayout_11">
@@ -705,7 +710,250 @@
                   <number>1</number>
                  </property>
                  <item>
-                  <widget class="FilterManagerForm" name="filterManagerForm" native="true"/>
+                  <widget class="QFrame" name="collectionManagerForm">
+                   <property name="frameShape">
+                    <enum>QFrame::StyledPanel</enum>
+                   </property>
+                   <property name="frameShadow">
+                    <enum>QFrame::Raised</enum>
+                   </property>
+                   <layout class="QHBoxLayout" name="horizontalLayout_6">
+                    <property name="spacing">
+                     <number>2</number>
+                    </property>
+                    <property name="topMargin">
+                     <number>0</number>
+                    </property>
+                    <property name="bottomMargin">
+                     <number>0</number>
+                    </property>
+                    <item>
+                     <widget class="QLabel" name="quickCollLabel">
+                      <property name="toolTip">
+                       <string>Quick collection</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="pixmap">
+                       <pixmap resource="../ema.qrc">:/icons/22x22/bookmark-toolbar.png</pixmap>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="addCriterionButton">
+                      <property name="toolTip">
+                       <string>Add selected files to quick collection</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../ema.qrc">
+                        <normaloff>:/icons/16x16/list-add.png</normaloff>:/icons/16x16/list-add.png</iconset>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QToolButton" name="excludeCriterionButton">
+                      <property name="toolTip">
+                       <string>Remove selected files from quick collection</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../ema.qrc">
+                        <normaloff>:/icons/16x16/list-remove.png</normaloff>:/icons/16x16/list-remove.png</iconset>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="Line" name="line_4">
+                      <property name="orientation">
+                       <enum>Qt::Vertical</enum>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_8">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>78</width>
+                        <height>20</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QWidget" name="currentCollWidget" native="true">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <layout class="QHBoxLayout" name="horizontalLayout_7">
+                       <property name="spacing">
+                        <number>2</number>
+                       </property>
+                       <property name="margin">
+                        <number>0</number>
+                       </property>
+                       <item>
+                        <widget class="QLabel" name="currentCollecLabel">
+                         <property name="toolTip">
+                          <string>Grid view</string>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <property name="pixmap">
+                          <pixmap resource="../ema.qrc">:/icons/22x22/view-list-icons.png</pixmap>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QLabel" name="curCollecLabel">
+                         <property name="minimumSize">
+                          <size>
+                           <width>50</width>
+                           <height>0</height>
+                          </size>
+                         </property>
+                         <property name="maximumSize">
+                          <size>
+                           <width>100</width>
+                           <height>16777215</height>
+                          </size>
+                         </property>
+                         <property name="text">
+                          <string>--</string>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QToolButton" name="addToCurrentCollectionButton">
+                         <property name="toolTip">
+                          <string>Add selected files to quick collection</string>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="../ema.qrc">
+                           <normaloff>:/icons/16x16/list-add.png</normaloff>:/icons/16x16/list-add.png</iconset>
+                         </property>
+                        </widget>
+                       </item>
+                       <item>
+                        <widget class="QToolButton" name="removeFromCurrentButton">
+                         <property name="toolTip">
+                          <string>Remove selected files from collection</string>
+                         </property>
+                         <property name="text">
+                          <string/>
+                         </property>
+                         <property name="icon">
+                          <iconset resource="../ema.qrc">
+                           <normaloff>:/icons/16x16/list-remove.png</normaloff>:/icons/16x16/list-remove.png</iconset>
+                         </property>
+                        </widget>
+                       </item>
+                      </layout>
+                     </widget>
+                    </item>
+                    <item>
+                     <spacer name="horizontalSpacer_7">
+                      <property name="orientation">
+                       <enum>Qt::Horizontal</enum>
+                      </property>
+                      <property name="sizeHint" stdset="0">
+                       <size>
+                        <width>77</width>
+                        <height>22</height>
+                       </size>
+                      </property>
+                     </spacer>
+                    </item>
+                    <item>
+                     <widget class="QLabel" name="filterLabel">
+                      <property name="minimumSize">
+                       <size>
+                        <width>22</width>
+                        <height>0</height>
+                       </size>
+                      </property>
+                      <property name="toolTip">
+                       <string>Quick collection</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="pixmap">
+                       <pixmap resource="../ema.qrc">:/icons/16x16/view-filter.png</pixmap>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QComboBox" name="criterionComboBox">
+                      <property name="toolTip">
+                       <string>Sorting filters</string>
+                      </property>
+                      <item>
+                       <property name="text">
+                        <string>-</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>No stars</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>&gt;=1 star</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>&gt;= 2 stars</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>&gt;= 3 stars</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>&gt;=4 stars</string>
+                       </property>
+                      </item>
+                      <item>
+                       <property name="text">
+                        <string>&gt;= 5 stars</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QComboBox" name="subCriterionComboBox">
+                      <property name="enabled">
+                       <bool>false</bool>
+                      </property>
+                      <property name="toolTip">
+                       <string>Sub-category sorting filter</string>
+                      </property>
+                      <item>
+                       <property name="text">
+                        <string>-</string>
+                       </property>
+                      </item>
+                     </widget>
+                    </item>
+                   </layout>
+                  </widget>
                  </item>
                  <item>
                   <widget class="QWidget" name="gridWidget" native="true">
@@ -1321,6 +1569,9 @@
                <verstretch>0</verstretch>
               </sizepolicy>
              </property>
+             <property name="toolTip">
+              <string>Number of files in stack</string>
+             </property>
              <property name="text">
               <string>--</string>
              </property>
@@ -1491,7 +1742,7 @@
    </property>
    <widget class="QMenu" name="menuFile">
     <property name="title">
-     <string>File</string>
+     <string>Piaf</string>
     </property>
     <addaction name="actionPreferences"/>
     <addaction name="actionQuit"/>
@@ -1525,7 +1776,30 @@
     <addaction name="actionEdit_plugins"/>
     <addaction name="actionClean"/>
    </widget>
+   <widget class="QMenu" name="menuCollections">
+    <property name="title">
+     <string>Files</string>
+    </property>
+    <addaction name="actionRemove_all_files"/>
+    <addaction name="separator"/>
+    <addaction name="actionClear_selection"/>
+    <addaction name="actionSelect_all"/>
+    <addaction name="actionInvert_selection"/>
+   </widget>
+   <widget class="QMenu" name="menuCollections_2">
+    <property name="title">
+     <string>Collections</string>
+    </property>
+    <addaction name="actionAdd_selected_to_quick_collection"/>
+    <addaction name="actionClear_quick_collection"/>
+    <addaction name="actionRemove_selected_from_quick_collec"/>
+    <addaction name="separator"/>
+    <addaction name="actionAdd_selected_to_current_collection"/>
+    <addaction name="actionRemove_selected_from_current_collection"/>
+   </widget>
    <addaction name="menuFile"/>
+   <addaction name="menuCollections"/>
+   <addaction name="menuCollections_2"/>
    <addaction name="menuEdit"/>
    <addaction name="menuTools"/>
    <addaction name="menuPlugins"/>
@@ -1671,6 +1945,69 @@
     <string>Alt+O</string>
    </property>
   </action>
+  <action name="actionClear_selection">
+   <property name="text">
+    <string>Clear selection</string>
+   </property>
+   <property name="toolTip">
+    <string>Clear list of selected files</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+Shift+A</string>
+   </property>
+  </action>
+  <action name="actionInvert_selection">
+   <property name="text">
+    <string>Invert selection</string>
+   </property>
+  </action>
+  <action name="actionRemove_all_files">
+   <property name="text">
+    <string>Remove all files</string>
+   </property>
+  </action>
+  <action name="actionAdd_selected_to_quick_collection">
+   <property name="text">
+    <string>Add selected to quick collection</string>
+   </property>
+   <property name="shortcut">
+    <string>B</string>
+   </property>
+  </action>
+  <action name="actionClear_quick_collection">
+   <property name="text">
+    <string>Clear quick collection</string>
+   </property>
+  </action>
+  <action name="actionSelect_all">
+   <property name="text">
+    <string>Select all</string>
+   </property>
+   <property name="toolTip">
+    <string>Select all files in list</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
+  </action>
+  <action name="actionRemove_selected_from_quick_collec">
+   <property name="text">
+    <string>Remove selected from quick collec</string>
+   </property>
+   <property name="toolTip">
+    <string>Remove selected files from quick collection</string>
+   </property>
+  </action>
+  <action name="actionAdd_selected_to_current_collection">
+   <property name="text">
+    <string>Add selected to current collection</string>
+   </property>
+  </action>
+  <action name="actionRemove_selected_from_current_collection">
+   <property name="text">
+    <string>Remove selected from current collection</string>
+   </property>
+  </action>
  </widget>
  <layoutdefault spacing="6" margin="11"/>
  <customwidgets>
@@ -1690,12 +2027,6 @@
    <class>MetadataWidget</class>
    <extends>QWidget</extends>
    <header location="global">metadatawidget.h</header>
-   <container>1</container>
-  </customwidget>
-  <customwidget>
-   <class>FilterManagerForm</class>
-   <extends>QWidget</extends>
-   <header location="global">filtermanagerform.h</header>
    <container>1</container>
   </customwidget>
   <customwidget>

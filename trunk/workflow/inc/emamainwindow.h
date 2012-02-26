@@ -90,8 +90,8 @@ class CollecTreeWidgetItem : QTreeWidgetItem
 //	Q_OBJECT
 	friend class EmaMainWindow;
 public:
-	CollecTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, t_collection * pcollec);
-	CollecTreeWidgetItem(QTreeWidget * treeWidgetParent, t_collection * pcollec);
+	CollecTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, EmaCollection * pcollec);
+	CollecTreeWidgetItem(QTreeWidget * treeWidgetParent, EmaCollection * pcollec);
 	~CollecTreeWidgetItem();
 
 	/** \brief Expand contents: read directory contents and display it */
@@ -103,14 +103,15 @@ public:
 	bool isFile() { return mIsFile; }
 
 	/** \brief Return collection */
-	t_collection * getCollection() { return mpCollec; }
+	EmaCollection * getCollection() { return mpCollec; }
 
 protected:
 	void init(); ///< init internal data and fill nb files
 	void purge(); ///< purge internal data and free memory
 	void updateDisplay(); ///< display information about collection
 
-	t_collection * mpCollec; ///< pointer to collection
+
+	EmaCollection * mpCollec; ///< pointer to collection
 	bool mIsFile;///< true if the item is a file
 	QTreeWidgetItem * subItem;///< fake item to see the content
 private:
@@ -188,8 +189,19 @@ private:
 	/// List of input directories
 	QList<DirectoryTreeWidgetItem *> mDirectoryList;
 
+	/// Quick collection
+	EmaCollection * mpQuickCollection;
+	/// Current selected collection
+	EmaCollection * mpCurrentCollection;
+
+	/// Root for quick collection
+	CollecTreeWidgetItem * mpQuickCollectionRootItem;
+
+	/// update collection tree widget
+	void updateCollectionsTreeWidgetItems();
+
 	/** \brief Append recursivelly a collection from a XML tree branch */
-	void appendCollection(QDomElement collecElem, t_collection * parent_collec);
+	void appendCollection(QDomElement collecElem, EmaCollection * parent_collec);
 
 	/// Opened image paths
 	QStringList m_imageList;
@@ -228,11 +240,10 @@ private:
 private:
 	QDomDocument mSettingsDoc;
 	void addFolderToXMLSettings(QDomElement * parent_elem, t_folder folder);
-	void addCollectionToXMLSettings(QDomElement * elem, t_collection collect);
+	void addCollectionToXMLSettings(QDomElement * elem, EmaCollection collect);
 
 	QTimer m_timer;
 	QMdiArea * pWorkspace;
-	QImage mWorkImage;
 
 	/// Main file diplayed
 	QString mMainFileName;
@@ -269,6 +280,7 @@ private slots:
 	void on_actionView_left_column_toggled(bool );
 	void on_batchPlayerButton_clicked();
 	void on_filesTreeWidget_itemExpanded(QTreeWidgetItem* item);
+	void on_collecTreeWidget_itemExpanded(QTreeWidgetItem* item);
 	void on_workspaceButton_clicked();
 	void slot_filesShowCheckBox_stateChanged(int);
 	void on_filesLoadButton_clicked();
@@ -306,8 +318,8 @@ private slots:
 	void on_filesTreeWidget_itemClicked ( QTreeWidgetItem * item, int column );
 	void on_filesTreeWidget_itemDoubleClicked ( QTreeWidgetItem * item, int column );
 	void on_collecAddButton_clicked();
-	void slot_newCollDialog_signalNewCollection(t_collection);
-	void slot_newCollDialog_signalCollectionChanged(t_collection *);
+	void slot_newCollDialog_signalNewCollection(EmaCollection);
+	void slot_newCollDialog_signalCollectionChanged(EmaCollection *);
 	void on_collecDeleteButton_clicked();
 	void on_collecEditButton_clicked();
 	void on_stopLoadButton_clicked();
@@ -318,6 +330,17 @@ private slots:
 	/// Refresh list of available acquisition devices
 	void on_deviceRefreshButton_clicked();
 	void on_deviceTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
+	void on_addCriterionButton_clicked();
+	void on_actionAdd_selected_to_quick_collection_triggered();
+	void on_excludeCriterionButton_clicked();
+	void on_actionClear_quick_collection_triggered();
+	void on_actionRemove_selected_from_quick_collec_triggered();
+	void on_addToCurrentCollectionButton_clicked();
+	void on_removeFromCurrentButton_clicked();
+	void on_actionAdd_selected_to_current_collection_triggered();
+	void on_actionRemove_selected_from_current_collection_triggered();
+	void on_collecTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
+	void on_collecTreeWidget_itemSelectionChanged();
 };
 
 #endif // EmaMAINWINDOW_H

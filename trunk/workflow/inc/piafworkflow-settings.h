@@ -22,7 +22,7 @@ typedef struct {
 	QList<t_folder *> directoryList;
 
 	/// list of collections
-	QList<t_collection *> collectionList;
+	QList<EmaCollection *> collectionList;
 
 	// ======== DEVICES =========
 	/// List of devices
