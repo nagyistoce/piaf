@@ -341,6 +341,9 @@
                    <property name="toolTip">
                     <string>Collections list</string>
                    </property>
+                   <property name="editTriggers">
+                    <set>QAbstractItemView::EditKeyPressed</set>
+                   </property>
                    <column>
                     <property name="text">
                      <string>Collections</string>

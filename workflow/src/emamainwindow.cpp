@@ -1602,14 +1602,16 @@ void EmaMainWindow::on_actionOpen_file_in_workspace_triggered()
 
   *****************************************************************************/
 
-
 void EmaMainWindow::on_collecAddButton_clicked()
 {
 	if(mpCurrentCollection)
 	{
 		int answer = QMessageBox::question(NULL, tr("Add as sub-collection ?"),
-										   tr("You have selected a collection. Do you want to add a new subcollection ?")
-										   );
+										   tr("You have selected a collection. "
+											  "Do you want to add a new subcollection ? "
+											  "If you say No, it will be added as a new collection.)"
+										   ),
+										   QMessageBox::Yes, QMessageBox::No );
 		if(answer == QMessageBox::No)
 		{
 			ui->collecTreeWidget->clearSelection();
@@ -1620,6 +1622,7 @@ void EmaMainWindow::on_collecAddButton_clicked()
 	CollectionEditDialog * newCollDialog = new CollectionEditDialog();
 	connect(newCollDialog, SIGNAL(signalNewCollection(EmaCollection)),
 			this, SLOT(slot_newCollDialog_signalNewCollection(EmaCollection)));
+
 	newCollDialog->show();
 }
 
@@ -1631,9 +1634,17 @@ void EmaMainWindow::slot_newCollDialog_signalNewCollection(EmaCollection collec)
 	m_workflow_settings.collectionList.append(new_collec);
 	if(mpCurrentCollection )
 	{
+		EMAMW_printf(SWLOG_INFO, "\tAdding '%s' AS SUB-collection OF '%s'",
+					 collec.title.toAscii().data(),
+					 mpCurrentCollection->title.toAscii().data()
+					 );
+
 		new CollecTreeWidgetItem(mpCurrentCollection->treeViewItem, new_collec);
 	}
-	else {
+	else
+	{
+		EMAMW_printf(SWLOG_INFO, "\tAdding '%s' AS new top-level collection",
+					 collec.title.toAscii().data());
 		new CollecTreeWidgetItem(ui->collecTreeWidget, new_collec);
 	}
 	saveSettings();
@@ -1784,7 +1795,6 @@ void EmaMainWindow::on_collecTreeWidget_itemExpanded(QTreeWidgetItem* item)
 
 	fprintf(stderr, "EmaMW::%s:%d : expanded %p !\n", __func__, __LINE__, item);
 	CollecTreeWidgetItem * curdir = (CollecTreeWidgetItem*)item;
-
 	// add sub items
 	fprintf(stderr, "EmaMW::%s:%d : EXPAND THIS TREE '%s' !\n",
 					__func__, __LINE__,
@@ -1845,10 +1855,10 @@ void CollecTreeWidgetItem::updateDisplay()
 
 				if(!pfile->treeViewItem) {
 					// create one item per child
-					QTreeWidgetItem * item = new QTreeWidgetItem(this);
-					item->setText(0, pfile->filename);
-					item->setToolTip(0, pfile->fullpath);
-					pfile->treeViewItem = item;
+					DirectoryTreeWidgetItem * item = new DirectoryTreeWidgetItem(this, pfile->fullpath);
+//					item->setText(0, pfile->filename);
+//					item->setToolTip(0, pfile->fullpath);
+					pfile->treeViewItem = (QTreeWidgetItem *) item;
 				}
 			}
 		}
@@ -1887,6 +1897,7 @@ void CollecTreeWidgetItem::init()
 {
 	if(mpCollec) {
 		setText(0, mpCollec->title);
+		mpCollec->treeViewItem = (QTreeWidgetItem *)this;
 	}
 	if(subCollecsList.isEmpty())
 	{
@@ -1900,18 +1911,9 @@ void CollecTreeWidgetItem::init()
 	}
 	mIsFile = false;
 
-	if(!mpCollec->filesList.isEmpty())
-	{
-		/// \bug FIXME
-	}
-
-	if(!mpCollec->subCollectionsList.isEmpty())
-	{
-		/// \bug FIXME
-
-	}
-
+	// the creation of sub -items is done in updateDisplay()
 	updateDisplay();
+
 
 /*	if(fi.isDir()) {
 		nb_files = 0;
@@ -2375,7 +2377,8 @@ void EmaMainWindow::updateCollectionsTreeWidgetItems()
 
 }
 
-void EmaMainWindow::on_addCriterionButton_clicked()
+
+QStringList EmaMainWindow::getSelectedFiles()
 {
 	QStringList files;
 	// append selected thumbs to quick collection
@@ -2391,8 +2394,17 @@ void EmaMainWindow::on_addCriterionButton_clicked()
 		}
 	}
 
-	mpQuickCollection->appendFiles(files);
-	mpQuickCollectionRootItem->updateDisplay();
+	return files;
+}
+
+void EmaMainWindow::on_addCriterionButton_clicked()
+{
+	QStringList files = getSelectedFiles();
+	if(!files.isEmpty())
+	{
+		mpQuickCollection->appendFiles(files);
+		mpQuickCollectionRootItem->updateDisplay();
+	}
 }
 
 void EmaMainWindow::on_actionAdd_selected_to_quick_collection_triggered()
@@ -2400,23 +2412,39 @@ void EmaMainWindow::on_actionAdd_selected_to_quick_collection_triggered()
 	on_addCriterionButton_clicked();
 }
 
+EmaCollection * EmaMainWindow::getSelectedCollection()
+{
+	if(ui->collecTreeWidget->selectedItems().isEmpty())
+	{
+		return NULL;
+	}
 
+
+	QTreeWidgetItem * item = ui->collecTreeWidget->selectedItems().at(0);
+	if(item->childCount()>0) // this is a collection
+	{
+		//
+		CollecTreeWidgetItem * collecItem = (CollecTreeWidgetItem *)item;
+		mpCurrentCollection = collecItem->mpCollec;
+
+		if(!collecItem->mpCollec) { return NULL; }
+		if(collecItem->mpCollec == mpQuickCollection )
+		{
+			return mpQuickCollection;
+		}
+
+		ui->curCollecLabel->setText(collecItem->mpCollec->title);
+		ui->currentCollWidget->setEnabled(true);
+
+		return collecItem->mpCollec;
+	}
+
+	return NULL;
+}
 
 void EmaMainWindow::on_excludeCriterionButton_clicked()
 {
-	QStringList files;
-	// append selected thumbs to quick collection
-	QList<ThumbImageFrame *>::iterator it;
-	for(it = mBottomThumbImageFrameList.begin();
-		it !=mBottomThumbImageFrameList.end();
-		++it)
-	{
-		ThumbImageFrame * curIt = (*it);
-		if(curIt && curIt->isSelected())
-		{
-			files.append(curIt->getFilename());
-		}
-	}
+	QStringList files = getSelectedFiles();
 
 	mpQuickCollection->removeFiles(files);
 	mpQuickCollectionRootItem->updateDisplay();
@@ -2443,19 +2471,8 @@ void EmaMainWindow::on_addToCurrentCollectionButton_clicked()
 		return;
 	}
 
-	QStringList files;
 	// append selected thumbs to quick collection
-	QList<ThumbImageFrame *>::iterator it;
-	for(it = mBottomThumbImageFrameList.begin();
-		it !=mBottomThumbImageFrameList.end();
-		++it)
-	{
-		ThumbImageFrame * curIt = (*it);
-		if(curIt && curIt->isSelected())
-		{
-			files.append(curIt->getFilename());
-		}
-	}
+	QStringList files = getSelectedFiles();
 
 	EMAMW_printf(SWLOG_INFO, "append %d files to collection '%s'",
 				 files.count(),
@@ -2464,10 +2481,36 @@ void EmaMainWindow::on_addToCurrentCollectionButton_clicked()
 
 	updateCollectionsTreeWidgetItems();
 	on_collecTreeWidget_itemSelectionChanged();
+
+	// save settings to prevent from loosing data in case of crash
+	saveSettings();
 }
 
 void EmaMainWindow::on_removeFromCurrentButton_clicked()
 {
+	QStringList files = getSelectedFiles();
+	if(files.isEmpty())
+	{
+		QMessageBox::warning(NULL, tr("No selected files"),
+							 tr("Nothing to remove: no selected files"));
+		return;
+	}
+	EmaCollection * pcol = getSelectedCollection();
+	if(!pcol)
+	{
+		EMAMW_printf(SWLOG_ERROR, "no selected collection");
+		QMessageBox::warning(NULL, tr("No selected collection"),
+							 tr("Remove from what? no selected collection"));
+		return;
+	}
+
+	pcol->removeFiles(files);
+
+	updateCollectionsTreeWidgetItems();
+	on_collecTreeWidget_itemSelectionChanged();
+
+	// save settings to prevent from loosing data in case of crash
+	saveSettings();
 
 }
 
@@ -2486,6 +2529,39 @@ void EmaMainWindow::on_collecTreeWidget_itemDoubleClicked(QTreeWidgetItem *item,
 	if(!item)
 	{
 		return;
+	}
+
+	if(item->childCount()>0) // this is a collection
+	{
+		CollecTreeWidgetItem * collecItem = (CollecTreeWidgetItem *)item;
+		mpCurrentCollection = collecItem->mpCollec;
+		if(!collecItem->mpCollec) { return; }
+
+		EMAMW_printf(SWLOG_INFO, "Open all files of collection '%s'",
+					 collecItem->mpCollec->title.toAscii().data()
+					 );
+
+//		if(collecItem->mpCollec == mpQuickCollection ) { return; }
+
+		ui->curCollecLabel->setText(collecItem->mpCollec->title);
+		ui->currentCollWidget->setEnabled(true);
+
+		// append files
+		QStringList files;
+		QList<t_collection_file *>::iterator fit;
+		for(fit = collecItem->mpCollec->filesList.begin();
+			fit != collecItem->mpCollec->filesList.end();
+			fit++)
+		{
+			EMAMW_printf(SWLOG_INFO, "\tadd thumb for file '%s'",
+						 (*fit)->fullpath.toAscii().data());
+			files.append( (*fit)->fullpath );
+		}
+
+		EMAMW_printf(SWLOG_INFO, "Append %d files in grids",
+					 files.count());
+		appendFileList(files);
+
 	}
 
 }
@@ -2514,18 +2590,18 @@ void EmaMainWindow::on_collecTreeWidget_itemSelectionChanged()
 		ui->curCollecLabel->setText(collecItem->mpCollec->title);
 		ui->currentCollWidget->setEnabled(true);
 
-		// append files
-		QList<t_collection_file *>::iterator fit;
-		for(fit = collecItem->mpCollec->filesList.begin();
-			fit != collecItem->mpCollec->filesList.end();
-			fit++)
-		{
-			EMAMW_printf(SWLOG_INFO, "Load file '%s'",
-						 (*fit)->fullpath.toAscii().data());
-			appendThumbImage( (*fit)->fullpath );
-		}
+//		// append files
+//		QList<t_collection_file *>::iterator fit;
+//		for(fit = collecItem->mpCollec->filesList.begin();
+//			fit != collecItem->mpCollec->filesList.end();
+//			fit++)
+//		{
+//			EMAMW_printf(SWLOG_INFO, "Load file '%s'",
+//						 (*fit)->fullpath.toAscii().data());
+//			appendThumbImage( (*fit)->fullpath );
+//		}
 
-		item->setExpanded(true);
+		//item->setExpanded(true);
 	}
 	else
 	{
@@ -2569,5 +2645,30 @@ void EmaMainWindow::on_collecTreeWidget_itemSelectionChanged()
 		}
 	}
 
+
+}
+
+void EmaMainWindow::on_actionRemove_all_files_triggered()
+{
+	EMAMW_printf(SWLOG_INFO, "Remove all files from grids");
+
+	QList<ThumbImageFrame *>::iterator it;
+	for(it = mGridThumbImageFrameList.begin();
+		it != mGridThumbImageFrameList.end(); )
+	{
+		ThumbImageFrame * thumb = (*it);
+		it = mGridThumbImageFrameList.erase(it);
+		delete thumb;
+	}
+	for(it = mBottomThumbImageFrameList.begin();
+		it != mBottomThumbImageFrameList.end(); )
+	{
+		ThumbImageFrame * thumb = (*it);
+		it = mBottomThumbImageFrameList.erase(it);
+		delete thumb;
+	}
+
+	//ui->scrollAreaWidgetContents
+	//ui->gridWidget
 
 }
