@@ -214,6 +214,13 @@ private:
 	/** @brief append a directory to managed directories */
 	DirectoryTreeWidgetItem * appendDirectoryToLibrary(QString path, QTreeWidgetItem * itemParent = NULL);
 
+
+	/** @brief Get selected collection, even if it's the wuick collection */
+	EmaCollection * getSelectedCollection();
+
+	/** @brief Get list of selected files */
+	QStringList getSelectedFiles();
+
 	/** @brief append a list of files to displayed files */
 	void appendFileList(QStringList list);
 
@@ -230,6 +237,7 @@ private:
 
 	/// Selected image frame on bottom line
 	ThumbImageFrame * mSelectedThumbImageFrame;
+
 
 	/** @brief Set the file to be displayed in main display */
 	void setCurrentMainFile(QString fileName);
@@ -341,6 +349,7 @@ private slots:
 	void on_actionRemove_selected_from_current_collection_triggered();
 	void on_collecTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
 	void on_collecTreeWidget_itemSelectionChanged();
+	void on_actionRemove_all_files_triggered();
 };
 
 #endif // EmaMAINWINDOW_H

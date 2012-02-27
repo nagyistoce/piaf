@@ -73,7 +73,7 @@ typedef struct {
 	int type;			///< Type: movie, image
 	EmaCollection * pCollection; ///< Reverse pointer to its collection
 
-	QTreeWidgetItem * treeViewItem;
+	QTreeWidgetItem * treeViewItem;	///< pointer on item, which is of type DirectoryTreeWidgetItem
 } t_collection_file;
 
 /** @brief Collection storage */
