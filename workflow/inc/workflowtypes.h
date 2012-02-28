@@ -96,6 +96,12 @@ public:
 	QTreeWidgetItem * treeViewItem;
 };
 
+// a few functions for managing collections
+
+/** @brief Remove a collection from a list */
+void removeCollection(QList<EmaCollection *> * pCollList, EmaCollection * delCol);
+
+
 typedef struct {
 	QString node;
 } t_device;

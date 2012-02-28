@@ -32,7 +32,9 @@ typedef struct {
 	int maxOpenNI;///< Max index for search
 	int maxFreenect;///< Max index for search
 
-
+	// ======== GUI Settings ========
+	int leftTabWidget_index;	///< Index of last opened tab in left tabwigdet (Folder, Collections, Device...)
+	int rightTabWidget_index;	///< Index of last opened tab in right tabwigdet (Info, Image, Plugins...)
 
 } t_workflow_settings ;
 
