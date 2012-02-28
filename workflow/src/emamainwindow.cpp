@@ -253,29 +253,33 @@ void EmaMainWindow::appendCollection(QDomElement collecElem, EmaCollection * par
 			// Adding sub-connections !
 			if(subcollecElem.tagName().compare("subcollections")==0)
 			{
-				EMAMW_printf(SWLOG_INFO, "\t\t\tAdding files...");
+				EMAMW_printf(SWLOG_INFO, "\t\t\tAdding sub-collections...");
 				QDomNode subcollecNode2 = subcollecElem.firstChild();
 				while(!subcollecNode2.isNull()) {
 					QDomElement subcollecElem2 = subcollecNode2.toElement(); // try to convert the node to an element.
 					if(!subcollecElem2.isNull()) {
+						EMAMW_printf(SWLOG_INFO, "\t\t\t\tAdding sub-collection '%s'...", subcollecElem2.attribute("title").toAscii().data());
 						appendCollection(subcollecElem2, newCollec);
 					}
 					subcollecNode2 = subcollecNode2.nextSibling();
 				}
 			}
 
-			// append this collection to parent
-			if(parent_collec)
-			{
-				parent_collec->appendSubCollection(newCollec);
-			}
+
 		}
 		subcollecNode = subcollecNode.nextSibling();
 	}
 
-
-	// append to collections list
-	m_workflow_settings.collectionList.append(newCollec);
+	// append this collection to parent
+	if(parent_collec)
+	{
+		parent_collec->appendSubCollection(newCollec);
+	}
+	else
+	{
+		// append to collections list
+		m_workflow_settings.collectionList.append(newCollec);
+	}
 }
 
 
@@ -2404,6 +2408,8 @@ void EmaMainWindow::on_addCriterionButton_clicked()
 	{
 		mpQuickCollection->appendFiles(files);
 		mpQuickCollectionRootItem->updateDisplay();
+		// save settings to prevent from loosing data in case of crash
+		saveSettings();
 	}
 }
 
@@ -2445,9 +2451,13 @@ EmaCollection * EmaMainWindow::getSelectedCollection()
 void EmaMainWindow::on_excludeCriterionButton_clicked()
 {
 	QStringList files = getSelectedFiles();
-
-	mpQuickCollection->removeFiles(files);
-	mpQuickCollectionRootItem->updateDisplay();
+	if(!files.isEmpty())
+	{
+		mpQuickCollection->removeFiles(files);
+		mpQuickCollectionRootItem->updateDisplay();
+		// save settings to prevent from loosing data in case of crash
+		saveSettings();
+	}
 }
 
 

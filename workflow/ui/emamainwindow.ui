@@ -81,8 +81,8 @@
              <rect>
               <x>0</x>
               <y>0</y>
-              <width>214</width>
-              <height>516</height>
+              <width>148</width>
+              <height>510</height>
              </rect>
             </property>
             <layout class="QVBoxLayout" name="verticalLayout_14">
@@ -704,8 +704,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>578</width>
-                  <height>496</height>
+                  <width>642</width>
+                  <height>488</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1238,8 +1238,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>561</width>
-                  <height>339</height>
+                  <width>96</width>
+                  <height>26</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_17">
@@ -1461,7 +1461,7 @@
                <x>0</x>
                <y>0</y>
                <width>194</width>
-               <height>507</height>
+               <height>506</height>
               </rect>
              </property>
              <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -1704,7 +1704,7 @@
             <rect>
              <x>0</x>
              <y>0</y>
-             <width>1012</width>
+             <width>1010</width>
              <height>118</height>
             </rect>
            </property>
@@ -1740,7 +1740,7 @@
      <x>0</x>
      <y>0</y>
      <width>1020</width>
-     <height>23</height>
+     <height>27</height>
     </rect>
    </property>
    <widget class="QMenu" name="menuFile">
@@ -1968,6 +1968,9 @@
    <property name="text">
     <string>Remove all files</string>
    </property>
+   <property name="toolTip">
+    <string>Remove all files from grid and bottom line</string>
+   </property>
   </action>
   <action name="actionAdd_selected_to_quick_collection">
    <property name="text">
@@ -2045,6 +2048,45 @@
    <container>1</container>
   </customwidget>
  </customwidgets>
+ <tabstops>
+  <tabstop>inputsTabWidget</tabstop>
+  <tabstop>filesLoadButton</tabstop>
+  <tabstop>filesClearButton</tabstop>
+  <tabstop>filesTreeWidget</tabstop>
+  <tabstop>collecTreeWidget</tabstop>
+  <tabstop>collecAddButton</tabstop>
+  <tabstop>collecDeleteButton</tabstop>
+  <tabstop>collecEditButton</tabstop>
+  <tabstop>leftScrollArea</tabstop>
+  <tabstop>deviceRefreshButton</tabstop>
+  <tabstop>deviceAddButton</tabstop>
+  <tabstop>deviceClearButton</tabstop>
+  <tabstop>deviceTreeWidget</tabstop>
+  <tabstop>gridButton</tabstop>
+  <tabstop>imgButton</tabstop>
+  <tabstop>workspaceButton</tabstop>
+  <tabstop>batchPlayerButton</tabstop>
+  <tabstop>scrollArea_2</tabstop>
+  <tabstop>addCriterionButton</tabstop>
+  <tabstop>excludeCriterionButton</tabstop>
+  <tabstop>addToCurrentCollectionButton</tabstop>
+  <tabstop>removeFromCurrentButton</tabstop>
+  <tabstop>criterionComboBox</tabstop>
+  <tabstop>subCriterionComboBox</tabstop>
+  <tabstop>batchPlayButton</tabstop>
+  <tabstop>batchMoveUpButton</tabstop>
+  <tabstop>batchMoveDownButton</tabstop>
+  <tabstop>batchDeleteButton</tabstop>
+  <tabstop>batchQueueTreeWidget</tabstop>
+  <tabstop>batchProgressScrollArea</tabstop>
+  <tabstop>toolsTabWidget</tabstop>
+  <tabstop>lineEdit</tabstop>
+  <tabstop>searchButton</tabstop>
+  <tabstop>scrollArea</tabstop>
+  <tabstop>stopLoadButton</tabstop>
+  <tabstop>batchButton</tabstop>
+  <tabstop>imageScrollArea</tabstop>
+ </tabstops>
  <resources>
   <include location="../ema.qrc"/>
   <include location="../../main/piaf.qrc"/>

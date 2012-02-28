@@ -128,6 +128,10 @@ void EmaCollection::removeFiles(QStringList listOfFiles)
 			t_collection_file * pfile = found;
 			WKTYPES_MSG(SWLOG_DEBUG, "\tremove file '%s'", pfile->fullpath.toAscii().data());
 			filesList.removeOne(pfile);
+			if(pfile->treeViewItem)
+			{
+				delete pfile->treeViewItem;
+			}
 			delete pfile;
 		}
 	}
@@ -142,6 +146,10 @@ void EmaCollection::clearFiles()
 	{
 		t_collection_file * pfile = filesList.at(0);
 		filesList.removeAt(0);
+		if(pfile->treeViewItem)
+		{
+			delete pfile->treeViewItem;
+		}
 		delete pfile;
 	}
 }
