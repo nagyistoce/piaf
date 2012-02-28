@@ -102,6 +102,39 @@ void EmaCollection::appendFiles(QStringList listOfFiles)
 	}
 }
 
+void removeCollection(QList<EmaCollection *> * pCollList, EmaCollection * delCol)
+{
+	PIAF_MSG(SWLOG_DEBUG, "Search in collections list %p for '%s'...",
+				 pCollList,
+				 delCol->title.toAscii().data());
+
+	QList<EmaCollection *>::iterator cit;
+	for(cit = pCollList->begin(); cit != pCollList->end(); ++cit)
+	{
+		EmaCollection * pcol = (*cit);
+		if(delCol == pcol)
+		{
+			// delete now
+			if(delCol->treeViewItem)
+			{
+				delete delCol->treeViewItem;
+			}
+			pCollList->removeOne(delCol);
+			delete delCol;
+			return;
+		}
+		else
+		{
+			// Search in its sub-collection
+			PIAF_MSG(SWLOG_DEBUG, "Search in '%s's sub-collections...",
+						 pcol->title.toAscii().data());
+			removeCollection(&pcol->subCollectionsList, delCol);
+		}
+	}
+
+}
+
+
 void EmaCollection::removeFiles(QStringList listOfFiles)
 {
 	WKTYPES_MSG(SWLOG_INFO, "Append %d files to collection '%s'",

@@ -1654,22 +1654,30 @@ void EmaMainWindow::slot_newCollDialog_signalNewCollection(EmaCollection collec)
 	saveSettings();
 }
 
+
 void EmaMainWindow::on_collecDeleteButton_clicked()
 {
-	if(ui->collecTreeWidget->selectedItems().isEmpty()) return;
+	EmaCollection * selectedCollection = getSelectedCollection();
 
-	// Edit the selected one
-	CollecTreeWidgetItem *pCollecItem = (CollecTreeWidgetItem *)ui->collecTreeWidget->selectedItems().at(0);
-	if(!pCollecItem) return;
+	if(!selectedCollection)
+	{
+		QMessageBox::warning(NULL, tr("No collection selected"),
+							 tr("No collection is selected: please select a collection before removing it."));
+		return;
+	}
+	if(selectedCollection==mpQuickCollection)
+	{
+		QMessageBox::warning(NULL, tr("Can't delete the quick collection"),
+							 tr("You can't delete the quick collection. "));
+		return;
+	}
 
-	if(QMessageBox::question(NULL, tr("Remove collection ")+pCollecItem->getCollection()->title+tr("?"),
-							 tr("Do you really want to delete collection ")+pCollecItem->getCollection()->title+tr("?")
+	if(QMessageBox::question(NULL, tr("Remove collection ")+selectedCollection->title+tr("?"),
+							 tr("Do you really want to delete collection ")+selectedCollection->title+tr("?")
 							 ) == QMessageBox::Yes)
 	{
-		EmaCollection * pcollec = pCollecItem->getCollection();
-		ui->collecTreeWidget->removeItemWidget(pCollecItem, 0);
-		m_workflow_settings.collectionList.removeOne(pcollec);
-		delete pcollec;
+		removeCollection(&m_workflow_settings.collectionList, selectedCollection);
+
 		saveSettings();
 	}
 
