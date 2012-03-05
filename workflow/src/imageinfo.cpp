@@ -455,20 +455,6 @@ int ImageInfo::loadMovieFile(QString filename)
 
 	m_image_info_struct.filesize = fi.size();
 
-	/// \bug FIXME CHEAT MODE
-	t_movie_pos pos;
-	pos.nbFramesSinceKeyFrame = 0;
-
-	pos.prevAbsPosition = pos.prevKeyFramePosition = m_image_info_struct.filesize / 4;
-	m_image_info_struct.bookmarksList.append(pos);
-
-	pos.prevAbsPosition = pos.prevKeyFramePosition = m_image_info_struct.filesize * 2/3;
-	m_image_info_struct.bookmarksList.append(pos);
-
-	pos.prevAbsPosition = pos.prevKeyFramePosition = m_image_info_struct.filesize * 5/7;
-	m_image_info_struct.bookmarksList.append(pos);
-
-
 	// load movie
 	tBoxSize size;
 	size.x = size.y = 0;
