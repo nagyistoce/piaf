@@ -274,8 +274,13 @@ void MainImageWidget::cropAbsolute(int x_crop, int y_crop, int scale)
 void MainImageWidget::on_globalImageLabel_signalPicker(QRgb colorRGB, int colorGrey, QPoint pt)
 {
 	QString str;
-	str.sprintf("%d,%d : (%d,%d,%d)\ng=%d",
-				pt.x(), pt.y(), qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB), colorGrey);
+	QColor hsvColor(colorRGB);
+
+	str.sprintf("%d,%d : RGB=(%d,%d,%d)\nHSV=(%d,%d,%d) g=%d",
+				pt.x(), pt.y(),
+				qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB),
+				hsvColor.hsvHue(), hsvColor.hsvSaturation(), hsvColor.value(),
+				colorGrey);
 	m_ui->infoLabel->setText(str);
 	str.sprintf("background-color: rgb(%d,%d,%d);\n"
 				"color: rgb(%d,%d,%d);\n"

@@ -1753,7 +1753,9 @@ int PiafFilter::processFunction(int indexFunction, void * data_in, void * data_o
 int PiafFilter::treatFrame(char *frame, int framesize)
 {
 	if(framesize< (int)(strlen(SWFRAME_HEADER)+2+strlen(SWFRAME_END)))
+	{
 		return 0;
+	}
 
 	// Decompose frame
 	// First arg =? SWFRAME_HEADER ??
@@ -1789,19 +1791,20 @@ int PiafFilter::treatFrame(char *frame, int framesize)
 			return 0;
 		}
 
-		if(!category)
+		if(!category) {
 			category = new char [ len+1 ];
+		}
 		memcpy(category, arg, len);
 		category[len] = '\0';
 
-		if(!subcategory)
+		if(!subcategory) {
 			subcategory = new char [ slen+1 ];
-
+		}
 		memcpy(subcategory, scat, slen);
 		subcategory[slen] = '\0';
 
 //#ifdef __SWPLUGIN_MANAGER__
-		printf("\tReceived category = '%s'\tsub-category='%s'\n",
+		fprintf(stderr, "\tReceived category = '%s'\tsub-category='%s'\n",
 			category, subcategory);
 //#endif
 
@@ -1812,13 +1815,13 @@ int PiafFilter::treatFrame(char *frame, int framesize)
 	if(strncmp(command, SWFRAME_SETFUNCLIST, strlen(SWFRAME_SETFUNCLIST)) == 0)
 	{
 #ifdef __SWPLUGIN_MANAGER__
-		printf("\tReceiving function list...\n");
+		fprintf(stderr, "\tReceiving function list...\n");
 #endif
 		// read nb functions
 		sscanf(arg , "%d", &nb_func);
 
 #ifdef __SWPLUGIN_DEBUG__
-		printf("\t\tNb_functions = %d\n", nb_func);
+		fprintf(stderr, "\t\tNb_functions = %d\n", nb_func);
 #endif
 
 		//allocate nb_func functions in function list
@@ -1879,11 +1882,11 @@ int PiafFilter::treatFrame(char *frame, int framesize)
 		arg2 = nextTab(arg);
 
 		int nb=0;
-		if(sscanf(arg, "%d", &nb))
+		if(sscanf(arg, "%d", &nb) == 1) {
 			funcList[fnum].nb_params = nb;
-
+		}
 #ifdef __SWPLUGIN_MANAGER__
-		printf("\t\tNumber of params : %d\n", funcList[fnum].nb_params );
+		fprintf(stderr, "\t\tNumber of params : %d\n", funcList[fnum].nb_params );
 #endif
 		// allocate param list
 		if(funcList[fnum].nb_params>0 && !funcList[fnum].param_list) { // first pass
