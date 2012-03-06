@@ -44,6 +44,7 @@ AvailablePluginTreeWidgetItem::AvailablePluginTreeWidgetItem(
 	: QTreeWidgetItem(parent), mpFilter(pFilter), mIndexFunction(idx_function)
 {
 	if(!mpFilter) { setText(0, ("NULL plugin")); return; }
+
 	if(mIndexFunction >= mpFilter->nbfunctions()) {
 		setText(0, ("idx > nbfunc")); return;
 	}
@@ -53,8 +54,15 @@ AvailablePluginTreeWidgetItem::AvailablePluginTreeWidgetItem(
 		DEBUG_MSG("\tAvailablePluginTreeWidgetItem([%d] = '%s')",
 			  mIndexFunction, mpFilter->getFunction(mIndexFunction).name);
 	}
+
 	// Set columns
-	setText(0, QString(mpFilter->getFunction(mIndexFunction).name));
+	if(strlen(mpFilter->getFunction(mIndexFunction).name) == 0)
+	{
+		QFileInfo fi(mpFilter->name());
+		setText(0, QObject::tr("Error: ") + fi.baseName());
+	} else {
+		setText(0, QString(mpFilter->getFunction(mIndexFunction).name));
+	}
 	//setText(1, QString::number(mpFilter->getFunction(mIndexFunction).nb_params));
 }
 
@@ -117,10 +125,29 @@ PluginEditorForm::PluginEditorForm(QWidget *parent) :
 				  filter->getIndexFunction(),
 				  filter->nbfunctions());
 
+		QFileInfo fi(filter->name());
 		QStringList cols;
-		cols << QString(filter->subcategory );
+		QString infoStr;
+		if(filter->subcategory && strlen(filter->subcategory) > 0)
+		{
+			cols << QString(filter->subcategory );
+			infoStr = tr("Plugin '") + fi.baseName() + tr("'' ")
+					+ QString::number(filter->nbfunctions()) + tr (" functions");
+			infoStr = tr("Plugin '") + fi.baseName() + tr("'' ")
+					+ QString::number(filter->nbfunctions()) + tr (" functions");
+		}
+		else if(filter->name())
+		{
+			cols << tr("Error with file '") + fi.baseName() + "'";
+			infoStr = tr("Error with file plugin '") + fi.absoluteFilePath() + tr("' = can't be loaded.");
+		}
+		else
+		{
+			cols << tr("Invalid filter");
+		}
 
 		QTreeWidgetItem * rootItem = new QTreeWidgetItem(ui->availablePluginsTreeWidget, cols);
+		rootItem->setToolTip(0, infoStr);
 
 		// Create a root tree for each filter binary, then one item per function
 		for(int idx_function = 0; idx_function<filter->nbfunctions(); idx_function++)
