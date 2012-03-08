@@ -49,6 +49,26 @@ class EmaMainWindow;
 class BatchProgressWidget;
 class ThumbImageFrame;
 
+/** @brief Types for EmaTreeWidgetItems */
+typedef enum {	TREE_NONE,  ///< undefined
+				TREE_FOLDER, ///< Folder : contains sub-folders and/or files
+				TREE_FILE, ///< File item : links to a file
+				TREE_COLLECTION, ///< Collection : contains sub-collectionss and/or files
+				TREE_DEVICE_ROOT, ///< Device category, eg V4L2, OpenNI ...
+				TREE_DEVICE_NODE  ///< Device node
+			 } t_treeitem_category;
+
+
+class EmaTreeWidgetItem : QTreeWidgetItem
+{
+public:
+	EmaTreeWidgetItem(QTreeWidget * treeWidgetParent, t_treeitem_category cat);
+	EmaTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, t_treeitem_category cat);
+	t_treeitem_category getCategory() { return mCategory; }
+protected:
+	t_treeitem_category mCategory;
+};
+
 /** \brief Directory tree item */
 class DirectoryTreeWidgetItem : QTreeWidgetItem
 {

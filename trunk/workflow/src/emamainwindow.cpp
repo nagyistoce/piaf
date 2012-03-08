@@ -918,6 +918,19 @@ void DirectoryTreeWidgetItem::expand()
 	}
 
 }
+EmaTreeWidgetItem::EmaTreeWidgetItem(QTreeWidget * treeWidgetParent, t_treeitem_category cat)
+	: QTreeWidgetItem(treeWidgetParent)
+{
+	mCategory = cat;
+}
+
+EmaTreeWidgetItem::EmaTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, t_treeitem_category cat)
+	: QTreeWidgetItem(treeWidgetItemParent)
+{
+	mCategory = cat;
+}
+
+
 
 DirectoryTreeWidgetItem::DirectoryTreeWidgetItem(QTreeWidgetItem * treeWidgetItemParent, QString path)
 	: QTreeWidgetItem(treeWidgetItemParent),
