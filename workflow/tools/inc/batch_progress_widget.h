@@ -79,6 +79,19 @@ typedef struct {
 } t_batch_options;
 
 
+/** @brief Batch processing task
+  */
+typedef struct {
+	QList<t_batch_item *> itemsList;	///< List of files
+	QString sequencePath;				///< Path to plugins sequence
+	t_batch_options options;			///< processing options
+} t_batch_task;
+
+/** @brief Delete task and its file items */
+void purgeBatchTask(t_batch_task * pTask);
+
+
+
 /** \brief Threaded batch processing
 
   */
@@ -92,13 +105,18 @@ public:
 	/** @brief Return true if the thread is running */
 	bool isRunning() { return mRunning; }
 
+	/** \brief Set the pointer on current task
+
+	  This function enables to display a task which is waiting in stack, finished or in progress
+	  */
+	int setBatchTask(t_batch_task * pTask);
 
 //	void run();
 
 	/** @brief Set the processing filter manager */
 	void setFilterSequencer(FilterSequencer * fm) { mpFilterSequencer = fm; }
 
-	/** @brief Set the processing list */
+	/** @brief Set the processing list (OBSOLETE) */
 	void setFileList(QList<t_batch_item *> * pFileList);
 
 	/** @brief start/stop the processing */
@@ -132,13 +150,14 @@ private:
 	bool mProcessing; ///< run command (process while run is true)
 	bool mPause; ///< user asked for a pause
 
-	t_batch_options mBatchOptions;	///< batch processing options: greyscale, reload plugins, ...
 
 	t_time_histogram mTimeHistogram; ///< time histogram
 	void appendTimeUS(float proctime_us); ///< Append processing time in us
 	void allocHistogram(float maxproctime_us);
 
-	QList<t_batch_item *> * mpFileList; ///< pointer to processing list
+	t_batch_task * mpBatchTask;	///< current batch task
+//	QList<t_batch_item *> * mpFileList; ///< pointer to processing list
+//	t_batch_options mBatchOptions;	///< batch processing options: greyscale, reload plugins, ...
 
 	QMutex mProcMutex; ///< Processing mutex
 	QMutex mLoopMutex; ///< Mutex for loop wait condition
@@ -178,9 +197,14 @@ public:
 	/** \brief Set the plugin sequence */
 	void setPluginSequence(QString sequencepath);
 
-
 	/** \brief Set the list of files */
 	void setFilesList(QStringList fileList);
+
+	/** \brief Set the pointer on current task
+
+	  This function enables to display a task which is waiting in stack, finished or in progress
+	  */
+	int setBatchTask(t_batch_task * pTask);
 
 protected:
     void changeEvent(QEvent *e);
@@ -190,7 +214,6 @@ private:
 	QTimer mDisplayTimer; ///< Display timer for periodic refresh
 	QString mLastDirName; ///< Last opened directory with images
 	QString mLastPluginsDirName; ///< Last opened directory with plugin sequence
-	QList<t_batch_item *> mFileList;
 
 	QImage mLoadImage; ///< Loaded image form list
 	IplImage * mDisplayIplImage; ///< IplImage for display conversion
@@ -200,8 +223,13 @@ private:
 	FilterSequencer mPreviewFilterSequencer;
 
 	BatchFiltersThread mBatchThread; ///< Batch processing thread
-	t_batch_options mBatchOptions;	///< batch processing options: greyscale, reload plugins, ...
+//	t_batch_options mBatchOptions;	///< batch processing options: greyscale, reload plugins, ...
 
+	/// Allocates a new batch task
+	void allocateBatchTask();
+
+	t_batch_task * mpBatchTask;	///< current batch task
+	bool mBatchTaskAllocated;	///< tells if current batch task has been allocated by the widget
 
 
 

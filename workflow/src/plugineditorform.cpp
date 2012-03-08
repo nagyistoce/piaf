@@ -511,7 +511,8 @@ void PluginEditorForm::on_appendPluginButton_clicked()
 void PluginEditorForm::on_loadButton_clicked()
 {
 	if(!mpFilterSequencer) {
-		QMessageBox::critical(NULL, tr("No sequencer"), tr("No filter sequencer = nothing to save"));
+		QMessageBox::critical(NULL, tr("No sequencer"),
+							  tr("No filter sequencer = nothing to save"));
 		return;
 	}
 

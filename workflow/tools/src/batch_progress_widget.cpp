@@ -27,6 +27,7 @@
 #include "FileVideoAcquisition.h"
 
 #include "piaf-settings.h"
+#include "piaf-common.h"
 #include "OpenCVEncoder.h"
 
 #include "timehistogramwidget.h"
@@ -37,6 +38,9 @@ BatchProgressWidget::BatchProgressWidget(QWidget *parent) :
     ui(new Ui::BatchProgressWidget)
 {
     ui->setupUi(this);
+
+	mpBatchTask = NULL;	// no current batch task
+	mBatchTaskAllocated = false;	//
 
 
 	// dont' show warning on plugin crash
@@ -49,16 +53,12 @@ BatchProgressWidget::BatchProgressWidget(QWidget *parent) :
 
 //	ui->controlGroupBox->setEnabled(false);
 
-	mBatchOptions.reload_at_change = ui->reloadPluginCheckBox->isChecked();
-	mBatchOptions.use_grey = ui->greyButton->isChecked();
-	mBatchOptions.record_output = ui->recordButton->isChecked();
-	mBatchOptions.view_image = ui->viewButton->isChecked() ;
+	allocateBatchTask();
 
-	mBatchThread.setOptions(mBatchOptions);
 
 	// assign a filter manager to background processing thread
 	mBatchThread.setFilterSequencer(&mFilterSequencer);
-	mBatchThread.setFileList(&mFileList);
+	//OBSOLETE mBatchThread.setFileList(&mFileList);
 
 	connect(&mDisplayTimer, SIGNAL(timeout()), this, SLOT(on_mDisplayTimer_timeout()));
 	//	mBatchThread.start(QThread::HighestPriority);
@@ -71,10 +71,70 @@ BatchProgressWidget::BatchProgressWidget(QWidget *parent) :
 
 }
 
+void BatchProgressWidget::allocateBatchTask()
+{
+	// Read batch options in GUI (defaults)
+	if(!mpBatchTask)
+	{
+		PIAF_MSG(SWLOG_INFO, "create new watch task");
+		mpBatchTask = new t_batch_task;
+		mpBatchTask->sequencePath = "(none)";
+	}
+
+	mpBatchTask->options.reload_at_change = ui->reloadPluginCheckBox->isChecked();
+	mpBatchTask->options.use_grey = ui->greyButton->isChecked();
+	mpBatchTask->options.record_output = ui->recordButton->isChecked();
+	mpBatchTask->options.view_image = ui->viewButton->isChecked() ;
+
+	mBatchThread.setOptions(mpBatchTask->options);
+}
+
+/*
+ * Delete task and its file items
+ */
+void purgeBatchTask(t_batch_task * pTask)
+{
+	if(!pTask) { return; }
+//	QList<t_batch_item *> mItemsList;	///< List of files
+//	QString mSequencePath;				///< Path to plugins sequence
+//	t_batch_options options;			///< processing options
+//	} t_batch_task;
+
+	fprintf(stderr, "[%s] %s:%d: delete batch task '%s' + %d files\n",
+			__FILE__, __func__, __LINE__,
+			pTask->sequencePath.toAscii().data(),
+			pTask->itemsList.count()
+			);
+	QList<t_batch_item *>::iterator it;
+	for(it = pTask->itemsList.begin();
+		it != pTask->itemsList.end();
+		) {
+		t_batch_item * pitem = (*it);
+		if(pitem)
+		{
+			if(pitem->treeItem)
+			{
+				delete pitem->treeItem;
+			}
+			delete pitem;
+		}
+		it = pTask->itemsList.erase(it);
+	}
+
+	delete pTask;
+}
+
 BatchProgressWidget::~BatchProgressWidget()
 {
-    delete ui;
+	if(mBatchTaskAllocated && mpBatchTask)
+	{
+		// purge
+		purgeBatchTask(mpBatchTask);
+		mpBatchTask = NULL;
+	}
 	swReleaseImage(&mDisplayIplImage);
+
+	delete ui;
 }
 
 void BatchProgressWidget::changeEvent(QEvent *e)
@@ -129,6 +189,12 @@ void BatchProgressWidget::on_loadButton_clicked()
  * Set the plugin sequence */
 void BatchProgressWidget::setPluginSequence(QString fileName)
 {
+	if(!mpBatchTask)
+	{
+		mpBatchTask = new t_batch_task;
+		mBatchTaskAllocated = true;
+	}
+
 	QFileInfo fi(fileName);
 	if(fi.isFile() && fi.exists())
 	{
@@ -141,8 +207,8 @@ void BatchProgressWidget::setPluginSequence(QString fileName)
 		} else {
 			//ui->controlGroupBox->setEnabled(true);
 			ui->sequenceLabel->setText(fi.baseName());
-			mBatchOptions.sequence_name = fi.baseName();
-			mBatchThread.setOptions(mBatchOptions);
+			mpBatchTask->options.sequence_name = fi.baseName();
+			mBatchThread.setOptions(mpBatchTask->options);
 
 			mPreviewFilterSequencer.loadFilterList(fi.absoluteFilePath().toUtf8().data());
 		}
@@ -157,11 +223,38 @@ void BatchProgressWidget::setPluginSequence(QString fileName)
 	}
 }
 
+/** \brief Set the pointer on current task
+
+  This function enables to display a task which is waiting in stack, finished or in progress
+  */
+int BatchProgressWidget::setBatchTask(t_batch_task * pTask)
+{
+	purgeBatchTask(mpBatchTask);
+	mBatchTaskAllocated = false; // keep in mind we received this pointer from external
+
+	// Show files list
+	mpBatchTask = pTask;
+	if(pTask)
+	{
+		PIAF_MSG(SWLOG_INFO, "Received new task = %p : %d files, sequence='%s'",
+				 mpBatchTask, mpBatchTask->itemsList.count(),
+				 mpBatchTask->sequencePath.toAscii().data()
+				 );
+	} else {
+		PIAF_MSG(SWLOG_INFO, "Received new task = %p", pTask);
+	}
+	return 0;
+}
 
 /*
  * Set the list of files */
 void BatchProgressWidget::setFilesList(QStringList files)
 {
+	if(!mpBatchTask)
+	{
+		allocateBatchTask();
+	}
+
 	QFileInfo fi;
 	QStringList list = files;
 	QStringList::Iterator it = list.begin();
@@ -184,7 +277,7 @@ void BatchProgressWidget::setFilesList(QStringList files)
 			item->treeItem = new QTreeWidgetItem(ui->filesTreeWidget, strings);
 			item->treeItem->setIcon(1, QIcon(":/images/16x16/waiting.png"));
 
-			mFileList.append(item);
+			mpBatchTask->itemsList.append(item);
 
 			mLastDirName = fi.absoluteDir().absolutePath();
 
@@ -213,8 +306,10 @@ void BatchProgressWidget::on_addButton_clicked()
 
 void BatchProgressWidget::on_resetButton_clicked()
 {
+	if(!mpBatchTask) { return; }
+
 	QList<t_batch_item *>::iterator it;
-	for(it = mFileList.begin(); it != mFileList.end(); ++it)
+	for(it = mpBatchTask->itemsList.begin(); it != mpBatchTask->itemsList.end(); ++it)
 	{
 		// remove selected
 		t_batch_item * item = (*it);
@@ -234,14 +329,14 @@ void BatchProgressWidget::on_delButton_clicked()
 {
 	QList<t_batch_item *>::iterator it;
 	int idx = 0;
-	for(it = mFileList.begin(); it != mFileList.end(); )
+	for(it = mpBatchTask->itemsList.begin(); it != mpBatchTask->itemsList.end(); )
 	{
 		// remove selected
 		t_batch_item * item = (*it);
 		if(item->treeItem->isSelected())
 		{
 			ui->filesTreeWidget->takeTopLevelItem(idx);
-			it = mFileList.erase(it);
+			it = mpBatchTask->itemsList.erase(it);
 			delete item;
 		}
 		else { ++it; idx++; }
@@ -250,23 +345,23 @@ void BatchProgressWidget::on_delButton_clicked()
 
 void BatchProgressWidget::on_recordButton_toggled(bool checked)
 {
-	mBatchOptions.record_output = checked;
-	mBatchThread.setOptions(mBatchOptions);
+	mpBatchTask->options.record_output = checked;
+	mBatchThread.setOptions(mpBatchTask->options);
 }
 
 void BatchProgressWidget::on_viewButton_toggled(bool checked)
 {
-	mBatchOptions.view_image = checked;
+	mpBatchTask->options.view_image = checked;
 
 	fprintf(stderr, "[Batch]::%s:%d : display = %c\n",
-			__func__, __LINE__, mBatchOptions.view_image ? 'T':'F');
+			__func__, __LINE__, mpBatchTask->options.view_image ? 'T':'F');
 
-	mBatchThread.setOptions(mBatchOptions);
+	mBatchThread.setOptions(mpBatchTask->options);
 }
 
 void BatchProgressWidget::on_greyButton_toggled(bool checked)
 {
-	mBatchOptions.use_grey = checked;
+	mpBatchTask->options.use_grey = checked;
 	if(checked)
 	{
 		ui->greyButton->setText(tr("Grey"));
@@ -276,7 +371,7 @@ void BatchProgressWidget::on_greyButton_toggled(bool checked)
 		ui->greyButton->setText(tr("Color"));
 	}
 
-	mBatchThread.setOptions(mBatchOptions);
+	mBatchThread.setOptions(mpBatchTask->options);
 }
 
 
@@ -322,8 +417,8 @@ void BatchProgressWidget::on_playPauseButton_toggled(bool checked)
 
 void BatchProgressWidget::on_reloadPluginCheckBox_stateChanged(int )
 {
-	mBatchOptions.reload_at_change = ui->reloadPluginCheckBox->isChecked();
-	mBatchThread.setOptions(mBatchOptions);
+	mpBatchTask->options.reload_at_change = ui->reloadPluginCheckBox->isChecked();
+	mBatchThread.setOptions(mpBatchTask->options);
 }
 
 
@@ -346,10 +441,11 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 		QTreeWidgetItem* treeItem, int /*column*/)
 {
 	if(!ui->viewButton->isChecked()) { return; }
+	if(!mpBatchTask) { return; }
 
 	fprintf(stderr, "[Batch] %s:%d \n",	__func__, __LINE__);
 	QList<t_batch_item *>::iterator it;
-	for(it = mFileList.begin(); it != mFileList.end(); ++it)
+	for(it = mpBatchTask->itemsList.begin(); it != mpBatchTask->itemsList.end(); ++it)
 	{
 		// remove selected
 		t_batch_item * item = (*it);
@@ -386,7 +482,7 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 
 					if(!loadedQImage.isNull())
 					{
-						if(mBatchOptions.reload_at_change
+						if(mpBatchTask->options.reload_at_change
 						   || oldSize.width != loadedQImage.width()
 						   || oldSize.height != loadedQImage.height()
 						   || oldDepth != loadedQImage.depth()
@@ -396,7 +492,7 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 									"or size changed (%dx%dx%d => %dx%dx%d) "
 									"=> reload filter sequence\n",
 									__func__, __LINE__,
-									mBatchOptions.reload_at_change ? 'T':'F',
+									mpBatchTask->options.reload_at_change ? 'T':'F',
 									oldSize.width, oldSize.height, oldDepth,
 									loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
 									);
@@ -489,7 +585,7 @@ void BatchProgressWidget::on_mDisplayTimer_timeout()
 	memset(&progress, 0, sizeof(t_batch_progress));
 
 	float processed = 0.f;
-	for(it = mFileList.begin(); it != mFileList.end(); ++it)
+	for(it = mpBatchTask->itemsList.begin(); it != mpBatchTask->itemsList.end(); ++it)
 	{
 		// remove selected
 		t_batch_item * item = (*it);
@@ -565,7 +661,7 @@ void BatchProgressWidget::on_mDisplayTimer_timeout()
 		}
 	}
 
-	progress.nb_total = mFileList.count();
+	progress.nb_total = mpBatchTask->itemsList.count();
 
 	QString procStr, errStr, totalStr;
 	procStr.sprintf("%d", progress.nb_processed);
@@ -577,12 +673,15 @@ void BatchProgressWidget::on_mDisplayTimer_timeout()
 	totalStr.sprintf("%d", progress.nb_total);
 	ui->nbFilesLabel->setText(totalStr);
 
-	int progress_percent = (int)roundf(processed *100.f / (float)mFileList.count());
+	int progress_percent = 100;
+	if(progress.nb_total>0) {
+		progress_percent = (int)roundf(processed *100.f / (float)mpBatchTask->itemsList.count());
+	}
 	ui->progressBar->setValue(progress_percent);
 
 	fprintf(stderr, "[Batch]::%s:%d : display = %c\n",
 			__func__, __LINE__,
-			mBatchOptions.view_image ? 'T':'F');
+			mpBatchTask->options.view_image ? 'T':'F');
 
 	if(progress.nb_unprocessed == 0) {
 		// we're done
@@ -590,7 +689,7 @@ void BatchProgressWidget::on_mDisplayTimer_timeout()
 	}
 
 	// display current processed image if needed
-	if(mBatchOptions.view_image)
+	if(mpBatchTask->options.view_image)
 	{
 		mBatchThread.lockDisplay(true); // lock display for thread-safe execution
 		IplImage * imgRGBdisplay = mBatchThread.getDisplayImage();
@@ -678,15 +777,21 @@ BatchFiltersThread::BatchFiltersThread()
 {
 	mRun = mRunning = mProcessing = false;
 	mpFilterSequencer = NULL;
-	mpFileList = NULL;
+
+
+	mpBatchTask = NULL;	// no current batch task
+
 
 	memset(&mTimeHistogram, 0, sizeof(t_time_histogram));
 	mTimeHistogram.nb_iter = -4; // to prevent from counting first iterations
 
 	mPause = false;
 
-	mBatchOptions.reload_at_change = true;
-	mBatchOptions.use_grey = false;
+	if(mpBatchTask)
+	{
+		mpBatchTask->options.reload_at_change = true;
+		mpBatchTask->options.use_grey = false;
+	}
 	mDisplayImage = NULL;
 }
 
@@ -705,13 +810,11 @@ BatchFiltersThread::~BatchFiltersThread()
 
 void BatchFiltersThread::setOptions(t_batch_options options)
 {
-	mBatchOptions = options;
-}
-
-void BatchFiltersThread::setFileList(QList<t_batch_item *> * pFileList)
-{
-	mpFileList = pFileList;
-}
+	if(mpBatchTask)
+	{
+		mpBatchTask->options = options;
+	}
+	}
 
 void BatchFiltersThread::startProcessing(bool on)
 {
@@ -756,17 +859,22 @@ void BatchFiltersThread::run()
 		}
 		bool procnow = mProcessing;
 		if(procnow) {
-			if(!mpFileList) {
+			if(!mpBatchTask) {
+				PIAF_MSG(SWLOG_DEBUG, "no task, no processing");
 				procnow = false;
 			}
-			else if(mpFileList->isEmpty()) {
+			else if(mpBatchTask->itemsList.isEmpty()) {
+				PIAF_MSG(SWLOG_DEBUG, "no item in task");
 				procnow = false;
 			} else {
+				PIAF_MSG(SWLOG_INFO, "%d items in task, processing...",
+						 mpBatchTask->itemsList.count()
+						 );
 				// check if at least one needs to be processed
 				bool at_least_one = false;
 				QList<t_batch_item *>::iterator it;
-				for(it = mpFileList->begin();
-					mRun && it != mpFileList->end() && !at_least_one; ++it)
+				for(it = mpBatchTask->itemsList.begin();
+					mRun && it != mpBatchTask->itemsList.end() && !at_least_one; ++it)
 				{
 					t_batch_item * item = (*it);
 					if(item->processing_state == UNPROCESSED)
@@ -814,7 +922,9 @@ void BatchFiltersThread::run()
 			while(still_processing) {
 				still_processing = false;
 				was_paused = false;
-				for(it = mpFileList->begin(); mRun && !was_paused && it != mpFileList->end(); ++it)
+				for(it = mpBatchTask->itemsList.begin();
+					mRun && !was_paused
+					&& it != mpBatchTask->itemsList.end(); ++it)
 				{
 					t_batch_item * item = (*it);
 					if(item->processing_state == UNPROCESSED)
@@ -854,7 +964,7 @@ void BatchFiltersThread::run()
 										item->absoluteFilePath.toUtf8().data());
 							}
 
-							if(mBatchOptions.reload_at_change
+							if(mpBatchTask->options.reload_at_change
 							   || oldSize.width != loadedQImage.width()
 							   || oldSize.height != loadedQImage.height()
 							   || oldDepth != loadedQImage.depth()
@@ -865,7 +975,7 @@ void BatchFiltersThread::run()
 										"or size changed (%dx%dx%d => %dx%dx%d) "
 										"=> reload filter sequence\n",
 										__func__, __LINE__,
-										mBatchOptions.reload_at_change ? 'T':'F',
+										mpBatchTask->options.reload_at_change ? 'T':'F',
 										oldSize.width, oldSize.height, oldDepth,
 										loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
 										);
@@ -901,15 +1011,15 @@ void BatchFiltersThread::run()
 								appendTimeUS(image.deltaTus);
 
 								// Check if we need to record
-								if(mBatchOptions.record_output) {
+								if(mpBatchTask->options.record_output) {
 									QFileInfo fi(item->absoluteFilePath);
 									QString outFile = item->absoluteFilePath
-													  + "-" + mBatchOptions.sequence_name + "." + fi.suffix();
+													  + "-" + mpBatchTask->options.sequence_name + "." + fi.suffix();
 									loadedQImage.save(outFile);
 								}
 
 								// Check if we need to copy an image for display
-								if(mBatchOptions.view_image) {
+								if(mpBatchTask->options.view_image) {
 									if(mDisplayImage &&
 											( mDisplayImage->width!=loadedQImage.width()
 											 || mDisplayImage->height!=loadedQImage.height()
@@ -960,7 +1070,7 @@ void BatchFiltersThread::run()
 							} else {
 								IplImage * loadedImage = swCreateImage(size,
 															IPL_DEPTH_8U,
-															mBatchOptions.use_grey ? 1:4);
+															mpBatchTask->options.use_grey ? 1:4);
 								// Loop on images
 								swImageStruct image;
 								memset(&image, 0, sizeof(swImageStruct));
@@ -984,7 +1094,7 @@ void BatchFiltersThread::run()
 										}
 
 										// if the item is no more in processing list
-										if(mpFileList->indexOf(item) < 0) {
+										if(mpBatchTask->itemsList.indexOf(item) < 0) {
 											was_paused = true;
 											still_processing = true;
 											// Forget this item because it may have been destroyed
@@ -1000,7 +1110,7 @@ void BatchFiltersThread::run()
 									long buffersize = image.buffer_size ;
 									int ret = -1;
 									if(read_frame) {
-										if(mBatchOptions.use_grey)
+										if(mpBatchTask->options.use_grey)
 										{
 											ret = fva->readImageYNoAcq((uchar *)image.buffer, &buffersize);
 										} else {
@@ -1032,11 +1142,11 @@ void BatchFiltersThread::run()
 											item->processing_state = PROCESSING;
 
 											// Check if we need to record
-											if(mBatchOptions.record_output) {
+											if(mpBatchTask->options.record_output) {
 												if(!encoder) {
 													QFileInfo fi(item->absoluteFilePath);
 													QString outputFile = item->absoluteFilePath
-																	  + "-" + mBatchOptions.sequence_name + ".avi";
+																	  + "-" + mpBatchTask->options.sequence_name + ".avi";
 													encoder = new OpenCVEncoder(loadedImage->width,
 																				loadedImage->height,
 																				(int)roundf(fva->getFrameRate()));
@@ -1063,7 +1173,7 @@ void BatchFiltersThread::run()
 											}
 
 											// Check if we need to copy an image for display
-											if(mBatchOptions.view_image) {
+											if(mpBatchTask->options.view_image) {
 												mDisplayMutex.lock();
 												if(mDisplayImage && (mDisplayImage->widthStep!=loadedImage->widthStep || mDisplayImage->height!=loadedImage->height)) {
 													swReleaseImage(&mDisplayImage);
