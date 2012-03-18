@@ -46,8 +46,8 @@
 
 
 class EmaMainWindow;
-class BatchProgressWidget;
 class ThumbImageFrame;
+class BatchQueueWidget;
 
 /** @brief Types for EmaTreeWidgetItems */
 typedef enum {	TREE_NONE,  ///< undefined
@@ -272,6 +272,7 @@ private:
 
 	QTimer m_timer;
 	QMdiArea * pWorkspace;
+	BatchQueueWidget * mpBatchQueueWidget;
 
 	/// Main file diplayed
 	QString mMainFileName;
@@ -282,7 +283,6 @@ private:
 	CaptureTreeWidgetItem * mFreenectItem;
 	CaptureTreeWidgetItem * mOpenCVItem;
 
-	BatchProgressWidget * mpBatchProgressWidget;
 
 #ifdef PIAF_LEGACY
 	WorkshopImage * pWorkshopImage;

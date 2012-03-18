@@ -79,7 +79,9 @@ SOURCES += tools/src/PiafFilter.cpp \
 	tools/src/collectioneditdialog.cpp \
 	tools/src/preferencesdialog.cpp \
     tools/src/batch_progress_widget.cpp \
-    src/workflowtypes.cpp
+    src/workflowtypes.cpp \
+    src/batchqueuewidget.cpp \
+    tools/src/batchthread.cpp
 
 
 HEADERS += tools/inc/PiafFilter.h \
@@ -106,7 +108,9 @@ HEADERS += tools/inc/PiafFilter.h \
     inc/workflowtypes.h \
     tools/inc/preferencesdialog.h \
     inc/piafworkflow-settings.h \
-    tools/inc/batch_progress_widget.h
+    tools/inc/batch_progress_widget.h \
+    inc/batchqueuewidget.h \
+    tools/inc/batchthread.h
 
 FORMS += ui/navimagewidget.ui \
     ui/thumbimagewidget.ui \
@@ -124,7 +128,8 @@ FORMS += ui/navimagewidget.ui \
     ui/pluginsettingswidget.ui \
 	tools/ui/collectioneditdialog.ui \
     tools/ui/preferencesdialog.ui \
-    tools/ui/batch_progress_widget.ui
+    tools/ui/batch_progress_widget.ui \
+    ui/batchqueuewidget.ui
 
 
 INCLUDEPATH += tools/inc
@@ -468,6 +473,11 @@ message( "FINAL CONFIGURATION ==================================================
 message( "")
 message( "")
 OTHER_FILES += doc/OpenCVToolsForPhoto.txt
+
+
+
+
+
 
 
 

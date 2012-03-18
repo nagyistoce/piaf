@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>BatchQueueWidget</class>
+ <widget class="QWidget" name="BatchQueueWidget">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>640</width>
+    <height>480</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <layout class="QVBoxLayout" name="verticalLayout">
+   <property name="spacing">
+    <number>2</number>
+   </property>
+   <property name="margin">
+    <number>2</number>
+   </property>
+   <item>
+    <widget class="QFrame" name="batchQueueFrame">
+     <layout class="QVBoxLayout" name="verticalLayout_18">
+      <property name="spacing">
+       <number>2</number>
+      </property>
+      <property name="margin">
+       <number>0</number>
+      </property>
+      <item>
+       <widget class="QWidget" name="widget_toolbar" native="true">
+        <layout class="QHBoxLayout" name="horizontalLayout_5">
+         <property name="spacing">
+          <number>0</number>
+         </property>
+         <property name="leftMargin">
+          <number>0</number>
+         </property>
+         <property name="topMargin">
+          <number>1</number>
+         </property>
+         <property name="rightMargin">
+          <number>0</number>
+         </property>
+         <property name="bottomMargin">
+          <number>1</number>
+         </property>
+         <item>
+          <widget class="QPushButton" name="batchPlayButton">
+           <property name="toolTip">
+            <string>Toggle play/pause</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../../main/piaf.qrc">
+             <normaloff>:/images/22x22/system-run.png</normaloff>
+             <normalon>:/icons/22x22/media-playback-pause.png</normalon>:/images/22x22/system-run.png</iconset>
+           </property>
+           <property name="checkable">
+            <bool>true</bool>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <spacer name="horizontalSpacer_5">
+           <property name="orientation">
+            <enum>Qt::Horizontal</enum>
+           </property>
+           <property name="sizeHint" stdset="0">
+            <size>
+             <width>40</width>
+             <height>20</height>
+            </size>
+           </property>
+          </spacer>
+         </item>
+         <item>
+          <widget class="QPushButton" name="batchMoveUpButton">
+           <property name="toolTip">
+            <string>Move up selected batch item</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../ema.qrc">
+             <normaloff>:/icons/16x16/arrow-up.png</normaloff>:/icons/16x16/arrow-up.png</iconset>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="batchMoveDownButton">
+           <property name="toolTip">
+            <string>Move down selected batch item</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../ema.qrc">
+             <normaloff>:/icons/16x16/arrow-down.png</normaloff>:/icons/16x16/arrow-down.png</iconset>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QPushButton" name="batchDeleteButton">
+           <property name="toolTip">
+            <string>Delete selected batch item</string>
+           </property>
+           <property name="text">
+            <string/>
+           </property>
+           <property name="icon">
+            <iconset resource="../ema.qrc">
+             <normaloff>:/icons/16x16/trash-empty.png</normaloff>:/icons/16x16/trash-empty.png</iconset>
+           </property>
+           <property name="flat">
+            <bool>true</bool>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="Line" name="line_2">
+           <property name="orientation">
+            <enum>Qt::Vertical</enum>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QLabel" name="label_2">
+           <property name="text">
+            <string>Threads:</string>
+           </property>
+          </widget>
+         </item>
+         <item>
+          <widget class="QSpinBox" name="nbThreadsSpinBox">
+           <property name="toolTip">
+            <string>Number of processing threads: should use as max the number of cores - 1</string>
+           </property>
+           <property name="minimum">
+            <number>1</number>
+           </property>
+          </widget>
+         </item>
+        </layout>
+       </widget>
+      </item>
+      <item>
+       <widget class="QTreeWidget" name="batchQueueTreeWidget">
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="maximumSize">
+         <size>
+          <width>16777215</width>
+          <height>100</height>
+         </size>
+        </property>
+        <property name="allColumnsShowFocus">
+         <bool>true</bool>
+        </property>
+        <column>
+         <property name="text">
+          <string>Session</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Sequence</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Nb files</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Options</string>
+         </property>
+        </column>
+        <column>
+         <property name="text">
+          <string>Progress</string>
+         </property>
+        </column>
+        <item>
+         <property name="text">
+          <string>Batch 1</string>
+         </property>
+         <property name="text">
+          <string>Sobel+Stretch</string>
+         </property>
+         <property name="text">
+          <string>18img</string>
+         </property>
+         <property name="text">
+          <string>Rec, histo</string>
+         </property>
+         <property name="text">
+          <string>100%</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../ema.qrc">
+           <normaloff>:/icons/16x16/dialog-ok-apply.png</normaloff>:/icons/16x16/dialog-ok-apply.png</iconset>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Batch 2</string>
+         </property>
+         <property name="text">
+          <string>Face detect</string>
+         </property>
+         <property name="text">
+          <string>5mov</string>
+         </property>
+         <property name="text">
+          <string>Rec</string>
+         </property>
+         <property name="text">
+          <string>42%</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../ema.qrc">
+           <normaloff>:/icons/16x16/system-software-update.png</normaloff>:/icons/16x16/system-software-update.png</iconset>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>Batch 3</string>
+         </property>
+         <property name="text">
+          <string>Ldmk track</string>
+         </property>
+         <property name="text">
+          <string>11mov</string>
+         </property>
+         <property name="text">
+          <string>Histo</string>
+         </property>
+         <property name="text">
+          <string>Waiting</string>
+         </property>
+         <property name="icon">
+          <iconset resource="../ema.qrc">
+           <normaloff>:/icons/16x16/view-history.png</normaloff>:/icons/16x16/view-history.png</iconset>
+         </property>
+        </item>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item>
+    <widget class="QScrollArea" name="batchProgressScrollArea">
+     <property name="widgetResizable">
+      <bool>true</bool>
+     </property>
+     <widget class="QWidget" name="batchProgressScrollAreaContents">
+      <property name="geometry">
+       <rect>
+        <x>0</x>
+        <y>0</y>
+        <width>634</width>
+        <height>334</height>
+       </rect>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_2">
+       <item>
+        <widget class="QLabel" name="label">
+         <property name="text">
+          <string>Current: -</string>
+         </property>
+        </widget>
+       </item>
+      </layout>
+     </widget>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../ema.qrc"/>
+  <include location="../../main/piaf.qrc"/>
+ </resources>
+ <connections/>
+</ui>
