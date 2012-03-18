@@ -41,6 +41,8 @@
 #include "thumbimageframe.h"
 #include "thumbimagewidget.h"
 
+#include "batchqueuewidget.h"
+
 #include <QMessageBox>
 #include <QFile>
 #include <QTextStream>
@@ -176,17 +178,15 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	// Default on file tree // FIXME: use last saved setting
 	ui->inputsTabWidget->setCurrentIndex(0);
 
+	mpBatchQueueWidget = new BatchQueueWidget(ui->page_batch);
+	ui->page_batch->layout()->addWidget(mpBatchQueueWidget);
+
 	// Hide splash
 	if(g_splash)
 	{
 //		g_splash->hide();
 	}
 
-	// =================== Create batch status progress widget =================
-	mpBatchProgressWidget = new BatchProgressWidget(ui->page_batch);
-	ui->batchProgressScrollAreaContents->layout()->addWidget(mpBatchProgressWidget);
-	// Disable interactions for user to show only the state of progress of batch
-	mpBatchProgressWidget->enableInteractive(false);
 
 
 	connect(ui->mainDisplayWidget, SIGNAL(signalZoomRect(QRect)),
