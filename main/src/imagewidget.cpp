@@ -294,7 +294,7 @@ void ImageWidget::setColorMode(int mode)
 
 		dImage->setNumColors(256);
 		QColor col;
-		fprintf(stderr, "ImageWidget::%s : colorMode = %d\n", __func__, m_colorMode);
+		//fprintf(stderr, "ImageWidget::%s:%d : colorMode = %d\n", __func__, __LINE__, m_colorMode);
 		// Change color mode
 		switch(m_colorMode) {
 		default:
@@ -354,6 +354,7 @@ void ImageWidget::keyReleaseEvent ( QKeyEvent * event )
 {
 	mShift = mCtrl = false;
 }
+
 void ImageWidget::slot_shortcut_in_activated()
 {
 	zoomOnDisplayPixel(width()/2, height()/2, KEY_ZOOM_INC);
@@ -363,11 +364,13 @@ void ImageWidget::slot_shortcut_out_activated()
 {
 	zoomOnDisplayPixel(width()/2, height()/2, -KEY_ZOOM_INC);
 }
+
 void ImageWidget::slot_shortcut_fit_activated()
 {
 	mZoomFitFactor = -1;
 	update();
 }
+
 void ImageWidget::slot_shortcut_1_activated()
 {
 	setZoomParams(xZoomCenter, yZoomCenter, 1);
