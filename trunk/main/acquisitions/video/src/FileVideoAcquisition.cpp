@@ -1663,7 +1663,10 @@ IplImage * FileVideoAcquisition::readImageRGB32()
 		fprintf(stderr, "[FileVA]::%s:%d : create RGB32 image = %dx%d",
 				__func__, __LINE__, mImageSize.width, mImageSize.height);
 		m_imageRGB32 = swCreateImage(mImageSize, IPL_DEPTH_8U, 4);
+		cvSet(m_imageRGB32, cvScalarAll(255)); // fill the alpha channel
+
 		m_imageBGR32 = swCreateImage(mImageSize, IPL_DEPTH_8U, 4);
+		cvSet(m_imageBGR32, cvScalarAll(255)); // fill the alpha channel
 	}
 	// Decode image
 	long buffersize = m_imageRGB32->widthStep * m_imageRGB32->height;
