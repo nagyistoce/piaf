@@ -43,6 +43,8 @@
 
 #include "batchqueuewidget.h"
 
+#include "sequence_select_dialog.h"
+
 #include <QMessageBox>
 #include <QFile>
 #include <QTextStream>
@@ -663,6 +665,11 @@ void EmaMainWindow::on_actionEdit_plugins_activated()
 	pluginDialog->show();
 }
 
+void EmaMainWindow::on_actionEdit_sequences_triggered()
+{
+	SequenceSelectDialog * seqDialog = new SequenceSelectDialog(NULL);
+	seqDialog->show();
+}
 void EmaMainWindow::on_actionBatch_processor_activated()
 {
 	statusBar()->showMessage( tr("Starting batch in new window") );
@@ -2703,3 +2710,5 @@ void EmaMainWindow::on_actionRemove_all_files_triggered()
 	//ui->gridWidget
 
 }
+
+
