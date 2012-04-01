@@ -704,8 +704,8 @@
                  <rect>
                   <x>0</x>
                   <y>0</y>
-                  <width>578</width>
-                  <height>496</height>
+                  <width>417</width>
+                  <height>46</height>
                  </rect>
                 </property>
                 <layout class="QVBoxLayout" name="verticalLayout_6">
@@ -1523,6 +1523,8 @@
     </property>
     <addaction name="actionEdit_plugins"/>
     <addaction name="actionClean"/>
+    <addaction name="separator"/>
+    <addaction name="actionEdit_sequences"/>
    </widget>
    <widget class="QMenu" name="menuCollections">
     <property name="title">
@@ -1757,6 +1759,11 @@
   <action name="actionRemove_selected_from_current_collection">
    <property name="text">
     <string>Remove selected from current collection</string>
+   </property>
+  </action>
+  <action name="actionEdit_sequences">
+   <property name="text">
+    <string>Edit sequences</string>
    </property>
   </action>
  </widget>

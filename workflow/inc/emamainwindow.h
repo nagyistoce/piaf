@@ -370,6 +370,7 @@ private slots:
 	void on_collecTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
 	void on_collecTreeWidget_itemSelectionChanged();
 	void on_actionRemove_all_files_triggered();
+	void on_actionEdit_sequences_triggered();
 };
 
 #endif // EmaMAINWINDOW_H
