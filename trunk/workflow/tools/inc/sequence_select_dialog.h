@@ -40,7 +40,10 @@ public:
 	/** \brief collapse contents: collapse directory and clear data */
 	void collapse();
 
+	QString getName() { return mName; }
 	QString getFullPath() { return mFullPath; }
+
+	QString getDescription() { return mDescription; }
 
 protected:
 
@@ -48,6 +51,7 @@ protected:
 	QString mName;
 	QString mFullPath;
 
+	QString mDescription;
 private:
 
 };
@@ -74,6 +78,10 @@ private slots:
 	void on_delButton_clicked();
 
 	void on_buttonBox_accepted();
+
+	void on_sequenceTreeWidget_itemActivated(QTreeWidgetItem *item, int column);
+
+	void on_sequenceTreeWidget_itemSelectionChanged();
 
 private:
     Ui::SequenceSelectDialog *ui;

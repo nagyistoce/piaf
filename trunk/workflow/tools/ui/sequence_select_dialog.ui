@@ -11,7 +11,11 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Sequences list</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="../../../main/piaf.qrc">
+    <normaloff>:/images/pixmaps/filter.png</normaloff>:/images/pixmaps/filter.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
    <item row="0" column="1">

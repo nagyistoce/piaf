@@ -87,15 +87,23 @@ SWSTART FUNCDESC=       0       View hist       1       Height scale    !       
 				/* Read
 SWSTART FUNCDESC=       0       View hist       1       Height scale    !       0.4     SWEND
 				  */
-				if(lst.count()>2)
+				if(lst.count()>3)
 				{
-					funcDesc = lst.at(2) + " (";
-					for(int arg = 3; arg<lst.count(); arg+=3)
+					funcDesc = lst.at(3) + " (";
+					mDescription += lst.at(3) + " (";
+					for(int arg = 5; arg<lst.count()-2; arg+=3)
 					{
+						if(arg >= 8) {
+							funcDesc += ", ";
+							mDescription += ", ";
+						}
+						mDescription += lst.at(arg) + "=" + lst.at(arg+2);
 						funcDesc += lst.at(arg) + "=" + lst.at(arg+2);
-						if(arg + 3 < lst.count()) { funcDesc += ", "; }
+						// if there are still arguments, add a comma
+
 					}
 					funcDesc += ")";
+					mDescription += ")\n";
 				}
 
 
@@ -103,8 +111,11 @@ SWSTART FUNCDESC=       0       View hist       1       Height scale    !       
 			lineidx++;
 		}
 		file.close();
-		setText(0, fi.baseName());
+
+		mName = fi.baseName();
+		setText(0, mName);
 		setText(1, funcDesc);
+		setToolTip(1, mDescription);
 	}
 	else
 	{
@@ -151,4 +162,27 @@ void SequenceSelectDialog::on_delButton_clicked()
 void SequenceSelectDialog::on_buttonBox_accepted()
 {
 
+}
+
+void SequenceSelectDialog::on_sequenceTreeWidget_itemActivated(QTreeWidgetItem *item, int column)
+{
+	if(!item)
+	{
+		ui->delButton->setEnabled(false);
+		ui->descriptionLabel->setText("");
+		return;
+	}
+
+	SequenceTreeWidgetItem * seqItem = (SequenceTreeWidgetItem *)item;
+
+	ui->delButton->setEnabled(true);
+	ui->descriptionLabel->setText(seqItem->getDescription());
+
+}
+
+void SequenceSelectDialog::on_sequenceTreeWidget_itemSelectionChanged()
+{
+	if(ui->sequenceTreeWidget->selectedItems().isEmpty()) { return; }
+
+	on_sequenceTreeWidget_itemActivated(ui->sequenceTreeWidget->selectedItems().at(0), 0);
 }
