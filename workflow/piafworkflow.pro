@@ -246,6 +246,7 @@ exists(tototatatutu) {
 SOURCES += \
 	$$LEGACYPATH/tools/src/SwPluginCore.cpp \
 	$$LEGACYPATH/acquisitions/video/src/FileVideoAcquisition.cpp \
+	$$LEGACYPATH/acquisitions/video/src/ffmpeg_file_acquisition.cpp \
 	$$LEGACYPATH/acquisitions/video/src/videocapture.cpp \
 	$$LEGACYPATH/acquisitions/video/src/swvideodetector.cpp \
 	$$LEGACYPATH/acquisitions/video/src/uvccolor.c \
@@ -269,6 +270,7 @@ HEADERS += \
 	$$LEGACYPATH/acquisitions/video/inc/ccvt.h \
 	$$LEGACYPATH/acquisitions/video/inc/SwVideoAcquisition.h \
 	$$LEGACYPATH/acquisitions/video/inc/FileVideoAcquisition.h \
+	$$LEGACYPATH/acquisitions/video/inc/ffmpeg_file_acquisition.h \
 	$$LEGACYPATH/acquisitions/video/inc/videocapture.h \
 	$$LEGACYPATH/acquisitions/video/inc/swvideodetector.h \
 	$$LEGACYPATH/acquisitions/video/inc/virtualdeviceacquisition.h \
@@ -337,8 +339,16 @@ exists(/usr/include/ni) {
 	DEFINES += HAS_OPENNI
 	INCLUDEPATH += /usr/include/ni
 	LIBS += -lOpenNI
+
+	# Live video source
 	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h
 	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp
+
+
+	# Live video source
+	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_file_acquisition.h
+	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_file_acquisition.cpp
+
 }
 
 # Obsolete because of OpenCVEncoder

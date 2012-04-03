@@ -1,5 +1,5 @@
 /*|------------------------------------------------------------------------------------------------------------|*/
-/*|     FileVideoAcquisition.h  -  description												|*/
+/*|     FFmpegFileVideoAcquisition.h  -  description												|*/
 /*|		  ---------------------------------														|*/				
 /*|	begin					: Wed July 9 2003																					|*/
 /*|   	copyright				: (C) 2003 by Christophe Seyve																		|*/
@@ -73,18 +73,11 @@ extern "C" {
 #define SUPPORTED_VIDEO_CODECS_EXT "*.AVI *.avi *.MPG *.mpg *.MPEG *.mpeg *.vob"
 
 
-
-/** Video acquisition high-level class
- * Performs device management and image acquisitions.
- @author Christophe Seyve - Sisell - cseyve@free.fr
- @version 0.1.0 \Date
- */
-
 class FileVideoAcquisition : public VirtualDeviceAcquisition {
 public:
 	/// Constructor
 	FileVideoAcquisition();
-		
+
 	/** Constructor with device entry
 		\param movie filename
 		*/
@@ -92,12 +85,47 @@ public:
 
 	/** return file name */
 	char * getDeviceName() { return m_videoFileName; };
+
+	/** Constructor with SwV4LDevice pointer entry
+		\param aVD SwV4LDevice class entry. Rare usage.
+		*/
+	/// Destructor
+	~FFmpegFileVideoAcquisition();
+	/// Checks if video device is initialised
+	bool VDIsInitialised();
+	/// Checks if video acquisition is initialised
+	bool AcqIsInitialised();
+
+	/** @brief Open device and read first image */
+	int openDevice(const char * aDevice, tBoxSize newSize);
+
+
+protected:
+
+};
+
+/** Video acquisition high-level class, using FFMPEG for decoding
+ * Performs device management and image acquisitions.
+ @author Christophe Seyve - Sisell - cseyve@free.fr
+ @version 0.1.0 \Date
+ */
+
+class FFmpegFileVideoAcquisition : public FileVideoAcquisition
+{
+public:
+	/// Constructor
+	FFmpegFileVideoAcquisition();
+		
+	/** Constructor with device entry
+		\param movie filename
+		*/
+	FFmpegFileVideoAcquisition(const char * device);
 	
 	/** Constructor with SwV4LDevice pointer entry
 		\param aVD SwV4LDevice class entry. Rare usage.
 		*/
 	/// Destructor
-	~FileVideoAcquisition();
+	~FFmpegFileVideoAcquisition();
 
 	/// Close video device (only on demand)
 	int VAcloseVD();

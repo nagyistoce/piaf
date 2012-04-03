@@ -20,6 +20,8 @@
 #include "VirtualDevice.h"
 #include "piaf-common.h"
 
+#include "ccvt.h"
+
 // additionnal libraries for memory/device control
 #include <assert.h>
 #include <sys/ioctl.h>
