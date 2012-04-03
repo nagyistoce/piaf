@@ -23,11 +23,19 @@
 #define OPENNI_VIDEOACQUISITION_H
 #include "virtualdeviceacquisition.h"
 
+#ifndef OPENNI_VIDEOACQUISITION_CPP
+#define OPENNI_VID_EXTERN	extern
+#else
+#define OPENNI_VID_EXTERN
+#endif
+
 #include <XnOpenNI.h>
 #include <XnLog.h>
 #include <XnCppWrapper.h>
 #include <XnFPSCalculator.h>
 
+#include <QMutex>
+#include <QWaitCondition>
 
 // IMAGE MODES
 /** @brief Mode for 8bit image of depth with 1 value = 2 cm (1 channel x IPL_DEPTH_8U)
@@ -73,8 +81,14 @@ Blue for
 
 using namespace xn;
 
-#include <QMutex>
-#include <QWaitCondition>
+OPENNI_VID_EXTERN float g_depth_LUT[OPENNI_RAW_MAX];
+OPENNI_VID_EXTERN u8 g_depth_grayLUT[OPENNI_RAW_MAX];
+OPENNI_VID_EXTERN float g_depth_8bit2m_LUT[256];
+
+void init_OpenNI_depth_LUT();
+XnBool fileExists(const char *fn);
+
+
 
 /** @brief OpenNI based video acquisition device for PrimeSense based 3D cameras
 
@@ -113,6 +127,9 @@ public:
 
 	/** @brief Stop acquisition */
 	int stopAcquisition();
+
+	/** @brief Read image as raw data */
+	IplImage * readImageRaw();
 
 	/** @brief Grabs one image and convert to RGB32 coding format
 		if sequential mode, return last acquired image, else read and return image

@@ -19,6 +19,7 @@
 
 #include "batchthread.h"
 #include "FileVideoAcquisition.h"
+#include "ffmpeg_file_acquisition.h"
 
 #include "piaf-settings.h"
 #include "piaf-common.h"
@@ -308,8 +309,8 @@ void BatchFiltersThread::run()
 
 						}
 						else {
-							// Load ad movie
-							FileVideoAcquisition * fva = new FileVideoAcquisition(
+							/// @todo : use factory Load ad movie
+							FileVideoAcquisition * fva = (FileVideoAcquisition *)new FFmpegFileVideoAcquisition(
 									item->absoluteFilePath.toUtf8().data());
 							CvSize size = cvSize(fva->getImageSize().width,
 												 fva->getImageSize().height);
@@ -333,10 +334,14 @@ void BatchFiltersThread::run()
 								// Loop on images
 								swImageStruct image;
 								memset(&image, 0, sizeof(swImageStruct));
+
 								image.width = loadedImage->widthStep / loadedImage->nChannels;// beware of pitch
 								image.height = loadedImage->height;
 								image.depth = loadedImage->nChannels;
-								image.buffer_size = image.width * image.height * image.depth;
+								image.bytedepth = loadedImage->depth / 8;
+								image.buffer_size =
+										image.width * image.height
+										* image.depth * image.bytedepth;
 
 								image.buffer = loadedImage->imageData; // Buffer
 								bool resume = true;
@@ -353,7 +358,8 @@ void BatchFiltersThread::run()
 										}
 
 										// if the item is no more in processing list
-										if(mpBatchTask->itemsList.indexOf(item) < 0) {
+										if(mpBatchTask->itemsList.indexOf(item) < 0)
+										{
 											was_paused = true;
 											still_processing = true;
 											// Forget this item because it may have been destroyed
@@ -371,12 +377,27 @@ void BatchFiltersThread::run()
 									if(read_frame) {
 										if(mpBatchTask->options.use_grey)
 										{
-											ret = fva->readImageYNoAcq((uchar *)image.buffer, &buffersize);
-										} else {
-											ret = fva->readImageRGB32NoAcq((uchar *)image.buffer, &buffersize);
+											//ret = fva->readImageYNoAcq((uchar *)image.buffer, &buffersize);
+											IplImage * grayImage = fva->readImageY();
+											if(grayImage)
+											{
+												ret = 0;
+												image.buffer = grayImage->imageData; // Buffer
+											}
+
+										}
+										else
+										{
+											//ret = fva->readImageRGB32NoAcq((uchar *)image.buffer, &buffersize);
+											IplImage * bgr32Image = fva->readImageRGB32();
+											if(bgr32Image)
+											{
+												ret = 0;
+												image.buffer = bgr32Image->imageData; // Buffer
+											}
+
 										}
 									}
-
 
 									if(!read_frame)
 									{

@@ -588,6 +588,14 @@ V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 	return 0;
 }
 
+
+IplImage * V4L2Device::readImageRaw()
+{
+	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
+	return NULL; /// \todo FIXME : return raw value
+}
+
+
 IplImage * V4L2Device::readImageRGB32()
 {
 	if(!rawframebuffer) {

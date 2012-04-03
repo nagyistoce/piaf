@@ -17,8 +17,10 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "openni_videoacquisition.h"
+#define OPENNI_VIDEOACQUISITION_CPP
 #include "piaf-common.h"
+
+#include "openni_videoacquisition.h"
 
 //---------------------------------------------------------------------------
 // Macros
@@ -39,10 +41,6 @@
 	fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); fflush(stderr); \
 }
 
-//---------------------------------------------------------------------------
-// Code
-//---------------------------------------------------------------------------
-void init_OpenNI_depth_LUT();
 
 using namespace xn;
 
@@ -377,9 +375,7 @@ int OpenNIVideoAcquisition::stopAcquisition()
 }
 
 
-static float g_depth_LUT[OPENNI_RAW_MAX] = {-1.f };
-static u8 g_depth_grayLUT[OPENNI_RAW_MAX] = {255 };
-static float g_depth_8bit2m_LUT[256];
+
 
 void init_OpenNI_depth_LUT()
 {
@@ -561,6 +557,12 @@ IplImage * OpenNIVideoAcquisition::getDepthImage32F()
 	}
 
 	return m_depthImage32F;
+}
+
+IplImage * OpenNIVideoAcquisition::readImageRaw()
+{
+	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
+	return NULL; /// \todo FIXME : return raw value
 }
 
 /** \brief Grabs one image and convert to grayscale coding format

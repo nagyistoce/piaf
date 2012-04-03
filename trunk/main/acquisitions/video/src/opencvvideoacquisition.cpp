@@ -224,6 +224,11 @@ int OpenCVVideoAcquisition::stopAcquisition()
 
 	return 0;
 }
+IplImage * OpenCVVideoAcquisition::readImageRaw()
+{
+	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
+	return NULL; /// \todo FIXME : return raw value
+}
 
 /** \brief Grabs one image and convert to RGB32 coding format
 	if sequential mode, return last acquired image, else read and return image

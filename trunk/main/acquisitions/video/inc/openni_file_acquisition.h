@@ -22,55 +22,16 @@
 #ifndef OPENNI_FILE_ACQUISITION_H
 #define OPENNI_FILE_ACQUISITION_H
 
+
 #include "virtualdeviceacquisition.h"
+
+// for LUT
+#include "openni_videoacquisition.h"
 
 #include <XnOpenNI.h>
 #include <XnLog.h>
 #include <XnCppWrapper.h>
 #include <XnFPSCalculator.h>
-
-
-// IMAGE MODES
-/** @brief Mode for 8bit image of depth with 1 value = 2 cm (1 channel x IPL_DEPTH_8U)
-For close distance = 0.6m, the pixels are white (255) and at 5.6 m, they are black.
-Unknown distance is black too.
-*/
-#define OPENNI_MODE_DEPTH_2CM		0
-
-#define OPENNI_DEPTH2CM_RANGE_MIN	0.6
-#define OPENNI_DEPTH2CM_RANGE_MAX	7
-
-/** @brief Mode for float (32F) image of depth in meter (1 channel x IPL_DEPTH_32F)
-The range is 0.6m to infinite. -1.f means the depth is unknown.
-For practical use, do not use depth >7m
-*/
-#define OPENNI_MODE_DEPTH_M		1
-
-/** \brief Mode for float (32F) image of 3D x,y,z position in meter (3 channels x IPL_DEPTH_32F)
-x,y,z is in the camera reference. X on image columns, Y on rows, and Z is depth
-x,y : position in 3D in meter
-z: depth in meter. The range is 0.6m to infinite. -1.f means the depth is unknown.
-For practical use, do not use depth >7m
-*/
-#define OPENNI_MODE_3D			2
-
-/** \brief Mode for false colors (depth as RGB)
-black when unknown
-in HSV, H=0 (Red for 0.6m),
-Blue for
-*/
-#define OPENNI_MODE_DEPTH_COLORS	3
-
-/** @brief Max value of raw depth image (11 bits) */
-#define OPENNI_RAW_MAX	10000
-
-/** @brief Value for unknown depth in raw depth image (11 bits) */
-#define OPENNI_RAW_UNKNOWN 0
-
-
-#define OPENNI_FRAME_W		640
-#define OPENNI_FRAME_H		480
-#define OPENNI_FPS			25
 
 using namespace xn;
 
@@ -115,6 +76,8 @@ public:
 
 	/** @brief Stop acquisition */
 	int stopAcquisition();
+	/** @brief Read image as raw data */
+	IplImage * readImageRaw();
 
 	/** @brief Grabs one image and convert to RGB32 coding format
 		if sequential mode, return last acquired image, else read and return image

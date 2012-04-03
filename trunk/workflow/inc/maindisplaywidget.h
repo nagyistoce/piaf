@@ -92,7 +92,7 @@ private:
 	// MOVIE PLAYBACK =========================================================
 
 	/// File Video acquisition
-	FileVideoAcquisition mFileVA;
+	FileVideoAcquisition * mpFileVA;
 
 	QTimer mPlayTimer;
 	bool mPlayGrayscale;///< if true, only decode grayscaled image (Y buffer)
