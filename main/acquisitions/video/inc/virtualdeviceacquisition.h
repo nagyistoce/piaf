@@ -213,6 +213,8 @@ public:
 		*/
 	virtual IplImage * readImageDepth() = 0;
 
+	/** @brief Read image as raw data */
+	virtual IplImage * readImageRaw() = 0;
 
 	/** @brief Get video properties (not updated) */
 	virtual t_video_properties getVideoProperties() = 0;

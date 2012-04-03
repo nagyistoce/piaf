@@ -38,6 +38,7 @@
 #include "OpenCVEncoder.h"
 
 #include <QDir>
+#include <QMessageBox>
 
 #define FORMAT_IMG		"-%03d.png"
 #define FORMAT_AVI		"-%03d.avi"
@@ -58,7 +59,7 @@ MainDisplayWidget::MainDisplayWidget(QWidget *parent) :
     ui->setupUi(this);
 	mpegEncoder = NULL;
 	mIsRecording = false;
-
+	mpFileVA = NULL;
 	mpFilterSequencer = NULL;
 	mpImageInfoStruct = NULL;
 
@@ -150,15 +151,35 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 	m_pVideoCaptureDoc = NULL;
 
 	m_listBookmarks.clear();
-	mFileVA.stopAcquisition();
+	if(mpFileVA)
+	{
+		MDW_printf(EMALOG_INFO, "Stop video acquisition");
+		mpFileVA->stopAcquisition();
+		delete mpFileVA; mpFileVA = NULL;
+	}
+
+	ui->timeLineWidget->setFilePosition(0);
+	ui->mainImageWidget->setImage(m_fullImage, pinfo);
+	ui->stackedWidget->setCurrentIndex(0);
+	ui->stackedWidget->show();
 
 	tBoxSize boxsize; memset(&boxsize, 0, sizeof(tBoxSize));
 
-	int ret = mFileVA.openDevice(moviePath.toUtf8().data(), boxsize);
-	if(ret >= 0) {
-		m_fullImage = iplImageToQImage( mFileVA.readImageRGB32() );
+	/// \todo : FIXME : use factory
+	mpFileVA = (FileVideoAcquisition*) new FFmpegFileVideoAcquisition(moviePath.toUtf8().data());
+	if(!mpFileVA)
+	{
+		QMessageBox::critical(NULL, tr("File error"),
+							  tr("Could not open file ") + moviePath + tr(" with movie player."));
+
+		return -1;
+	}
+	int ret = 0;
+	if(mpFileVA->isDeviceReady()) {
+		m_fullImage = iplImageToQImage( mpFileVA->readImageRGB32() );
 	} else {
 		PIAF_MSG(SWLOG_ERROR, "Could not open file '%s'", moviePath.toUtf8().data());
+		ret = -1;
 	}
 
 	if(pinfo)
@@ -185,13 +206,8 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 
 	}
 
-	ui->timeLineWidget->setFilePosition(0);
-	ui->mainImageWidget->setImage(m_fullImage, pinfo);
-	ui->stackedWidget->setCurrentIndex(0);
-	ui->stackedWidget->show();
-
-	if(mFileVA.getFrameRate()>0) {
-		mPlayTimer.setInterval((int)(1000.f /(mPlaySpeed * (float)mFileVA.getFrameRate())));
+	if(mpFileVA->getFrameRate()>1E-5) {
+		mPlayTimer.setInterval((int)(1000.f /(mPlaySpeed * (float)mpFileVA->getFrameRate())));
 	}
 
 	return ret;
@@ -238,7 +254,10 @@ void MainDisplayWidget::slotNewBookmarkList(QList<video_bookmark_t> list) {
 
 void MainDisplayWidget::on_goFirstButton_clicked()
 {
-	mFileVA.slotRewindMovie();
+	if(mpFileVA)
+	{
+		mpFileVA->rewindMovie();
+	}
 	updateDisplay();
 
 	// to update navigation image widget
@@ -247,7 +266,7 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 
 void MainDisplayWidget::updateDisplay()
 {
-	IplImage * captureImage = ( mPlayGrayscale ? mFileVA.readImageY() : mFileVA.readImageRGB32() );
+	IplImage * captureImage = ( mPlayGrayscale ? mpFileVA->readImageY() : mpFileVA->readImageRGB32() );
 	m_fullImage = iplImageToQImage( captureImage );
 	if(mpegEncoder && mIsRecording)
 	{
@@ -255,12 +274,18 @@ void MainDisplayWidget::updateDisplay()
 	}
 
 	ui->mainImageWidget->setImage(m_fullImage, NULL);
-	ui->timeLineWidget->setFilePosition(mFileVA.getAbsolutePosition());
+	if(mpFileVA)
+	{
+		ui->timeLineWidget->setFilePosition(mpFileVA->getAbsolutePosition());
+	}
 }
 
 void MainDisplayWidget::on_goPrevButton_clicked()
 {
-	mFileVA.slotRewindMovie();
+	if(mpFileVA)
+	{
+		mpFileVA->rewindMovie();
+	}
 	mPlayTimer.stop();
 
 	ui->playButton->blockSignals(true);
@@ -276,7 +301,16 @@ void MainDisplayWidget::on_playButton_toggled(bool checked)
 {
 	if(checked)
 	{
-		mPlayTimer.start((int)(1000.f / (mPlaySpeed * (float)mFileVA.getFrameRate())));
+		if(mpFileVA)
+		{
+			mPlayTimer.start((int)(1000.f / (mPlaySpeed * (float)mpFileVA->getFrameRate())));
+		}
+		else // Do not toggle
+		{
+			ui->playButton->blockSignals(true);
+			ui->playButton->setChecked(false);
+			ui->playButton->blockSignals(false);
+		}
 	} else {
 		mPlayTimer.stop();
 	}
@@ -302,7 +336,7 @@ void MainDisplayWidget::on_mainImageWidget_signalZoomChanged(float zoom_scale)
 
 void MainDisplayWidget::on_goNextButton_clicked()
 {
-	bool got_picture = mFileVA.GetNextFrame();
+	bool got_picture = mpFileVA->GetNextFrame();
 	if(got_picture)
 	{
 		updateDisplay();
@@ -338,7 +372,7 @@ void MainDisplayWidget::on_mPlayTimer_timeout()
 		}
 
 	} else { // WE ARE IN MOVIE MODE
-		got_picture = mFileVA.GetNextFrame();
+		got_picture = mpFileVA->GetNextFrame();
 		if(got_picture)
 		{
 			updateDisplay();
@@ -396,8 +430,8 @@ void MainDisplayWidget::on_speedComboBox_currentIndexChanged(QString val)
 			__func__, __LINE__,
 			val.toAscii().data(),
 			mPlaySpeed, ok?'T':'F');
-	if(mFileVA.getFrameRate()>0) {
-		mPlayTimer.setInterval((int)(1000.f /(mPlaySpeed * (float)mFileVA.getFrameRate())));
+	if(mpFileVA->getFrameRate()>0) {
+		mPlayTimer.setInterval((int)(1000.f /(mPlaySpeed * (float)mpFileVA->getFrameRate())));
 	}
 }
 
@@ -406,19 +440,19 @@ void MainDisplayWidget::on_timeLineWidget_signalCursorBookmarkChanged(
 {
 	fprintf(stderr, "MainDisplayWidget::%s:%d received !\n", __func__, __LINE__);
 	if(movie_pos.nbFramesSinceKeyFrame <= 1) {
-		mFileVA.setAbsolutePosition(movie_pos.prevAbsPosition);
+		mpFileVA->setAbsolutePosition(movie_pos.prevAbsPosition);
 
 		// display
 		on_goNextButton_clicked();
 
 	} // else go some frames before
 	else {
-		mFileVA.setAbsolutePosition(movie_pos.prevKeyFramePosition);
+		mpFileVA->setAbsolutePosition(movie_pos.prevKeyFramePosition);
 		fprintf(stderr, "[VidPlay]::%s:%d : skip %d frames to reach the bookmark frame\n",
 				__func__, __LINE__, movie_pos.nbFramesSinceKeyFrame-1);
 		// display
 		for(int nb = 0; nb < movie_pos.nbFramesSinceKeyFrame-1; nb++) {
-			mFileVA.GetNextFrame();
+			mpFileVA->GetNextFrame();
 		}
 
 		// Display & process last one
@@ -435,7 +469,7 @@ void MainDisplayWidget::on_timeLineWidget_signalCursorBookmarkChanged(
 void MainDisplayWidget::on_timeLineWidget_signalCursorPositionChanged(unsigned long long filepos)
 {
 	fprintf(stderr, "MainDisplayWidget::%s:%d received !\n", __func__, __LINE__);
-	mFileVA.setAbsolutePosition(filepos);
+	mpFileVA->setAbsolutePosition(filepos);
 	on_goNextButton_clicked();
 }
 
@@ -460,9 +494,9 @@ void MainDisplayWidget::on_bookmarksButton_clicked()
 
 void MainDisplayWidget::on_addBkmkButton_clicked()
 {
-	appendBookmark(mFileVA.getMoviePosition());
+	appendBookmark(mpFileVA->getMoviePosition());
 	if(mpImageInfoStruct) {
-		mpImageInfoStruct->bookmarksList.append(mFileVA.getMoviePosition());
+		mpImageInfoStruct->bookmarksList.append(mpFileVA->getMoviePosition());
 		saveImageInfoStruct(mpImageInfoStruct);
 		ui->timeLineWidget->setFileInfo(*mpImageInfoStruct);
 	}

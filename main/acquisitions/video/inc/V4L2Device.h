@@ -132,6 +132,9 @@ public:
 	/** \brief Stop acquisition */
 	int stopAcquisition();
 
+	/** @brief Read image as raw data */
+	IplImage * readImageRaw();
+
 	/** \brief Grabs one image and convert to RGB32 coding format
 		if sequential mode, return last acquired image, else read and return image
 

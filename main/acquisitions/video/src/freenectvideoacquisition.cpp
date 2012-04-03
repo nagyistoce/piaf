@@ -406,41 +406,45 @@ int FreenectVideoAcquisition::stopAcquisition()
 	return 0;
 }
 
-static float g_depth_LUT[FREENECT_RAW_MAX] = {-1.f };
-static u8 g_depth_grayLUT[FREENECT_RAW_MAX] = {255 };
+static float g_freenect_depth_LUT[FREENECT_RAW_MAX] = {-1.f };
+static u8 g_freenect_depth_grayLUT[FREENECT_RAW_MAX] = {255 };
 
 void init_freenect_depth_LUT()
 {
-	if(g_depth_LUT[0]>=0) return;
+	if(g_freenect_depth_LUT[0]>=0) return;
 	/* From OpenKinect :
 	   http://openkinect.org/w/index.php?title=Imaging_Information&oldid=613
 	distance = 0.1236 * tan(rawDisparity / 2842.5 + 1.1863)
 	   */
 	// Raw in meter (float)
 	for(int raw = 0; raw<FREENECT_RAW_MAX; raw++) {
-		g_depth_LUT[raw] = (float)( 0.1236 * tan((double)raw/2842.5 + 1.1863) );
+		g_freenect_depth_LUT[raw] = (float)( 0.1236 * tan((double)raw/2842.5 + 1.1863) );
 	}
 
-	g_depth_LUT[FREENECT_RAW_UNKNOWN] = -1.f;
+	g_freenect_depth_LUT[FREENECT_RAW_UNKNOWN] = -1.f;
 
 	/* LUT for 8bit info on depth :
 	*/
 
 	for(int raw = 0; raw<FREENECT_RAW_MAX; raw++) {
 		int val = (int)round( 255. *
-							  (1. - (g_depth_LUT[raw] - FREENECT_DEPTH2CM_RANGE_MIN)
+							  (1. - (g_freenect_depth_LUT[raw] - FREENECT_DEPTH2CM_RANGE_MIN)
 								 / (FREENECT_DEPTH2CM_RANGE_MAX - FREENECT_DEPTH2CM_RANGE_MIN) )
 							  );
 		if(val > 255) val = 255;
 		else if(val < 1) val = 1;// keep 0 for unknown
 
-		g_depth_grayLUT[raw] = (u8)val;
+		g_freenect_depth_grayLUT[raw] = (u8)val;
 	}
 
-	g_depth_grayLUT[FREENECT_RAW_UNKNOWN] = 0;
+	g_freenect_depth_grayLUT[FREENECT_RAW_UNKNOWN] = 0;
 
 }
-
+IplImage * FreenectVideoAcquisition::readImageRaw()
+{
+	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
+	return NULL; /// \todo FIXME : return raw value
+}
 /** \brief Grabs one image and convert to RGB32 coding format
 	if sequential mode, return last acquired image, else read and return image
 
@@ -484,7 +488,7 @@ IplImage * FreenectVideoAcquisition::readImageRGB32()
 				u8 * line8u = IPLLINE_8U(m_grayImage, r);
 				for(int c = 0; c<m_grayImage->width; c++)
 				{
-					line8u[c] = g_depth_grayLUT[ linedepth[c] ];
+					line8u[c] = g_freenect_depth_grayLUT[ linedepth[c] ];
 				}
 			}
 			fprintf(stderr, "[Freenect]::%s:%d: mode = %d => 2Cm => gray => BGR32\n",
@@ -510,7 +514,7 @@ IplImage * FreenectVideoAcquisition::getDepthImage32F()
 		u16 * lineraw = (u16 *)(m_depthRawImage16U->imageData + r*m_depthRawImage16U->widthStep);
 		for(int c = 0; c<m_depthRawImage16U->width; c++)
 		{
-			linedepth[c] = g_depth_LUT[ lineraw[c] ];
+			linedepth[c] = g_freenect_depth_LUT[ lineraw[c] ];
 		}
 	}
 

@@ -56,7 +56,7 @@ FFmpegFileVideoAcquisition::~FFmpegFileVideoAcquisition() {
 }
 
 long FFmpegFileVideoAcquisition::getFrameIndex() {
-	return (long)playFrame;
+	return (long)mPlayFrame;
 }
 
 unsigned long long FFmpegFileVideoAcquisition::getAbsolutePosition() {
@@ -88,6 +88,11 @@ void FFmpegFileVideoAcquisition::purge() {
 	CPP_DELETE_ARRAY(m_noPitchBuffer);
 }
 
+IplImage * FFmpegFileVideoAcquisition::readImageRaw()
+{
+	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
+	return NULL; /// \todo FIXME : return raw value
+}
 
 // START COPY FROM VideoPlayerTool.cpp
 void FFmpegFileVideoAcquisition::initPlayer() {
@@ -105,7 +110,7 @@ void FFmpegFileVideoAcquisition::initPlayer() {
 	m_noPitchBuffer = NULL;
 
 	m_isJpeg = false;
-	playFrame = 0;
+	mPlayFrame = 0;
 	m_prevPosition = 0;
 	m_fileSize = 0;
 	myVD_palette = -1;
@@ -333,7 +338,7 @@ int FFmpegFileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 	fprintf(stderr, "FileVA::%s:%d : file size : %llu / img=%dx%d\n",
 			__func__, __LINE__, m_fileSize, mImageSize.width, mImageSize.height);
 
-	slotRewindMovie();
+	rewindMovie();
 	return 1;
 }
 
@@ -392,7 +397,7 @@ int FFmpegFileVideoAcquisition::setChannel(int ch)
 	return 1;
 }
 
-void FFmpegFileVideoAcquisition::slotRewindMovie()
+void FFmpegFileVideoAcquisition::rewindMovie()
 {
 	if(!myAcqIsInitialised)
 	{
@@ -419,7 +424,7 @@ void FFmpegFileVideoAcquisition::slotRewindMovie()
 	{
 		m_prevPosition = 0;
 		av_seek_frame(m_pFormatCtx, m_videoStream, 0, 0);
-		playFrame = 0;
+		mPlayFrame = 0;
 		m_movie_pos.prevAbsPosition = 0;
 		m_movie_pos.prevKeyFramePosition = 0;
 		m_movie_pos.nbFramesSinceKeyFrame = 0;
@@ -436,7 +441,7 @@ t_video_properties FFmpegFileVideoAcquisition::updateVideoProperties()
 	m_video_properties.frame_width = mImageSize.width;
 	m_video_properties.frame_height = mImageSize.height;
 
-	m_video_properties.frame_count = playFrame;
+	m_video_properties.frame_count = mPlayFrame;
 	return m_video_properties;
 }
 
@@ -467,7 +472,7 @@ void FFmpegFileVideoAcquisition::setAbsoluteFrame(int frame)
 	{
 		m_prevPosition = frame;
 		av_seek_frame(m_pFormatCtx, m_videoStream, 0, 0);
-		playFrame = frame;
+		mPlayFrame = frame;
 	}
 
 	// read first frame
@@ -492,9 +497,9 @@ void FFmpegFileVideoAcquisition::rewindToPosMovie(unsigned long long l_position)
 
 	if(l_position <= 0)
 	{
-		DEBUG_ALL("position <= 0 => slotRewindMovie")
+		DEBUG_ALL("position <= 0 => rewindMovie")
 
-		slotRewindMovie();
+		rewindMovie();
 		return;
 	}
 
@@ -515,8 +520,8 @@ void FFmpegFileVideoAcquisition::rewindToPosMovie(unsigned long long l_position)
 	m_movie_pos.nbFramesSinceKeyFrame = -1; // tell that we cannot know the last key frame
 	m_movie_pos.prevKeyFramePosition = 0;
 
-	// FIXME : update playFrame
-	playFrame -= JUMP_BUFFERSIZE / DEFAULT_FRAME_SIZE;
+	// FIXME : update mPlayFrame
+	mPlayFrame -= JUMP_BUFFERSIZE / DEFAULT_FRAME_SIZE;
 	unsigned long long curpos = url_ftell(URLPB(m_pFormatCtx->pb));
 	while(curpos<l_position && !endOfFile())
 	{
@@ -696,8 +701,8 @@ bool FFmpegFileVideoAcquisition::GetNextFrame()
 					fill_buffer();
 
 					// FIXME : OLD !!! increaseTimeFileVA();
-					// update playFrame
-					playFrame++;
+					// update mPlayFrame
+					mPlayFrame++;
 
 					//
 					if(m_pFrame->key_frame)
@@ -706,7 +711,7 @@ bool FFmpegFileVideoAcquisition::GetNextFrame()
 						m_movie_pos.prevKeyFramePosition = m_prevPosition;
 
 					//	fprintf(stderr, "FileVA::%s:%d : key frame = %d : frame=%d\n",
-					//			__func__, __LINE__, m_pFrame->key_frame, playFrame);
+					//			__func__, __LINE__, m_pFrame->key_frame, mPlayFrame);
 					} else {
 						if(m_movie_pos.nbFramesSinceKeyFrame>=0) {
 							m_movie_pos.nbFramesSinceKeyFrame++;
@@ -724,9 +729,9 @@ bool FFmpegFileVideoAcquisition::GetNextFrame()
 	}
 
 	//    return frameFinished!=0;
-	fprintf(stderr, "FileVA::%s:%d NO FRAME FOUND counter=%d playFrame=%ld Fpos=%lu)\n",
+	fprintf(stderr, "FileVA::%s:%d NO FRAME FOUND counter=%d mPlayFrame=%ld Fpos=%lu)\n",
 		__func__, __LINE__,
-		counter, playFrame,
+		counter, mPlayFrame,
 		(unsigned long)url_ftell(URLPB(m_pFormatCtx->pb)));
 
 	return false;
@@ -795,7 +800,7 @@ unsigned char * FFmpegFileVideoAcquisition::readImageBuffer(long * buffersize)
 	*buffersize = avpicture_get_size(m_pCodecCtx->pix_fmt,
 									 mImageSize.width, mImageSize.height);
 
-	//fprintf(stderr, "FileVA::%s:%d : read image %d\n", __func__, __LINE__, playFrame);
+	//fprintf(stderr, "FileVA::%s:%d : read image %d\n", __func__, __LINE__, mPlayFrame);
 
 	return receptBuffer;
 }
@@ -936,7 +941,7 @@ int FFmpegFileVideoAcquisition::readImageRaw(unsigned char * rawimage,
 
 	if(rawimage == NULL)
 		return 0;
-fprintf(stderr, "FileVA::%s:%d : read image %ld\n", __func__, __LINE__, playFrame);
+fprintf(stderr, "FileVA::%s:%d : read image %ld\n", __func__, __LINE__, mPlayFrame);
 	// no conversion, return raw image
 	AVPicture dummypic;
 	int imsize = avpicture_fill(&dummypic, NULL, m_pCodecCtx->pix_fmt, mImageSize.width, mImageSize.height);
@@ -1181,8 +1186,8 @@ int FFmpegFileVideoAcquisition::readImageY(unsigned char* image, long * buffersi
 
 
 	/*
-	fprintf(stderr, "FileVA::%s:%d :playFrame=%d image size: %d x %d pitch=%d\n", __func__, __LINE__,
-		playFrame,
+	fprintf(stderr, "FileVA::%s:%d :mPlayFrame=%d image size: %d x %d pitch=%d\n", __func__, __LINE__,
+		mPlayFrame,
 		width, height, pitch);
 	*/
 
@@ -1230,7 +1235,7 @@ int FFmpegFileVideoAcquisition::readImageY(unsigned char* image, long * buffersi
 		FileClose(fdebug);
 	}*/
 
-	return playFrame;
+	return mPlayFrame;
 }
 
 int FFmpegFileVideoAcquisition::readImageYNoAcq(unsigned char* image, long * buffersize)

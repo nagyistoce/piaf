@@ -7,10 +7,8 @@
 /*|	description			: Entete de la classe VideoAcquisition par fichier											|*/
 /*|------------------------------------------------------------------------------------------------------------|*/
 
-#ifndef _FILE_VIDEOACQUISITION_
-#define _FILE_VIDEOACQUISITION_
-
-
+#ifndef FFMPEG_FILE_VIDEOACQUISITION_H
+#define FFMPEG_FILE_VIDEOACQUISITION_H
 
 
 #ifndef WIN32
@@ -49,6 +47,7 @@
 
 #include "nolinux_videodev.h"
 #include "virtualdeviceacquisition.h"
+#include "FileVideoAcquisition.h"
 
 #ifdef PIAF_LEGACY
 #include "workshopmovie.h"
@@ -56,7 +55,7 @@
 #include "workflowtypes.h"
 #endif 
 
-#include "sw_types.h"
+
 
 #include "ccvt.h"
 
@@ -70,39 +69,8 @@ extern "C" {
 #include <avformat.h>
 }
 
-#define SUPPORTED_VIDEO_CODECS_EXT "*.AVI *.avi *.MPG *.mpg *.MPEG *.mpeg *.vob"
 
 
-class FileVideoAcquisition : public VirtualDeviceAcquisition {
-public:
-	/// Constructor
-	FileVideoAcquisition();
-
-	/** Constructor with device entry
-		\param movie filename
-		*/
-	FileVideoAcquisition(const char * device);
-
-	/** return file name */
-	char * getDeviceName() { return m_videoFileName; };
-
-	/** Constructor with SwV4LDevice pointer entry
-		\param aVD SwV4LDevice class entry. Rare usage.
-		*/
-	/// Destructor
-	~FFmpegFileVideoAcquisition();
-	/// Checks if video device is initialised
-	bool VDIsInitialised();
-	/// Checks if video acquisition is initialised
-	bool AcqIsInitialised();
-
-	/** @brief Open device and read first image */
-	int openDevice(const char * aDevice, tBoxSize newSize);
-
-
-protected:
-
-};
 
 /** Video acquisition high-level class, using FFMPEG for decoding
  * Performs device management and image acquisitions.
@@ -184,6 +152,8 @@ public:
 		\return NULL if error
 		*/
 	IplImage * readImageDepth() { return 0; }
+	/** @brief Read image as raw data */
+	IplImage * readImageRaw();
 
 	/** @brief Get video properties (not updated) */
 	t_video_properties getVideoProperties() { updateVideoProperties(); return m_video_properties; }
@@ -223,13 +193,7 @@ public:
 		*/
 	int readImageRaw(unsigned char * rawimage, unsigned char * compimage, long * compsize, bool contAcq);
 	
-	/** @brief Return acquisition frame rate in frame per second */
-	float getFrameRate() { return m_fps; }
-	/** Return acquisition period in milliseconds,
 
-		computed from frame rate */
-	long getPeriod() { return m_period_ms; }
-	
 	/** Returns address of last acquisition buffer and launch no new acquisition */
 	unsigned char * getImageRawNoAcq();
 	
@@ -248,32 +212,33 @@ public:
 		@return 0 if error
 		*/
 	int readImageRGB32(unsigned char* image, long * buffersize, bool contAcq = false);
-	
-	// SlotRewindMovie...
-	void slotRewindMovie();
-	
+	/** @brief Read image as raw data */
+
+
+	/**************** FROM FileVideoAcquisition (BEGIN) ************************/
 	/** Return the index of last read frame (needed for post-processing or permanent encoding) */
-	long getFrameIndex(); 
+	long getFrameIndex();
 	/** Return the absolute position to be stored in database (needed for post-processing or permanent encoding) */
 	unsigned long long getAbsolutePosition();
-	
+	void rewindMovie();
+
+	/**************** FROM FileVideoAcquisition (END) ************************/
+
+	/** get position of picture n-1
+	 */
+	unsigned long long getPrevAbsolutePosition() { return m_prevPosition; }
+
 	/** set absolute position in file
 	 */
 	void setAbsolutePosition(unsigned long long newpos);
 	/** go to frame position in file
 	 */
 	void setAbsoluteFrame(int frame);
-	
-	/** get position of picture n-1
-	 */
-	unsigned long long getPrevAbsolutePosition() { return m_prevPosition; }
 
 
 	/** @brief Get last movie position */
 	t_movie_pos getMoviePosition() { return m_movie_pos; }
 
-	/** Return file size in bytes */
-	unsigned long long getFileSize() { return m_fileSize; }
 
 	/// Not really used, just for Video Device compatibility
 	char * getnorm() { static char norm[]="pal"; return norm;};
@@ -289,9 +254,6 @@ public:
 		@see linux/videodev.h
 		*/
 	int getPalette();
-
-	/** @brief Return the index of current frame, from start */
-	int getPlayFrame() { return playFrame; };
 	
 	bool endOfFile();
 	
@@ -359,8 +321,6 @@ private:
 	// no of current stream
 	int m_videoStream;
 	AVPacket packet;
-	long m_period_ms;	///< File period in ms
-	float m_fps; ///< Framerate in frame per second
 
 	// reference time & step
 	struct tm FileVA_Tm;
@@ -378,11 +338,6 @@ private:
 	suseconds_t timeref_usec;
 #endif
 
-	// index of played frame
-	long playFrame;
-
-	/// File size in bytes
-	unsigned long long m_fileSize;
 
 	/// Usage to be confirmed...
 	int myVD_palette;

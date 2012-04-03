@@ -44,9 +44,12 @@ VideoPlayerTool::VideoPlayerTool(QWidget *p_parent, const char *p_name,
 {
 	pWorkspace = p_parent;
 	VideoFile[0] = '\0';
+
 	fprintf(stderr, "VideoPlayerTool::%s:%d : parent=%p, pWin=%p\n",
 			__func__, __LINE__, p_parent, pWin);
+
 	((QWorkspace *)pWorkspace)->addWindow((QWidget *)display());
+
 	initPlayer();
 	m_pWorkshopMovie = NULL;
 
@@ -224,7 +227,8 @@ void VideoPlayerTool::initPlayer()
 		if(pixIcon.load("VcrStepBackward.png"))
 			stepBackMovie->setPixmap(pixIcon);
 		else
-			stepBackMovie->setText(tr("Back")); }
+			stepBackMovie->setText(tr("Back"));
+	}
 	stepBackMovie->setFlat(true);
 	stepBackMovie->setToggleButton(false);
 	connect(stepBackMovie, SIGNAL(clicked()), this, SLOT(slotStepBackwardMovie()));
@@ -232,10 +236,11 @@ void VideoPlayerTool::initPlayer()
 	playMovie = new QPushButton( playHBox);
 	{
 		QPixmap pixIcon;
-	if(pixIcon.load("VcrPlay.png"))
-		playMovie->setPixmap(pixIcon);
-	else
-		playMovie->setText(tr("Play")); }
+		if(pixIcon.load("VcrPlay.png"))
+			playMovie->setPixmap(pixIcon);
+		else
+			playMovie->setText(tr("Play"));
+	}
 	playMovie->setFlat(true);
 	playMovie->setToggleButton(false);
 	connect(playMovie, SIGNAL(clicked()), this, SLOT(slotPlayPauseMovie()));
@@ -243,10 +248,11 @@ void VideoPlayerTool::initPlayer()
 	stepMovie = new QPushButton( playHBox);
 	{
 		QPixmap pixIcon;
-	if(pixIcon.load("VcrStepForward.png"))
-		stepMovie->setPixmap(pixIcon);
-	else
-		stepMovie->setText(tr("Step")); }
+		if(pixIcon.load("VcrStepForward.png"))
+			stepMovie->setPixmap(pixIcon);
+		else
+			stepMovie->setText(tr("Step"));
+	}
 
 	stepMovie->setFlat(true);
 	stepMovie->setToggleButton(false);

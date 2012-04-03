@@ -48,6 +48,7 @@
 
 #include "imgutils.h"
 #include "FileVideoAcquisition.h"
+#include "ffmpeg_file_acquisition.h"
 
 /** @breif Convert an OpenCV IplIMage to a QImage */
 QImage iplImageToQImage(IplImage * iplImage, bool swap_RB = true);
@@ -199,7 +200,7 @@ private:
 	t_image_info_struct m_image_info_struct;
 
 	/// File video acquisition used to read movie properties
-	FileVideoAcquisition mFileVA;
+	FFmpegFileVideoAcquisition mFileVA;
 
 
 	/** @brief Original image */

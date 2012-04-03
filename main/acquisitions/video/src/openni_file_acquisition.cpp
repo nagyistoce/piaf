@@ -48,13 +48,6 @@ extern void init_OpenNI_depth_LUT(); // from openni_videoacquisition
 
 using namespace xn;
 
-XnBool fileExists(const char *fn)
-{
-	XnBool exists;
-	xnOSDoesFileExist(fn, &exists);
-	return exists;
-}
-
 
 #define SAMPLE_XML_PATH "../../../../Data/SamplesConfig.xml"
 #define SAMPLE_XML_PATH_LOCAL "SamplesConfig.xml"
@@ -503,76 +496,6 @@ int OpenNIFileAcquisition::stopAcquisition()
 }
 
 
-static float g_depth_LUT[OPENNI_RAW_MAX] = {-1.f };
-static u8 g_depth_grayLUT[OPENNI_RAW_MAX] = {255 };
-static float g_depth_8bit2m_LUT[256];
-
-void init_OpenNI_depth_LUT()
-{
-	if(g_depth_LUT[0]>=0) return;
-	/* From OpenKinect :
-	   http://openkinect.org/w/index.php?title=Imaging_Information&oldid=613
-	distance = 0.1236 * tan(rawDisparity / 2842.5 + 1.1863)
-	   */
-	// Raw in meter (float)
-	for(int raw = 0; raw<OPENNI_RAW_MAX; raw++) {
-	//	g_depth_LUT[raw] = (float)( 0.1236 * tan((double)raw/2842.5 + 1.1863) );
-		g_depth_LUT[raw] = (float)raw / 1000.f ;// openNI returns depth in mm
-	}
-
-	g_depth_LUT[OPENNI_RAW_UNKNOWN] = -1.f;
-
-	/* LUT for 8bit info on depth :
-	*/
-	int l_depth_8bit2m_LUT_count[256];
-	memset(l_depth_8bit2m_LUT_count, 0, sizeof(int)*256);
-
-	for(int raw = 0; raw<OPENNI_RAW_MAX; raw++) {
-		int val = (int)round( 255. *
-							  (1. - (g_depth_LUT[raw] - OPENNI_DEPTH2CM_RANGE_MIN)
-								 / (OPENNI_DEPTH2CM_RANGE_MAX - OPENNI_DEPTH2CM_RANGE_MIN) )
-							  );
-		if(val > 255) val = 255;
-		else if(val < 1) val = 1;// keep 0 for unknown
-
-		//l_depth_8bit2m_LUT_count[val]++;
-		g_depth_8bit2m_LUT[val] = g_depth_LUT[raw];
-
-		g_depth_grayLUT[raw] = (u8)val;
-	}
-	g_depth_LUT[OPENNI_RAW_UNKNOWN] = -1.f;
-	g_depth_grayLUT[OPENNI_RAW_UNKNOWN] = 0;
-
-	FILE * fLUT = fopen(TMP_DIRECTORY "OpenNI-LUT_8bit_to_meters.txt", "w");
-	if(fLUT)
-	{
-		fprintf(fLUT, "# Recorded with Piaf with 8bit depth from %g m (gray=255) to %g meters (gray=1), unknonw depth is gray=0\n",
-				(float)OPENNI_DEPTH2CM_RANGE_MIN, (float)OPENNI_DEPTH2CM_RANGE_MAX);
-		fprintf(fLUT, "#  Project homepage & Source code: http://code.google.com/p/piaf/\n#\n");
-
-		fprintf(fLUT, "# 8bit_value\tDistance in meter\tResolution\n");
-	}
-	for(int val = 0; val<256; val++)
-	{
-		if(l_depth_8bit2m_LUT_count[val] > 1)
-		{
-			g_depth_8bit2m_LUT[val] /= l_depth_8bit2m_LUT_count[val];
-		}
-		if(fLUT)
-		{
-			fprintf(fLUT, "%d\t%g\t%g\n",
-					val, g_depth_8bit2m_LUT[val],
-					val > 0 ?  g_depth_8bit2m_LUT[val-1]- g_depth_8bit2m_LUT[val]: 0);
-		}
-	}
-	if(fLUT)
-	{
-		fclose(fLUT);
-	}
-
-	g_depth_grayLUT[OPENNI_RAW_UNKNOWN] = 0;
-
-}
 
 void OpenNIFileAcquisition::run()
 {
@@ -603,7 +526,11 @@ void OpenNIFileAcquisition::run()
 
 	m_isRunning = false;
 }
-
+IplImage * OpenNIFileAcquisition::readImageRaw()
+{
+	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
+	return NULL; /// \todo FIXME : return raw value
+}
 /** \brief Grabs one image and convert to RGB32 coding format
 	if sequential mode, return last acquired image, else read and return image
 

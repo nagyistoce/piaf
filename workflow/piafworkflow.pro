@@ -55,85 +55,6 @@ OBJECTS_DIR = .obj-simple
 
 TRANSLATIONS = piafworkflow_French.ts
 
-SOURCES += tools/src/PiafFilter.cpp \
-	src/main.cpp \
-    src/navimagewidget.cpp \
-    src/thumbimagewidget.cpp \
-    src/searchcriterionwidget.cpp \
-    src/qimagedisplay.cpp \
-    src/imageinfowidget.cpp \
-    src/mainimagewidget.cpp \
-    src/emamainwindow.cpp \
-    src/thumbimageframe.cpp \
-    src/imageinfo.cpp \
-    src/imgutils.cpp \
-    src/exifdisplayscrollarea.cpp \
-    src/metadatawidget.cpp \
-    src/emaimagemanager.cpp \
-	src/filtermanagerform.cpp \
-    src/plugineditorform.cpp \
-    ../main/tools/src/timehistogramwidget.cpp \
-    src/maindisplaywidget.cpp \
-    src/timelinewidget.cpp \
-    src/pluginsettingswidget.cpp \
-	tools/src/collectioneditdialog.cpp \
-	tools/src/preferencesdialog.cpp \
-    tools/src/batch_progress_widget.cpp \
-    src/workflowtypes.cpp \
-    src/batchqueuewidget.cpp \
-    tools/src/batchthread.cpp \
-    tools/src/sequence_select_dialog.cpp
-
-
-HEADERS += tools/inc/PiafFilter.h \
-	inc/navimagewidget.h \
-    inc/thumbimagewidget.h \
-    inc/searchcriterionwidget.h \
-    inc/qimagedisplay.h \
-    inc/imageinfowidget.h \
-    inc/mainimagewidget.h \
-    inc/emamainwindow.h \
-    inc/thumbimageframe.h \
-    inc/imageinfo.h \
-    inc/imgutils.h \
-    inc/exifdisplayscrollarea.h \
-    inc/metadatawidget.h \
-    inc/emaimagemanager.h \
-	inc/filtermanagerform.h \
-    inc/plugineditorform.h \
-    ../main/tools/inc/timehistogramwidget.h \
-    inc/maindisplaywidget.h \
-    inc/timelinewidget.h \
-    inc/pluginsettingswidget.h \
-	tools/inc/collectioneditdialog.h \
-    inc/workflowtypes.h \
-    tools/inc/preferencesdialog.h \
-    inc/piafworkflow-settings.h \
-    tools/inc/batch_progress_widget.h \
-    inc/batchqueuewidget.h \
-    tools/inc/batchthread.h \
-    tools/inc/sequence_select_dialog.h
-
-FORMS += ui/navimagewidget.ui \
-    ui/thumbimagewidget.ui \
-    ui/searchcriterionwidget.ui \
-    ui/imageinfowidget.ui \
-    ui/mainimagewidget.ui \
-    ui/emamainwindow.ui \
-    ui/thumbimageframe.ui \
-    ui/exifdisplayscrollarea.ui \
-    ui/metadatawidget.ui \
-	ui/filtermanagerform.ui \
-    ui/plugineditorform.ui \
-    ../main/tools/ui/timehistogramwidget.ui \
-	ui/maindisplaywidget.ui \
-    ui/pluginsettingswidget.ui \
-	tools/ui/collectioneditdialog.ui \
-    tools/ui/preferencesdialog.ui \
-    tools/ui/batch_progress_widget.ui \
-    ui/batchqueuewidget.ui \
-    tools/ui/sequence_select_dialog.ui
-
 
 INCLUDEPATH += tools/inc
 INCLUDEPATH += ../main/tools/inc
@@ -239,13 +160,12 @@ exists(tototatatutu) {
 	$$LEGACYPATH/components/src/workshopmovie.cpp \
 
 	FORMS += $$LEGACYPATH/tools/ui/swtoolmainwindow.ui \
-
 }
 
 # $$LEGACYPATH/src/main.cpp \
 SOURCES += \
 	$$LEGACYPATH/tools/src/SwPluginCore.cpp \
-	$$LEGACYPATH/acquisitions/video/src/FileVideoAcquisition.cpp \
+#	$$LEGACYPATH/acquisitions/video/src/FileVideoAcquisition.cpp \
 	$$LEGACYPATH/acquisitions/video/src/ffmpeg_file_acquisition.cpp \
 	$$LEGACYPATH/acquisitions/video/src/videocapture.cpp \
 	$$LEGACYPATH/acquisitions/video/src/swvideodetector.cpp \
@@ -367,6 +287,87 @@ exists(/usr/include/ni) {
 # acquisitions/video/inc/color.h \
 # acquisitions/video/inc/avilib.h \
 # acquisitions/video/inc/V4L2Device.h \
+
+
+
+SOURCES += tools/src/PiafFilter.cpp \
+	src/main.cpp \
+	src/navimagewidget.cpp \
+	src/thumbimagewidget.cpp \
+	src/searchcriterionwidget.cpp \
+	src/qimagedisplay.cpp \
+	src/imageinfowidget.cpp \
+	src/mainimagewidget.cpp \
+	src/emamainwindow.cpp \
+	src/thumbimageframe.cpp \
+	src/imageinfo.cpp \
+	src/imgutils.cpp \
+	src/exifdisplayscrollarea.cpp \
+	src/metadatawidget.cpp \
+	src/emaimagemanager.cpp \
+	src/filtermanagerform.cpp \
+	src/plugineditorform.cpp \
+	../main/tools/src/timehistogramwidget.cpp \
+	src/maindisplaywidget.cpp \
+	src/timelinewidget.cpp \
+	src/pluginsettingswidget.cpp \
+	tools/src/collectioneditdialog.cpp \
+	tools/src/preferencesdialog.cpp \
+	tools/src/batch_progress_widget.cpp \
+	src/workflowtypes.cpp \
+	src/batchqueuewidget.cpp \
+	tools/src/batchthread.cpp \
+	tools/src/sequence_select_dialog.cpp
+
+
+HEADERS += tools/inc/PiafFilter.h \
+	inc/navimagewidget.h \
+	inc/thumbimagewidget.h \
+	inc/searchcriterionwidget.h \
+	inc/qimagedisplay.h \
+	inc/imageinfowidget.h \
+	inc/mainimagewidget.h \
+	inc/emamainwindow.h \
+	inc/thumbimageframe.h \
+	inc/imageinfo.h \
+	inc/imgutils.h \
+	inc/exifdisplayscrollarea.h \
+	inc/metadatawidget.h \
+	inc/emaimagemanager.h \
+	inc/filtermanagerform.h \
+	inc/plugineditorform.h \
+	../main/tools/inc/timehistogramwidget.h \
+	inc/maindisplaywidget.h \
+	inc/timelinewidget.h \
+	inc/pluginsettingswidget.h \
+	tools/inc/collectioneditdialog.h \
+	inc/workflowtypes.h \
+	tools/inc/preferencesdialog.h \
+	inc/piafworkflow-settings.h \
+	tools/inc/batch_progress_widget.h \
+	inc/batchqueuewidget.h \
+	tools/inc/batchthread.h \
+	tools/inc/sequence_select_dialog.h
+
+FORMS += ui/navimagewidget.ui \
+	ui/thumbimagewidget.ui \
+	ui/searchcriterionwidget.ui \
+	ui/imageinfowidget.ui \
+	ui/mainimagewidget.ui \
+	ui/emamainwindow.ui \
+	ui/thumbimageframe.ui \
+	ui/exifdisplayscrollarea.ui \
+	ui/metadatawidget.ui \
+	ui/filtermanagerform.ui \
+	ui/plugineditorform.ui \
+	../main/tools/ui/timehistogramwidget.ui \
+	ui/maindisplaywidget.ui \
+	ui/pluginsettingswidget.ui \
+	tools/ui/collectioneditdialog.ui \
+	tools/ui/preferencesdialog.ui \
+	tools/ui/batch_progress_widget.ui \
+	ui/batchqueuewidget.ui \
+	tools/ui/sequence_select_dialog.ui
 
 
 
