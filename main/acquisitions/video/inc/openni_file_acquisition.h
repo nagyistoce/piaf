@@ -76,6 +76,7 @@ public:
 
 	/** @brief Stop acquisition */
 	int stopAcquisition();
+
 	/** @brief Read image as raw data */
 	IplImage * readImageRaw();
 

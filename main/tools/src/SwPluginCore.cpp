@@ -749,6 +749,18 @@ int swReadFromPipe(unsigned char * mBuffer, u32 size,
 	if(!pipe) {
 		return 0;
 	}
+
+	if(size == 0 )
+	{
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d : invalid size=%u\n",
+				__func__, __LINE__, size);
+	}
+	if(mBuffer == NULL )
+	{
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d : invalid mBuffer=%p\n",
+				__func__, __LINE__, mBuffer);
+	}
+
 	int iter=0;
 	int itermax = timeout_ms * 1000/TIMEOUT_STEP;
 	u32 index = 0;
@@ -756,8 +768,9 @@ int swReadFromPipe(unsigned char * mBuffer, u32 size,
 	while(iter < itermax && index<size && pipe) {
 		iter++;
 
-		result = fread(mBuffer + index, sizeof(unsigned char), (size_t)(size-index),
-				 pipe);
+		result = fread(mBuffer + index,
+					   sizeof(unsigned char), (size_t)(size-index),
+					   pipe);
 
 		if(!result) {
 			int errnum = errno;

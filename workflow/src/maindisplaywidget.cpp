@@ -140,9 +140,12 @@ void  MainDisplayWidget::zoomOn(int x, int y, float scale) {
 
   ******************************************************************************/
 /* @brief Set the movie file */
-int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pinfo)
+int MainDisplayWidget::setMovieFile(QString moviePath,
+									t_image_info_struct * pinfo)
 {
+
 	mpImageInfoStruct = pinfo;
+
 	QFileInfo fi(moviePath);
 	setWindowTitle(fi.baseName());
 	mSourceName = fi.baseName();
@@ -174,6 +177,7 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 
 		return -1;
 	}
+
 	int ret = 0;
 	if(mpFileVA->isDeviceReady()) {
 		m_fullImage = iplImageToQImage( mpFileVA->readImageRGB32() );
@@ -206,7 +210,8 @@ int MainDisplayWidget::setMovieFile(QString moviePath, t_image_info_struct * pin
 
 	}
 
-	if(mpFileVA->getFrameRate()>1E-5) {
+	if(mpFileVA->getFrameRate()>1E-5)
+	{
 		mPlayTimer.setInterval((int)(1000.f /(mPlaySpeed * (float)mpFileVA->getFrameRate())));
 	}
 
