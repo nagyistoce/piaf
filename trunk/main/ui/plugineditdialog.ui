@@ -18,7 +18,7 @@
     <normaloff>:/images/pixmaps/filter.png</normaloff>:/images/pixmaps/filter.png</iconset>
   </property>
   <layout class="QGridLayout" name="gridLayout">
-   <item row="0" column="0" rowspan="4">
+   <item row="0" column="0" rowspan="5">
     <widget class="QListWidget" name="pluginListWidget">
      <property name="selectionMode">
       <enum>QAbstractItemView::ExtendedSelection</enum>
@@ -56,7 +56,7 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
+   <item row="4" column="1">
     <widget class="QPushButton" name="saveButton">
      <property name="toolTip">
       <string>Save modifications</string>
@@ -70,9 +70,24 @@
      </property>
     </widget>
    </item>
+   <item row="2" column="1">
+    <widget class="QPushButton" name="iconButton">
+     <property name="toolTip">
+      <string>Change icon of selected plugin</string>
+     </property>
+     <property name="text">
+      <string>Icon</string>
+     </property>
+     <property name="icon">
+      <iconset resource="../../workflow/ema.qrc">
+       <normaloff>:/icons/16x16/code-class.png</normaloff>:/icons/16x16/code-class.png</iconset>
+     </property>
+    </widget>
+   </item>
   </layout>
  </widget>
  <resources>
+  <include location="../../workflow/ema.qrc"/>
   <include location="../piaf.qrc"/>
  </resources>
  <connections/>

@@ -41,7 +41,7 @@ void swPurgePipe(FILE *fR);
 #endif // 		SWPLUGIN_SIDE
 
 /// Size of frame mBuffer for communication with plugin
-#define SWPLUGINCORE_mBuffer_SIZE 4096
+#define SWPLUGINCORE_BUFFER_SIZE 4096
 
 bool g_debug_SwPluginCore = false;
 
@@ -58,11 +58,10 @@ SwPluginCore::SwPluginCore()
 	size_in = size_out = 0;
 
 	category = subcategory = name = NULL;
-	swAllocateFrame(&frame, SWPLUGINCORE_mBuffer_SIZE);
+	swAllocateFrame(&frame, SWPLUGINCORE_BUFFER_SIZE);
 
-	mBuffer = new char [SWPLUGINCORE_mBuffer_SIZE];
-	memset(mBuffer, 0, SWPLUGINCORE_mBuffer_SIZE*sizeof(char)); // for valgrind uninitialized test
-
+	mBuffer = new char [SWPLUGINCORE_BUFFER_SIZE];
+	memset(mBuffer, 0, SWPLUGINCORE_BUFFER_SIZE*sizeof(char)); // for valgrind uninitialized test
 
 }
 
@@ -367,7 +366,7 @@ int SwPluginCore::loop()
 	while(!quit)
 	{
 		mBuffer[0]='\0';
-		ret = fgets(mBuffer, SWPLUGINCORE_mBuffer_SIZE-1, stdin);
+		ret = fgets(mBuffer, SWPLUGINCORE_BUFFER_SIZE-1, stdin);
 #ifdef __SWPLUGIN_DEBUG__
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "PLUGIN: (BUFSIZ=%d) Read mBuffer='%s'\n", BUFSIZ, mBuffer); fflush(stderr);
 #endif
