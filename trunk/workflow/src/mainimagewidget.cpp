@@ -135,7 +135,12 @@ void MainImageWidget::slotUpdateImage()
 		image.width = (int)m_fullImage.width();
 		image.height = (int)m_fullImage.height();
 		image.depth = m_fullImage.depth() / 8;
-		image.buffer_size = image.width * image.height * image.depth;
+		image.bytedepth = 1;
+
+		image.pixelType = swU8;
+
+		image.buffer_size = image.width * image.height
+				* image.depth * image.bytedepth;
 
 		m_displayImage = m_fullImage.copy();
 

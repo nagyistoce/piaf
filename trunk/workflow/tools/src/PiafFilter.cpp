@@ -962,10 +962,31 @@ IMAGE PROCESSING  SECTION
 int FilterSequencer::processImage(swImageStruct * image)
 {
 	// send image to process
+	if(imageTmp && image->buffer_size != imageTmp->buffer_size)
+	{
+		delete imageTmp;
+		imageTmp = NULL;
+	}
+
 	if(!imageTmp)
 	{
 		imageTmp = new swImageStruct;
 		memcpy(imageTmp, image, sizeof(swImageStruct));
+
+		if(imageTmp->bytedepth == 0)
+		{
+			imageTmp->bytedepth = 1;
+			image->bytedepth = 1;
+		}
+
+		fprintf(stderr, "FilterSequencer::%s:%d allocate tmp image struct for "
+				"image={%dx%d depth=%d bytedepth=%d buffer_size=%d buffer=%p}...\n",
+				__func__, __LINE__,
+				imageTmp->width, imageTmp->height,
+				imageTmp->depth, imageTmp->bytedepth,
+				(unsigned int)imageTmp->buffer_size,
+				imageTmp->buffer
+				);
 
 		// allocate buffer
 		imageTmp->buffer = new unsigned char * [ imageTmp->buffer_size];
@@ -1064,6 +1085,10 @@ int FilterSequencer::processImage(swImageStruct * image)
 		// even or odd ??
 		if(ret && (step % 2) == 1) // odd, must invert
 		{
+//			fprintf(stderr, "[PiafFilter] %s:%d : memcpy(image->buffer=%p, imageTmp->buffer=%p, image->buffer_size=%u);\n",
+//					__func__, __LINE__,
+//					image->buffer, imageTmp->buffer, image->buffer_size
+//					);
 			memcpy(image->buffer, imageTmp->buffer, image->buffer_size);
 		}
 
