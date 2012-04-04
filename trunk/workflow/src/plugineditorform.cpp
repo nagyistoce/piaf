@@ -490,6 +490,11 @@ LoadedPluginTreeWidgetItem::~LoadedPluginTreeWidgetItem()
 
 }
 
+void PluginEditorForm::on_availablePluginsTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
+{
+	on_appendPluginButton_clicked();
+}
+
 void PluginEditorForm::on_appendPluginButton_clicked()
 {
 	// Get selected item
@@ -682,4 +687,5 @@ void PluginEditorForm::on_selectedPluginsTreeWidget_itemDoubleClicked(QTreeWidge
 	mpFilterSequencer->setFinal(loaded->getFilter());
 
 }
+
 

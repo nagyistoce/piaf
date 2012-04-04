@@ -256,6 +256,7 @@ QImage iplImageToQImage(IplImage * iplImage, bool swap_RB) {
 		}
 		}break;
 	case IPL_DEPTH_16U: {
+
 		if(!rgb24_to_bgr32) {
 
 			unsigned short valmax = 0;
@@ -263,9 +264,11 @@ QImage iplImageToQImage(IplImage * iplImage, bool swap_RB) {
 			for(int r=0; r<iplImage->height; r++)
 			{
 				unsigned short * buffershort = (unsigned short *)(iplImage->imageData + r*iplImage->widthStep);
-				for(int c=0; c<iplImage->width; c++)
-					if(buffershort[c]>valmax)
+				for(int c=0; c<iplImage->width; c++) {
+					if(buffershort[c]>valmax) {
 						valmax = buffershort[c];
+					}
+				}
 			}
 
 			if(valmax>0) {
@@ -342,6 +345,33 @@ QImage iplImageToQImage(IplImage * iplImage, bool swap_RB) {
 					}
 			}
 		}
+		}break;
+	case IPL_DEPTH_32F: {
+		// create temp image
+		IplImage * image8bit = swCreateImage(cvGetSize(iplImage),
+											 IPL_DEPTH_8U, iplImage->nChannels);
+		double minVal, maxVal;
+		CvPoint maxPt;
+		try {
+			cvMinMaxLoc(iplImage, &minVal, &maxVal, &maxPt);
+		}
+		catch(cv::Exception)
+		{
+			maxVal = 255.;
+		}
+		// Get dynamic of image
+		int limit = 1;
+		while (limit < maxVal)
+		{
+			limit = limit << 1;
+		}
+		// convert scale
+		cvConvertScale(iplImage, image8bit, 255./(double)limit, 0.);
+
+		// convert
+		qImage = iplImageToQImage(image8bit).copy();
+		swReleaseImage(&image8bit);
+
 		}break;
 	}
 

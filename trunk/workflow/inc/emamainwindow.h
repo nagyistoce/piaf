@@ -371,6 +371,7 @@ private slots:
 	void on_collecTreeWidget_itemSelectionChanged();
 	void on_actionRemove_all_files_triggered();
 	void on_actionEdit_sequences_triggered();
+	void on_deviceStopButton_clicked();
 };
 
 #endif // EmaMAINWINDOW_H

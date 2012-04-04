@@ -154,6 +154,7 @@ private slots:
 	void on_appendPluginButton_clicked();
 	void on_loadButton_clicked();
 
+	void on_availablePluginsTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column);
 };
 
 #endif // PLUGINEDITORFORM_H

@@ -101,7 +101,7 @@
                 <string>Folders explorer</string>
                </property>
                <property name="currentIndex">
-                <number>1</number>
+                <number>2</number>
                </property>
                <widget class="QWidget" name="inputsTabWidgetPage1">
                 <attribute name="icon">
@@ -396,6 +396,29 @@
                       <property name="icon">
                        <iconset resource="../ema.qrc">
                         <normaloff>:/icons/16x16/view-refresh.png</normaloff>:/icons/16x16/view-refresh.png</iconset>
+                      </property>
+                      <property name="iconSize">
+                       <size>
+                        <width>16</width>
+                        <height>16</height>
+                       </size>
+                      </property>
+                      <property name="flat">
+                       <bool>true</bool>
+                      </property>
+                     </widget>
+                    </item>
+                    <item>
+                     <widget class="QPushButton" name="deviceStopButton">
+                      <property name="toolTip">
+                       <string>Stop acquisition on currently selected device</string>
+                      </property>
+                      <property name="text">
+                       <string/>
+                      </property>
+                      <property name="icon">
+                       <iconset resource="../ema.qrc">
+                        <normaloff>:/icons/16x16/media-playback-stop.png</normaloff>:/icons/16x16/media-playback-stop.png</iconset>
                       </property>
                       <property name="iconSize">
                        <size>

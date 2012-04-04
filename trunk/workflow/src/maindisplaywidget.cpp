@@ -374,12 +374,12 @@ void MainDisplayWidget::slot_mPlayTimer_timeout()
 		{
 			IplImage * captureImage = m_pVideoCaptureDoc->readImage();
 
-			fprintf(stderr, "MainDisplayW::%s:%d: saving /dev/shm/MainDisplayWidget-slot_mPlayTimer_timeout.png : %dx%dx%d\n",
-					__func__, __LINE__,
-					captureImage->width, captureImage->height, captureImage->nChannels
-					);
+//			fprintf(stderr, "MainDisplayW::%s:%d: saving /dev/shm/MainDisplayWidget-slot_mPlayTimer_timeout.png : %dx%dx%d\n",
+//					__func__, __LINE__,
+//					captureImage->width, captureImage->height, captureImage->nChannels
+//					);
 
-			cvSaveImage(SHM_DIRECTORY "MainDisplayWidget-slot_mPlayTimer_timeout.png", captureImage);
+//			cvSaveImage(SHM_DIRECTORY "MainDisplayWidget-slot_mPlayTimer_timeout.png", captureImage);
 			ui->mainImageWidget->setImage( captureImage, NULL);
 
 			if(mpegEncoder && mIsRecording)

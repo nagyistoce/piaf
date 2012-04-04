@@ -962,6 +962,16 @@ IMAGE PROCESSING  SECTION
 
 int FilterSequencer::processImage(swImageStruct * image)
 {
+
+	fprintf(stderr, "[FilterSequencer]::%s:%d: process image ! swImageStruct=%p = %dx%dx%dx%d\n",
+			__func__, __LINE__,
+			image,
+			image->width, image->height, image->depth, image->bytedepth);
+
+	PIAF_MSG(SWLOG_INFO, "Process image swImageStruct=%p = %dx%dx%dx%d",
+			 image,
+			 image->width, image->height, image->depth, image->bytedepth);
+
 	// send image to process
 	if(imageTmp && image->buffer_size != imageTmp->buffer_size)
 	{

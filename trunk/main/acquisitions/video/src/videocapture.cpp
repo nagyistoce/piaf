@@ -160,7 +160,7 @@ bool VideoCaptureDoc::newDocument(int dev)
 	fprintf(stderr, "[VideoCapture]::%s:%d ----- CREATE NEW WINDOW FOR DEVICE '%s' -----\n",
 			__func__, __LINE__, txt);
 #ifndef _V4L2
-	myVAcq = new OpenCVVideoAcquisition(dev);
+	mpVAcq = new OpenCVVideoAcquisition(dev);
 #else
 	mpVAcq = new V4L2Device(dev);
 #endif
@@ -174,7 +174,7 @@ bool VideoCaptureDoc::newDocument(int dev)
 	}
 
 	// start acquisition
-	fprintf(stderr, "[VidCapture]::%s:%d : myVAcq->startAcquisition...\n", __func__, __LINE__);
+	fprintf(stderr, "[VidCapture]::%s:%d : mpVAcq->startAcquisition...\n", __func__, __LINE__);
 	if(mpVAcq->startAcquisition() < 0) {
 		fprintf(stderr, "[VidCapture]::%s:%d : Error: canot initialize acquisition !\n", __func__, __LINE__);
 		return false;
@@ -235,13 +235,15 @@ void VideoCaptureDoc::run()
 		int ret = loadImage();
 		if(ret)
 		{
-			fprintf(stderr, "VideoCaptureDoc::%s:%d: (threaded) mVAcq=%p "
-					"load image size : %d x %d ret=%d\n",
-					__func__, __LINE__, mpVAcq,
-					imageSize.width, imageSize.height,
-					ret
-					);
-			cvSaveImage(SHM_DIRECTORY "VideoCaptureDoc.png", mpVAcq->readImageRGB32());
+			IplImage * img = readImage();
+//			fprintf(stderr, "VideoCaptureDoc::%s:%d: (threaded) mVAcq=%p "
+//					"load image size : %d x %d ret=%d => readImage()=%dx%dx%dx%d\n",
+//					__func__, __LINE__, mpVAcq,
+//					imageSize.width, imageSize.height,
+//					ret,
+//					img->width, img->height, img->depth, img->nChannels
+//					);
+//			cvSaveImage(SHM_DIRECTORY "VideoCaptureDoc.jpg", img);
 		} else {
 			fprintf(stderr, "VideoCaptureDoc::%s:%d: acquisition failed\n",
 					__func__, __LINE__
@@ -331,7 +333,7 @@ int VideoCaptureDoc::setpicture(int br, int hue, int col, int cont, int white)
 {
 	if(!mpVAcq) return -1;
 
-//	return myVAcq->setpicture(br, hue, col, cont, white);
+//	return mpVAcq->setpicture(br, hue, col, cont, white);
 	t_video_properties props = mpVAcq->updateVideoProperties();
 	props.brightness = br;
 	props.hue = hue;
@@ -351,7 +353,7 @@ int VideoCaptureDoc::getpicture(video_picture * pic)
 	pic->contrast = props.contrast * 16384;
 	// FIXME
 	return 0;
-	//return myVAcq->getpicture(pic);
+	//return mpVAcq->getpicture(pic);
 }
 int VideoCaptureDoc::getcapability(video_capability * vc)
 {
@@ -363,7 +365,7 @@ int VideoCaptureDoc::getcapability(video_capability * vc)
 
 	return 0;
 
-	//return myVAcq->getcapability(vc);
+	//return mpVAcq->getcapability(vc);
 }
 
 int VideoCaptureDoc::changeAcqParams(tBoxSize newSize, int ch)
@@ -504,7 +506,11 @@ int VideoCaptureDoc::loadImage()
 /// \todo FIXME not thread-safe
 IplImage * VideoCaptureDoc::readImage()
 {
-	return imageRGBA;
+	if(mpVAcq) {
+		return mpVAcq->readImageRaw();
+	}
+	return NULL;
+	//return imageRGBA;
 }
 
 unsigned char * VideoCaptureDoc::getCurrentImageRGB()

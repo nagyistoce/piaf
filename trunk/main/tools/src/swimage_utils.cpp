@@ -18,6 +18,7 @@
 
 #include "swimage_utils.h"
 
+#include "swvideodetector.h"
 
 /* Create and allocate buffer from SwImageStruct => .buffer must be deleted !*/
 swImageStruct * createSwImageFromImage(swImageStruct * swimIn)
@@ -114,6 +115,7 @@ void mapIplImageToSwImage(IplImage * iplImage, swImageStruct * swim)
 	swim->height = iplImage->height;
 	swim->depth = iplImage->nChannels;
 	swim->bytedepth = iplImage->depth/8;
+	swim->pitch = iplImage->widthStep;
 
 	switch(iplImage->depth)
 	{
@@ -165,8 +167,72 @@ void freeSwImage(swImageStruct ** pswim)
 	if(swim->allocated)
 	{
 		delete [] swim->buffer;
+		swim->buffer = 0;
 	}
 	// Clear structure
 	memset(swim, 0, sizeof(swImageStruct));
 	*pswim = NULL;
 }
+
+
+/** @brief Convert an image struct to IplIMage, resize/alloc iplImage if needed */
+IplImage * convertSwImageToIplImage(swImageStruct * swim, IplImage ** pimg)
+{
+	if(!pimg)
+	{
+		fprintf(stderr, "[%s] %s:%d : error in IplImage pointer\n",
+				__FILE__, __func__, __LINE__
+				);
+		return NULL;
+	}
+
+	IplImage * img = *pimg;
+	if(img && (img->widthStep != swim->pitch || img->height != swim->height))
+	{
+		fprintf(stderr, "[%s] %s:%d : size does not match => "
+				"release IplImage=%dx%d x nChannels=%d x depth=%d\n",
+				__FILE__, __func__, __LINE__,
+				img->width, img->height, img->nChannels, img->depth
+				);
+		swReleaseImage(pimg);
+		*pimg = NULL;
+	}
+
+	if(!img)
+	{
+		fprintf(stderr, "\n\n[%s] %s:%d : create IplImage=%dx%d x nChannels=%d x depth=%d\n",
+				__FILE__, __func__, __LINE__,
+				swim->width, swim->height, swim->depth, swim->bytedepth*8
+				); fflush(stderr);
+
+		img = swCreateImage(cvSize(swim->width, swim->height),
+									swim->bytedepth * 8, swim->depth);
+		*pimg = img;
+	}
+
+	// Copy buffer
+	if(swim->pitch == img->widthStep)
+	{
+		fprintf(stderr, "\n\n[%s] %s:%d : memcpy IplImage=%dx%d x nChannels=%d x depth=%d\n",
+				__FILE__, __func__, __LINE__,
+				swim->width, swim->height, swim->depth, swim->bytedepth*8
+				); fflush(stderr);
+		memcpy(img->imageData, swim->buffer, swim->buffer_size);
+	}
+	else // do it line by line
+	{
+		fprintf(stderr, "\n\n[%s] %s:%d : memcpy line by line IplImage=%dx%d x nChannels=%d x depth=%d\n",
+				__FILE__, __func__, __LINE__,
+				swim->width, swim->height, swim->depth, swim->bytedepth*8
+				); fflush(stderr);
+		for(int r = 0; r<swim->height; r++)
+		{
+			memcpy(img->imageData + r*img->widthStep,
+				   swim->buffer + r * swim->pitch,
+				   swim->width * swim->bytedepth * swim->depth);
+		}
+	}
+
+	return img;
+}
+
