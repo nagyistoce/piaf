@@ -314,7 +314,7 @@ protected:
 	void init();
 	void purge();
 
-	swImageStruct *imageTmp;
+	swImageStruct * imageTmp;
 	bool lockProcess;
 
 	bool mNoWarning; ///< Don't show warning on plugin crash

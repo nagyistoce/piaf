@@ -560,7 +560,9 @@ int SwPluginCore::processFunction(char *framemBuffer, int )//unused len)
 		}
 
 		// allocate mBuffer for input data
-		int size = sizeof(swImageStruct) + tmpStruct.buffer_size + tmpStruct.metadata_size;
+		int size = sizeof(swImageStruct)
+				+ tmpStruct.buffer_size
+				+ tmpStruct.metadata_size;
 
 #ifdef __SWPLUGIN_DEBUG__
 		// debug
@@ -578,8 +580,9 @@ int SwPluginCore::processFunction(char *framemBuffer, int )//unused len)
 		swImageStruct * pimage = (swImageStruct *)data_in;
 		if(!data_in || size_in != size)
 		{
-			if(data_in)
+			if(data_in) {
 				delete [] data_in;
+			}
 			data_in = new unsigned char [ size ];
 			memset(data_in, 0, sizeof(unsigned char)*size);
 
@@ -598,7 +601,8 @@ int SwPluginCore::processFunction(char *framemBuffer, int )//unused len)
 
 		memcpy(pimage, &tmpStruct, sizeof(swImageStruct));
 
-		pimage->buffer = (unsigned char *)data_in + sizeof(swImageStruct); //restore pointer
+		pimage->buffer = (unsigned char *)data_in
+				+ sizeof(swImageStruct); //restore pointer
 
 #ifdef __SWPLUGIN_DEBUG__
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> SwPluginCore::%s:%d: copy header:"
@@ -615,7 +619,8 @@ int SwPluginCore::processFunction(char *framemBuffer, int )//unused len)
 #ifdef __SWPLUGIN_DEBUG__
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT ">>>>> SwPluginCore::%s:%d: reading image mBuffers.\n", __func__, __LINE__);
 #endif
-		if(!swReadFromPipe((unsigned char *)pimage->buffer, (u32)(pimage->buffer_size),
+		if(!swReadFromPipe((unsigned char *)pimage->buffer,
+						   (u32)(pimage->buffer_size),
 						   stdin, timeout_ms)) {
 			swPurgePipe(stdin);
 			return 0;

@@ -24,9 +24,9 @@
 
 /// Image struct for binary exchanges
 typedef struct _swImageStruct {
-	i32 width;	/*! Image width = nb columns = pitch */
-	i32 height;	/*! Image height = nb rows */
-
+	i32 width;	/*!< Image width = nb columns (!= pitch) */
+	i32 height;	/*!< Image height = nb rows */
+	i32 pitch; /*!< Image pitch = nb columns*depth*bytedepth (+a few bytes for alignment) */
 
 	// Date of image ===========================================================
 	u32 Date;	/*! Date in second from Epoch */
@@ -44,8 +44,8 @@ typedef struct _swImageStruct {
 	u32 buffer_size;	/*! Size of image buffer, eg. width*height*depth*bytedepth */
 	i32 deltaTus;		/*! Time from start of source (if available, ie file ou device stream) */
 
-	void * buffer;		/*! Raw image buffer */
-
+	u8 * buffer;		/*! Raw image buffer */
+	u8	allocated;		/*!< flag to tell if image buffer has been allocated */
 
 	u32	metadata_size;
 	unsigned char * metadata;

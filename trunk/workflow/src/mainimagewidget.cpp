@@ -130,8 +130,10 @@ void MainImageWidget::slotUpdateImage()
 
 	if(mpFilterSequencer)
 	{
+
 		swImageStruct image;
 		memset(&image, 0, sizeof(swImageStruct));
+
 		image.width = (int)m_fullImage.width();
 		image.height = (int)m_fullImage.height();
 		image.depth = m_fullImage.depth() / 8;
