@@ -20,7 +20,7 @@
 
 
 /* Create and allocate buffer from SwImageStruct => .buffer must be deleted !*/
-swImageStruct * createSwImageFormImage(swImageStruct * swimIn)
+swImageStruct * createSwImageFromImage(swImageStruct * swimIn)
 {
 	if(!swimIn) { return NULL; }
 	// Create
@@ -43,7 +43,7 @@ swImageStruct * createSwImageFormImage(swImageStruct * swimIn)
 }
 
 /* Create image from IplImage, then map buffer to swimIn->buffer => .buffer does not need to be deleted !*/
-swImageStruct * createSwImageHeaderFormImage(swImageStruct * swimIn)
+swImageStruct * createSwImageHeaderFromImage(swImageStruct * swimIn)
 {
 	if(!swimIn) { return NULL; }
 	// Create

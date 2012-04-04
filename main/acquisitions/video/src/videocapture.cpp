@@ -39,7 +39,7 @@ VideoCaptureDoc::VideoCaptureDoc()
 {
 	imageRGBA = NULL;
 	currentPixel = 0;
-	myVAcq=NULL;
+	mpVAcq=NULL;
 	pImageTimer = NULL;
 	m_running = m_run = false;
 }
@@ -51,7 +51,7 @@ VideoCaptureDoc::VideoCaptureDoc(VirtualDeviceAcquisition * vAcq)
 	imageRGBA = NULL;
 	mask = NULL;
 	currentPixel = 0;
-	myVAcq=vAcq;
+	mpVAcq=vAcq;
 
 	// alloc image size
 	allocateImages();
@@ -71,7 +71,7 @@ VideoCaptureDoc::VideoCaptureDoc(VirtualDeviceAcquisition * vAcq)
 	modified = false;
 
 	// start background thread
-	if(myVAcq->isAcquisitionRunning()) {
+	if(mpVAcq->isAcquisitionRunning()) {
 		start();
 	}
 }
@@ -97,9 +97,9 @@ VideoCaptureDoc::~VideoCaptureDoc()
 	swReleaseImage(&imageRGBA);
 
 	// stop acquisition
-	if(myVAcq) {
-		delete myVAcq;
-		myVAcq = NULL;
+	if(mpVAcq) {
+		delete mpVAcq;
+		mpVAcq = NULL;
 	}
 }
 
@@ -140,10 +140,10 @@ bool VideoCaptureDoc::newDocument(int dev)
   // TODO: Add your document initialization code here
   /////////////////////////////////////////////////
 	// VIDEO INITIALISATION
-	if(myVAcq)
+	if(mpVAcq)
 	{
-		delete myVAcq;
-		myVAcq = NULL;
+		delete mpVAcq;
+		mpVAcq = NULL;
 	}
 	swReleaseImage(&imageRGBA);
 
@@ -162,9 +162,9 @@ bool VideoCaptureDoc::newDocument(int dev)
 #ifndef _V4L2
 	myVAcq = new OpenCVVideoAcquisition(dev);
 #else
-	myVAcq = new V4L2Device(dev);
+	mpVAcq = new V4L2Device(dev);
 #endif
-	if(!myVAcq->isDeviceReady())
+	if(!mpVAcq->isDeviceReady())
 	{
 		printf("(VirtualVideoAcquisition) : Video device init failed\n");
 		return false;
@@ -175,12 +175,12 @@ bool VideoCaptureDoc::newDocument(int dev)
 
 	// start acquisition
 	fprintf(stderr, "[VidCapture]::%s:%d : myVAcq->startAcquisition...\n", __func__, __LINE__);
-	if(myVAcq->startAcquisition() < 0) {
+	if(mpVAcq->startAcquisition() < 0) {
 		fprintf(stderr, "[VidCapture]::%s:%d : Error: canot initialize acquisition !\n", __func__, __LINE__);
 		return false;
 	}
 	else {
-		printf("Initialization : %d\n",  myVAcq->isAcquisitionRunning());
+		printf("Initialization : %d\n",  mpVAcq->isAcquisitionRunning());
 	}
 
 	// alloc image size
@@ -202,11 +202,20 @@ bool VideoCaptureDoc::newDocument(int dev)
 
 	return true;
 }
+void VideoCaptureDoc::stop()
+{
+	fprintf(stderr, "VideoCaptureDoc::%s:%d : stop video acquisition loop\n",
+					__func__, __LINE__);
+	m_run = false;
+
+}
 
 void VideoCaptureDoc::run()
 {
-	if(!myVAcq)
+	if(!mpVAcq)
 	{
+		fprintf(stderr, "VideoCaptureDoc::%s:%d : no video acquisition\n",
+						__func__, __LINE__);
 		return;
 	}
 
@@ -214,7 +223,7 @@ void VideoCaptureDoc::run()
 					__func__, __LINE__);
 
 	// start acquisition by default
-	myVAcq->startAcquisition();
+	mpVAcq->startAcquisition();
 
 	fprintf(stderr, "VideoCaptureDoc::%s:%d : starting loop\n",
 					__func__, __LINE__);
@@ -223,10 +232,21 @@ void VideoCaptureDoc::run()
 	while(m_run)
 	{
 		// grab images
-//		fprintf(stderr, "VideoCaptureDoc::%s:%d : (threaded) load image size : %ld x %ld \n",
-//				__func__, __LINE__,
-//				imageSize.width, imageSize.height);
-		loadImage();
+		int ret = loadImage();
+		if(ret)
+		{
+			fprintf(stderr, "VideoCaptureDoc::%s:%d: (threaded) mVAcq=%p "
+					"load image size : %d x %d ret=%d\n",
+					__func__, __LINE__, mpVAcq,
+					imageSize.width, imageSize.height,
+					ret
+					);
+			cvSaveImage(SHM_DIRECTORY "VideoCaptureDoc.png", mpVAcq->readImageRGB32());
+		} else {
+			fprintf(stderr, "VideoCaptureDoc::%s:%d: acquisition failed\n",
+					__func__, __LINE__
+					);
+		}
 	}
 
 	fprintf(stderr, "VideoCaptureDoc::%s:%d : stopped thread\n",
@@ -237,7 +257,7 @@ void VideoCaptureDoc::run()
 
 int VideoCaptureDoc::allocateImages()
 {
-	imageSize = myVAcq->getImageSize();
+	imageSize = mpVAcq->getImageSize();
 	currentPixel = (int)( imageSize.width * imageSize.height);
 
 	fprintf(stderr, "VideoCaptureDoc::%s:%d : Image size : %d x %d x 4\n",
@@ -248,7 +268,7 @@ int VideoCaptureDoc::allocateImages()
 	if( !(imageRGBA ))
 	{
 		printf("RGB image memory allocation failed\n");
-		myVAcq->stopAcquisition();
+		mpVAcq->stopAcquisition();
 		return 0;
 	}
 
@@ -268,24 +288,24 @@ int VideoCaptureDoc::allocateImages()
 
 t_video_properties VideoCaptureDoc::getVideoProperties()
 {
-	if(!myVAcq) {
+	if(!mpVAcq) {
 		t_video_properties empty;
 		memset(&empty, 0, sizeof(t_video_properties));
 		return empty;
 	}
 
-	t_video_properties props = myVAcq->updateVideoProperties();
+	t_video_properties props = mpVAcq->updateVideoProperties();
 	return props;
 }
 
 int VideoCaptureDoc::setVideoProperties(t_video_properties props)
 {
-	if(!myVAcq) {
+	if(!mpVAcq) {
 		fprintf(stderr, "VidCapDoc::%s:%d : no vid acq\n", __func__, __LINE__);
 		return -1;
 	}
 
-	return myVAcq->setVideoProperties(props);
+	return mpVAcq->setVideoProperties(props);
 }
 void VideoCaptureDoc::setDetectionMask(char * /*maskfile*/)
 {
@@ -294,37 +314,37 @@ void VideoCaptureDoc::setDetectionMask(char * /*maskfile*/)
 /*  Set exposure value in us */
 int VideoCaptureDoc::setexposure( int exposure_us )
 {
-	if(!myVAcq) return -1;
-	t_video_properties props = myVAcq->updateVideoProperties();
+	if(!mpVAcq) return -1;
+	t_video_properties props = mpVAcq->updateVideoProperties();
 	props.exposure = exposure_us/100; // in V4L2, exposure in in 100us step
-	return myVAcq->setVideoProperties(props);
+	return mpVAcq->setVideoProperties(props);
 }
 int VideoCaptureDoc::setgain( int gain)
 {
-	if(!myVAcq) return -1;
-	t_video_properties props = myVAcq->updateVideoProperties();
+	if(!mpVAcq) return -1;
+	t_video_properties props = mpVAcq->updateVideoProperties();
 	props.gain = gain; // in V4L2,
-	return myVAcq->setVideoProperties(props);
+	return mpVAcq->setVideoProperties(props);
 }
 
 int VideoCaptureDoc::setpicture(int br, int hue, int col, int cont, int white)
 {
-	if(!myVAcq) return -1;
+	if(!mpVAcq) return -1;
 
 //	return myVAcq->setpicture(br, hue, col, cont, white);
-	t_video_properties props = myVAcq->updateVideoProperties();
+	t_video_properties props = mpVAcq->updateVideoProperties();
 	props.brightness = br;
 	props.hue = hue;
 	props.saturation = col;
 	props.contrast = cont;
 	props.hue = hue;
 
-	return myVAcq->setVideoProperties(props);
+	return mpVAcq->setVideoProperties(props);
 }
 
 int VideoCaptureDoc::getpicture(video_picture * pic)
 {
-	t_video_properties props = myVAcq->updateVideoProperties();
+	t_video_properties props = mpVAcq->updateVideoProperties();
 	pic->brightness = props.brightness * 16384;
 	pic->hue = props.hue * 16384;
 	pic->colour = props.saturation * 16384;
@@ -335,7 +355,7 @@ int VideoCaptureDoc::getpicture(video_picture * pic)
 }
 int VideoCaptureDoc::getcapability(video_capability * vc)
 {
-	t_video_properties props = myVAcq->updateVideoProperties();
+	t_video_properties props = mpVAcq->updateVideoProperties();
 	vc->maxwidth = props.max_width;
 	vc->minwidth = props.min_width;
 	vc->maxheight = props.max_height;
@@ -348,20 +368,20 @@ int VideoCaptureDoc::getcapability(video_capability * vc)
 
 int VideoCaptureDoc::changeAcqParams(tBoxSize newSize, int ch)
 {
-	t_video_properties props = myVAcq->updateVideoProperties();
+	t_video_properties props = mpVAcq->updateVideoProperties();
 	props.frame_width = newSize.width;
 	props.frame_height = newSize.height;
 	props.mode = ch;
 
-	return myVAcq->setVideoProperties(props);
+	return mpVAcq->setVideoProperties(props);
 }
 
 //thomas.
 int VideoCaptureDoc::setChannel(int ch)
 {
-	t_video_properties props = myVAcq->updateVideoProperties();
+	t_video_properties props = mpVAcq->updateVideoProperties();
 	props.mode = ch; // FIXME
-	return myVAcq->setVideoProperties(props);
+	return mpVAcq->setVideoProperties(props);
 }
 
 
@@ -418,7 +438,7 @@ int VideoCaptureDoc::waitForImage()
 								  200 // ms
 								  );
 	if(ret) {
-		IplImage * imageIn = myVAcq->readImageRGB32();
+		IplImage * imageIn = mpVAcq->readImageRaw();
 		if(imageIn)
 		{
 //			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRGB32() ok "
@@ -429,17 +449,18 @@ int VideoCaptureDoc::waitForImage()
 
 			if(imageIn->width>0 && imageIn->height>0)
 			{
-				if(imageIn->width != imageRGBA->width
+				if(imageIn->widthStep != imageRGBA->widthStep
 				   || imageIn->height != imageRGBA->height)
 				{
 					swReleaseImage(&imageRGBA);
-					imageRGBA = swCreateImage(cvGetSize(imageIn), IPL_DEPTH_8U,
-											  imageIn->nChannels == 1 ? 1 : 4 );
+					imageRGBA = swCreateImage(cvGetSize(imageIn), imageIn->depth,
+											  imageIn->nChannels );
 					// update input size to force display change
 					imageSize = cvGetSize(imageRGBA);
 				}
 
-				swConvert(imageIn, imageRGBA);
+				// convert to destination
+				cvCopy(imageIn, imageRGBA);
 			}
 			else
 			{
@@ -460,15 +481,23 @@ int VideoCaptureDoc::waitForImage()
 		return 0;
 	}
 
+
+	fprintf(stderr, "VideoCapture::%s:%d : timeout => return -1\n", __func__, __LINE__);
 	return -1;
 }
 
 int VideoCaptureDoc::loadImage()
 {
-	myVAcq->grab(); // FIXME
-
-	// unlock wait condition to unlock every WorkshopVideoCaptureThread
-	mWaitCondition.wakeAll();
+	if(mpVAcq->grab()< 0)
+	{
+		fprintf(stderr, "VideoCapture::%s:%d : grab failed\n", __func__, __LINE__);
+		return 0;
+	}
+	else
+	{
+		// unlock wait condition to unlock every WorkshopVideoCaptureThread
+		mWaitCondition.wakeAll();
+	}
 
 	return 1;
 }

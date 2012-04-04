@@ -25,9 +25,10 @@
 #include "SwImage.h"
 
 /** @brief Create and allocate buffer from SwImageStruct => .buffer must be deleted !*/
-swImageStruct * createSwImageFormImage(swImageStruct * swimIn);
+swImageStruct * createSwImageFromImage(swImageStruct * swimIn);
+
 /** @brief Create image from IplImage, then map buffer to swimIn->buffer => .buffer does not need to be deleted !*/
-swImageStruct * createSwImageHeaderFormImage(swImageStruct * swimIn);
+swImageStruct * createSwImageHeaderFromImage(swImageStruct * swimIn);
 
 /** @brief Map swimim->buffer to iplImage->imageData */
 void mapIplImageToSwImage(IplImage * iplImage, swImageStruct * swim);

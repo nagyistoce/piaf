@@ -965,7 +965,7 @@ int FilterSequencer::processImage(swImageStruct * image)
 	// send image to process
 	if(imageTmp && image->buffer_size != imageTmp->buffer_size)
 	{
-		freeImage(&imageTmp);
+		freeSwImage(&imageTmp);
 	}
 
 	if(!imageTmp)

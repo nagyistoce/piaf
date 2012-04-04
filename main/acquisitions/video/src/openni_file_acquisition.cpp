@@ -538,16 +538,19 @@ IplImage * OpenNIFileAcquisition::readImageRaw()
 	*/
 IplImage * OpenNIFileAcquisition::readImageRGB32()
 {
-	if(!m_captureIsInitialised) { return NULL; }
+	if(!m_captureIsInitialised) {
+		OPENNI_PRINTF("m_captureIsInitialised = %d", m_captureIsInitialised);
+
+		return NULL; }
 
 	if(!m_bgr32Image)
 	{
-		fprintf(stderr, "[Freenect]::%s:%d : create BGR32 image\n", __func__, __LINE__);
+		OPENNI_PRINTF("create BGR32 image\n");
 		m_bgr32Image = swCreateImage(m_imageSize, IPL_DEPTH_8U, 4);
 	}
 
 	int mode = (int)round(m_video_properties.mode);
-
+	OPENNI_PRINTF("mode = %d", mode);
 	switch(mode)
 	{
 	default:
@@ -559,7 +562,6 @@ IplImage * OpenNIFileAcquisition::readImageRGB32()
 //		}
 		break;
 	case OPENNI_MODE_DEPTH_2CM: // 2CM
-
 
 		if(!m_grayImage)
 		{
@@ -585,6 +587,10 @@ IplImage * OpenNIFileAcquisition::readImageRGB32()
 			//OPENNI_PRINTF("mode = %d => 2Cm => gray => BGR32\n", mode);
 
 			cvCvtColor(m_grayImage, m_bgr32Image, CV_GRAY2BGRA);
+		}
+		else
+		{
+			OPENNI_PRINTF("ERROR: no 16bit image");
 		}
 
 		break;

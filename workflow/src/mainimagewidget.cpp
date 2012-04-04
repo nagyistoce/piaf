@@ -45,10 +45,12 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	QWidget(parent),
 	m_ui(new Ui::MainImageWidget)
 {
+	m_inputIplImage = NULL;
+
 	mpFilterSequencer = NULL;
 	m_ui->setupUi(this);
+
 	m_ui->globalImageLabel->switchToSmartZoomMode(true);
-	//m_ui->globalImageLabel->grabKeyboard ();
 	m_ui->globalImageLabel->setEditMode(EDITMODE_ZOOM);
 
 	QMenu * viewMenu = new QMenu(m_ui->viewModeButton);
@@ -157,23 +159,124 @@ void MainImageWidget::slotUpdateImage()
 
 }
 
+int MainImageWidget::setImage(IplImage * imageIn,
+							  t_image_info_struct * pinfo )
+{
+	if(!imageIn) {
+		PIAF_MSG(SWLOG_ERROR, "setImage with IplImage=NULL");
+		return -1;
+	}
+
+	static int s_MainImageWidget_setImage_IplImage_count = 0;
+	const char turning_wheel[5] = "|/-\\";
+
+	fprintf(stderr, "\rMainImageWidget::%s:%d (IplImage=%dx%dx%dx%d, pinfo=%p) %c",
+			__func__, __LINE__,
+			imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels,
+			pinfo,
+			turning_wheel[ (s_MainImageWidget_setImage_IplImage_count++) % 4]
+			);
+
+	if(imageIn->depth != IPL_DEPTH_8U)
+	{
+		// create temp image
+		IplImage * image8bit = swCreateImage(cvGetSize(imageIn), IPL_DEPTH_8U, imageIn->nChannels);
+
+		// convert scale
+		cvConvertScale(imageIn, image8bit, 1., 0.);
+
+		m_fullImage = iplImageToQImage(image8bit);
+		swReleaseImage(&image8bit);
+	}
+	else
+	{
+		// Copy into QImage
+		m_fullImage = iplImageToQImage(imageIn, false);
+	}
+	m_displayImage = m_fullImage.copy();
+
+	// hide movie navigation bar
+
+	if(!m_fullImage.isNull())
+	{
+		QString strInfo;
+		if(!pinfo) {
+			strInfo.sprintf( "%d x %d x %d\n",
+					m_fullImage.width(),
+					m_fullImage.height(),
+					m_fullImage.depth()/8);
+		} else {
+			strInfo.sprintf("%s\n%d x %d x %d\n%d ISO",
+					pinfo->filepath.toUtf8().data(),
+					m_fullImage.width(),
+					m_fullImage.height(),
+					m_fullImage.depth()/8,
+					pinfo->exif.ISO
+					);
+		}
+
+		m_ui->globalImageLabel->setToolTip(strInfo);
+	}
+
+	slotUpdateImage();
+
+	return 0;
+}
+
 int MainImageWidget::setImage(QImage imageIn,
 								   t_image_info_struct * pinfo )
 {
 
-//	fprintf(stderr, "NavImageWidget::%s:%d (%dx%dx%d, pinfo=%p)\n",
-//			__func__, __LINE__,
-//			imageIn.width(), imageIn.height(), imageIn.depth(),
-//			pinfo
-//			);
+	fprintf(stderr, "MainImageWidget::%s:%d (QImage=%dx%dx%d, pinfo=%p)\n",
+			__func__, __LINE__,
+			imageIn.width(), imageIn.height(), imageIn.depth(),
+			pinfo
+			);
+
+	// if size did not change, do not copy the code
+	if(m_inputIplImage)
+	{
+		if(m_inputIplImage->width != imageIn.width()
+				|| m_inputIplImage->height != imageIn.height()
+				|| m_inputIplImage->nChannels != imageIn.depth()/8
+			   )
+		{
+			swReleaseImage(&m_inputIplImage);
+		}
+	}
 
 	m_fullImage = imageIn.copy();
 	m_displayImage = m_fullImage.copy();
 
-	// hide movie navigation bar
-//	m_ui->movieToolbarWidget->hide();
+	if(!m_inputIplImage)
+	{
+		m_inputIplImage = swCreateImage(cvSize(m_fullImage.width(), m_fullImage.height()),
+										IPL_DEPTH_8U,
+										m_fullImage.depth()/8
+										);
+	}
 
-	if(!m_fullImage.isNull()) {
+	// copy buffer
+	if(m_inputIplImage->widthStep == m_fullImage.width()*m_fullImage.depth()/8)
+	{
+		memcpy(m_inputIplImage->imageData,
+			   m_fullImage.bits(),
+			   m_fullImage.width() * m_fullImage.height() * m_fullImage.depth()/8);
+	}
+	else
+	{
+		for(int r = 0; r<m_fullImage.height(); r++)
+		{
+			memcpy(m_inputIplImage->imageData + r*m_inputIplImage->widthStep,
+				   m_fullImage.bits() + r *  m_fullImage.width() *  m_fullImage.depth()/8,
+				   m_fullImage.width() * m_fullImage.depth()/8);
+		}
+	}
+
+
+	// hide movie navigation bar
+	if(!m_fullImage.isNull())
+	{
 		QString strInfo;
 		if(!pinfo) {
 			strInfo.sprintf( "%d x %d x %d\n",

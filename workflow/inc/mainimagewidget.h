@@ -49,6 +49,9 @@ public:
 	/** @brief Set the image */
 	int setImage(QImage imageIn, t_image_info_struct * pinfo = NULL);
 
+	/** @brief Set the image as IplImage. Depth may be >8bit : IPL_DEPTH_16U, IPL_DEPTH_32F...*/
+	int setImage(IplImage * iplImageIn, t_image_info_struct * pinfo = NULL);
+
 
 	/** @brief Zoom on a part of input image at a specified scale */
 	void zoomOn(int unscaled_x, int unscaled_y, float scale);
@@ -63,7 +66,8 @@ protected:
 	virtual void changeEvent(QEvent *e);
 
 	QRect m_displayRect;
-	QImage m_fullImage;
+	IplImage * m_inputIplImage;	///< input as IplImage, may be more than 8bit
+	QImage m_fullImage;	///< QImage for display
 	QImage m_displayImage;
 
 	FilterSequencer * mpFilterSequencer;

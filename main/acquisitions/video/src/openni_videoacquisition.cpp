@@ -300,15 +300,18 @@ int OpenNIVideoAcquisition::grab()
 		OPENNI_PRINTF("Capture is not initialized");
 		return -1;
 	}
+
 	// Wait for acq
 	if(!mGrabWaitCondition.wait(&mGrabMutex, 200))
 	{
 		OPENNI_PRINTF("wait failed");
 		return -1;
 	}
+	OPENNI_PRINTF("grabbed");
 
 	return 0;
 }
+
 /* Set the raw depth buffer (11 bit in 16bit short) */
 int OpenNIVideoAcquisition::setRawDepthBuffer(void * depthbuf, uint32_t timestamp)
 {
@@ -493,7 +496,8 @@ IplImage * OpenNIVideoAcquisition::readImageRGB32()
 	switch(mode)
 	{
 	default:
-		OPENNI_PRINTF("FIXME");
+		OPENNI_PRINTF("FIXME: Only 2cm mode is supported");
+
 //		if(m_requested_format == FREENECT_VIDEO_RGB && m_cameraRGBImage8U) {
 //			cvCvtColor(m_cameraRGBImage8U, m_bgr32Image, CV_RGB2BGRA);
 //		} else if(m_cameraRGBImage8U) {
@@ -524,7 +528,7 @@ IplImage * OpenNIVideoAcquisition::readImageRGB32()
 				}
 			}
 
-			//OPENNI_PRINTF("mode = %d => 2Cm => gray => BGR32\n", mode);
+			OPENNI_PRINTF("mode = %d => 2Cm => gray => BGR32\n", mode);
 
 			cvCvtColor(m_grayImage, m_bgr32Image, CV_GRAY2BGRA);
 		}
@@ -537,13 +541,20 @@ IplImage * OpenNIVideoAcquisition::readImageRGB32()
 
 IplImage * OpenNIVideoAcquisition::getDepthImage32F()
 {
-	if(!m_depthRawImage16U) return NULL;
+	if(!m_depthRawImage16U)
+	{
+		return NULL;
+	}
+
 	if(!m_depthImage32F)
 	{
 		CvSize imgSize = cvGetSize(m_depthRawImage16U);
-		OPENNI_PRINTF("Create 32f image : %dx%d", imgSize.width, imgSize.height);
+
+		OPENNI_PRINTF("Create 32F image : %dx%d", imgSize.width, imgSize.height);
+
 		m_depthImage32F = swCreateImage(cvGetSize(m_depthRawImage16U), IPL_DEPTH_32F, 1);
 	}
+
 
 	for(int r=0; r<m_depthImage32F->height; r++)
 	{
