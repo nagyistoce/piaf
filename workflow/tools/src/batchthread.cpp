@@ -25,6 +25,8 @@
 #include "piaf-common.h"
 #include "OpenCVEncoder.h"
 
+#include "swimage_utils.h"
+
 #include <QFileInfo>
 
 /*******************************************************************************
@@ -333,17 +335,8 @@ void BatchFiltersThread::run()
 															mpBatchTask->options.use_grey ? 1:4);
 								// Loop on images
 								swImageStruct image;
-								memset(&image, 0, sizeof(swImageStruct));
+								mapIplImageToSwImage(loadedImage, &image);
 
-								image.width = loadedImage->widthStep / loadedImage->nChannels;// beware of pitch
-								image.height = loadedImage->height;
-								image.depth = loadedImage->nChannels;
-								image.bytedepth = loadedImage->depth / 8;
-								image.buffer_size =
-										image.width * image.height
-										* image.depth * image.bytedepth;
-
-								image.buffer = loadedImage->imageData; // Buffer
 								bool resume = true;
 								while(resume && mRun)
 								{
@@ -382,7 +375,7 @@ void BatchFiltersThread::run()
 											if(grayImage)
 											{
 												ret = 0;
-												image.buffer = grayImage->imageData; // Buffer
+												mapIplImageToSwImage(grayImage, &image);
 											}
 
 										}
@@ -393,7 +386,7 @@ void BatchFiltersThread::run()
 											if(bgr32Image)
 											{
 												ret = 0;
-												image.buffer = bgr32Image->imageData; // Buffer
+												mapIplImageToSwImage(bgr32Image, &image);
 											}
 
 										}

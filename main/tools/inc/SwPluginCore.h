@@ -28,6 +28,8 @@
 #include <SwImage.h>
 
 
+
+
 /**
     \brief Component for dialoging with plugins.
 

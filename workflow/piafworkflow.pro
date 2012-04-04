@@ -176,7 +176,8 @@ SOURCES += \
 	$$LEGACYPATH/acquisitions/video/src/opencvvideoacquisition.cpp \
 	$$LEGACYPATH/src/plugineditdialog.cpp \
 	$$LEGACYPATH/tools/src/vidacqsettingswindow.cpp \
-	$$LEGACYPATH/src/imagewidget.cpp
+	$$LEGACYPATH/src/imagewidget.cpp \
+	$$LEGACYPATH/tools/src/swimage_utils.cpp
 
 HEADERS += \
 	$$LEGACYPATH/inc/sw_types.h \
@@ -199,7 +200,9 @@ HEADERS += \
 	$$LEGACYPATH/tools/inc/vidacqsettingswindow.h \
 	$$LEGACYPATH/inc/piaf-settings.h \
 	$$LEGACYPATH/inc/nolinux_videodev.h \
-	$$LEGACYPATH/inc/imagewidget.h
+	$$LEGACYPATH/inc/imagewidget.h \
+	$$LEGACYPATH/tools/inc/swimage_utils.h \
+	$$LEGACYPATH/inc/swopencv.h
 
 
 linux-g++: {
@@ -487,6 +490,9 @@ message( "FINAL CONFIGURATION ==================================================
 message( "")
 message( "")
 OTHER_FILES += doc/OpenCVToolsForPhoto.txt
+
+
+
 
 
 

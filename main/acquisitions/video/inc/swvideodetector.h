@@ -24,21 +24,8 @@
 
 #include "video_asm.h"
 
-#ifndef __WITHOUT_OPENCV__
-
-#ifndef OPENCV_22
-#include <cv.h>
-#include <cvaux.h>
-#include <highgui.h>
-#else
-#include <opencv.hpp>
-#include <legacy/compat.hpp>
-#endif
-
-#else
-#include "cversatz.h"
-#endif
 #include "sw_types.h"
+#include "swopencv.h"
 
 /// For image storage
 typedef struct _Img {

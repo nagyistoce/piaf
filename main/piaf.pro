@@ -90,6 +90,7 @@ SOURCES += src/main.cpp \
 	tools/src/timehistogramwidget.cpp \
     tools/src/batchfiltersmainwindow.cpp \
 	tools/src/vidacqsettingswindow.cpp \
+	tools/src/swimage_utils.cpp \
 	src/imagewidget.cpp \
 	tools/src/time_histogram.cpp
 
@@ -153,6 +154,7 @@ HEADERS += inc/workshop.h \
     tools/inc/videoplayertool.h \
 	tools/inc/OpenCVEncoder.h \
 	tools/inc/moviebookmarkform.h \
+	tools/inc/swimage_utils.h \
 	acquisitions/video/inc/v4lutils.h \
     acquisitions/video/inc/ccvt.h \
     acquisitions/video/inc/SwVideoAcquisition.h \

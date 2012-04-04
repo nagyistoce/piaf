@@ -23,6 +23,7 @@
 #include <SwTypes.h>
 #include <sys/time.h>
 
+#include "swimage_utils.h"
 
 //// Qt includes
 //#include <qlabel.h>
@@ -964,8 +965,7 @@ int FilterSequencer::processImage(swImageStruct * image)
 	// send image to process
 	if(imageTmp && image->buffer_size != imageTmp->buffer_size)
 	{
-		delete imageTmp;
-		imageTmp = NULL;
+		freeImage(&imageTmp);
 	}
 
 	if(!imageTmp)
@@ -989,8 +989,8 @@ int FilterSequencer::processImage(swImageStruct * image)
 				);
 
 		// allocate buffer
-		imageTmp->buffer = new unsigned char * [ imageTmp->buffer_size];
-		memset(imageTmp->buffer, 0, sizeof(unsigned char)*imageTmp->buffer_size);
+		imageTmp->buffer = new u8 [ imageTmp->buffer_size];
+		memset(imageTmp->buffer, 0, sizeof(u8)*imageTmp->buffer_size);
 	}
 
 	if(mLoadedFiltersList.isEmpty()) {
