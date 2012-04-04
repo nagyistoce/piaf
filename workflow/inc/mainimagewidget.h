@@ -67,6 +67,7 @@ protected:
 
 	QRect m_displayRect;
 	IplImage * m_inputIplImage;	///< input as IplImage, may be more than 8bit
+	IplImage * m_outputIplImage;///< output of filters as IplImage, may be more than 8bit
 	QImage m_fullImage;	///< QImage for display
 	QImage m_displayImage;
 

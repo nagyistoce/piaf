@@ -42,4 +42,8 @@ swImageStruct * createSwImageHeaderFromIplImage(IplImage * image);
 /** @brief Free swImageStruct allocated */
 void freeSwImage(swImageStruct ** swim);
 
+/** @brief Convert an image struct to IplIMage, resize/alloc iplImage if needed */
+IplImage * convertSwImageToIplImage(swImageStruct *, IplImage **);
+
+
 #endif // SWIMAGE_UTILS_H

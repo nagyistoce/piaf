@@ -25,6 +25,7 @@
 #include "ui_mainimagewidget.h"
 #include "piaf-common.h"
 
+#include "swimage_utils.h"
 #include "PiafFilter.h"
 
 #include <QMouseEvent>
@@ -33,7 +34,7 @@
 int g_EMAMainImgW_debug_mode = EMALOG_DEBUG;
 
 #define EMAMIW_printf(a,...)  { \
-		if(g_EMAMainImgW_debug_mode>=(a)) { \
+		if(1 || g_EMAMainImgW_debug_mode<=(a)) { \
 			fprintf(stderr,"EmaMainImageW::%s:%d : ",__func__,__LINE__); \
 			fprintf(stderr,__VA_ARGS__); \
 			fprintf(stderr,"\n"); \
@@ -45,7 +46,7 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	QWidget(parent),
 	m_ui(new Ui::MainImageWidget)
 {
-	m_inputIplImage = NULL;
+	m_inputIplImage = m_outputIplImage = NULL;
 
 	mpFilterSequencer = NULL;
 	m_ui->setupUi(this);
@@ -97,6 +98,9 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 
 MainImageWidget::~MainImageWidget()
 {
+	swReleaseImage(&m_inputIplImage);
+	swReleaseImage(&m_outputIplImage);
+
 	delete m_ui;
 }
 
@@ -127,36 +131,41 @@ void MainImageWidget::setFilterSequencer(FilterSequencer * pFS)
 
 void MainImageWidget::slotUpdateImage()
 {
-	PIAF_MSG(SWLOG_TRACE, "update filterseq=%p !!",
+	PIAF_MSG(SWLOG_INFO, "update filterseq=%p !!",
 			 mpFilterSequencer);
 
 	if(mpFilterSequencer)
 	{
-
 		swImageStruct image;
 		memset(&image, 0, sizeof(swImageStruct));
 
-		image.width = (int)m_fullImage.width();
-		image.height = (int)m_fullImage.height();
-		image.depth = m_fullImage.depth() / 8;
-		image.bytedepth = 1;
+		mapIplImageToSwImage(m_inputIplImage, &image );
 
-		image.pixelType = swU8;
-
-		image.buffer_size = image.width * image.height
-				* image.depth * image.bytedepth;
-
-		m_displayImage = m_fullImage.copy();
-
-		image.buffer = m_displayImage.bits(); // use diplay image as processing uffer
+		fprintf(stderr, "[MainImageWidget]::%s:%d: process image !\n",
+				__func__, __LINE__);
 
 		int ret = mpFilterSequencer->processImage(&image);
-		PIAF_MSG(SWLOG_TRACE, "sequence returned %d", ret);
+		fprintf(stderr, "[MainImageWidget]::%s:%d: sequence returned %d ! => copy in out=%p\n",
+				__func__, __LINE__, ret, m_outputIplImage);
+		if(ret>=0)
+		{
+			convertSwImageToIplImage(&image, &m_outputIplImage);
+
+			// convert back to display image
+			m_displayImage = iplImageToQImage(m_outputIplImage);
+		}
+		else
+		{
+			m_displayImage = m_fullImage.copy();
+		}
+	}
+	else
+	{
+		m_displayImage = m_fullImage.copy();
 	}
 
 	// refresh display
 	m_ui->globalImageLabel->setRefImage(&m_displayImage);
-
 }
 
 int MainImageWidget::setImage(IplImage * imageIn,
@@ -177,26 +186,28 @@ int MainImageWidget::setImage(IplImage * imageIn,
 			turning_wheel[ (s_MainImageWidget_setImage_IplImage_count++) % 4]
 			);
 
-	if(imageIn->depth != IPL_DEPTH_8U)
+	// Copy into QImage
+	if(m_inputIplImage && (
+				m_inputIplImage->width != imageIn->width
+				|| m_inputIplImage->height != imageIn->height
+				|| m_inputIplImage->depth != imageIn->depth
+				|| m_inputIplImage->nChannels != imageIn->nChannels
+				))
 	{
-		// create temp image
-		IplImage * image8bit = swCreateImage(cvGetSize(imageIn), IPL_DEPTH_8U, imageIn->nChannels);
-
-		// convert scale
-		cvConvertScale(imageIn, image8bit, 1., 0.);
-
-		m_fullImage = iplImageToQImage(image8bit);
-		swReleaseImage(&image8bit);
+		swReleaseImage(&m_inputIplImage);
+		swReleaseImage(&m_outputIplImage);
 	}
-	else
+	if(!m_inputIplImage)
 	{
-		// Copy into QImage
-		m_fullImage = iplImageToQImage(imageIn, false);
+		m_inputIplImage = cvCloneImage(imageIn);
+	} else {
+		cvCopy(imageIn, m_inputIplImage);
 	}
+
+	m_fullImage = iplImageToQImage(imageIn);
 	m_displayImage = m_fullImage.copy();
 
 	// hide movie navigation bar
-
 	if(!m_fullImage.isNull())
 	{
 		QString strInfo;
@@ -239,9 +250,13 @@ int MainImageWidget::setImage(QImage imageIn,
 		if(m_inputIplImage->width != imageIn.width()
 				|| m_inputIplImage->height != imageIn.height()
 				|| m_inputIplImage->nChannels != imageIn.depth()/8
+				|| m_inputIplImage->depth != IPL_DEPTH_8U
 			   )
 		{
+			EMAMIW_printf(SWLOG_INFO, "=> release input image %dx%d x %d x %d\n",
+						  m_inputIplImage->width, m_inputIplImage->height, m_inputIplImage->depth, m_inputIplImage->nChannels);
 			swReleaseImage(&m_inputIplImage);
+			swReleaseImage(&m_outputIplImage);
 		}
 	}
 
@@ -250,11 +265,21 @@ int MainImageWidget::setImage(QImage imageIn,
 
 	if(!m_inputIplImage)
 	{
+		EMAMIW_printf(SWLOG_INFO, "Realloc image %dx%d x %d x %d\n",
+					  m_fullImage.width(), m_fullImage.height(),
+					  IPL_DEPTH_8U,
+					  m_fullImage.depth()/8);
+
 		m_inputIplImage = swCreateImage(cvSize(m_fullImage.width(), m_fullImage.height()),
 										IPL_DEPTH_8U,
 										m_fullImage.depth()/8
 										);
+		EMAMIW_printf(SWLOG_INFO, "=> IplImage image %dx%d x %d x %d\n",
+					  m_inputIplImage->width, m_inputIplImage->height, m_inputIplImage->depth, m_inputIplImage->nChannels);
 	}
+	EMAMIW_printf(SWLOG_INFO, "=> IplImage image %dx%d x %d x %d\n",
+				  m_inputIplImage->width, m_inputIplImage->height, m_inputIplImage->depth, m_inputIplImage->nChannels);
+
 
 	// copy buffer
 	if(m_inputIplImage->widthStep == m_fullImage.width()*m_fullImage.depth()/8)
@@ -268,7 +293,7 @@ int MainImageWidget::setImage(QImage imageIn,
 		for(int r = 0; r<m_fullImage.height(); r++)
 		{
 			memcpy(m_inputIplImage->imageData + r*m_inputIplImage->widthStep,
-				   m_fullImage.bits() + r *  m_fullImage.width() *  m_fullImage.depth()/8,
+				   m_fullImage.scanLine(r),
 				   m_fullImage.width() * m_fullImage.depth()/8);
 		}
 	}

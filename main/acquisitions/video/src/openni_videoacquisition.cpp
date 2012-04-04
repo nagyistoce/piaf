@@ -307,7 +307,7 @@ int OpenNIVideoAcquisition::grab()
 		OPENNI_PRINTF("wait failed");
 		return -1;
 	}
-	OPENNI_PRINTF("grabbed");
+//	OPENNI_PRINTF("unlocked by notify");
 
 	return 0;
 }
@@ -340,8 +340,9 @@ int OpenNIVideoAcquisition::setRawDepthBuffer(void * depthbuf, uint32_t timestam
 	m_got_depth ++;
 	m_depth_timestamp = timestamp;
 
-//	OPENNI_PRINTF("got depth %dx%d x 1",
-//				  m_imageSize.width, m_imageSize.height);
+//	OPENNI_PRINTF("got depth %d x %d x %d x %d",
+//				  m_depthRawImage16U->width, m_depthRawImage16U->height,
+//				  m_depthRawImage16U->depth, m_depthRawImage16U->nChannels);
 
 	mGrabWaitCondition.wakeAll();
 
@@ -572,8 +573,8 @@ IplImage * OpenNIVideoAcquisition::getDepthImage32F()
 
 IplImage * OpenNIVideoAcquisition::readImageRaw()
 {
-	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
-	return NULL; /// \todo FIXME : return raw value
+	return m_depthRawImage16U;
+//	return NULL; /// \todo FIXME : return raw value
 }
 
 /** \brief Grabs one image and convert to grayscale coding format

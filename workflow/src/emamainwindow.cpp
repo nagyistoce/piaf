@@ -2363,16 +2363,48 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 }
 
+
+void EmaMainWindow::on_deviceStopButton_clicked()
+{
+	if(ui->deviceTreeWidget->selectedItems().isEmpty()) { return; }
+	CaptureTreeWidgetItem * captItem = (CaptureTreeWidgetItem *)ui->deviceTreeWidget->selectedItems().at(0);
+	if(!captItem->isCategory())
+	{
+		if(captItem->getVideoCaptureDoc())
+		{
+			captItem->getVideoCaptureDoc()->stop();
+
+			statusBar()->showMessage(tr("Stopped device ") + captItem->text(0));
+			ui->mainDisplayWidget->setVideoCaptureDoc(NULL);
+
+			// display main widget
+			ui->stackedWidget->setCurrentIndex(0);
+		}
+		else
+		{
+			statusBar()->showMessage(tr("No video capture doc"));
+		}
+	}
+	else
+	{
+		statusBar()->showMessage(tr("Select device instead of category"));
+	}
+}
+
+
 void EmaMainWindow::on_deviceTreeWidget_itemDoubleClicked(QTreeWidgetItem *item, int column)
 {
 	CaptureTreeWidgetItem * captItem = (CaptureTreeWidgetItem *)item;
 	if(!captItem->isCategory())
 	{
-		CaptureTreeWidgetItem * captItem = (CaptureTreeWidgetItem *)item;
 		if(captItem->getVideoCaptureDoc())
 		{
 			statusBar()->showMessage(tr("Opening device ") + captItem->text(0));
 			ui->mainDisplayWidget->setVideoCaptureDoc(captItem->getVideoCaptureDoc());
+
+			// display main widget
+			ui->stackedWidget->setCurrentIndex(0);
+
 		}
 		else
 		{
