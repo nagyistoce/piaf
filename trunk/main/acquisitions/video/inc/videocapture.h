@@ -74,6 +74,10 @@ public:
     /** @brief Threaded acquisition loop */
     virtual void run();
 
+	/** @brief Stop acquisition loop */
+	void stop();
+
+
     //bool canCloseFrame(WorkshopVideoCaptureView* pFrame);
 	/** @brief sets the modified flag for the document after a modifying action on the view connected to the document.*/
     void setModified(bool _m=true){ modified=_m; };
@@ -176,7 +180,7 @@ public:
 
 private:
 	/// Generic acquisition module
-	VirtualDeviceAcquisition *myVAcq;
+	VirtualDeviceAcquisition *mpVAcq;
     /// Run command (control flag)
     bool m_run;
     /// Run status

@@ -123,7 +123,7 @@ private slots:
 	void on_goPrevButton_clicked();
 	void on_goFirstButton_clicked();
 	void updateDisplay();
-	void on_mPlayTimer_timeout();
+	void slot_mPlayTimer_timeout();
 
 	void on_timeLineWidget_signalCursorBookmarkChanged(t_movie_pos);
 	void on_timeLineWidget_signalCursorPositionChanged(unsigned long long);

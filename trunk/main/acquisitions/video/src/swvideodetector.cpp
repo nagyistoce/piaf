@@ -266,6 +266,12 @@ IplImage * swCreateImage(CvSize size, int depth, int channels) {
 			img->width, img->height, img->depth, img->nChannels);
 	}
 
+	// For 32bit, fill the alpha channel
+	if(img->depth == IPL_DEPTH_8U && img->nChannels == 4)
+	{
+		cvFillImage(img, (255));
+	}
+
 	return img;
 }
 

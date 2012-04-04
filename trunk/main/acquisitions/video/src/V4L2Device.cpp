@@ -220,10 +220,10 @@ int V4L2Device::grab()
 	// Returns frame buffer adress
 	rawframebuffer = getFrameBuffer();
 
-	static int s_grab_err = 0;
+	static int s_grab_err = 0; // error counter in ms
 	if(!rawframebuffer)
 	{
-		s_grab_err+=100;
+		s_grab_err += 100;
 		fprintf(stderr, "\r[V4L2]::%s:%d : acq returned null buffer for %3d ms!", __func__, __LINE__,
 				s_grab_err);
 		fflush(stderr);
@@ -610,6 +610,8 @@ IplImage * V4L2Device::readImageRGB32()
 	}
 	if(!m_iplImageRGB32) {
 		m_iplImageRGB32 = swCreateImage(m_imageSize, IPL_DEPTH_8U, 4);
+		// fill alpha channel
+		memset(m_iplImageRGB32->imageData, 0xff, m_iplImageRGB32->widthStep*m_iplImageRGB32->height);
 	}
 
 	// Convert into BGR32
@@ -786,7 +788,8 @@ int V4L2Device::convert2RGB32(unsigned char * src, unsigned char * dest)
 					swReleaseImage(& mUncompImage); // size changed
 					swReleaseImage(&m_iplImageRGB32);
 				}
-				else if(retjpeg > 0) {
+				else if(retjpeg > 0)
+				{
 	//				V4L2_printf("retjpeg=%d", retjpeg);
 	//				cvSaveImage("/dev/shm/piaf-uncompjpeg.ppm", mUncompImage);
 					if(m_iplImageRGB32
@@ -814,6 +817,7 @@ int V4L2Device::convert2RGB32(unsigned char * src, unsigned char * dest)
 			dest[0] = src[0];
 			dest[1] = src[1];
 			dest[2] = src[2];
+			dest[3] = 255; /// \todo FIXME??
 			src += 3;
 			dest += 4;
 		}

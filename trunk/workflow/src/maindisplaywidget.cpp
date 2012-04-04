@@ -70,7 +70,7 @@ MainDisplayWidget::MainDisplayWidget(QWidget *parent) :
 	ui->stackedWidget->hide();
 	m_pVideoCaptureDoc = NULL;
 
-	connect(&mPlayTimer, SIGNAL(timeout()), this, SLOT(on_mPlayTimer_timeout()));
+	connect(&mPlayTimer, SIGNAL(timeout()), this, SLOT(slot_mPlayTimer_timeout()));
 }
 
 MainDisplayWidget::~MainDisplayWidget()
@@ -272,13 +272,20 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 void MainDisplayWidget::updateDisplay()
 {
 	IplImage * captureImage = ( mPlayGrayscale ? mpFileVA->readImageY() : mpFileVA->readImageRGB32() );
+	PIAF_MSG(SWLOG_INFO, "setImage with IplImage %dx%dx%dx%d",
+			 captureImage->width, captureImage->height, captureImage->nChannels, captureImage->depth
+			 );
+	ui->mainImageWidget->setImage(captureImage, NULL);
+
+	// Convert to QImage before display
 	m_fullImage = iplImageToQImage( captureImage );
 	if(mpegEncoder && mIsRecording)
 	{
 		mpegEncoder->encodeImage(captureImage);
 	}
 
-	ui->mainImageWidget->setImage(m_fullImage, NULL);
+
+	//ui->mainImageWidget->setImage(m_fullImage, NULL);
 	if(mpFileVA)
 	{
 		ui->timeLineWidget->setFilePosition(mpFileVA->getAbsolutePosition());
@@ -355,32 +362,50 @@ void MainDisplayWidget::on_goNextButton_clicked()
 
 }
 
-void MainDisplayWidget::on_mPlayTimer_timeout()
+void MainDisplayWidget::slot_mPlayTimer_timeout()
 {
 	bool got_picture = false;
 	if(m_pVideoCaptureDoc) // LIVE CAPTURE MODE
 	{
+		PIAF_MSG(SWLOG_DEBUG, "Live mode");
+
 		got_picture = (m_pVideoCaptureDoc->waitForImage() >= 0);
 		if(got_picture)
 		{
 			IplImage * captureImage = m_pVideoCaptureDoc->readImage();
-//			fprintf(stderr, "MainDisplayW::%s:%d: saving /dev/shm/capture.jpg : %dx%dx%d\n",
-//					__func__, __LINE__,
-//					captureImage->width, captureImage->height, captureImage->nChannels
-//					);
+
+			fprintf(stderr, "MainDisplayW::%s:%d: saving /dev/shm/MainDisplayWidget-slot_mPlayTimer_timeout.png : %dx%dx%d\n",
+					__func__, __LINE__,
+					captureImage->width, captureImage->height, captureImage->nChannels
+					);
+
+			cvSaveImage(SHM_DIRECTORY "MainDisplayWidget-slot_mPlayTimer_timeout.png", captureImage);
+			ui->mainImageWidget->setImage( captureImage, NULL);
+
 			if(mpegEncoder && mIsRecording)
 			{
 				mpegEncoder->encodeImage(captureImage);
 			}
+
 			m_fullImage = iplImageToQImage( captureImage );
-			ui->mainImageWidget->setImage( m_fullImage, NULL);
+		}
+		else
+		{
+			PIAF_MSG(SWLOG_ERROR, "Live mode: grab failed failed => start capture loop");
+			m_pVideoCaptureDoc->start();
 		}
 
 	} else { // WE ARE IN MOVIE MODE
+		PIAF_MSG(SWLOG_DEBUG, "Movie mode");
+
 		got_picture = mpFileVA->GetNextFrame();
 		if(got_picture)
 		{
 			updateDisplay();
+		}
+		else
+		{
+			PIAF_MSG(SWLOG_ERROR, "GeTNextFrame failed");
 		}
 	}
 
