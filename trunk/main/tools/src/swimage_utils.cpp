@@ -19,7 +19,6 @@
 #include "swopencv.h"
 #include "swimage_utils.h"
 
-
 /* Create and allocate buffer from SwImageStruct => .buffer must be deleted !*/
 swImageStruct * createSwImageFromImage(swImageStruct * swimIn)
 {

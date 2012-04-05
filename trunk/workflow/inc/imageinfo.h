@@ -50,7 +50,7 @@
 #include "FileVideoAcquisition.h"
 #include "ffmpeg_file_acquisition.h"
 
-
+/** @brief Structure for caching images */
 typedef struct {
 	char * fullpath;				/*!< full path of original image */
 	IplImage * iplImage;			/*!< raw image for faster display */

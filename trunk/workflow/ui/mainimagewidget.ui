@@ -35,7 +35,7 @@
       </sizepolicy>
      </property>
      <property name="styleSheet">
-      <string notr="true">background-color: rgb(85, 85, 255);</string>
+      <string notr="true"/>
      </property>
      <widget class="QLabel" name="OSDLabel">
       <property name="geometry">
@@ -47,7 +47,8 @@
        </rect>
       </property>
       <property name="styleSheet">
-       <string notr="true">color: rgb(255, 255, 255);</string>
+       <string notr="true">color: rgb(255, 255, 255);
+alternate-background-color: rgba(255, 255, 255, 0);</string>
       </property>
       <property name="text">
        <string>OSD</string>

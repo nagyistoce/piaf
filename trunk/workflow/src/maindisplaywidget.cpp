@@ -382,6 +382,7 @@ void MainDisplayWidget::slot_mPlayTimer_timeout()
 //			cvSaveImage(SHM_DIRECTORY "MainDisplayWidget-slot_mPlayTimer_timeout.png", captureImage);
 			ui->mainImageWidget->setImage( captureImage, NULL);
 
+
 			if(mpegEncoder && mIsRecording)
 			{
 				mpegEncoder->encodeImage(captureImage);
