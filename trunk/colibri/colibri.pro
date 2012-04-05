@@ -52,11 +52,13 @@ win32:TARGET = $$join(TARGET,,d)
 SOURCES += src/main.cpp \
     src/colibrimainwindow.cpp \
 	src/imgutils.cpp \
-	../main/src/imagewidget.cpp
+	../main/src/imagewidget.cpp \
+	../main/tools/src/swimage_utils.cpp
 
 HEADERS += inc/colibrimainwindow.h \
 	inc/imgutils.h \
-	../main/inc/imagewidget.h
+	../main/inc/imagewidget.h \
+	../main/tools/inc/swimage_utils.h
 
 linux-g++: {
 	HEADERS += \
