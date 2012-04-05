@@ -821,14 +821,23 @@ void VideoPlayerTool::display_frame()
 		detailsImage->create(theSize.width, theSize.height, (playGrayscale?8:32));
 	}
 
+	IplImage * lastImage = NULL;
 	if(!playGrayscale) {
-		buffersize = theSize.width*theSize.height*4;
-		m_fileVA->readImageRGB32NoAcq(detailsImage->bits(), &buffersize);
+		//buffersize = theSize.width*theSize.height*4;
+
+		//m_fileVA->readImageRGB32NoAcq(detailsImage->bits(), &buffersize);
+		lastImage = m_fileVA->readImageRGB32();
+
 	} else {
-		buffersize = theSize.width*theSize.height;
-		m_fileVA->readImageYNoAcq(detailsImage->bits(), &buffersize);
+//		buffersize = theSize.width*theSize.height;
+//		m_fileVA->readImageYNoAcq(detailsImage->bits(), &buffersize);
+		lastImage = m_fileVA->readImageY();
 	}
 
+	QImage qImage = iplImageToQImage(lastImage);
+
+	memcpy(detailsImage->bits(), qImage.bits(),
+		   qImage.width()*qImage.height()*qImage.depth()/8);
 	detailsView->setWorkshopImage(detailsImage);
 
 

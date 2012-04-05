@@ -19,6 +19,7 @@
 
 #include "batchfiltersmainwindow.h"
 #include "ui_batchfiltersmainwindow.h"
+#include "ffmpeg_file_acquisition.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -27,7 +28,7 @@
 #include "OpenCVEncoder.h"
 
 #include "timehistogramwidget.h"
-
+#include "swimage_utils.h"
 
 BatchFiltersMainWindow::BatchFiltersMainWindow(QWidget *parent) :
 	QMainWindow(parent),
@@ -909,8 +910,10 @@ void BatchFiltersThread::run()
 						}
 						else {
 							// Load ad movie
-							FileVideoAcquisition * fva = new FileVideoAcquisition(
-									item->absoluteFilePath.toUtf8().data());
+							/// \todo : FIXME : use factory
+							FileVideoAcquisition * fva = (FileVideoAcquisition *)//new FileVideoAcquisition(
+									new FFmpegFileVideoAcquisition(
+										item->absoluteFilePath.toUtf8().data());
 							CvSize size = cvSize(fva->getImageSize().width,
 												 fva->getImageSize().height);
 							if(size.width <=0 || size.height <=0)
@@ -933,12 +936,7 @@ void BatchFiltersThread::run()
 								// Loop on images
 								swImageStruct image;
 								memset(&image, 0, sizeof(swImageStruct));
-								image.width = loadedImage->widthStep / loadedImage->nChannels;// beware of pitch
-								image.height = loadedImage->height;
-								image.depth = loadedImage->nChannels;
-								image.buffer_size = image.width * image.height * image.depth;
 
-								image.buffer = loadedImage->imageData; // Buffer
 								bool resume = true;
 								while(resume && mRun)
 								{
@@ -966,14 +964,22 @@ void BatchFiltersThread::run()
 
 
 									bool read_frame = fva->GetNextFrame();
-									long buffersize = image.buffer_size ;
+									//long buffersize = image.buffer_size ;
 									int ret = -1;
 									if(read_frame) {
+										IplImage * readImage = NULL;
 										if(mBatchOptions.use_grey)
 										{
-											ret = fva->readImageYNoAcq((uchar *)image.buffer, &buffersize);
+											//ret = fva->readImageYNoAcq((uchar *)image.buffer, &buffersize);
+											readImage = fva->readImageY();
 										} else {
-											ret = fva->readImageRGB32NoAcq((uchar *)image.buffer, &buffersize);
+											//ret = fva->readImageRGB32NoAcq((uchar *)image.buffer, &buffersize);
+											readImage = fva->readImageRGB32();
+										}
+										if(readImage) {
+											ret = 0;
+											mapIplImageToSwImage(readImage, &image);
+
 										}
 									}
 

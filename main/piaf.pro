@@ -77,9 +77,10 @@ SOURCES += src/main.cpp \
     tools/src/videoplayertool.cpp \
     acquisitions/video/src/v4lutils.c \
 	acquisitions/video/src/jdatasrc.c \
-	acquisitions/video/src/FileVideoAcquisition.cpp \
-    acquisitions/video/src/videocapture.cpp \
-    acquisitions/video/src/swvideodetector.cpp \
+	#acquisitions/video/src/FileVideoAcquisition.cpp \
+	acquisitions/video/src/ffmpeg_file_acquisition.cpp \
+	acquisitions/video/src/videocapture.cpp \
+	acquisitions/video/src/swvideodetector.cpp \
 	acquisitions/video/src/uvccolor.c \
     tools/src/swtoolmainwindow.cpp \
     tools/src/OpenCVEncoder.cpp \
@@ -159,7 +160,8 @@ HEADERS += inc/workshop.h \
     acquisitions/video/inc/ccvt.h \
     acquisitions/video/inc/SwVideoAcquisition.h \
     acquisitions/video/inc/FileVideoAcquisition.h \
-    acquisitions/video/inc/videocapture.h \
+	acquisitions/video/inc/ffmpeg_file_acquisition.h \
+	acquisitions/video/inc/videocapture.h \
     acquisitions/video/inc/swvideodetector.h \
     tools/inc/swtoolmainwindow.h \
 	acquisitions/video/inc/virtualdeviceacquisition.h \

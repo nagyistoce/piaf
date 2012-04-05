@@ -197,6 +197,7 @@ int MainImageWidget::setImage(IplImage * imageIn,
 		swReleaseImage(&m_inputIplImage);
 		swReleaseImage(&m_outputIplImage);
 	}
+
 	if(!m_inputIplImage)
 	{
 		m_inputIplImage = cvCloneImage(imageIn);
