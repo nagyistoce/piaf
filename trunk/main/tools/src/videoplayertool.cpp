@@ -27,6 +27,7 @@
 #include <QPixmap>
 
 #include "moviebookmarkform.h"
+#include "ffmpeg_file_acquisition.h"
 
 #ifndef max
 #define max(a,b) ((a)>(b)?(a):(b))
@@ -128,7 +129,7 @@ int VideoPlayerTool::setFile(char * file, int period = 0)
 
 	detailsView->setTitle(fi.baseName(TRUE));
 
-	m_fileVA = new FileVideoAcquisition(file);
+	m_fileVA = (FileVideoAcquisition *)new FFmpegFileVideoAcquisition(file);
 	if(!m_fileVA)
 	{
 		fprintf(stderr, "[VideoPlayerT] : setFile : cannot open file '%s'\n", file);
@@ -580,7 +581,7 @@ void VideoPlayerTool::slotRewindMovie()
 			VideoFile);
 	// read first frame to see if format is supported
 	if(m_fileVA)
-		m_fileVA->slotRewindMovie();
+		m_fileVA->rewindMovie();
 	else
 		setFile(VideoFile);
 

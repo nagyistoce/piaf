@@ -1937,7 +1937,7 @@ int SwFilterManager::processImage(swImageStruct * image)
 		memcpy(imageTmp, image, sizeof(swImageStruct));
 
 		// allocate buffer
-		imageTmp->buffer = new unsigned char * [ imageTmp->buffer_size];
+		imageTmp->buffer = new u8 [ imageTmp->buffer_size];
 		memset(imageTmp->buffer, 0, sizeof(unsigned char)*imageTmp->buffer_size);
 	}
 
