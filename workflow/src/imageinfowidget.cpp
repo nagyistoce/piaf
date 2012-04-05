@@ -350,15 +350,20 @@ QImage iplImageToQImage(IplImage * iplImage, bool swap_RB) {
 		// create temp image
 		IplImage * image8bit = swCreateImage(cvGetSize(iplImage),
 											 IPL_DEPTH_8U, iplImage->nChannels);
-		double minVal, maxVal;
+		double minVal=0. , maxVal = 255.;
 		CvPoint maxPt;
-		try {
+		#ifdef OPENCV_22
+		try
+		#endif 
+		{
 			cvMinMaxLoc(iplImage, &minVal, &maxVal, &maxPt);
 		}
-		catch(cv::Exception)
+		#ifdef OPENCV_22
+		catch(cv::Exception e)
 		{
 			maxVal = 255.;
 		}
+		#endif
 		// Get dynamic of image
 		int limit = 1;
 		while (limit < maxVal)
