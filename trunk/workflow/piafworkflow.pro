@@ -90,6 +90,7 @@ linux-g++: {
 }
 
 LEGACYPATH=../main
+
 linux-g++: {
 	DEFINES += _V4L2
 

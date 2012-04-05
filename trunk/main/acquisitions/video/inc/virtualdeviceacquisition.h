@@ -28,6 +28,7 @@
 #include "swvideodetector.h"
 
 #include <QThread>
+#include <QImage>
 
 #define VIDEO_PROPS_DEVICE_NAME_LEN		256
 /** @brief Video input properties
@@ -226,5 +227,8 @@ public:
 	virtual int setVideoProperties(t_video_properties props) = 0;
 
 };
+
+/** @brief Conversion tool IplImage -> QImage */
+QImage iplImageToQImage(IplImage * iplImage, bool swap_RB = false);
 
 #endif // VIRTUALDEVICEACQUISITION_H

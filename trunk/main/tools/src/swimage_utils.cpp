@@ -110,7 +110,7 @@ swImageStruct * createSwImageHeaderFromIplImage(IplImage * iplImage)
 }
 
 void mapIplImageToSwImage(IplImage * iplImage, swImageStruct * swim)
-{
+{	
 	swim->width = iplImage->width;
 	swim->height = iplImage->height;
 	swim->depth = iplImage->nChannels;
