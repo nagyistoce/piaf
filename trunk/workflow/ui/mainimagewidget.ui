@@ -124,12 +124,27 @@ alternate-background-color: rgba(255, 255, 255, 0);</string>
        </widget>
       </item>
       <item>
-       <widget class="QLabel" name="depthLabel">
+       <widget class="QPushButton" name="depthButton">
+        <property name="maximumSize">
+         <size>
+          <width>45</width>
+          <height>16777215</height>
+         </size>
+        </property>
         <property name="toolTip">
-         <string>Byte depth of image</string>
+         <string>N channels x bit depth</string>
         </property>
         <property name="text">
-         <string>8b</string>
+         <string>-</string>
+        </property>
+        <property name="shortcut">
+         <string>I</string>
+        </property>
+        <property name="checkable">
+         <bool>true</bool>
+        </property>
+        <property name="flat">
+         <bool>true</bool>
         </property>
        </widget>
       </item>

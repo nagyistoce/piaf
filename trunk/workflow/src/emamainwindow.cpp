@@ -364,7 +364,7 @@ void EmaMainWindow::loadSettings()
 
 				m_workflow_settings.maxV4L2 = e.attribute("maxV4L2", "5").toInt();
 				m_workflow_settings.maxOpenCV = e.attribute("maxOpenCV", "5").toInt();
-				m_workflow_settings.maxOpenNI = e.attribute("maxOpenNI", "5").toInt();
+				m_workflow_settings.maxOpenNI = e.attribute("maxOpenNI", "1").toInt();
 				m_workflow_settings.maxFreenect = e.attribute("maxFreenect", "5").toInt();
 
 			}
@@ -2201,6 +2201,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 							__func__, __LINE__, txt);
 					statusBar()->showMessage(tr("Initialization on ") + QString(txt));
 					myVAcq->stopAcquisition();
+
 					// Check if it's already created
 					if( ui->deviceTreeWidget->findItems(QString(txt), Qt::MatchExactly).isEmpty() )
 					{
@@ -2263,10 +2264,11 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 			}
 			else
 			{
-				freenect_idx++;
 
 				if(freenectDevice->isAcquisitionRunning())
 				{
+					freenectDevice->stopAcquisition();
+
 					statusBar()->showMessage(tr("Initialization OK"));
 					if(ui->deviceTreeWidget->findItems(QString(txt), Qt::MatchExactly).isEmpty())
 					{
@@ -2281,12 +2283,16 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 				}
 				else {
 					statusBar()->showMessage(tr("Initialization FAILURE !"));
+					delete freenectDevice;
 				}
 			}
 
 		} else {
 			delete freenectDevice;
 		}
+
+		freenect_idx++;
+
 	} while(freenect_found && freenect_idx<m_workflow_settings.maxFreenect);
 	mFreenectItem->setExpanded(true);
 

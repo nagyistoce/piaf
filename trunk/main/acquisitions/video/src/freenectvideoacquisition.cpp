@@ -20,13 +20,35 @@
 
 #include "swvideodetector.h"
 
+// As global for one context shared by several objects
+freenect_context * m_freenect_ctx = NULL;
+
+class FreenectEventThread : public QThread {
+public:
+	void run()
+	{
+		fprintf(stderr, "[Freenect]::%s:%d : freenect_process_events loop STARTED !\n", __func__, __LINE__);
+		int processok=-1;
+		while(m_freenect_ctx)// && processok>=0)
+		{
+			//fprintf(stderr, "[Freenect]::%s:%d : freenect_process_events !\n", __func__, __LINE__);
+
+			processok = freenect_process_events(m_freenect_ctx);
+		}
+		fprintf(stderr, "[Freenect]::%s:%d : freenect_process_events loop STOPPED !\n", __func__, __LINE__);
+	}
+
+};
+
+FreenectEventThread freenectEventThread;
+
+bool g_debug_FreenectVideoAcquisition = false;
+
 FreenectVideoAcquisition::FreenectVideoAcquisition(int idx_device)
 {
 	//m_current_format = m_requested_format = FREENECT_VIDEO_RGB;
 
 	m_current_format = m_requested_format = FREENECT_VIDEO_IR_8BIT;
-	m_freenect_ctx = NULL;
-	m_freenect_dev = NULL;
 	m_freenect_angle = 0;
 	m_freenect_led = 0;
 	m_got_rgb = 0;
@@ -36,7 +58,7 @@ FreenectVideoAcquisition::FreenectVideoAcquisition(int idx_device)
 
 	m_run = m_isRunning = false;
 	m_freenect_dev = NULL;
-	m_freenect_ctx = NULL;
+
 	m_image_mode = FREENECT_MODE_DEPTH_2CM;
 	// Freenect native images
 	m_depthRawImage16U = m_cameraIRImage8U = m_cameraRGBImage8U = NULL;
@@ -64,19 +86,28 @@ FreenectVideoAcquisition::FreenectVideoAcquisition(int idx_device)
 	m_imageSize = cvSize(0,0);
 
 	// Initialize device
-	if (freenect_init(&m_freenect_ctx, NULL)) {
-		printf("Error: Cannot get context\n");
-		return ;
+	if(!m_freenect_ctx)
+	{
+		if (freenect_init(&m_freenect_ctx, NULL)) {
+			printf("Error: Cannot get context\n");
+			return ;
+		}
+		// Start libfreenect events processing thread, only once
+		freenectEventThread.start();
 	}
 
 	if (freenect_open_device(m_freenect_ctx,
 							 &m_freenect_dev,
 							 idx_device))
 	{
-		fprintf(stderr, "Freenect::%s:%d : Error: Cannot get device\n", __func__, __LINE__);
+		fprintf(stderr, "[Freenect %p]::%s:%d : Error: cannot open device # %d\n",
+				this, __func__, __LINE__, idx_device);
 		m_freenect_dev = NULL;
 		return ;
 	}
+
+	fprintf(stderr, "[Freenect %p]::%s:%d : opened device # %d : SUCCESS\n",
+			this, __func__, __LINE__, idx_device);
 
 }
 
@@ -106,7 +137,16 @@ void FreenectVideoAcquisition::setSequentialMode(bool on)
 QList<FreenectVideoAcquisition *> g_freenectDevices;
 // CALLBACKS
 
-void depth_cb(freenect_device *dev, void *depth, uint32_t timestamp) {
+void depth_cb(freenect_device *dev, void *depth, uint32_t timestamp)
+{
+	fprintf(stderr, "[Freenect]::%s:%d : got Depth image : %p\n",
+			__func__, __LINE__,
+			depth
+
+
+
+			);
+
 	// Find device
 	QList<FreenectVideoAcquisition *>::iterator it;
 	for(it = g_freenectDevices.begin(); it != g_freenectDevices.end(); ++it)
@@ -119,10 +159,13 @@ void depth_cb(freenect_device *dev, void *depth, uint32_t timestamp) {
 			return;
 		}
 	}
-
+	fprintf(stderr, "[Freenect]::%s:%d: ERROR: device %p not found\n",
+			__func__, __LINE__,
+			dev);
 }
 
-void rgb_cb(freenect_device *dev, void *rgb, uint32_t timestamp) {
+void rgb_cb(freenect_device *dev, void *rgb, uint32_t timestamp)
+{
 	fprintf(stderr, "[Freenect]::%s:%d : got IR/RGB image : %p\n",
 			__func__, __LINE__,
 			rgb);
@@ -139,6 +182,11 @@ void rgb_cb(freenect_device *dev, void *rgb, uint32_t timestamp) {
 			return;
 		}
 	}
+
+	fprintf(stderr, "[Freenect]::%s:%d: ERROR: device %p not found\n",
+			__func__, __LINE__,
+			dev);
+
 }
 
 /* Set the raw depth buffer (11 bit in 16bit short) */
@@ -169,10 +217,12 @@ int FreenectVideoAcquisition::setRawDepthBuffer(void * depthbuf, uint32_t timest
 	m_got_depth ++;
 	m_depth_timestamp = timestamp;
 
-//	fprintf(stderr, "[Freenect]::%s:%d : got depth %dx%d x 1\n",
-//			__func__, __LINE__,
-//			m_imageSize.width, m_imageSize.height);
-
+	if(g_debug_FreenectVideoAcquisition)
+	{
+		fprintf(stderr, "[Freenect]::%s:%d : got depth %dx%d x 1\n",
+			__func__, __LINE__,
+			m_imageSize.width, m_imageSize.height);
+	}
 	mGrabWaitCondition.wakeAll();
 
 	return 0;
@@ -231,10 +281,13 @@ int FreenectVideoAcquisition::setRawImageBuffer(void * imgbuf, uint32_t timestam
 
 	m_got_rgb++;
 	m_rgb_timestamp = timestamp;
-	fprintf(stderr, "[Freenect]::%s:%d : got image %dx%d x 1\n",
-			__func__, __LINE__,
-			m_imageSize.width, m_imageSize.height);
-
+	if(g_debug_FreenectVideoAcquisition)
+	{
+		fprintf(stderr, "[Freenect]::%s:%d : got image %dx%d x %dx%d\n",
+				__func__, __LINE__,
+				m_cameraIRImage8U->width, m_cameraIRImage8U->height,
+				m_cameraIRImage8U->depth, m_cameraIRImage8U->nChannels);
+	}
 	mGrabWaitCondition.wakeAll();
 	return 0;
 }
@@ -258,10 +311,35 @@ void * freenect_threadfunc(void *arg)
 /** \brief Start acquisition */
 int FreenectVideoAcquisition::startAcquisition()
 {
+	// Initialize device
+	if(!m_freenect_ctx) {
+		if (freenect_init(&m_freenect_ctx, NULL)) {
+			fprintf(stderr, "Freenect::%s:%d : Cannot get context\n", __func__, __LINE__);
+			return -1;
+		}
+	}
+
+
+	if(!m_freenect_dev)
+	{
+		fprintf(stderr, "[Freenect %p]::%s:%d : opening device # %d ...\n",
+				this, __func__, __LINE__, m_idx_device);
+		if (freenect_open_device(m_freenect_ctx,
+								 &m_freenect_dev,
+								 m_idx_device))
+		{
+			fprintf(stderr, "Freenect::%s:%d : Error: Cannot get device\n", __func__, __LINE__);
+			m_freenect_dev = NULL;
+			return -1;
+		}
+	}
+
 	if(!m_freenect_dev) {
-		fprintf(stderr, "Freenect::%s:%d : no device : return -1\n", __func__, __LINE__);
+		fprintf(stderr, "[Freenect %p]::%s:%d : could not open device # %d ...\n",
+				this, __func__, __LINE__, m_idx_device);
 		return -1;
 	}
+
 #ifndef NEWER_FREENECT_API
 	freenect_set_depth_format(m_freenect_dev, FREENECT_DEPTH_11BIT);
 	freenect_set_video_format(m_freenect_dev, m_requested_format);
@@ -270,8 +348,10 @@ int FreenectVideoAcquisition::startAcquisition()
 	freenect_frame_mode new_mode = freenect_find_depth_mode(current_mode.resolution, FREENECT_DEPTH_11BIT);
 	freenect_set_video_mode(m_freenect_dev,  new_mode);
 #endif
+
 	freenect_start_depth(m_freenect_dev);
 
+	/// \todo FIXME : how to read the source depth/RGB channel ??
 	freenect_start_video(m_freenect_dev);
 
 	m_imageSize.width = FREENECT_FRAME_W;
@@ -290,16 +370,13 @@ int FreenectVideoAcquisition::startAcquisition()
 	// append to managed list
 	g_freenectDevices.append(this);
 
-
 	m_rgb_timestamp = m_depth_timestamp = 0;
 
 	fprintf(stderr, "[Freenect]::%s:%d : capture=%p\n", __func__, __LINE__,
 			m_freenect_dev);
 
-
-	m_run = true;
 	// start event thread
-	start();
+	//start();
 
 	// update video properties
 	updateVideoProperties();
@@ -313,6 +390,10 @@ int FreenectVideoAcquisition::startAcquisition()
 int FreenectVideoAcquisition::processEvents()
 {
 	if(!m_freenect_ctx) {
+		return -1;
+	}
+
+	if(!m_run) {
 		return -1;
 	}
 
@@ -334,16 +415,21 @@ int FreenectVideoAcquisition::processEvents()
 		}
 
 	}
+	else
+	{
+		usleep(10000);
+		fprintf(stderr, "[Freenect]::%s:%d : loop !\n", __func__, __LINE__);
+	}
 
 	// process freenect events
-	return freenect_process_events(m_freenect_ctx);
+	return 1; //freenect_process_events(m_freenect_ctx);
 }
 
 /* Function called by the doc (parent) thread */
 int FreenectVideoAcquisition::grab()
 {
-	if(!m_freenect_ctx) {
-		fprintf(stderr, "Freenect::%s:%d : no context -> return -1\n", __func__, __LINE__);
+	if(!m_freenect_dev) {
+		fprintf(stderr, "Freenect::%s:%d : no dev -> return -1\n", __func__, __LINE__);
 		return -1;
 	}
 
@@ -362,13 +448,14 @@ void FreenectVideoAcquisition::run()
 {
 	m_isRunning = true;
 	m_run = true;
+
 	//
 	while(m_run && processEvents() >= 0)
 	{
 		//fprintf(stderr, "Freenect::%s:%d : process loop\n", __func__, __LINE__);
-		;
 	}
 
+	fprintf(stderr, "Freenect::%s:%d : process loop STOPPED\n", __func__, __LINE__);
 	m_isRunning = false;
 }
 
@@ -384,10 +471,14 @@ int FreenectVideoAcquisition::stopAcquisition()
 	g_freenectDevices.removeOne(this);
 
 	m_run = false;
-	while(m_isRunning)
+	int retry_ms = 0;
+	while(m_isRunning&&retry_ms<30000)
 	{
-		usleep(1000);
+		fprintf(stderr, "Freenect::%s:%d : wait for process loop to end (since %dms)\n", __func__, __LINE__, retry_ms);
+		usleep(100000);
+		retry_ms += 100;
 	}
+	m_isRunning = false;
 
 	if(m_freenect_dev) {
 		freenect_stop_depth(m_freenect_dev);
@@ -398,10 +489,10 @@ int FreenectVideoAcquisition::stopAcquisition()
 		m_freenect_dev = NULL;
 	}
 
-	if(m_freenect_dev) {
-		freenect_shutdown(m_freenect_ctx);
-		m_freenect_ctx = NULL;
-	}
+//	if(m_freenect_ctx) {
+//		freenect_shutdown(m_freenect_ctx);
+//		m_freenect_ctx = NULL;
+//	}
 
 	m_captureIsInitialised = 0;
 

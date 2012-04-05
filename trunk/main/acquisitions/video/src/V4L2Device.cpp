@@ -591,8 +591,8 @@ V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 
 IplImage * V4L2Device::readImageRaw()
 {
-	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
-	return NULL; /// \todo FIXME : return raw value
+	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED => return BGR32\n", __FILE__, __func__, __LINE__);
+	return readImageRGB32(); /// \todo FIXME : return raw value
 }
 
 
@@ -1143,7 +1143,7 @@ int V4L2Device::start_capturing() {
 	
 	
 	
-	
+	mGrabEnabled = true;
 	
 	// LAUNCH CAPTURE QUERIES
 	
@@ -1151,7 +1151,6 @@ int V4L2Device::start_capturing() {
 	enum v4l2_buf_type type;
 	for (i = 0; i < n_buffers; ++i) {
 		struct v4l2_buffer buf;
-		
 		CLEAR (buf);
 		
 		buf.type        = V4L2_BUF_TYPE_VIDEO_CAPTURE;
@@ -1173,8 +1172,10 @@ int V4L2Device::start_capturing() {
 	
 	if (-1 == xioctl(vd.fd, VIDIOC_STREAMON, &type)) {
 		int errnum = errno;
+
 		V4L2_printf("error in xioctl(vd.fd, VIDIOC_STREAMON, &buf) err=%d=%s\n",
 					errnum, strerror(errnum));
+
 		return -1;
 	}
 

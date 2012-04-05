@@ -184,7 +184,7 @@ private:
 	freenect_video_format m_current_format;
 	pthread_t m_freenect_thread;
 
-	freenect_context *m_freenect_ctx;
+
 	freenect_device *m_freenect_dev;
 	/// Run command for thread
 	bool m_run;

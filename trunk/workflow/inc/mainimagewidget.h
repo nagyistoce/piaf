@@ -110,6 +110,8 @@ private slots:
 
 	void on_snapButton_clicked();
 
+	void on_depthButton_toggled(bool checked);
+
 private:
 	Ui::MainImageWidget *m_ui;
 
