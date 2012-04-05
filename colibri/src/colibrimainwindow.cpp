@@ -32,6 +32,8 @@
 #include <QDesktopWidget>
 #include <QMessageBox>
 
+#include "swimage_utils.h"
+
 u8 mode_file = 0;
 
 ColibriMainWindow::ColibriMainWindow(QWidget *parent)
@@ -508,12 +510,7 @@ void ColibriMainWindow::computeImage(IplImage * iplImage) {
 	}
 
 	// compute plugin sequence
-	mSwImage.width = iplImage->width;
-	mSwImage.height = iplImage->height;
-	mSwImage.depth = iplImage->nChannels;
-	mSwImage.buffer_size = mSwImage.width * mSwImage.height * mSwImage.depth;
-
-	mSwImage.buffer = iplImage->imageData; // Buffer
+	mapIplImageToSwImage(iplImage, &mSwImage);
 
 //	fprintf(stderr, "[Colibri] %s:%d : process sequence '%s' on image (%dx%dx%d)\n",
 //			__func__, __LINE__,

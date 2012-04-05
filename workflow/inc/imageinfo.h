@@ -50,8 +50,6 @@
 #include "FileVideoAcquisition.h"
 #include "ffmpeg_file_acquisition.h"
 
-/** @breif Convert an OpenCV IplIMage to a QImage */
-QImage iplImageToQImage(IplImage * iplImage, bool swap_RB = true);
 
 typedef struct {
 	char * fullpath;				/*!< full path of original image */

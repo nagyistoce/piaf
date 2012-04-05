@@ -16,9 +16,9 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "swopencv.h"
 #include "swimage_utils.h"
 
-#include "swvideodetector.h"
 
 /* Create and allocate buffer from SwImageStruct => .buffer must be deleted !*/
 swImageStruct * createSwImageFromImage(swImageStruct * swimIn)
@@ -194,8 +194,8 @@ IplImage * convertSwImageToIplImage(swImageStruct * swim, IplImage ** pimg)
 				__FILE__, __func__, __LINE__,
 				img->width, img->height, img->nChannels, img->depth
 				);
-		swReleaseImage(pimg);
-		*pimg = NULL;
+		cvReleaseImage(pimg);
+		*pimg = img = NULL;
 	}
 
 	if(!img)
@@ -205,7 +205,7 @@ IplImage * convertSwImageToIplImage(swImageStruct * swim, IplImage ** pimg)
 				swim->width, swim->height, swim->depth, swim->bytedepth*8
 				); fflush(stderr);
 
-		img = swCreateImage(cvSize(swim->width, swim->height),
+		img = cvCreateImage(cvSize(swim->width, swim->height),
 									swim->bytedepth * 8, swim->depth);
 		*pimg = img;
 	}
