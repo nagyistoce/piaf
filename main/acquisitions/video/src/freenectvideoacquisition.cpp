@@ -169,9 +169,9 @@ int FreenectVideoAcquisition::setRawDepthBuffer(void * depthbuf, uint32_t timest
 	m_got_depth ++;
 	m_depth_timestamp = timestamp;
 
-	fprintf(stderr, "[Freenect]::%s:%d : got depth %dx%d x 1\n",
-			__func__, __LINE__,
-			m_imageSize.width, m_imageSize.height);
+//	fprintf(stderr, "[Freenect]::%s:%d : got depth %dx%d x 1\n",
+//			__func__, __LINE__,
+//			m_imageSize.width, m_imageSize.height);
 
 	mGrabWaitCondition.wakeAll();
 
@@ -343,16 +343,18 @@ int FreenectVideoAcquisition::processEvents()
 int FreenectVideoAcquisition::grab()
 {
 	if(!m_freenect_ctx) {
+		fprintf(stderr, "Freenect::%s:%d : no context -> return -1\n", __func__, __LINE__);
 		return -1;
 	}
 
 	// Wait for acq
 	if(!mGrabWaitCondition.wait(&mGrabMutex, 200))
 	{
+		fprintf(stderr, "Freenect::%s:%d : wait timeout-> return -1\n", __func__, __LINE__);
 		return -1;
 	}
 
-	fprintf(stderr, "Freenect::%s:%d : unlocked condition\n", __func__, __LINE__);
+	//fprintf(stderr, "Freenect::%s:%d : unlocked condition\n", __func__, __LINE__);
 	return 0;
 }
 
@@ -442,6 +444,8 @@ void init_freenect_depth_LUT()
 }
 IplImage * FreenectVideoAcquisition::readImageRaw()
 {
+	return m_depthRawImage16U;
+
 	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
 	return NULL; /// \todo FIXME : return raw value
 }

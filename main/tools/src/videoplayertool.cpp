@@ -834,7 +834,7 @@ void VideoPlayerTool::display_frame()
 		lastImage = m_fileVA->readImageY();
 	}
 
-	QImage qImage = iplImageToQImage(lastImage);
+	QImage qImage = iplImageToQImage(lastImage, true);
 
 	memcpy(detailsImage->bits(), qImage.bits(),
 		   qImage.width()*qImage.height()*qImage.depth()/8);

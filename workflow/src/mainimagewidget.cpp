@@ -145,8 +145,8 @@ void MainImageWidget::slotUpdateImage()
 				__func__, __LINE__);
 
 		int ret = mpFilterSequencer->processImage(&image);
-		fprintf(stderr, "[MainImageWidget]::%s:%d: sequence returned %d ! => copy in out=%p\n",
-				__func__, __LINE__, ret, m_outputIplImage);
+//		fprintf(stderr, "[MainImageWidget]::%s:%d: sequence returned %d ! => copy in out=%p\n",
+//				__func__, __LINE__, ret, m_outputIplImage);
 		if(ret>=0)
 		{
 			convertSwImageToIplImage(&image, &m_outputIplImage);
@@ -176,15 +176,15 @@ int MainImageWidget::setImage(IplImage * imageIn,
 		return -1;
 	}
 
-	static int s_MainImageWidget_setImage_IplImage_count = 0;
-	const char turning_wheel[5] = "|/-\\";
+//	static int s_MainImageWidget_setImage_IplImage_count = 0;
+//	const char turning_wheel[5] = "|/-\\";
 
-	fprintf(stderr, "\rMainImageWidget::%s:%d (IplImage=%dx%dx%dx%d, pinfo=%p) %c",
-			__func__, __LINE__,
-			imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels,
-			pinfo,
-			turning_wheel[ (s_MainImageWidget_setImage_IplImage_count++) % 4]
-			);
+//	fprintf(stderr, "\rMainImageWidget::%s:%d (IplImage=%dx%dx%dx%d, pinfo=%p) %c",
+//			__func__, __LINE__,
+//			imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels,
+//			pinfo,
+//			turning_wheel[ (s_MainImageWidget_setImage_IplImage_count++) % 4]
+//			);
 
 	// Copy into QImage
 	if(m_inputIplImage && (
@@ -194,6 +194,7 @@ int MainImageWidget::setImage(IplImage * imageIn,
 				|| m_inputIplImage->nChannels != imageIn->nChannels
 				))
 	{
+		PIAF_MSG(SWLOG_INFO, "Size changed");
 		swReleaseImage(&m_inputIplImage);
 		swReleaseImage(&m_outputIplImage);
 	}
@@ -228,6 +229,15 @@ int MainImageWidget::setImage(IplImage * imageIn,
 		}
 
 		m_ui->globalImageLabel->setToolTip(strInfo);
+	}
+
+	if(imageIn)
+	{
+		QString OSDStr;
+		OSDStr.sprintf("%dx%db",
+					   imageIn->nChannels, imageIn->depth);
+		m_ui->OSDLabel->setText(OSDStr);
+		m_ui->depthLabel->setText(OSDStr);
 	}
 
 	slotUpdateImage();
@@ -407,7 +417,8 @@ void MainImageWidget::cropAbsolute(int x_crop, int y_crop, int scale)
 //	emit signalCropRect(m_cropRect);
 }
 
-void MainImageWidget::on_globalImageLabel_signalPicker(QRgb colorRGB, int colorGrey, QPoint pt)
+void MainImageWidget::on_globalImageLabel_signalPicker(QRgb colorRGB,
+													   int colorGrey, QPoint pt)
 {
 	QString str;
 	QColor hsvColor(colorRGB);
