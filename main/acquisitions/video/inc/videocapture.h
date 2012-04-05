@@ -71,6 +71,10 @@ public:
     /** Destructor for the fileclass of the application */
     ~VideoCaptureDoc();
 
+
+	/** @brief Start acquisition loop */
+	void start(Priority = InheritPriority);
+
     /** @brief Threaded acquisition loop */
     virtual void run();
 

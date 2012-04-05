@@ -202,12 +202,36 @@ bool VideoCaptureDoc::newDocument(int dev)
 
 	return true;
 }
+/** @brief Start acquisition loop */
+void VideoCaptureDoc::start(Priority)
+{
+
+	if(mpVAcq)
+	{
+		fprintf(stderr, "VideoCaptureDoc::%s:%d : start video acquisition device",
+						__func__, __LINE__);
+		mpVAcq->startAcquisition();
+	}
+
+	if(isRunning())
+	{
+		fprintf(stderr, "VideoCaptureDoc::%s:%d: loop already running\n",
+			 __func__, __LINE__);
+		return;
+	}
+	fprintf(stderr, "VideoCaptureDoc::%s:%d : start video acquisition loop\n",
+					__func__, __LINE__);
+	QThread::start();
+}
+
 void VideoCaptureDoc::stop()
 {
-	fprintf(stderr, "VideoCaptureDoc::%s:%d : stop video acquisition loop\n",
-					__func__, __LINE__);
+	fprintf(stderr, "VideoCaptureDoc::%s:%d : stop video acquisition loop (running=%c / finished = %c)\n",
+					__func__, __LINE__,
+			QThread::isRunning() ? 'T':'F',
+			QThread::isFinished() ? 'T':'F'
+			);
 	m_run = false;
-
 }
 
 void VideoCaptureDoc::run()
@@ -216,6 +240,7 @@ void VideoCaptureDoc::run()
 	{
 		fprintf(stderr, "VideoCaptureDoc::%s:%d : no video acquisition\n",
 						__func__, __LINE__);
+		m_running = false;
 		return;
 	}
 
@@ -455,6 +480,7 @@ int VideoCaptureDoc::waitForImage()
 				   || imageIn->height != imageRGBA->height)
 				{
 					swReleaseImage(&imageRGBA);
+
 					imageRGBA = swCreateImage(cvGetSize(imageIn), imageIn->depth,
 											  imageIn->nChannels );
 					// update input size to force display change
@@ -466,8 +492,10 @@ int VideoCaptureDoc::waitForImage()
 			}
 			else
 			{
-				fprintf(stderr, "VideoCapture::%s:%d : Acquisition problem : readImageRGB32() failed (SIZE PB)\n",
-						__func__, __LINE__);
+				fprintf(stderr, "VideoCapture::%s:%d : Acquisition problem : "
+						"readImageRGB32() failed (SIZE PB: %dx%d)\n",
+						__func__, __LINE__,
+						imageIn->width, imageIn->height);
 				usleep(500000);
 				return -1;
 			}

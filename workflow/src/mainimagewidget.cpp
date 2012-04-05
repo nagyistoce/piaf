@@ -51,6 +51,8 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	mpFilterSequencer = NULL;
 	m_ui->setupUi(this);
 
+	m_ui->OSDLabel->setVisible(false);
+
 	m_ui->globalImageLabel->switchToSmartZoomMode(true);
 	m_ui->globalImageLabel->setEditMode(EDITMODE_ZOOM);
 
@@ -236,13 +238,26 @@ int MainImageWidget::setImage(IplImage * imageIn,
 		QString OSDStr;
 		OSDStr.sprintf("%dx%db",
 					   imageIn->nChannels, imageIn->depth);
+		m_ui->depthButton->setText(OSDStr);
+
+		OSDStr.sprintf("%dx%d\n"
+					   "%dx%db",
+					   imageIn->width, imageIn->height,
+					   imageIn->nChannels, imageIn->depth);
 		m_ui->OSDLabel->setText(OSDStr);
-		m_ui->depthLabel->setText(OSDStr);
+
 	}
 
 	slotUpdateImage();
 
 	return 0;
+}
+
+
+void MainImageWidget::on_depthButton_toggled(bool checked)
+{
+	m_ui->OSDLabel->setVisible(checked);
+
 }
 
 int MainImageWidget::setImage(QImage imageIn,
@@ -638,3 +653,5 @@ void MainImageWidget::on_snapButton_clicked()
 
 	emit signalSnapshot(m_fullImage);
 }
+
+

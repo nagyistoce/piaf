@@ -574,8 +574,14 @@ int MainDisplayWidget::setVideoCaptureDoc(VideoCaptureDoc * pVideoCaptureDoc)
 
 	if(!m_pVideoCaptureDoc->isRunning())
 	{
+		PIAF_MSG(SWLOG_INFO, "Starting device '%s' ...", m_pVideoCaptureDoc->getVideoProperties().devicename);
 		m_pVideoCaptureDoc->start();
 	}
+	else
+	{
+		PIAF_MSG(SWLOG_INFO, "Device '%s' already running", m_pVideoCaptureDoc->getVideoProperties().devicename);
+	}
+
 	mSourceName = QString( m_pVideoCaptureDoc->getVideoProperties().devicename );
 	updateSnapCounter();
 
