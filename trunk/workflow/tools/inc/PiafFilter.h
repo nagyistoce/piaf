@@ -29,6 +29,7 @@
 #include <SwImage.h>
 
 #include "SwPluginCore.h"
+#include "swopencv.h"
 
 #include "time_histogram.h"
 
@@ -111,9 +112,15 @@ public:
 	///< Flag indicating that the plugin has died or must be disconnected
 	bool plugin_died;
 
-	/** @brief
+	/** @brief Process one function and update image output
+
+	  @return deltaTus if ok, <0 if error
+
 	  */
-	int processFunction(int indexFunction, void * data_in, void * data_out, int timeout_ms);
+	int processFunction(int indexFunction,
+						IplImage * img_in,
+						IplImage ** pimg_out,
+						int timeout_ms);
 
 	/** @brief Force state of enabling flag */
 	void setEnabled(bool on ) {enabled = on; }
@@ -140,6 +147,9 @@ public:
 private:
 	/// Communication frame
 	swFrame frame;
+
+	/// Image storage structs
+	swImageStruct data_in, data_out;
 
 	/** @brief Load process properties from binary file */
 	void loadBinary(char * filename);
@@ -280,11 +290,12 @@ public:
 	int loadSequence(char * filename);
 
 	/** @brief process an image and store result into input structure
-		@param image input image in swImageStruct structure
+	  @param imageIn input image in IplImage structure
+	  @param imageOut pointer to output image in IplImage structure. The FilterSequencer may change its size, ...
 
 		@return <0 if error, >=0 if success
 	*/
-	int processImage(swImageStruct * image);
+	int processImage(IplImage * imageIn, IplImage ** pimageOut);
 
 	/** @brief Load a plugin sequence : { plugin>function>parameters => ... }
 
@@ -314,7 +325,7 @@ protected:
 	void init();
 	void purge();
 
-	swImageStruct * imageTmp;
+	IplImage * imageTmp; ///< Temporary image
 	bool lockProcess;
 
 	bool mNoWarning; ///< Don't show warning on plugin crash

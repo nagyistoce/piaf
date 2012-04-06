@@ -33,8 +33,9 @@
 #endif
 
 
-// include componenet header
+// include component header
 #include "SwPluginCore.h"
+#include "swimage_utils.h"
 
 
 /********************** GLOBAL SECTION ************************
@@ -191,11 +192,22 @@ void allocateImages()
 
 void finishImages()
 {
+	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
+	mapIplImageToSwImage(cvImGray, imOut);
+
+	return;
+
 	if(cvIm2->nChannels>1) {
 		if(cvIm2->nChannels == 3)
 			cvCvtColor(cvImGray, cvIm2, CV_GRAY2RGB);
 		else
 			cvCvtColor(cvImGray, cvIm2, CV_GRAY2RGBA);
+
+		// Try to change outpue nchannels
+		fprintf(stderr, "[%s] %s:%d : try to change output nChannels\n",
+				__FILE__, __func__, __LINE__);
+		swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
+		mapIplImageToSwImage(cvImGray, imOut);
 	}
 	else
 	{

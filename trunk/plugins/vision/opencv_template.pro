@@ -17,6 +17,7 @@ unix:LIBS += -L/usr/local/lib
 unix:DEFINES += VERSION __LINUX_VERSION__
 
 INCLUDEPATH += /usr/local/include/SwPlugin/
+
 LIBS += -L/usr/local/lib/ -lSwPluginCore
 
 linux-g++:TMAKE_CXXFLAGS += -g -Wall -O2 \
@@ -24,8 +25,9 @@ linux-g++:TMAKE_CXXFLAGS += -g -Wall -O2 \
 	-Wunused -Wswitch -Wcomment -Wuninitialized -Wparentheses  \
 	-Wpointer-arith  -Wshadow
 
-HEADERS =	
-SOURCES =	$$(SRCNAME).cpp 
+HEADERS = 
+SOURCES =	$$(SRCNAME).cpp \
+	../../main/tools/src/swimage_utils.cpp
 
 DEPENDPATH +=		.
 DEPENDPATH +=		$$INCLUDEPATH

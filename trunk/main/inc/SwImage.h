@@ -42,13 +42,15 @@ typedef struct _swImageStruct {
 	u8 bytedepth;	/*! Depth of image, e.g. nb of bytes: 1 for 8bit, 2 for 16bit, 4 for 32b... */
 
 	u32 buffer_size;	/*! Size of image buffer, eg. width*height*depth*bytedepth */
-	i32 deltaTus;		/*! Time from start of source (if available, ie file ou device stream) */
-
 	u8 * buffer;		/*! Raw image buffer */
+	u32	buffer_maxsize;	/*< Size of raw image buffer */
 	u8	allocated;		/*!< flag to tell if image buffer has been allocated */
 
-	u32	metadata_size;
+	u32	metadata_size;	/*< Size of last received buffer */
+	u32	metadata_maxsize;	/*< Size of metadata buffer */
 	unsigned char * metadata;
+
+	i32 deltaTus;		/*! Time from start of source (if available, ie file ou device stream) */
 
 } swImageStruct;
 
