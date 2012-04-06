@@ -135,26 +135,23 @@ void MainImageWidget::slotUpdateImage()
 {
 	PIAF_MSG(SWLOG_INFO, "update filterseq=%p !!",
 			 mpFilterSequencer);
-
+	IplImage * imageIn = m_inputIplImage;
 	if(mpFilterSequencer)
 	{
-		swImageStruct image;
-		memset(&image, 0, sizeof(swImageStruct));
-
-		mapIplImageToSwImage(m_inputIplImage, &image );
-
 		fprintf(stderr, "[MainImageWidget]::%s:%d: process image !\n",
 				__func__, __LINE__);
 
-		int ret = mpFilterSequencer->processImage(&image);
-//		fprintf(stderr, "[MainImageWidget]::%s:%d: sequence returned %d ! => copy in out=%p\n",
-//				__func__, __LINE__, ret, m_outputIplImage);
+		//int ret = mpFilterSequencer->processImage(&image);
+		int ret = mpFilterSequencer->processImage(m_inputIplImage,
+												  &m_outputIplImage);
+		fprintf(stderr, "[MainImageWidget]::%s:%d: sequence returned %d ! => copy in out=%p\n",
+				__func__, __LINE__,
+				ret, m_outputIplImage);
 		if(ret>=0)
 		{
-			convertSwImageToIplImage(&image, &m_outputIplImage);
-
 			// convert back to display image
 			m_displayImage = iplImageToQImage(m_outputIplImage);
+			imageIn = m_outputIplImage;
 		}
 		else
 		{
@@ -164,6 +161,21 @@ void MainImageWidget::slotUpdateImage()
 	else
 	{
 		m_displayImage = m_fullImage.copy();
+	}
+
+	if(imageIn)
+	{
+		QString OSDStr;
+		OSDStr.sprintf("%dx%db",
+					   imageIn->nChannels, imageIn->depth);
+		m_ui->depthButton->setText(OSDStr);
+
+		OSDStr.sprintf("%dx%d\n"
+					   "%dx%db",
+					   imageIn->width, imageIn->height,
+					   imageIn->nChannels, imageIn->depth);
+		m_ui->OSDLabel->setText(OSDStr);
+
 	}
 
 	// refresh display
@@ -233,20 +245,7 @@ int MainImageWidget::setImage(IplImage * imageIn,
 		m_ui->globalImageLabel->setToolTip(strInfo);
 	}
 
-	if(imageIn)
-	{
-		QString OSDStr;
-		OSDStr.sprintf("%dx%db",
-					   imageIn->nChannels, imageIn->depth);
-		m_ui->depthButton->setText(OSDStr);
 
-		OSDStr.sprintf("%dx%d\n"
-					   "%dx%db",
-					   imageIn->width, imageIn->height,
-					   imageIn->nChannels, imageIn->depth);
-		m_ui->OSDLabel->setText(OSDStr);
-
-	}
 
 	slotUpdateImage();
 

@@ -21,6 +21,7 @@
 #include "ui_batch_progress_widget.h"
 
 #include "batchthread.h"
+#include "swopencv.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
@@ -485,6 +486,7 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 {
 	if(!ui->viewButton->isChecked()) { return; }
 	if(!mpBatchTask) { return; }
+	IplImage * imageOut = NULL; // temp image for storing data output
 
 	fprintf(stderr, "[Batch] %s:%d \n",	__func__, __LINE__);
 	QList<t_batch_item *>::iterator it;
@@ -495,7 +497,8 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 		if(item->treeItem == treeItem)
 		{
 			CvSize oldSize = cvSize(mLoadImage.width(), mLoadImage.height());
-			int oldDepth = mLoadImage.depth();
+			int oldNChannels = mLoadImage.depth()/8;
+			int oldDepth = IPL_DEPTH_8U;
 
 			if(mLoadImage.load(item->absoluteFilePath))
 			{
@@ -511,9 +514,9 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 				if(strlen(mPreviewFilterSequencer.getPluginSequenceFile())>0)
 				{
 					// TODO : process image
-					QImage loadedQImage;
-					if(loadedQImage.load(item->absoluteFilePath))
-					{
+					IplImage * loadedImage = cvLoadImage(item->absoluteFilePath.toUtf8().data());
+
+					if(loadedImage) {
 
 					}
 					else
@@ -523,12 +526,13 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 								item->absoluteFilePath.toAscii().data());
 					}
 
-					if(!loadedQImage.isNull())
+					if(loadedImage)
 					{
 						if(mpBatchTask->options.reload_at_change
-						   || oldSize.width != loadedQImage.width()
-						   || oldSize.height != loadedQImage.height()
-						   || oldDepth != loadedQImage.depth()
+								|| oldSize.width != loadedImage->width
+								|| oldSize.height != loadedImage->height
+								|| oldDepth != loadedImage->depth
+								|| oldNChannels != loadedImage->nChannels
 						   )
 						{
 							fprintf(stderr, "Batch Preview::%s:%d : reload_at_change=%c "
@@ -537,52 +541,42 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 									__func__, __LINE__,
 									mpBatchTask->options.reload_at_change ? 'T':'F',
 									oldSize.width, oldSize.height, oldDepth,
-									loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
+									loadedImage->width, loadedImage->height,
+									loadedImage->depth
 									);
+
 							// unload previously loaded filters
 							mPreviewFilterSequencer.unloadAllLoaded();
+
 							// reload same file
 							mPreviewFilterSequencer.loadFilterList(mPreviewFilterSequencer.getPluginSequenceFile());
 						}
 
-						oldSize.width = loadedQImage.width();
-						oldSize.height = loadedQImage.height();
-						oldDepth = loadedQImage.depth();
+						oldSize.width = loadedImage->width;
+						oldSize.height = loadedImage->height;
+						oldDepth = loadedImage->depth;
+						oldNChannels = loadedImage->nChannels;
 
-						swImageStruct image;
-						memset(&image, 0, sizeof(swImageStruct));
-						image.width = loadedQImage.width();
-						image.height = loadedQImage.height();
-						image.depth = loadedQImage.depth() / 8;
-						image.buffer_size = image.width * image.height * image.depth;
-
-						image.buffer = loadedQImage.bits(); // Buffer
-
-						fprintf(stderr, "[Batch] %s:%d : process sequence '%s' on image '%s' (%dx%dx%d)\n",
+						fprintf(stderr, "[Batch] %s:%d : process sequence '%s' on image '%s' (%dx%dx%dx%d)\n",
 								__func__, __LINE__,
 								mPreviewFilterSequencer.getPluginSequenceFile(),
 								item->absoluteFilePath.toAscii().data(),
-								loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
+								loadedImage->width, loadedImage->height,
+								loadedImage->depth, loadedImage->nChannels
 								);
 						// Process this image with filters
-						mPreviewFilterSequencer.processImage(&image);
+						mPreviewFilterSequencer.processImage(loadedImage, &imageOut);
 
-						fprintf(stderr, "[Batch] %s:%d : processd sequence '%s' => display image '%s' (%dx%dx%d)\n",
+						fprintf(stderr, "[Batch] %s:%d : processd sequence '%s' "
+								"=> display image '%s' (%dx%dx%dx%d)\n",
 								__func__, __LINE__,
 								mPreviewFilterSequencer.getPluginSequenceFile(),
 								item->absoluteFilePath.toAscii().data(),
-								loadedQImage.width(), loadedQImage.height(), loadedQImage.depth());
-
-
+								loadedImage->width, loadedImage->height,
+								loadedImage->depth, loadedImage->nChannels);
 
 						// Copy into QImage
-//						QImage qImage( (uchar*)imgRGBdisplay->imageData,
-//									   imgRGBdisplay->width, imgRGBdisplay->height, imgRGBdisplay->widthStep,
-//									   ( imgRGBdisplay->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
-//										QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
-//										)
-//									  );
-						mLoadImage = loadedQImage.copy(); //qImage.copy();
+						mLoadImage = iplImageToQImage(imageOut);
 						ui->imageLabel->setRefImage(&mLoadImage);
 						ui->imageLabel->update();
 					}

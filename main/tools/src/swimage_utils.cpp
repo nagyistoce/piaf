@@ -35,6 +35,8 @@ swImageStruct * createSwImageFromImage(swImageStruct * swimIn)
 				);
 		swim->bytedepth = 1;
 	}
+
+	// Allocate buffer
 	swim->allocated = 1;
 	swim->buffer = new u8 [ swim->buffer_size ];
 	memcpy(swim->buffer, swimIn->buffer, swim->buffer_size);
@@ -73,19 +75,7 @@ swImageStruct * createSwImageFromIplImage(IplImage * iplImage)
 	// Create
 	swImageStruct * swim = new swImageStruct;
 	memset(swim, 0, sizeof(swImageStruct));
-	swim->width = iplImage->width;
-	swim->height = iplImage->height;
-	swim->depth = iplImage->nChannels;
-	swim->bytedepth = iplImage->depth/8;
-	swim->pitch = iplImage->widthStep;
-	if(swim->bytedepth == 0)
-	{
-		fprintf(stderr, "[%s] %s:%d : error in bytedepth from IplImage=%dx%d x nChannels=%d x depth=%d\n",
-				__FILE__, __func__, __LINE__,
-				iplImage->width, iplImage->height, iplImage->nChannels, iplImage->depth
-				);
-		swim->bytedepth = 1;
-	}
+
 	mapIplImageToSwImage(iplImage, swim);
 
 	swim->allocated = 1;
@@ -105,6 +95,7 @@ swImageStruct * createSwImageHeaderFromIplImage(IplImage * iplImage)
 	memset(swim, 0, sizeof(swImageStruct));
 
 	mapIplImageToSwImage(iplImage, swim);
+	swim->allocated = 0; // useless, but repeated for better code reading
 	return swim;
 }
 
@@ -151,8 +142,17 @@ void mapIplImageToSwImage(IplImage * iplImage, swImageStruct * swim)
 				);
 		swim->bytedepth = 1;
 	}
+
+	if(swim->buffer && swim->allocated)
+	{
+		delete [] swim->buffer;
+		swim->buffer = NULL;
+		swim->buffer_size = swim->buffer_maxsize = 0;
+	}
+
 	swim->allocated = 0;
-	swim->buffer_size = iplImage->widthStep * iplImage->height;
+	swim->buffer_size =
+			swim->buffer_maxsize = iplImage->widthStep * iplImage->height;
 	swim->buffer = (u8 *)iplImage->imageData;
 }
 
@@ -212,7 +212,7 @@ IplImage * convertSwImageToIplImage(swImageStruct * swim, IplImage ** pimg)
 	// Copy buffer
 	if(swim->pitch == img->widthStep)
 	{
-		fprintf(stderr, "\n\n[%s] %s:%d : memcpy IplImage=%dx%d x nChannels=%d x depth=%d\n",
+		fprintf(stderr, "\n\n[%s] %s:%d : memcpy in one single time IplImage=%dx%d x nChannels=%d x depth=%d\n",
 				__FILE__, __func__, __LINE__,
 				swim->width, swim->height, swim->depth, swim->bytedepth*8
 				); fflush(stderr);
@@ -232,6 +232,11 @@ IplImage * convertSwImageToIplImage(swImageStruct * swim, IplImage ** pimg)
 		}
 	}
 
+	// DEBUG
+	fprintf(stderr, "[%s] %s:%d: saving /dev/shm/convertFromSwImage.png\n",
+			__FILE__, __func__, __LINE__
+			);
+	cvSaveImage("/dev/shm/convertFromSwImage.png", img);
 	return img;
 }
 

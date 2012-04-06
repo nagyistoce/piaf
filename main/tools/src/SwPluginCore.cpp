@@ -32,7 +32,7 @@ compiles with : qmake piaf-lib.pro && make
 void swPurgePipe(FILE *fR);
 
 /// Debug options for communication protocol
-//#define __SWPLUGIN_DEBUG__
+#define __SWPLUGIN_DEBUG__
 
 #ifndef SWPLUGIN_SIDE
 #define SWPLUGIN_SIDE_PRINT		"PIAF-GUI-SIDE\t"
@@ -786,7 +786,8 @@ int swReadFromPipe(unsigned char * mBuffer, u32 size,
 		}
 		else /*if(!ferror(pipe))*/ {
 #ifdef __SWPLUGIN_DEBUG__
-				fprintf(stderr, SWPLUGIN_SIDE_PRINT "\tread %lu/%d chars at index=%lu = 0x%02x\n", result, (size_t)(size-index), index, mBuffer[index]);
+				fprintf(stderr, SWPLUGIN_SIDE_PRINT "\tread %lu/%d chars at index=%lu = 0x%02x\n",
+						result, (size_t)(size-index), index, mBuffer[index]);
 #endif
 				index += result;
 			}
@@ -996,13 +997,21 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 	// ok, we've got header and
 	// readimage  header
 	swImageStruct * imOut = (swImageStruct *)data_out;
+
+	// sotre buffers addresses to
 	unsigned char * mBuffer = (unsigned char *)imOut->buffer;
+	long mBuffer_maxsize = imOut->buffer_maxsize;
+
 	unsigned char * metadata = (unsigned char *)imOut->metadata;
+	long metadata_maxsize = imOut->metadata_maxsize;
+
 	if(! swReadFromPipe((unsigned char *)imOut,
 		(u32) sizeof(swImageStruct),
-		fR, timeout_ms )) {
+		fR, timeout_ms ))
+	{
+		// restore buffer address
 		imOut->buffer = mBuffer;
-
+		imOut->buffer_size = 0;
 
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d FAILED FOR swReceiveImage\n", __func__, __LINE__);
 
@@ -1012,24 +1021,62 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 
 	// Restore pointers to local values
 	imOut->buffer = mBuffer;
+	imOut->buffer_maxsize = mBuffer_maxsize;
+
 	imOut->metadata = metadata;
+	imOut->metadata_maxsize = metadata_maxsize;
 
 	// debug
 #ifdef __SWPLUGIN_DEBUG__
-	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: received image %dx%d = mBuffer_size=%ld bytes metadata=%ld\n", __func__, __LINE__,
-			(int)imOut->width, (int)imOut->height,
+	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: receiving image %dx%d x%dx%d= "
+			"mBuffer_size=%ld bytes metadata=%ld\n",
+			__func__, __LINE__,
+			(int)imOut->width, (int)imOut->height, (int)imOut->bytedepth, (int)imOut->depth,
 			(long)imOut->buffer_size, (long)imOut->metadata_size);
 #endif
-	if((*pstopnow)) {
+	if((*pstopnow))
+	{
 		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation.\n", __func__, __LINE__);
 		return 0;
 	}
 
+	// Check if buffer size if enough
+	if(imOut->buffer_size > imOut->buffer_maxsize )
+	{
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "resize buffer : %lu -> %lu\n",
+				(ulong)imOut->buffer_size,
+				(ulong)imOut->buffer_maxsize
+				);
+		imOut->buffer_maxsize = imOut->buffer_size;
+
+		if(imOut->buffer) { delete [] imOut->buffer; }
+		imOut->buffer = new u8 [ imOut->buffer_maxsize ];
+	}
+	// Check if metadata buffer size if enough
+	if(imOut->metadata_size > imOut->metadata_maxsize )
+	{
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "resize metadata : %lu -> %lu\n",
+				(ulong)imOut->metadata_size,
+				(ulong)imOut->metadata_maxsize
+				);
+		imOut->metadata_maxsize = imOut->metadata_size;
+
+		if(imOut->metadata) { delete [] imOut->metadata; }
+		imOut->metadata = new u8 [ imOut->metadata_maxsize ];
+	}
+
 	// Read image mBuffer from pipe
-	if(! swReadFromPipe((unsigned char *)imOut->buffer, (u32)imOut->buffer_size, fR, timeout_ms)) {
+	if(! swReadFromPipe((unsigned char *)imOut->buffer,
+						(u32)imOut->buffer_size,
+						fR, timeout_ms)) {
 
 		return 0;
 	}
+#ifdef __SWPLUGIN_DEBUG__
+	fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: received image %dx%d x%dx%d= mBuffer_size=%ld bytes metadata=%ld\n", __func__, __LINE__,
+			(int)imOut->width, (int)imOut->height, (int)imOut->bytedepth, (int)imOut->depth,
+			(long)imOut->buffer_size, (long)imOut->metadata_size);
+#endif
 
 	// Read metadata
 	if(!imOut->metadata && imOut->metadata_size > 0)
@@ -1055,8 +1102,8 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 				"metadata_size=%ld bytes in metadata=%p\n",
 				__func__, __LINE__, (long)imOut->metadata_size, imOut->metadata);
 		if(! swReadFromPipe((unsigned char *)imOut->metadata, (u32)imOut->metadata_size,
-							fR, timeout_ms)) {
-
+							fR, timeout_ms))
+		{
 			fprintf(stderr, SWPLUGIN_SIDE_PRINT "SwPluginCore::%s:%d: ERROR while reading metadata"
 					"metadata_size=%ld bytes in metadata=%p\n",
 					__func__, __LINE__,
@@ -1075,7 +1122,7 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 	} else {
 		sprintf(file, "receiveimage_parent.ppm");
 	}
-	debugWriteImage(file, (swImageStruct *)data_out);
+//	debugWriteImage(file, (swImageStruct *)data_out);
 #endif
 
 	return 1;
@@ -1131,6 +1178,7 @@ int swSendImage(int iFunc, swFrame * frame, swType outputType, void * data_out, 
 				 (int)pimage->buffer_size,
 				 (int)pimage->metadata_size, pimage->metadata
 				 );
+
 #endif
 		fwrite(pimage, sizeof(swImageStruct), 1, fW);
 		fflush(fW);
@@ -1168,9 +1216,9 @@ fprintf(stderr, SWPLUGIN_SIDE_PRINT "PLUGIN_SIDE\t");
 
 		char file[64];
 		if(fW == stdout)
-			sprintf(file, "sendimage_stdout.ppm");
+			sprintf(file, "/dev/shm/sendimage_stdout.ppm");
 		else
-			sprintf(file, "sendimage_parent.ppm");
+			sprintf(file, "/dev/shm/sendimage_parent.ppm");
 		debugWriteImage(file, (swImageStruct *)data_out);
 #endif
 

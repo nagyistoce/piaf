@@ -18,6 +18,8 @@
 //#define __SWPLUGIN_DEBUG__
 
 #include "PiafFilter.h"
+#include "swimage_utils.h"
+#include "swvideodetector.h"
 
 //#include "workshoptool.h"
 #include <SwTypes.h>
@@ -960,47 +962,43 @@ IMAGE PROCESSING  SECTION
 
 
 
-int FilterSequencer::processImage(swImageStruct * image)
+int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 {
-
+	int deltaTus = 0;
 	fprintf(stderr, "[FilterSequencer]::%s:%d: process image ! swImageStruct=%p = %dx%dx%dx%d\n",
 			__func__, __LINE__,
-			image,
-			image->width, image->height, image->depth, image->bytedepth);
+			imageIn,
+			imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
 
-	PIAF_MSG(SWLOG_INFO, "Process image swImageStruct=%p = %dx%dx%dx%d",
-			 image,
-			 image->width, image->height, image->depth, image->bytedepth);
+	PIAF_MSG(SWLOG_INFO, "Process image IplImage *=%p = %dx%dx%dx%d",
+			 imageIn,
+			 imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
 
-	// send image to process
-	if(imageTmp && image->buffer_size != imageTmp->buffer_size)
+	if(imageTmp
+			&& (imageTmp->width != imageIn->width
+				|| imageTmp->height != imageIn->height
+				|| imageTmp->depth != imageIn->depth
+				|| imageTmp->nChannels != imageIn->nChannels
+				) )
 	{
-		freeSwImage(&imageTmp);
+		swReleaseImage(&imageTmp);
 	}
 
+	// send image to process
 	if(!imageTmp)
 	{
-		imageTmp = new swImageStruct;
-		memcpy(imageTmp, image, sizeof(swImageStruct));
-
-		if(imageTmp->bytedepth == 0)
-		{
-			imageTmp->bytedepth = 1;
-			image->bytedepth = 1;
-		}
+		imageTmp = cvCloneImage(imageIn);
 
 		fprintf(stderr, "FilterSequencer::%s:%d allocate tmp image struct for "
-				"image={%dx%d depth=%d bytedepth=%d buffer_size=%d buffer=%p}...\n",
+				"image={%dx%d depth=%d nChannels=%d }...\n",
 				__func__, __LINE__,
 				imageTmp->width, imageTmp->height,
-				imageTmp->depth, imageTmp->bytedepth,
-				(unsigned int)imageTmp->buffer_size,
-				imageTmp->buffer
+				imageTmp->depth, imageTmp->nChannels
 				);
-
-		// allocate buffer
-		imageTmp->buffer = new u8 [ imageTmp->buffer_size];
-		memset(imageTmp->buffer, 0, sizeof(u8)*imageTmp->buffer_size);
+	}
+	else
+	{
+		cvCopy(imageIn, imageTmp);
 	}
 
 	if(mLoadedFiltersList.isEmpty()) {
@@ -1022,8 +1020,6 @@ int FilterSequencer::processImage(swImageStruct * image)
 	} else {
 		lockProcess = true;
 
-		swImageStruct *im1 = image, *im2 = imageTmp;
-
 		ret = 1;
 		int id=0;
 
@@ -1043,13 +1039,15 @@ int FilterSequencer::processImage(swImageStruct * image)
 			int filtidx = 0;
 			for(it = mLoadedFiltersList.begin();
 				it != mLoadedFiltersList.end()
-				&& ret && !finalreached;
-					++it, ++filtidx ) {
+					&& ret && !finalreached;
+					++it, ++filtidx )
+			{
 				PiafFilter * pv = (*it);
 				finalreached |= pv->isFinal();
 
 				// process
-				if( pv->enabled ) {
+				if( pv->enabled )
+				{
 					if(g_debug_FilterSequencer)
 					{
 						fprintf(stderr, "FilterSequencer::%s:%d processing filter [%d] func[%d]=%s\n",
@@ -1059,25 +1057,24 @@ int FilterSequencer::processImage(swImageStruct * image)
 								pv->funcList[pv->indexFunction].name);
 					}
 
-					ret = pv->processFunction(pv->indexFunction, im1, im2, 2000 );
+					ret = pv->processFunction(pv->indexFunction,
+											  imageTmp,
+											  &imageTmp, 2000 );
 					if(ret)
 					{
 						step++;
 
 						// invert buffers
-						swImageStruct *imTmp = im2;
-						im2 = im1;
-						im1 = imTmp;
-
-						total_time_us += imTmp->deltaTus;
+						total_time_us += ret;
 
 						// time statistics
-						pv->setTimeUS( imTmp->deltaTus );
+						pv->setTimeUS( ret );
 					}
 					else
 					{	// Processing has one error
 						global_return --;
 						crashedPlugins.append(pv);
+
 						fprintf(stderr, "[PiafFiltersManager]::%s:%d : filter '%s' failed "
 								"=> will return %d\n",
 								__func__, __LINE__, pv->exec_name,
@@ -1092,18 +1089,8 @@ int FilterSequencer::processImage(swImageStruct * image)
 
 		lockProcess = false;
 
-		// even or odd ??
-		if(ret && (step % 2) == 1) // odd, must invert
-		{
-//			fprintf(stderr, "[PiafFilter] %s:%d : memcpy(image->buffer=%p, imageTmp->buffer=%p, image->buffer_size=%u);\n",
-//					__func__, __LINE__,
-//					image->buffer, imageTmp->buffer, image->buffer_size
-//					);
-			memcpy(image->buffer, imageTmp->buffer, image->buffer_size);
-		}
-
 		// store accumulated time in output image
-		image->deltaTus = total_time_us;
+		deltaTus = total_time_us;
 	}
 
 
@@ -1156,6 +1143,15 @@ int FilterSequencer::processImage(swImageStruct * image)
 	}
 	else { // on succes, signal that the processing is done so the widtgets can be updated
 		emit signalProcessingDone();
+	}
+
+	if(global_return >= 0)
+	{
+		if(pimageOut)
+		{
+			*pimageOut = imageTmp;
+		}
+		return deltaTus;
 	}
 	return global_return;
 }
@@ -1255,6 +1251,9 @@ void PiafFilter::init()
 	category = NULL;
 	subcategory = NULL;
 	mKeepAlive = false;
+
+	memset(&data_in, 0, sizeof(swImageStruct));
+	memset(&data_out, 0, sizeof(swImageStruct));
 
 	enabled = false;
 	final = false;
@@ -1736,21 +1735,27 @@ void PiafFilter::sendRequest(char * req)
 }
 
 
-int PiafFilter::processFunction(int indexFunction, void * data_in, void * data_out, int timeout_ms)
+int PiafFilter::processFunction(int indexFunction,
+								IplImage * img_in,
+								IplImage ** pimg_out,
+								int timeout_ms)
 {
 	// wait for unlock on stdin/out
-	if(waitForUnlock(200) && !plugin_died) {
+	if(waitForUnlock(200) && !plugin_died)
+	{
+		mapIplImageToSwImage(img_in, &data_in);
 
 		comLock = true; // lock
 		int ret = 0;
-		if(pipeW) {
-			ret = swSendImage(indexFunction, &frame, swImage, data_in, pipeW);
+		if(pipeW)
+		{
+			ret = swSendImage(indexFunction, &frame, swImage, &data_in, pipeW);
 		}
 
 		// read image from pipeR
 		if(ret) {
 			if(pipeR) {
-				ret = swReceiveImage(data_out, pipeR, timeout_ms, &plugin_died);
+				ret = swReceiveImage(&data_out, pipeR, timeout_ms, &plugin_died);
 
 				if(plugin_died) {
 					// First stop reception
@@ -1760,12 +1765,14 @@ int PiafFilter::processFunction(int indexFunction, void * data_in, void * data_o
 				}
 				else
 				{
-					swImageStruct * im2 = (swImageStruct *)data_out;
+					convertSwImageToIplImage(&data_out, pimg_out);
 
 					// append processing time
-					//PIAF_MSG(SWLOG_INFO, "\tdeltaTus=%d us", (int)im2->deltaTus);
-					appendTimeUS(&mTimeHistogram, im2->deltaTus);
+					//PIAF_MSG(SWLOG_INFO, "\tdeltaTus=%d us", (int)data_out->deltaTus);
+					appendTimeUS(&mTimeHistogram, data_out.deltaTus);
 
+					// Return deltaTus
+					ret = data_out.deltaTus;
 				}
 
 			} else {
@@ -1774,7 +1781,6 @@ int PiafFilter::processFunction(int indexFunction, void * data_in, void * data_o
 		}
 
 		comLock = false;
-
 
 		return ret;
 	}
