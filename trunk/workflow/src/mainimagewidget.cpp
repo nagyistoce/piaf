@@ -48,6 +48,7 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 {
 	m_inputIplImage = m_outputIplImage = NULL;
 
+	mSwapR_B = true;
 	mpFilterSequencer = NULL;
 	m_ui->setupUi(this);
 
@@ -150,7 +151,7 @@ void MainImageWidget::slotUpdateImage()
 		if(ret>=0)
 		{
 			// convert back to display image
-			m_displayImage = iplImageToQImage(m_outputIplImage);
+			m_displayImage = iplImageToQImage(m_outputIplImage, mSwapR_B);
 			imageIn = m_outputIplImage;
 		}
 		else
@@ -220,7 +221,7 @@ int MainImageWidget::setImage(IplImage * imageIn,
 		cvCopy(imageIn, m_inputIplImage);
 	}
 
-	m_fullImage = iplImageToQImage(imageIn);
+	m_fullImage = iplImageToQImage(imageIn, mSwapR_B);
 	m_displayImage = m_fullImage.copy();
 
 	// hide movie navigation bar

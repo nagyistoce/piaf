@@ -70,6 +70,7 @@ protected:
 	IplImage * m_outputIplImage;///< output of filters as IplImage, may be more than 8bit
 	QImage m_fullImage;	///< QImage for display
 	QImage m_displayImage;
+	bool mSwapR_B; ///< swap R and B colors because source is RGB32 instead of BGR32
 
 	FilterSequencer * mpFilterSequencer;
 /// \bug obsolete zooming variable, now inside ImageWidget

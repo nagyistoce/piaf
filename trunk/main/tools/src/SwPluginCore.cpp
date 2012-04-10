@@ -15,7 +15,6 @@
  *                                                                         *
  ***************************************************************************/
 
-//#define __SWPLUGIN_DEBUG__
 
 #include "SwPluginCore.h"
 #include "sw_types.h"
@@ -32,7 +31,7 @@ compiles with : qmake piaf-lib.pro && make
 void swPurgePipe(FILE *fR);
 
 /// Debug options for communication protocol
-#define __SWPLUGIN_DEBUG__
+//#define __SWPLUGIN_DEBUG__
 
 #ifndef SWPLUGIN_SIDE
 #define SWPLUGIN_SIDE_PRINT		"PIAF-GUI-SIDE\t"
@@ -792,6 +791,7 @@ int swReadFromPipe(unsigned char * mBuffer, u32 size,
 				index += result;
 			}
 	}
+
 	if(index == size)
 	{
 #ifdef __SWPLUGIN_DEBUG__

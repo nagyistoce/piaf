@@ -1060,11 +1060,10 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 					ret = pv->processFunction(pv->indexFunction,
 											  imageTmp,
 											  &imageTmp, 2000 );
-					if(ret)
+					if(ret>=0)
 					{
 						step++;
 
-						// invert buffers
 						total_time_us += ret;
 
 						// time statistics
@@ -1311,6 +1310,9 @@ int PiafFilter::destroy()
 
 	deleteHistogram(&mTimeHistogram);
 	swFreeFrame(&frame);
+
+	freeSwImage(&data_in);
+	freeSwImage(&data_out);
 
 
 	if(buffer) { delete [] buffer; buffer = NULL; }

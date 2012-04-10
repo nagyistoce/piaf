@@ -380,14 +380,11 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 						oldSize.height = loadedQImage.height();
 						oldDepth = loadedQImage.depth();
 
-						swImageStruct image;
-						memset(&image, 0, sizeof(swImageStruct));
-						image.width = loadedQImage.width();
-						image.height = loadedQImage.height();
-						image.depth = loadedQImage.depth() / 8;
-						image.buffer_size = image.width * image.height * image.depth;
+						IplImage * outputImage = NULL;
+						IplImage * inputImageHeader = swCreateImageHeader(cvSize(loadedQImage.width(), loadedQImage.height()),
+																		  IPL_DEPTH_8U, loadedQImage.depth() == 32 ? 4 : 1);
 
-						image.buffer = loadedQImage.bits(); // Buffer
+						inputImageHeader->imageData = (char *)loadedQImage.bits();
 
 						fprintf(stderr, "[Batch] %s:%d : process sequence '%s' on image '%s' (%dx%dx%d)\n",
 								__func__, __LINE__,
@@ -396,7 +393,7 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 								loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
 								);
 						// Process this image with filters
-						mPreviewFilterManager.processImage(&image);
+						mPreviewFilterManager.processImage(inputImageHeader, &outputImage);
 
 						fprintf(stderr, "[Batch] %s:%d : processd sequence '%s' => display image '%s' (%dx%dx%d)\n",
 								__func__, __LINE__,
@@ -404,16 +401,11 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 								item->absoluteFilePath.toAscii().data(),
 								loadedQImage.width(), loadedQImage.height(), loadedQImage.depth());
 
-
-
 						// Copy into QImage
-//						QImage qImage( (uchar*)imgRGBdisplay->imageData,
-//									   imgRGBdisplay->width, imgRGBdisplay->height, imgRGBdisplay->widthStep,
-//									   ( imgRGBdisplay->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
-//										QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
-//										)
-//									  );
-						mLoadImage = loadedQImage.copy(); //qImage.copy();
+						mLoadImage = iplImageToQImage(outputImage).copy(); //qImage.copy();
+						swReleaseImage(&outputImage);
+						swReleaseImage(&inputImageHeader);
+
 						ui->imageLabel->setRefImage(&mLoadImage);
 						ui->imageLabel->update();
 					}
@@ -851,61 +843,72 @@ void BatchFiltersThread::run()
 							//
 							oldDepth = loadedQImage.depth();
 
+							IplImage * outputImage = NULL;
+							IplImage * inputImageHeader = swCreateImageHeader(cvSize(loadedQImage.width(), loadedQImage.height()),
+																			  IPL_DEPTH_8U, loadedQImage.depth() == 32 ? 4 : 1);
 
-							swImageStruct image;
-							memset(&image, 0, sizeof(swImageStruct));
-							image.width = loadedQImage.width();
-							image.height = loadedQImage.height();
-							image.depth = loadedQImage.depth() / 8;
-							image.buffer_size = image.width * image.height * image.depth;
-							image.buffer = loadedQImage.bits(); // Buffer
+							inputImageHeader->imageData = (char *)loadedQImage.bits();
+
+							fprintf(stderr, "[Batch] %s:%d : process sequence '%s' on image '%s' (%dx%dx%d)\n",
+									__func__, __LINE__,
+									mpFilterManager->getPluginSequenceFile(),
+									item->absoluteFilePath.toAscii().data(),
+									loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
+									);
+
+							fprintf(stderr, "[Batch] %s:%d : processd sequence '%s' => display image '%s' (%dx%dx%d)\n",
+									__func__, __LINE__,
+									mpFilterManager->getPluginSequenceFile(),
+									item->absoluteFilePath.toAscii().data(),
+									loadedQImage.width(), loadedQImage.height(), loadedQImage.depth());
+
 
 							// Process this image with filters
-							int retproc = mpFilterManager->processImage(&image);
+							int retproc = mpFilterManager->processImage(inputImageHeader, &outputImage);
 							if(retproc < 0)
 							{
 								item->processing_state = ERROR_PROCESS;
 
 							} else {
 								// Store statistics
-								appendTimeUS(image.deltaTus);
+								appendTimeUS(retproc /* deltaTus */);
 
 								// Check if we need to record
 								if(mBatchOptions.record_output) {
 									QFileInfo fi(item->absoluteFilePath);
 									QString outFile = item->absoluteFilePath
 													  + "-" + mBatchOptions.sequence_name + "." + fi.extension();
-									loadedQImage.save(outFile);
+
+									//loadedQImage.save(outFile);
+									cvSaveImage(outFile.toUtf8().data(), outputImage);
 								}
 
 								// Check if we need to copy an image for display
 								if(mBatchOptions.view_image) {
 									if(mDisplayImage &&
-											( mDisplayImage->width!=loadedQImage.width()
-											 || mDisplayImage->height!=loadedQImage.height()
-											 || mDisplayImage->nChannels!=loadedQImage.depth()/8
+											( mDisplayImage->width!=outputImage->width
+											 || mDisplayImage->height!=outputImage->height
+											 || mDisplayImage->nChannels!=outputImage->height
 											 )) {
 										swReleaseImage(&mDisplayImage);
 									}
 
 									if(!mDisplayImage) {
-										mDisplayImage = swCreateImage(cvSize(loadedQImage.width(), loadedQImage.height()),
-																	  IPL_DEPTH_8U, loadedQImage.depth()/8);
+										mDisplayImage = swCreateImage(cvGetSize(outputImage),
+																	  IPL_DEPTH_8U, outputImage->nChannels);
 										cvSet(mDisplayImage, cvScalarAll(255));
 									}
 
-									IplImage * imgHeader =  swCreateImageHeader(cvSize(loadedQImage.width(), loadedQImage.height()),
-																		  IPL_DEPTH_8U, loadedQImage.depth()/8);
-									cvSetData(imgHeader, loadedQImage.bits(),
-											  loadedQImage.width()* loadedQImage.depth()/8);
-									cvCopy(imgHeader, mDisplayImage);
-									swReleaseImageHeader(&imgHeader);
+									cvCopy(outputImage, mDisplayImage);
 								}
 
 								// Set the state to processed
 								item->processing_state = PROCESSED;
 							}
 							item->progress = 1.f;
+
+							swReleaseImage(&outputImage);
+							swReleaseImage(&inputImageHeader);
 
 						}
 						else {
@@ -934,9 +937,6 @@ void BatchFiltersThread::run()
 															IPL_DEPTH_8U,
 															mBatchOptions.use_grey ? 1:4);
 								// Loop on images
-								swImageStruct image;
-								memset(&image, 0, sizeof(swImageStruct));
-
 								bool resume = true;
 								while(resume && mRun)
 								{
@@ -965,9 +965,9 @@ void BatchFiltersThread::run()
 
 									bool read_frame = fva->GetNextFrame();
 									//long buffersize = image.buffer_size ;
+									IplImage * readImage = NULL;
 									int ret = -1;
 									if(read_frame) {
-										IplImage * readImage = NULL;
 										if(mBatchOptions.use_grey)
 										{
 											//ret = fva->readImageYNoAcq((uchar *)image.buffer, &buffersize);
@@ -978,8 +978,6 @@ void BatchFiltersThread::run()
 										}
 										if(readImage) {
 											ret = 0;
-											mapIplImageToSwImage(readImage, &image);
-
 										}
 									}
 
@@ -993,7 +991,8 @@ void BatchFiltersThread::run()
 										}
 										resume = false;
 									} else {
-										int retproc = mpFilterManager->processImage(&image);
+										IplImage * outputImage = NULL;
+										int retproc = mpFilterManager->processImage(readImage, &outputImage);
 
 										if(retproc < 0) {
 											// Set the state to processing error
@@ -1002,35 +1001,35 @@ void BatchFiltersThread::run()
 										}
 										else {
 											// Store statistics
-											appendTimeUS(image.deltaTus);
+											appendTimeUS(retproc /* deltaTus */);
 
 											item->processing_state = PROCESSING;
 
 											// Check if we need to record
-											if(mBatchOptions.record_output) {
+											if(mBatchOptions.record_output && outputImage) {
 												if(!encoder) {
 													QFileInfo fi(item->absoluteFilePath);
 													QString outputFile = item->absoluteFilePath
 																	  + "-" + mBatchOptions.sequence_name + ".avi";
-													encoder = new OpenCVEncoder(loadedImage->width,
-																				loadedImage->height,
+													encoder = new OpenCVEncoder(outputImage->width,
+																				outputImage->height,
 																				(int)roundf(fva->getFrameRate()));
 													encoder->startEncoder(outputFile.toUtf8().data());
 												}
 
 												if(encoder) {
-													switch(loadedImage->nChannels)
+													switch(outputImage->nChannels)
 													{
 													default:
 														break;
 													case 3:
-														encoder->encodeFrameRGB24((uchar *)loadedImage->imageData);
+														encoder->encodeFrameRGB24((uchar *)outputImage->imageData);
 														break;
 													case 4:
-														encoder->encodeFrameRGB32((uchar *)loadedImage->imageData);
+														encoder->encodeFrameRGB32((uchar *)outputImage->imageData);
 														break;
 													case 1:
-														encoder->encodeFrameY((uchar *)loadedImage->imageData);
+														encoder->encodeFrameY((uchar *)outputImage->imageData);
 														break;
 													}
 
@@ -1040,21 +1039,28 @@ void BatchFiltersThread::run()
 											// Check if we need to copy an image for display
 											if(mBatchOptions.view_image) {
 												mDisplayMutex.lock();
-												if(mDisplayImage && (mDisplayImage->widthStep!=loadedImage->widthStep || mDisplayImage->height!=loadedImage->height)) {
+												if(mDisplayImage && outputImage
+														&& (mDisplayImage->widthStep!=outputImage->widthStep
+															|| mDisplayImage->height!=outputImage->height
+															|| mDisplayImage->nChannels != outputImage->nChannels)) {
 													swReleaseImage(&mDisplayImage);
 												}
 
 												if(!mDisplayImage) {
-													mDisplayImage = cvCloneImage(loadedImage);
-													fprintf(stderr, "clone disp=%dx%dx%d", mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
+													mDisplayImage = cvCloneImage(outputImage);
+													fprintf(stderr, "clone disp=%dx%dx%d",
+															mDisplayImage->width, mDisplayImage->height,
+															mDisplayImage->nChannels);
 												}
 												else {
 													//fprintf(stderr, "disp=%dx%dx%d", mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
-													cvCopy(loadedImage, mDisplayImage);
+													cvCopy(outputImage, mDisplayImage);
 												}
 												mDisplayMutex.unlock();
 
 											}
+
+											swReleaseImage(&outputImage);
 										}
 
 										// compute progress

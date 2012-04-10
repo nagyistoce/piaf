@@ -157,10 +157,8 @@ void mapIplImageToSwImage(IplImage * iplImage, swImageStruct * swim)
 }
 
 /** @brief Free swImageStruct allocated */
-void freeSwImage(swImageStruct ** pswim)
+void freeSwImage(swImageStruct * swim)
 {
-	if(!pswim) { return; }
-	swImageStruct  * swim = *pswim;
 	if(!swim) { return; }
 
 	if(swim->allocated)
@@ -170,7 +168,6 @@ void freeSwImage(swImageStruct ** pswim)
 	}
 	// Clear structure
 	memset(swim, 0, sizeof(swImageStruct));
-	*pswim = NULL;
 }
 
 
@@ -212,17 +209,21 @@ IplImage * convertSwImageToIplImage(swImageStruct * swim, IplImage ** pimg)
 	// Copy buffer
 	if(swim->pitch == img->widthStep)
 	{
-		fprintf(stderr, "\n\n[%s] %s:%d : memcpy in one single time IplImage=%dx%d x nChannels=%d x depth=%d\n",
+		fprintf(stderr, "\n\n[%s] %s:%d : memcpy in one single time "
+				"swImage:%dx%dx%dx%d => IplImage=%dx%d x nChannels=%d x depth=%d\n",
 				__FILE__, __func__, __LINE__,
-				swim->width, swim->height, swim->depth, swim->bytedepth*8
+				swim->width, swim->height, swim->depth, swim->bytedepth*8,
+				img->width, img->height, img->nChannels, img->depth
 				); fflush(stderr);
 		memcpy(img->imageData, swim->buffer, swim->buffer_size);
 	}
 	else // do it line by line
 	{
-		fprintf(stderr, "\n\n[%s] %s:%d : memcpy line by line IplImage=%dx%d x nChannels=%d x depth=%d\n",
+		fprintf(stderr, "\n\n[%s] %s:%d : memcpy line by line "
+				"swImage:%dx%dx%dx%d => IplImage=%dx%d x nChannels=%d x depth=%d\n",
 				__FILE__, __func__, __LINE__,
-				swim->width, swim->height, swim->depth, swim->bytedepth*8
+				swim->width, swim->height, swim->depth, swim->bytedepth*8,
+				img->width, img->height, img->nChannels, img->depth
 				); fflush(stderr);
 		for(int r = 0; r<swim->height; r++)
 		{
