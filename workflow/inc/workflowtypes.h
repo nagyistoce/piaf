@@ -66,6 +66,13 @@ typedef struct {
 
 class EmaCollection;
 
+#define EMAFILE_TYPE_UNKNOWN	0
+#define EMAFILE_TYPE_IMAGE		1
+#define EMAFILE_TYPE_MOVIE		2
+#define EMAFILE_TYPE_OPENNI		3
+
+
+
 /** @brief File known in collection */
 typedef struct {
 	QString fullpath;	///< Full path to file

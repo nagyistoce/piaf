@@ -241,7 +241,7 @@ void EmaMainWindow::appendCollection(QDomElement collecElem, EmaCollection * par
 						pfile->filename = QFileInfo(pfile->fullpath).baseName();
 						pfile->pCollection = newCollec;
 						pfile->treeViewItem = NULL;
-
+						pfile->type = EMAFILE_TYPE_UNKNOWN;
 						newCollec->filesList.append(pfile);
 
 						EMAMW_printf(SWLOG_INFO, "\t\t\tAdding file '%s'...",
