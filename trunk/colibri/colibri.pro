@@ -65,7 +65,8 @@ linux-g++: {
 		../main/tools/inc/SwPluginCore.h \
 		../main/tools/inc/SwFilters.h
 	SOURCES += ../main/tools/src/SwPluginCore.cpp \
-		../main/tools/src/SwFilters.cpp
+		../main/tools/src/SwFilters.cpp \
+		../main/acquisitions/video/src/swvideodetector.cpp
 }
 
 FORMS += ui/colibrimainwindow.ui
@@ -73,6 +74,7 @@ INCLUDEPATH += inc
 INCLUDEPATH += .
 INCLUDEPATH += ../main/inc
 INCLUDEPATH += ../main/tools/inc/
+INCLUDEPATH += ../main/acquisitions/video/inc/
 
 DEPENDPATH += $$INCLUDEPATH
 win32: {

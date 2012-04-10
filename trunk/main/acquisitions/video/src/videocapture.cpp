@@ -202,6 +202,7 @@ bool VideoCaptureDoc::newDocument(int dev)
 
 	return true;
 }
+
 /** @brief Start acquisition loop */
 void VideoCaptureDoc::start(Priority)
 {
@@ -215,10 +216,16 @@ void VideoCaptureDoc::start(Priority)
 
 	if(isRunning())
 	{
-		fprintf(stderr, "VideoCaptureDoc::%s:%d: loop already running\n",
-			 __func__, __LINE__);
+		fprintf(stderr, "VideoCaptureDoc::%s:%d: loop already running: isRuning()=%c "
+				"m_running=%c m_run=%c\n",
+				__func__, __LINE__,
+				isRunning() ? 'T':'F',
+				m_running ? 'T':'F',
+				m_run ? 'T':'F'
+						);
 		return;
 	}
+
 	fprintf(stderr, "VideoCaptureDoc::%s:%d : start video acquisition loop\n",
 					__func__, __LINE__);
 	QThread::start();
@@ -231,6 +238,7 @@ void VideoCaptureDoc::stop()
 			QThread::isRunning() ? 'T':'F',
 			QThread::isFinished() ? 'T':'F'
 			);
+
 	m_run = false;
 }
 
@@ -241,16 +249,11 @@ void VideoCaptureDoc::run()
 		fprintf(stderr, "VideoCaptureDoc::%s:%d : no video acquisition\n",
 						__func__, __LINE__);
 		m_running = false;
+		m_run = false;
 		return;
 	}
 
 	fprintf(stderr, "VideoCaptureDoc::%s:%d : started thread\n",
-					__func__, __LINE__);
-
-	// start acquisition by default
-	mpVAcq->startAcquisition();
-
-	fprintf(stderr, "VideoCaptureDoc::%s:%d : starting loop\n",
 					__func__, __LINE__);
 
 	m_run = m_running = true;
@@ -261,6 +264,7 @@ void VideoCaptureDoc::run()
 		if(ret)
 		{
 			IplImage * img = readImage();
+
 //			fprintf(stderr, "VideoCaptureDoc::%s:%d: (threaded) mVAcq=%p "
 //					"load image size : %d x %d ret=%d => readImage()=%dx%dx%dx%d\n",
 //					__func__, __LINE__, mpVAcq,
@@ -269,6 +273,7 @@ void VideoCaptureDoc::run()
 //					img->width, img->height, img->depth, img->nChannels
 //					);
 //			cvSaveImage(SHM_DIRECTORY "VideoCaptureDoc.jpg", img);
+
 		} else {
 			fprintf(stderr, "VideoCaptureDoc::%s:%d: acquisition failed\n",
 					__func__, __LINE__
@@ -278,6 +283,13 @@ void VideoCaptureDoc::run()
 
 	fprintf(stderr, "VideoCaptureDoc::%s:%d : stopped thread\n",
 					__func__, __LINE__);
+	if(mpVAcq)
+	{
+		fprintf(stderr, "VideoCaptureDoc::%s:%d : stop video acquisition device",
+						__func__, __LINE__);
+		mpVAcq->stopAcquisition();
+	}
+
 	m_run = m_running = false;
 }
 
@@ -292,7 +304,7 @@ int VideoCaptureDoc::allocateImages()
 			imageSize.width, imageSize.height);
 
 	imageRGBA = swCreateImage(imageSize, IPL_DEPTH_8U, 4);
-	if( !(imageRGBA ))
+	if( !(imageRGBA) )
 	{
 		printf("RGB image memory allocation failed\n");
 		mpVAcq->stopAcquisition();
@@ -446,7 +458,7 @@ bool VideoCaptureDoc::saveDocument(const QString &filename, const char * /*forma
 
   modified=false;
   m_filename=filename;
-	m_title=QFileInfo(f).fileName();
+  m_title=QFileInfo(f).fileName();
   return true;
 }
 
@@ -461,20 +473,24 @@ void VideoCaptureDoc::deleteContents()
 
 int VideoCaptureDoc::waitForImage()
 {
+	fprintf(stderr, "VideoCapture::%s:%d : wait for notify\n", __func__, __LINE__);
 	bool ret = mWaitCondition.wait(&mMutex,
-								  200 // ms
+								  50 // ms
 								  );
-	if(ret) {
+	if(!ret) {
+		fprintf(stderr, "VideoCapture::%s:%d : timeout => return -1\n", __func__, __LINE__);
+
+	} else {
 		IplImage * imageIn = mpVAcq->readImageRaw();
 		if(imageIn)
 		{
-//			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRGB32() ok "
-//					": %dx%dx%dx%d\n",
-//					__func__, __LINE__,
-//					imageIn->width, imageIn->height,
-//					imageIn->nChannels, imageIn->depth);
+			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRaw() ok "
+					": %dx%dx%dx%d\n",
+					__func__, __LINE__,
+					imageIn->width, imageIn->height,
+					imageIn->nChannels, imageIn->depth);
 
-			if(imageIn->width>0 && imageIn->height>0)
+			if(imageIn->width > 0 && imageIn->height>0)
 			{
 				if(imageIn->widthStep != imageRGBA->widthStep
 				   || imageIn->height != imageRGBA->height)
@@ -502,7 +518,7 @@ int VideoCaptureDoc::waitForImage()
 		}
 		else
 		{
-			fprintf(stderr, "VideoCapture::%s:%d : Acquisition problem : readImageRGB32() failed\n",
+			fprintf(stderr, "VideoCapture::%s:%d : Acquisition problem : readImageRaw() failed\n",
 					__func__, __LINE__);
 			usleep(500000);
 			return -1;
@@ -518,6 +534,10 @@ int VideoCaptureDoc::waitForImage()
 
 int VideoCaptureDoc::loadImage()
 {
+	if(!mpVAcq) {
+		fprintf(stderr, "VideoCapture::%s:%d : no acq => grab failed\n", __func__, __LINE__);
+		return -1;
+	}
 	if(mpVAcq->grab()< 0)
 	{
 		fprintf(stderr, "VideoCapture::%s:%d : grab failed\n", __func__, __LINE__);
@@ -526,6 +546,7 @@ int VideoCaptureDoc::loadImage()
 	else
 	{
 		// unlock wait condition to unlock every WorkshopVideoCaptureThread
+		fprintf(stderr, "VideoCapture::%s:%d : acq OK => notify all\n", __func__, __LINE__);
 		mWaitCondition.wakeAll();
 	}
 
@@ -537,6 +558,7 @@ IplImage * VideoCaptureDoc::readImage()
 	if(mpVAcq) {
 		return mpVAcq->readImageRaw();
 	}
+
 	return NULL;
 	//return imageRGBA;
 }
