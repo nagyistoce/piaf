@@ -314,7 +314,7 @@ void swReleaseImage(IplImage ** img) {
 		try {
 			cvReleaseImage(img);
 		} catch(cv::Exception e) {
-			fprintf(stderr, "[swvideodetector] %s:%d : error in openCV cvReleaseImage ", __func__, __LINE__);
+			fprintf(stderr, "[swvideodetector] %s:%d : error in openCV cvReleaseImage \n", __func__, __LINE__);
 		}
 #else
 		cvReleaseImage(img);
@@ -323,7 +323,7 @@ void swReleaseImage(IplImage ** img) {
 	else
 	{
 		fprintf(stderr, "[swvideodetector] %s:%d : error : cannot use cvReleaseImage "
-				" to release %dx%dx%dx%d", __func__, __LINE__,
+				" to release %dx%dx%dx%d\n", __func__, __LINE__,
 				(*img)->width, (*img)->height, (*img)->depth, (*img)->nChannels);
 
 	}
@@ -338,7 +338,7 @@ void swReleaseImageHeader(IplImage ** img) {
 	try {
 		cvReleaseImageHeader(img);
 	} catch(cv::Exception e) {
-		fprintf(stderr, "[swvideodetector] %s:%d : error in openCV cvReleaseImage ", __func__, __LINE__);
+		fprintf(stderr, "[swvideodetector] %s:%d : error in openCV cvReleaseImage\n", __func__, __LINE__);
 	}
 #else
 	cvReleaseImageHeader(img);

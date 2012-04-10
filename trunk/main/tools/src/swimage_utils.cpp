@@ -196,48 +196,61 @@ IplImage * convertSwImageToIplImage(swImageStruct * swim, IplImage ** pimg)
 
 	if(!img)
 	{
-		fprintf(stderr, "\n\n[%s] %s:%d : create IplImage=%dx%d x nChannels=%d x depth=%d\n",
-				__FILE__, __func__, __LINE__,
-				swim->width, swim->height, swim->depth, swim->bytedepth*8
-				); fflush(stderr);
+		if(swim->width > 0 && swim->height > 0)
+		{
+			fprintf(stderr, "\n\n[%s] %s:%d: create IplImage= %d x %d x nChannels=%d x depth=%d\n",
+					__FILE__, __func__, __LINE__,
+					swim->width, swim->height, swim->depth, swim->bytedepth*8
+					); fflush(stderr);
 
-		img = cvCreateImage(cvSize(swim->width, swim->height),
-									swim->bytedepth * 8, swim->depth);
+			img = cvCreateImage(cvSize(swim->width, swim->height),
+										swim->bytedepth * 8, swim->depth);
+		}
+		else
+		{
+			fprintf(stderr, "\n\n[%s] %s:%d: INVALID SIZE: cannot create IplImage= %d x %d x nChannels=%d x depth=%d\n",
+					__FILE__, __func__, __LINE__,
+					swim->width, swim->height, swim->depth, swim->bytedepth*8
+					); fflush(stderr);
+		}
 		*pimg = img;
 	}
 
-	// Copy buffer
-	if(swim->pitch == img->widthStep)
+	if(swim && img)
 	{
-		fprintf(stderr, "\n\n[%s] %s:%d : memcpy in one single time "
-				"swImage:%dx%dx%dx%d => IplImage=%dx%d x nChannels=%d x depth=%d\n",
-				__FILE__, __func__, __LINE__,
-				swim->width, swim->height, swim->depth, swim->bytedepth*8,
-				img->width, img->height, img->nChannels, img->depth
-				); fflush(stderr);
-		memcpy(img->imageData, swim->buffer, swim->buffer_size);
-	}
-	else // do it line by line
-	{
-		fprintf(stderr, "\n\n[%s] %s:%d : memcpy line by line "
-				"swImage:%dx%dx%dx%d => IplImage=%dx%d x nChannels=%d x depth=%d\n",
-				__FILE__, __func__, __LINE__,
-				swim->width, swim->height, swim->depth, swim->bytedepth*8,
-				img->width, img->height, img->nChannels, img->depth
-				); fflush(stderr);
-		for(int r = 0; r<swim->height; r++)
+		// Copy buffer
+		if(swim->pitch == img->widthStep)
 		{
-			memcpy(img->imageData + r*img->widthStep,
-				   swim->buffer + r * swim->pitch,
-				   swim->width * swim->bytedepth * swim->depth);
+//			fprintf(stderr, "\n\n[%s] %s:%d : memcpy in one single time "
+//					"swImage:%dx%dx%dx%d => IplImage=%dx%d x nChannels=%d x depth=%d\n",
+//					__FILE__, __func__, __LINE__,
+//					swim->width, swim->height, swim->depth, swim->bytedepth*8,
+//					img->width, img->height, img->nChannels, img->depth
+//					); fflush(stderr);
+			memcpy(img->imageData, swim->buffer, swim->buffer_size);
 		}
-	}
+		else // do it line by line
+		{
+			fprintf(stderr, "\n\n[%s] %s:%d : memcpy line by line "
+					"swImage:%dx%dx%dx%d => IplImage=%dx%d x nChannels=%d x depth=%d\n",
+					__FILE__, __func__, __LINE__,
+					swim->width, swim->height, swim->depth, swim->bytedepth*8,
+					img->width, img->height, img->nChannels, img->depth
+					); fflush(stderr);
+			for(int r = 0; r<swim->height; r++)
+			{
+				memcpy(img->imageData + r*img->widthStep,
+					   swim->buffer + r * swim->pitch,
+					   swim->width * swim->bytedepth * swim->depth);
+			}
+		}
 
-	// DEBUG
-	fprintf(stderr, "[%s] %s:%d: saving /dev/shm/convertFromSwImage.png\n",
-			__FILE__, __func__, __LINE__
-			);
-	cvSaveImage("/dev/shm/convertFromSwImage.png", img);
+//		// DEBUG
+//		fprintf(stderr, "[%s] %s:%d: DEBUG: saving /dev/shm/convertFromSwImage.png\n",
+//				__FILE__, __func__, __LINE__
+//				);
+//		cvSaveImage("/dev/shm/convertFromSwImage.png", img);
+	}
 	return img;
 }
 

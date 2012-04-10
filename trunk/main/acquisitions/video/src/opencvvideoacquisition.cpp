@@ -226,8 +226,8 @@ int OpenCVVideoAcquisition::stopAcquisition()
 }
 IplImage * OpenCVVideoAcquisition::readImageRaw()
 {
-	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
-	return NULL; /// \todo FIXME : return raw value
+	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED => return BGR32\n", __FILE__, __func__, __LINE__);
+	return readImageRGB32();
 }
 
 /** \brief Grabs one image and convert to RGB32 coding format

@@ -113,6 +113,16 @@ PluginEditorForm::PluginEditorForm(QWidget *parent) :
 	mpFilterSequencer = NULL;
 	mOwnFilterSequencer = false;
 
+	slot_refreshFilters();
+
+	// show plugins by default
+	on_pluginsButton_clicked();
+}
+
+void PluginEditorForm::slot_refreshFilters()
+{
+	PIAF_MSG(SWLOG_INFO, "Refreshing filters ...");
+	ui->availablePluginsTreeWidget->clear();
 
 	// Display the list of available filters
 	QList<PiafFilter *> availList = mFilterSequencer.getAvailableFilters();
@@ -160,8 +170,6 @@ PluginEditorForm::PluginEditorForm(QWidget *parent) :
 	}
 	mFilterSequencer.unloadAllAvailable();
 
-	// show plugins by default
-	on_pluginsButton_clicked();
 }
 
 
@@ -497,6 +505,10 @@ void PluginEditorForm::on_availablePluginsTreeWidget_itemDoubleClicked(QTreeWidg
 
 void PluginEditorForm::on_appendPluginButton_clicked()
 {
+	if(ui->availablePluginsTreeWidget->selectedItems().isEmpty())
+	{
+		return;
+	}
 	// Get selected item
 	AvailablePluginTreeWidgetItem * item =
 			(AvailablePluginTreeWidgetItem *)ui->availablePluginsTreeWidget->selectedItems().at(0);
@@ -546,7 +558,10 @@ void PluginEditorForm::on_saveButton_clicked()
 
 void PluginEditorForm::on_removePluginButton_clicked()
 {
-	if(ui->selectedPluginsTreeWidget->selectedItems().isEmpty()) return;
+	if(ui->selectedPluginsTreeWidget->selectedItems().isEmpty())
+	{
+		return;
+	}
 
 	LoadedPluginTreeWidgetItem * item =
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
@@ -600,6 +615,7 @@ void PluginEditorForm::on_upButton_clicked()
 {
 	if(!mpFilterSequencer) return;
 	if(ui->selectedPluginsTreeWidget->selectedItems().isEmpty()) { return; }
+
 	LoadedPluginTreeWidgetItem * item =
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
 	if(!item) { return; }
@@ -628,8 +644,9 @@ void PluginEditorForm::cleanAllPlugins()
 	for(it = availList.begin(); it != availList.end(); ++it)
 	{
 		PiafFilter * filter = (*it);
+		QFileInfo fi(filter->exec_name);
 		char command[1024];
-		sprintf(command, "killall -9 %s", filter->exec_name);
+		sprintf(command, "killall -9 %s %s", filter->exec_name, fi.baseName().toAscii().data());
 		PIAF_MSG(SWLOG_DEBUG, "run cmd '%s'", command);
 		system(command);
 	}

@@ -143,7 +143,6 @@ void  MainDisplayWidget::zoomOn(int x, int y, float scale) {
 int MainDisplayWidget::setMovieFile(QString moviePath,
 									t_image_info_struct * pinfo)
 {
-
 	mpImageInfoStruct = pinfo;
 
 	QFileInfo fi(moviePath);
@@ -207,7 +206,7 @@ int MainDisplayWidget::setMovieFile(QString moviePath,
 	}
 	else
 	{
-
+/// \todo FIXME: if there is no fileinfo, there won't be bookmarks !
 	}
 
 	if(mpFileVA->getFrameRate()>1E-5)
@@ -220,6 +219,10 @@ int MainDisplayWidget::setMovieFile(QString moviePath,
 
 void MainDisplayWidget::appendBookmark(t_movie_pos pos)
 {
+	PIAF_MSG(SWLOG_INFO, "Append bmk at: abs=%llu key=%llu +%d frames",
+			 pos.prevAbsPosition,
+			 pos.prevKeyFramePosition,
+			 pos.nbFramesSinceKeyFrame );
 	video_bookmark_t bmk;
 	bmk.pAction = NULL;
 	bmk.index = m_listBookmarks.count();
@@ -230,6 +233,7 @@ void MainDisplayWidget::appendBookmark(t_movie_pos pos)
 	else {
 		bmk.percent = -1;
 	}
+
 	m_listBookmarks.append(bmk);
 
 }
@@ -526,7 +530,7 @@ void MainDisplayWidget::on_bookmarksButton_clicked()
 
 void MainDisplayWidget::on_addBkmkButton_clicked()
 {
-	appendBookmark(mpFileVA->getMoviePosition());
+	appendBookmark( mpFileVA->getMoviePosition() );
 	if(mpImageInfoStruct) {
 		mpImageInfoStruct->bookmarksList.append(mpFileVA->getMoviePosition());
 		saveImageInfoStruct(mpImageInfoStruct);

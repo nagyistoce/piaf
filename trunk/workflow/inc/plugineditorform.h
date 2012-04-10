@@ -132,6 +132,8 @@ private:
 	void updateTimeHistogram();
 private slots:
 	/// Refresh function
+	void slot_refreshFilters();
+
 	void on_pluginsButton_clicked();
 
 	void on_selectedPluginsTreeWidget_itemDoubleClicked(QTreeWidgetItem* item, int column);

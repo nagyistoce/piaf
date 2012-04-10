@@ -1682,12 +1682,15 @@ IplImage * FFmpegFileVideoAcquisition::readImageRGB32()
 
 		return NULL;
 	}
-//	fprintf(stderr, "[FileVA]::%s:%d : read RGB32 image = %dx%d : ret = %d",
+
+//	fprintf(stderr, "[FileVA]::%s:%d : read BGR32 image = %dx%d : ret = %d\n",
 //			__func__, __LINE__,
 //			mImageSize.width, mImageSize.height, ret);
-	cvCvtColor(m_imageRGB32, m_imageBGR32, CV_BGRA2RGBA);
+	return m_imageRGB32;
 
-	return m_imageBGR32;
+	// image is already in BGR32 format, so no need to convert -> comment following lines
+//	cvCvtColor(m_imageRGB32, m_imageBGR32, CV_BGRA2RGBA);
+//	return m_imageBGR32;
 }
 
 int FFmpegFileVideoAcquisition::setVideoProperties(t_video_properties props)

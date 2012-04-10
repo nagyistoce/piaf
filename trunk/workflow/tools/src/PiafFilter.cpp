@@ -964,13 +964,20 @@ IMAGE PROCESSING  SECTION
 
 int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 {
+	if(!imageIn)
+	{
+		fprintf(stderr, "[FilterSequencer]::%s:%d: NULL input image\n", __func__, __LINE__);
+		return -1;
+	}
 	int deltaTus = 0;
-	fprintf(stderr, "[FilterSequencer]::%s:%d: process image ! swImageStruct=%p = %dx%dx%dx%d\n",
-			__func__, __LINE__,
-			imageIn,
-			imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
-
-	PIAF_MSG(SWLOG_INFO, "Process image IplImage *=%p = %dx%dx%dx%d",
+	if(g_debug_FilterSequencer)
+	{
+		fprintf(stderr, "[FilterSequencer]::%s:%d: process image ! swImageStruct=%p = %dx%dx%dx%d\n",
+				__func__, __LINE__,
+				imageIn,
+				imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
+	}
+	PIAF_MSG(SWLOG_DEBUG, "Process image IplImage *=%p = %dx%dx%dx%d",
 			 imageIn,
 			 imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
 
@@ -1445,9 +1452,16 @@ int PiafFilter::forceCloseConnection() {
 */
 int PiafFilter::waitForAnswer(int timeout)
 {
+	if(!buffer)
+	{
+		PIAF_MSG(SWLOG_ERROR, "No buffer for output ! (buffer=NULL)");
+		return -1;
+	}
+
 #define TIMEOUT_STEP 20000
-	if(timeout == 0)
+	if(timeout == 0) {
 		timeout = 1000; // millisec
+	}
 	int iter = 0, maxiter = timeout * 1000 / TIMEOUT_STEP;
 
 	while(iter < maxiter) {
@@ -1998,6 +2012,7 @@ swFunctionDescriptor * PiafFilter::updateFunctionDescriptor()
 	// ---- ask plugin process for parameters values ----
 	char txt[1024];
 	sprintf(txt, SWFRAME_ASKFUNCTIONDESC "\t%d", indexFunction);
+
 	// send function
 	if(waitForUnlock(1000)) {
 		lockComm();
