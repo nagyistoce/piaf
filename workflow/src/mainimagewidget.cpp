@@ -48,7 +48,7 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 {
 	m_inputIplImage = m_outputIplImage = NULL;
 
-	mSwapR_B = true;
+	mSwapR_B = false;
 	mpFilterSequencer = NULL;
 	m_ui->setupUi(this);
 
@@ -139,15 +139,11 @@ void MainImageWidget::slotUpdateImage()
 	IplImage * imageIn = m_inputIplImage;
 	if(mpFilterSequencer)
 	{
-		fprintf(stderr, "[MainImageWidget]::%s:%d: process image !\n",
-				__func__, __LINE__);
+
 
 		//int ret = mpFilterSequencer->processImage(&image);
 		int ret = mpFilterSequencer->processImage(m_inputIplImage,
 												  &m_outputIplImage);
-		fprintf(stderr, "[MainImageWidget]::%s:%d: sequence returned %d ! => copy in out=%p\n",
-				__func__, __LINE__,
-				ret, m_outputIplImage);
 		if(ret>=0)
 		{
 			// convert back to display image
@@ -156,6 +152,11 @@ void MainImageWidget::slotUpdateImage()
 		}
 		else
 		{
+			fprintf(stderr, "[MainImageWidget]::%s:%d: sequence returned %d ! "
+					"=> copy in out=%p\n",
+					__func__, __LINE__,
+					ret, m_outputIplImage);
+
 			m_displayImage = m_fullImage.copy();
 		}
 	}

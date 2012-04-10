@@ -15,6 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 
+#include "piaf-common.h"
+
 #include "plugineditdialog.h"
 #include "ui_plugineditdialog.h"
 #include <QFileDialog>
@@ -157,6 +159,7 @@ void PluginEditDialog::on_delButton_clicked()
 
 void PluginEditDialog::on_saveButton_clicked()
 {
+	PIAF_MSG(SWLOG_INFO, "Saving edited list of plugins");
 	char home[512]="/usr/local/piaf";
 
 	if(getenv("HOME")) {
@@ -187,5 +190,5 @@ void PluginEditDialog::on_saveButton_clicked()
 				home, errnum, strerror(errnum));
 	}
 
-	close();
+	accept();
 }

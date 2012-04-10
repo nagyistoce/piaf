@@ -663,6 +663,8 @@ void EmaMainWindow::on_actionEdit_plugins_activated()
 {
 	PluginEditDialog * pluginDialog = new PluginEditDialog(NULL);
 	pluginDialog->show();
+
+	connect(pluginDialog, SIGNAL(accepted()), ui->pluginManagerForm, SLOT(slot_refreshFilters()));
 }
 
 void EmaMainWindow::on_actionEdit_sequences_triggered()
@@ -670,6 +672,7 @@ void EmaMainWindow::on_actionEdit_sequences_triggered()
 	SequenceSelectDialog * seqDialog = new SequenceSelectDialog(NULL);
 	seqDialog->show();
 }
+
 void EmaMainWindow::on_actionBatch_processor_activated()
 {
 	statusBar()->showMessage( tr("Starting batch in new window") );
@@ -1848,6 +1851,14 @@ void CollecTreeWidgetItem::expand()
 // display information about collection
 void CollecTreeWidgetItem::updateDisplay()
 {
+	if(!mpCollec)
+	{
+		EMAMW_printf(SWLOG_WARNING, "this=%p has no collec",
+					 this
+					 );
+		return;
+	}
+
 	EMAMW_printf(SWLOG_INFO, "update collection %p='%s' / %d files / %d subcolls",
 				 mpCollec, mpCollec ? mpCollec->title.toAscii().data() : "null",
 				 mpCollec ? mpCollec->filesList.count() : -1,
@@ -1865,9 +1876,9 @@ void CollecTreeWidgetItem::updateDisplay()
 			if(subItem && (!mpCollec->filesList.isEmpty()
 						   || !mpCollec->subCollectionsList.isEmpty()))
 			{
-					// remove fake item
-					removeChild(subItem);
-					subItem = NULL;
+				// remove fake item
+				removeChild(subItem);
+				subItem = NULL;
 			}
 
 			// update sub items
@@ -1917,12 +1928,8 @@ void CollecTreeWidgetItem::updateDisplay()
 			}
 		}
 	}
-	else
-	{
-		EMAMW_printf(SWLOG_WARNING, "this=%p has no collec",
-					 this
-					 );
-	}
+
+
 }
 
 void CollecTreeWidgetItem::init()
@@ -2337,6 +2344,8 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 				if(openniDevice->isAcquisitionRunning())
 				{
+					openniDevice->stopAcquisition();
+
 					statusBar()->showMessage(tr("Initialization OK"));
 					// add into explorer
 					if(ui->deviceTreeWidget->findItems(QString(txt), Qt::MatchExactly).isEmpty())
