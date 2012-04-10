@@ -21,6 +21,8 @@
 //#include "workshoptool.h"
 #include <SwTypes.h>
 
+#include "swimage_utils.h"
+#include "swvideodetector.h"
 
 // Qt includes
 #include <qlabel.h>
@@ -1928,18 +1930,40 @@ IMAGE PROCESSING  SECTION
 
 
 
-int SwFilterManager::processImage(swImageStruct * image)
+int SwFilterManager::processImage(IplImage * imageIn, IplImage ** pimageOut)
 {
+	PIAF_MSG(SWLOG_TRACE, "Process image IplImage *=%p = %dx%dx%dx%d",
+			 imageIn,
+			 imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
+
+	if(imageTmp
+			&& (imageTmp->width != imageIn->width
+				|| imageTmp->height != imageIn->height
+				|| imageTmp->depth != imageIn->depth
+				|| imageTmp->nChannels != imageIn->nChannels
+				) )
+	{
+		swReleaseImage(&imageTmp);
+	}
+
 	// send image to process
 	if(!imageTmp)
 	{
-		imageTmp = new swImageStruct;
-		memcpy(imageTmp, image, sizeof(swImageStruct));
+		imageTmp = cvCloneImage(imageIn);
 
-		// allocate buffer
-		imageTmp->buffer = new u8 [ imageTmp->buffer_size];
-		memset(imageTmp->buffer, 0, sizeof(unsigned char)*imageTmp->buffer_size);
+		fprintf(stderr, "FilterSequencer::%s:%d allocate tmp image struct for "
+				"image={%dx%d depth=%d nChannels=%d }...\n",
+				__func__, __LINE__,
+				imageTmp->width, imageTmp->height,
+				imageTmp->depth, imageTmp->nChannels
+				);
 	}
+	else
+	{
+		cvCopy(imageIn, imageTmp);
+	}
+
+
 
 	if(selectedFilterColl->isEmpty()) {
 		fprintf(stderr, "[SwFiltersManager]::%s:%d : empty filter list\n", __func__, __LINE__);
@@ -1951,12 +1975,12 @@ int SwFilterManager::processImage(swImageStruct * image)
 	int ret = 1;
 
 	int global_return = 0;
+	int total_time_us = 0;
 
 	if(!lockProcess) {
 		lockProcess = true;
 
 		swPluginView * pv;
-		swImageStruct *im1 = image, *im2 = imageTmp;
 
 		ret = 1;
 		int id=0;
@@ -1975,21 +1999,18 @@ int SwFilterManager::processImage(swImageStruct * image)
 												pv->filter->funcList[pv->indexFunction].name);
 					}
 
-					ret = pv->filter->processFunction(pv->indexFunction, im1, im2, 2000 );
-					if(ret)
+					ret = pv->filter->processFunction(pv->indexFunction,
+											  imageTmp,
+											  &imageTmp, 2000 );
+					if(ret>=0)
 					{
 						step++;
 
-						// invert buffers
-						swImageStruct *imTmp = im2;
-						im2 = im1;
-						im1 = imTmp;
-
-						total_time_us += imTmp->deltaTus;
+						total_time_us += ret;
 
 						// time statistics
 						if( pv->mwPluginTime ) {
-							pv->mwPluginTime->setTimeUS( imTmp->deltaTus );
+							pv->mwPluginTime->setTimeUS( ret );
 						}
 					}
 					else
@@ -2009,14 +2030,9 @@ int SwFilterManager::processImage(swImageStruct * image)
 
 		lockProcess = false;
 
-		// even or odd ??
-		if(ret && (step % 2) == 1) // odd, must invert
-		{
-			memcpy(image->buffer, imageTmp->buffer, image->buffer_size);
-		}
 
 		// store accumulated time in output image
-		image->deltaTus = total_time_us;
+		//deltaTus = total_time_us;
 	}
 
 
@@ -2033,8 +2049,35 @@ int SwFilterManager::processImage(swImageStruct * image)
 			loadFilterList(getPluginSequenceFile());
 		}
 	}
+	if(global_return < 0) {
+		return global_return;
+	}
 
-	return global_return;
+	if(pimageOut)
+	{
+		IplImage * imageOut = (*pimageOut);
+		if(imageOut && (imageOut->width != imageTmp->width
+						|| imageOut->height != imageTmp->height
+						|| imageOut->depth != imageTmp->depth
+						|| imageOut->nChannels != imageTmp->nChannels))
+		{
+			swReleaseImage(&imageOut);
+			*pimageOut = imageOut = NULL;
+		}
+		if(!imageOut)
+		{
+			imageOut = cvCloneImage(imageTmp);
+			*pimageOut = imageOut;
+		}
+		else
+		{
+			cvCopy(imageTmp, imageOut);
+		}
+
+
+	}
+
+	return total_time_us;
 }
 
 
@@ -2124,6 +2167,8 @@ void SwFilter::init()
 	buffer = new char [BUFFER_SIZE];
 	memset(buffer, 0, sizeof(BUFFER_SIZE));
 
+	memset(&data_in, 0, sizeof(swImageStruct));
+	memset(&data_out, 0, sizeof(swImageStruct));
 
 
 	// pipes initialisation
@@ -2151,6 +2196,9 @@ int SwFilter::destroy() {
 		return 0;
 
 	unloadChildProcess();
+
+	freeSwImage(&data_in);
+	freeSwImage(&data_out);
 
 	swFreeFrame(&frame);
 
@@ -2529,21 +2577,25 @@ void SwFilter::sendRequest(char * req)
 }
 
 
-int SwFilter::processFunction(int indexFunction, void * data_in, void * data_out, int timeout_ms)
+int SwFilter::processFunction(int indexFunction,
+							  IplImage * img_in,
+							  IplImage ** pimg_out,
+							  int timeout_ms)
 {
 	// wait for unlock on stdin/out
 	if(waitForUnlock(200) && !plugin_died) {
+		mapIplImageToSwImage(img_in, &data_in);
 
 		comLock = true; // lock
 		int ret = 0;
 		if(pipeW) {
-			ret = swSendImage(indexFunction, &frame, swImage, data_in, pipeW);
+			ret = swSendImage(indexFunction, &frame, swImage, &data_in, pipeW);
 		}
 
 		// read image from pipeR
 		if(ret) {
 			if(pipeR) {
-				ret = swReceiveImage(data_out, pipeR, timeout_ms, &plugin_died);
+				ret = swReceiveImage(&data_out, pipeR, timeout_ms, &plugin_died);
 
 				if(plugin_died) {
 					// First stop reception
@@ -2551,8 +2603,15 @@ int SwFilter::processFunction(int indexFunction, void * data_in, void * data_out
 								__func__, __LINE__, childpid);
 					emit signalDied(childpid);
 				}
+				else
+				{
+					convertSwImageToIplImage(&data_out, pimg_out);
 
+					// Return deltaTus
+					ret = data_out.deltaTus;
+				}
 			} else {
+
 				ret = 0;
 			}
 		}

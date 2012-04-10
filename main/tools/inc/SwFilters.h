@@ -42,6 +42,7 @@
 #include <SwImage.h>
 
 #include "SwPluginCore.h"
+#include "swopencv.h"
 
 
 #include <QWorkspace>
@@ -85,13 +86,23 @@ public:
 	/// returns number of functions
 	int nbfunctions();
 	bool plugin_died;	///< Flag indicating that the plugin has or must be disconnected
-	/** @brief
+
+	/** @brief Process one function and update image output
+
+	  @return deltaTus if ok, <0 if error
+
 	  */
-	int processFunction(int indexFunction, void * data_in, void * data_out, int timeout_ms);
+	int processFunction(int indexFunction,
+						IplImage * img_in,
+						IplImage ** pimg_out,
+						int timeout_ms);
+
 private:
 	swFrame frame;
 
 
+	/// Image storage structs
+	swImageStruct data_in, data_out;
 
 	/// tells if process is loaded
 	bool statusOpen;
@@ -222,11 +233,10 @@ public:
 	void setWorkspace(QWorkspace * wsp);
 
 	/** @brief process an image and store result into input structure
-		@param image input image in swImageStruct structure
 
-		@return <0 if error, >=0 if success
+		@return <0 if error, deltaTus if success
 	*/
-	int processImage(swImageStruct * image);
+	int processImage(IplImage * imageIn, IplImage ** pimageOut);
 
 	/** @brief Show filters manager window */
 	void showWindow();
@@ -246,7 +256,7 @@ public:
 	/** @brief reload automatically plugin sequence when a plugin crash (default: false) */
 	void enableAutoReloadSequence(bool on) { mAutoReloadSequence = on; }
 private:
-	swImageStruct *imageTmp;
+	IplImage *imageTmp;
 	bool lockProcess;
 
 	bool mNoWarning; ///< Don't show warning on plugin crash

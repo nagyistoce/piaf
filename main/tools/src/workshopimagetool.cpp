@@ -474,9 +474,9 @@ void WorkshopImageTool::setToolbar()
 
 	// buttons
 	pixIcon = QIcon("IconColorGrey.png" );
-	actColorGrey = colorMenu->addAction(pixIcon, tr("Grey"));
+	actColorGrey = colorMenu->addAction(pixIcon, tr("Normal"));
 	actColorGrey->setIconVisibleInMenu(true);
-	actColorGrey->setShortcut(QKeySequence(("Ctrl+G")));
+	actColorGrey->setShortcut(QKeySequence(("Ctrl+N")));
 
 	connect(actColorGrey, SIGNAL(activated()), this, SLOT(slotColorGreyMode()));
 //	colorMenu->connectItem( 0, actColorGrey, SLOT(activated()) );
@@ -699,16 +699,32 @@ void WorkshopImageTool::slotUpdateImage()
 
 	/******************* FILTER PROCESSING *********************/
 	if(filterManager) {
-		swImageStruct image;
-		memset(&image, 0, sizeof(swImageStruct));
-		image.width = (int)imageSize.width;
-		image.height = (int)imageSize.height;
-		image.depth = ImgRGB.depth() / 8;
-		image.buffer_size = image.width * image.height * image.depth;
+		IplImage * imageIn = swCreateImageHeader(cvSize(ProcImgRGB.width(), ProcImgRGB.height()),
+											   IPL_DEPTH_8U, ProcImgRGB.depth()/8);
 
-		image.buffer = ProcImgRGB.bits(); // Buffer
+		PIAF_MSG(SWLOG_DEBUG, "Process image IplImage *=%p = %dx%dx%dx%d",
+				 imageIn,
+				 imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
 
-		filterManager->processImage(&image);
+		imageIn->imageData = (char *)ProcImgRGB.bits(); // Buffer
+		IplImage * outputImage = NULL;
+
+		int retproc = filterManager->processImage(imageIn, &outputImage);
+		if(retproc >= 0)
+		{
+			PIAF_MSG(SWLOG_INFO, "=> ret=%d out IplImage *=%p = %dx%dx%dx%d",
+					 retproc, outputImage,
+					 (!outputImage) ? -1: outputImage->width,
+					 (!outputImage) ? -1: outputImage->height,
+					 (!outputImage) ? -1: outputImage->depth,
+					 (!outputImage) ? -1: outputImage->nChannels);
+
+
+			//
+			ProcImgRGB = iplImageToQImage(outputImage, true);
+		}
+		swReleaseImageHeader(&imageIn);
+		swReleaseImage(&outputImage);
 	}
 
 /*
