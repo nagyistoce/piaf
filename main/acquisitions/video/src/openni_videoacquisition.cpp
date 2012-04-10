@@ -260,6 +260,8 @@ int OpenNIVideoAcquisition::startAcquisition()
 	depth.StartGenerating();
 
 	// start event thread
+	OPENNI_PRINTF("Starting thread ...");
+
 	start();
 
 	m_captureIsInitialised = true;
@@ -296,6 +298,7 @@ int OpenNIVideoAcquisition::setLEDMode(int led_mode)
 /* Function called by the doc (parent) thread */
 int OpenNIVideoAcquisition::grab()
 {
+	//OPENNI_PRINTF("grab...");
 	if(!m_captureIsInitialised) {
 		OPENNI_PRINTF("Capture is not initialized");
 		return -1;
@@ -307,7 +310,7 @@ int OpenNIVideoAcquisition::grab()
 		OPENNI_PRINTF("wait failed");
 		return -1;
 	}
-//	OPENNI_PRINTF("unlocked by notify");
+	OPENNI_PRINTF("unlocked by notify");
 
 	return 0;
 }
@@ -452,8 +455,10 @@ void OpenNIVideoAcquisition::run()
 {
 	m_isRunning = true;
 	m_run = true;
+	OPENNI_PRINTF("Acquisition loop started ...");
+
 	//
-	while(m_run )//&& processEvents() >= 0)
+	while( m_run )//&& processEvents() >= 0)
 	{
 		nRetVal = context.WaitOneUpdateAll(depth);
 		if (nRetVal != XN_STATUS_OK)
@@ -468,11 +473,12 @@ void OpenNIVideoAcquisition::run()
 			depth.GetMetaData(depthMD);
 			const XnDepthPixel* pDepthMap = depthMD.Data();
 
-//			OPENNI_PRINTF("Frame %d Middle point is: %u. FPS: %f\n",
-//						  depthMD.FrameID(), depthMD(depthMD.XRes() / 2, depthMD.YRes() / 2), xnFPSCalc(&xnFPS));
+			OPENNI_PRINTF("Frame %d Middle point is: %u. FPS: %f\n",
+						  depthMD.FrameID(), depthMD(depthMD.XRes() / 2, depthMD.YRes() / 2), xnFPSCalc(&xnFPS));
 			setRawDepthBuffer((void *)pDepthMap, depthMD.Timestamp());
 		}
 	}
+	OPENNI_PRINTF("Acquisition loop stopped ...");
 
 	m_isRunning = false;
 }
@@ -573,8 +579,15 @@ IplImage * OpenNIVideoAcquisition::getDepthImage32F()
 
 IplImage * OpenNIVideoAcquisition::readImageRaw()
 {
+	OPENNI_PRINTF("Return m_depthRawImage16U=%p", m_depthRawImage16U);
+	if(m_depthRawImage16U)
+	{
+		OPENNI_PRINTF("return depth %d x %d x %d x %d",
+					  m_depthRawImage16U->width, m_depthRawImage16U->height,
+					  m_depthRawImage16U->depth, m_depthRawImage16U->nChannels);
+	}
+
 	return m_depthRawImage16U;
-//	return NULL; /// \todo FIXME : return raw value
 }
 
 /** \brief Grabs one image and convert to grayscale coding format

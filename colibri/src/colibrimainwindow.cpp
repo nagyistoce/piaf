@@ -35,6 +35,7 @@
 #include "swimage_utils.h"
 
 u8 mode_file = 0;
+int g_debug_piaf = 0;
 
 ColibriMainWindow::ColibriMainWindow(QWidget *parent)
 	:
@@ -45,12 +46,7 @@ ColibriMainWindow::ColibriMainWindow(QWidget *parent)
 	ui->setupUi(this);
 
 	m_pColibriThread = NULL;
-
-#ifndef WIN32
-	memset(&mSwImage, 0, sizeof(swImageStruct));
-#else
-	/// \todo port to Win32
-#endif
+	mOutputImage = NULL;
 
 	QString filename = ":/qss/Colibri.qss";
 	QFile file(filename);
@@ -173,8 +169,6 @@ void ColibriMainWindow::on_fileButton_clicked()
 	}
 
 	computeImage(iplImage);
-
-	displayImage(iplImage);
 
 	tmReleaseImage(&iplImage);
 }
@@ -498,33 +492,26 @@ void ColibriMainWindow::computeImage(IplImage * iplImage) {
 	if(!iplImage) return;
 
 #ifndef WIN32
-
-	// TODO : check if size changed
-	if(mSwImage.width != iplImage->width || mSwImage.height != iplImage->height
-	   || mSwImage.depth != iplImage->nChannels) {
-		// unload previously loaded filters
-		mFilterManager.slotUnloadAll();
-		// reload same file
-		mFilterManager.loadFilterList(mFilterManager.getPluginSequenceFile());
-		memset(&mSwImage, 0, sizeof(swImageStruct));
-	}
-
-	// compute plugin sequence
-	mapIplImageToSwImage(iplImage, &mSwImage);
-
 //	fprintf(stderr, "[Colibri] %s:%d : process sequence '%s' on image (%dx%dx%d)\n",
 //			__func__, __LINE__,
 //			mFilterManager.getPluginSequenceFile(),
-//			mSwImage.width, mSwImage.height, mSwImage.depth
+//			iplImage->width, iplImage->height, iplImage->depth
 //			);
 
 	// Process this image with filters
-	mFilterManager.processImage(&mSwImage);
+	int retproc = mFilterManager.processImage(iplImage, &mOutputImage);
 #else
 	/// \todo port to Win32
 #endif
 	// Display image as output
-	//displayImage(iplImage);
+	if(retproc > 0 && mOutputImage)
+	{
+		displayImage(mOutputImage);
+	}
+	else
+	{
+		displayImage(iplImage);
+	}
 }
 
 void ColibriMainWindow::on_deskButton_clicked() {
@@ -594,7 +581,7 @@ void ColibriMainWindow::on_grabTimer_timeout() {
 //	cvSaveImage("/dev/shm/unprocessed.png", iplImage);
 	computeImage(iplImage);
 //	cvSaveImage("/dev/shm/processed.png", iplImage);
-	displayImage(iplImage);
+
 
     show();
 

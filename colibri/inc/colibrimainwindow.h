@@ -154,7 +154,7 @@ private:
 #ifndef WIN32
 	/// Processing sequence filter
 	SwFilterManager mFilterManager;
-	swImageStruct mSwImage; ///< Piaf plugin image struct for processing
+	IplImage * mOutputImage; ///< Piaf plugin image for processing
 #else
 	/// \todo port to Win32
 #endif

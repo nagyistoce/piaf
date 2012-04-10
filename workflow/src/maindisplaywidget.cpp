@@ -392,6 +392,7 @@ void MainDisplayWidget::slot_mPlayTimer_timeout()
 		}
 		else
 		{
+			sleep(1);
 			PIAF_MSG(SWLOG_ERROR, "Live mode: grab failed failed => start capture loop");
 			m_pVideoCaptureDoc->start();
 		}
@@ -586,7 +587,7 @@ int MainDisplayWidget::setVideoCaptureDoc(VideoCaptureDoc * pVideoCaptureDoc)
 	updateSnapCounter();
 
 	double fps = m_pVideoCaptureDoc->getVideoProperties().fps;
-	if(fps <= 0)
+	if(fps <= 5)
 	{
 		fps = 12.5;
 		MDW_printf(EMALOG_WARNING, "fps = %g -> force %g",
