@@ -479,6 +479,11 @@ int ImageInfo::loadMovieFile(QString filename)
 			  m_image_info_struct.width, m_image_info_struct.height, m_image_info_struct.fps );
 
 	m_originalImage = tmCloneImage(mFileVA.readImageRGB32());
+	// Invert R<->B
+	if(m_originalImage->nChannels == 4)
+	{
+		cvCvtColor(mFileVA.readImageRGB32(), m_originalImage, CV_BGRA2RGBA);
+	}
 	return 0;
 }
 
