@@ -594,9 +594,9 @@ int ImageInfo::loadFile(QString filename)
 			float th_factor_h = (float)m_originalImage->height / (float)IMGTHUMB_HEIGHT;
 			if(th_factor_w > th_factor_h) {
 				// limit w
-				th_w = m_originalImage->width * IMGTHUMB_HEIGHT/ m_originalImage->height;
+				th_w = m_originalImage->width * IMGTHUMB_HEIGHT / m_originalImage->height;
 			} else {
-				th_h = m_originalImage->height * IMGTHUMB_WIDTH/ m_originalImage->width;
+				th_h = m_originalImage->height * IMGTHUMB_WIDTH / m_originalImage->width;
 			}
 
 			while((th_w % 4) != 0) { th_w++; }
