@@ -344,8 +344,6 @@ private:
 
 	// Previous picture position
 	unsigned long long m_prevPosition;
-	/** @brief Last movie position, defined by the position of last key frame and nb of frame since this key frame */
-	t_movie_pos m_movie_pos;
 
 
 	// Variables for VirtualDeviceAcquisition API

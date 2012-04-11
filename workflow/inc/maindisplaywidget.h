@@ -95,11 +95,12 @@ private:
 	FileVideoAcquisition * mpFileVA;
 
 	QTimer mPlayTimer;
-	bool mPlayGrayscale;///< if true, only decode grayscaled image (Y buffer)
-	float mPlaySpeed; ///< play speed ratio
+	bool mPlayGrayscale;	///< if true, only decode grayscaled image (Y buffer)
+	float mPlaySpeed;		///< play speed ratio
 
-	// Bookmarks
+	/// Bookmarks list
 	QList<video_bookmark_t> m_listBookmarks;
+
 	MovieBookmarkForm * m_editBookmarksForm;
 	void appendBookmark(t_movie_pos);
 

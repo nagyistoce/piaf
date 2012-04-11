@@ -202,11 +202,12 @@ int MainDisplayWidget::setMovieFile(QString moviePath,
 
 			appendBookmark(bkmk);
 		}
-		ui->timeLineWidget->setFileInfo(*pinfo);
+
+		ui->timeLineWidget->setFileSize(pinfo->filesize);
 	}
 	else
 	{
-/// \todo FIXME: if there is no fileinfo, there won't be bookmarks !
+		ui->timeLineWidget->setFileSize(fi.size());
 	}
 
 	if(mpFileVA->getFrameRate()>1E-5)
@@ -235,10 +236,17 @@ void MainDisplayWidget::appendBookmark(t_movie_pos pos)
 	}
 
 	m_listBookmarks.append(bmk);
+	ui->timeLineWidget->setBookmarkList(m_listBookmarks);
 
 }
 
 void MainDisplayWidget::slotNewBookmarkList(QList<video_bookmark_t> list) {
+	if(!mpImageInfoStruct)
+	{
+		PIAF_MSG(SWLOG_ERROR, "No info struct for this file");
+		return;
+	}
+
 	// clear actions
 	mpImageInfoStruct->bookmarksList.clear();
 
@@ -257,8 +265,8 @@ void MainDisplayWidget::slotNewBookmarkList(QList<video_bookmark_t> list) {
 		appendBookmark((*it).movie_pos);
 	}
 	saveImageInfoStruct(mpImageInfoStruct);
-
-	ui->timeLineWidget->setFileInfo(*mpImageInfoStruct);
+	ui->timeLineWidget->setBookmarkList(m_listBookmarks);
+	ui->timeLineWidget->setFileSize(mpImageInfoStruct->filesize);
 }
 
 void MainDisplayWidget::on_goFirstButton_clicked()
@@ -530,11 +538,17 @@ void MainDisplayWidget::on_bookmarksButton_clicked()
 
 void MainDisplayWidget::on_addBkmkButton_clicked()
 {
-	appendBookmark( mpFileVA->getMoviePosition() );
+	t_movie_pos bkmk = mpFileVA->getMoviePosition();
+
+	PIAF_MSG(SWLOG_INFO, "New bookmark = {name='%s', prevAbsPosition=%llu, key=%llu +%d frames}",
+			 bkmk.name.toAscii().data(),
+			 bkmk.prevAbsPosition, bkmk.prevKeyFramePosition, bkmk.nbFramesSinceKeyFrame);
+	appendBookmark( bkmk );
+
 	if(mpImageInfoStruct) {
 		mpImageInfoStruct->bookmarksList.append(mpFileVA->getMoviePosition());
 		saveImageInfoStruct(mpImageInfoStruct);
-		ui->timeLineWidget->setFileInfo(*mpImageInfoStruct);
+		ui->timeLineWidget->setFileSize(mpImageInfoStruct->filesize);
 	}
 }
 

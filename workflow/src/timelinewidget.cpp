@@ -54,15 +54,16 @@ void TimeLineWidget::setFilePosition(unsigned long long filepos)
 
 int TimeLineWidget::computeCursorDisplayPos(unsigned long long filepos)
 {
-	if(m_image_info_struct.filesize <= 0)
+	if(mFileSize <= 0)
 	{
 		return 0;
 	}
 
 	int cursorPos = (int)roundf( size().width() * (double)filepos
-								 / (double)m_image_info_struct.filesize );
+								 / (double)mFileSize );
 	return cursorPos;
 }
+
 
 void TimeLineWidget::paintEvent( QPaintEvent * e)
 {
@@ -72,10 +73,10 @@ void TimeLineWidget::paintEvent( QPaintEvent * e)
 	p.setPen(QColor(qRgb(255,192,0)));
 
 	int margin = 2;
-	QList<t_movie_pos>::iterator it;
-	for(it = m_image_info_struct.bookmarksList.begin(); it != m_image_info_struct.bookmarksList.end(); ++it)
+	QList<video_bookmark_t>::iterator it;
+	for(it = m_bookmarksList.begin(); it != m_bookmarksList.end(); ++it)
 	{
-		t_movie_pos bkmk = (*it);
+		t_movie_pos bkmk = (*it).movie_pos;
 		PIAF_MSG(SWLOG_TRACE, "\t\tadded bookmark name='%s' "
 				 "prevAbsPos=%lld prevKeyFrame=%lld nbFrameSinceKey=%d",
 				 bkmk.name.toAscii().data(),
@@ -123,10 +124,10 @@ void TimeLineWidget::keyReleaseEvent ( QKeyEvent * event )
 void TimeLineWidget::mousePressEvent(QMouseEvent *e)
 {
 	if(!e) { return; }
-	if(m_image_info_struct.filesize == 0) {
+	if(mFileSize == 0) {
 		fprintf(stderr, "TimeLineWidget::%s:%d invalid filesize = %llu !\n",
 				__func__, __LINE__,
-				m_image_info_struct.filesize);
+				mFileSize);
 		printImageInfoStruct(&m_image_info_struct);
 
 		return;
@@ -145,10 +146,10 @@ void TimeLineWidget::setCursorDisplayPos(int posx)
 			found.nbFramesSinceKeyFrame = found.prevAbsPosition = found.prevKeyFramePosition = 0;
 
 			int dmin = 10;
-			QList<t_movie_pos>::iterator it;
-			for(it = m_image_info_struct.bookmarksList.begin(); it != m_image_info_struct.bookmarksList.end(); ++it)
+			QList<video_bookmark_t>::iterator it;
+			for(it = m_bookmarksList.begin(); it != m_bookmarksList.end(); ++it)
 			{
-				t_movie_pos pos = (*it);
+				t_movie_pos pos = (*it).movie_pos;
 				int disppos = computeCursorDisplayPos(pos.prevAbsPosition);
 				int dist = abs(posx -disppos);
 				if(dist < dmin){
@@ -165,7 +166,7 @@ void TimeLineWidget::setCursorDisplayPos(int posx)
 				fprintf(stderr, "TimeLineWidget::%s:%d : e->pos = %d / w=%d / filesize=%llu => emit signal for movie_pos.prevAbsPos= %llu\n",
 					__func__, __LINE__,
 					posx, size().width(),
-					m_image_info_struct.filesize, found.prevAbsPosition
+					mFileSize, found.prevAbsPosition
 					);
 				mFilePos = found.prevAbsPosition;
 				emit signalCursorBookmarkChanged(found);
@@ -176,11 +177,11 @@ void TimeLineWidget::setCursorDisplayPos(int posx)
 
 		}
 
-		mFilePos = posx / (double)size().width() * (double)m_image_info_struct.filesize;
+		mFilePos = posx / (double)size().width() * (double)mFileSize;
 		fprintf(stderr, "TimeLineWidget::%s:%d : e->pos = %d / w=%d / filesize=%llu => new pos=%llu\n",
 			__func__, __LINE__,
 			posx, size().width(),
-			m_image_info_struct.filesize, mFilePos
+			mFileSize, mFilePos
 			);
 
 		emit signalCursorPositionChanged(mFilePos);
