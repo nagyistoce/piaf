@@ -1310,8 +1310,8 @@ void EmaMainWindow::appendThumbImage(QString fileName) {
 void EmaMainWindow::slot_mainGroupBox_resizeEvent(QResizeEvent * e) {
 	if(!e) { return ; }
 	
-	EMAMW_printf(EMALOG_DEBUG, "Resize event : %dx%d\n", e->size().width(), e->size().height())
-	
+	EMAMW_printf(EMALOG_DEBUG, "Resize event : %dx%d\n",
+				 e->size().width(), e->size().height())
 }
 
 
