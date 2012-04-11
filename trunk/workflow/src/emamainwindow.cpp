@@ -111,7 +111,6 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	  mSettings( PIAFWKFL_SETTINGS ),
 	  mSettingsDoc(PIAFWKFL_SETTINGS)
 {
-	g_debug_piaf = true;
 
 	ui->setupUi(this);
 	g_splash->showMessage(QObject::tr("Restore settings ..."), Qt::AlignBottom | Qt::AlignHCenter);

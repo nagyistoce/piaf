@@ -30,19 +30,31 @@ class TimeLineWidget : public QLabel
 public:
     explicit TimeLineWidget(QWidget *parent = 0);
     ~TimeLineWidget();
-	int setFileInfo(t_image_info_struct info)
+
+
+
+	/** @brief Activate magnetic mode: the cursor will be attrcated by bookmarks */
+	void setMagneticMode(bool on) { mMagnetic = on; }
+
+	/** @brief Set the absolute position in file */
+	void setFilePosition(unsigned long long filepos);
+
+	/** @brief Set the file size */
+	int setFileSize(unsigned long long fileSize)
 	{
-		m_image_info_struct = info;
+		mFileSize = fileSize;
 		repaint();
 		return 0;
 	}
 
-	/** @brief Activate magnetic mode: the cursor will be attrcated by bookmarks */
-	void setMagneticMode(bool on) { mMagnetic = on; }
-	void setFilePosition(unsigned long long filepos);
-
 	/** @brief compute display position from position in file */
 	int computeCursorDisplayPos(unsigned long long filepos);
+
+	/** @brief Set the list of bookmarks */
+	void setBookmarkList(QList<video_bookmark_t> bkmkList) {
+		m_bookmarksList = bkmkList;
+		repaint();
+	}
 
 protected:
     void changeEvent(QEvent *e);
@@ -67,6 +79,11 @@ private:
 	/// Cursor file position
 	unsigned long long mFilePos;
 
+	/// Bookmarks list
+	QList<video_bookmark_t> m_bookmarksList;
+
+	/// File size
+	unsigned long long mFileSize;
 	/// magnetic mode. Default=true
 	bool mMagnetic;
 

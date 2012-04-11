@@ -361,18 +361,21 @@ CvSize OpenNIVideoAcquisition::getImageSize()
 /* Stop acquisition */
 int OpenNIVideoAcquisition::stopAcquisition()
 {
-	if(depth) {
-		depth.StopGenerating();
-	}
+
 
 	m_run = false;
-	while(m_isRunning)
+	int retry = 0;
+	while(m_isRunning && retry<3000)
 	{
-		usleep(1000);
+		usleep(10000);
+		retry += 10;
+	}
+	if(depth) {
+		depth.StopGenerating();
+		depth.Release();
 	}
 
 
-	depth.Release();
 	scriptNode.Release();
 	context.Release();
 
