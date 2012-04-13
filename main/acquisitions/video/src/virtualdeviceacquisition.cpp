@@ -118,11 +118,30 @@ QImage iplImageToQImage(IplImage * iplImage, bool swap_RB)
 		if(!rgb24_to_bgr32 && !gray_to_bgr32) {
 			if(iplImage->nChannels != 4) {
 				//
-				for(int r=0; r<iplImage->height; r++) {
-					// NO need to swap R<->B
-					memcpy(qImage.bits() + r*orig_width*depth,
-						iplImage->imageData + r*iplImage->widthStep,
-						orig_width*depth);
+				if(!swap_RB)
+				{
+					for(int r=0; r<iplImage->height; r++) {
+						// NO need to swap R<->B
+						memcpy(qImage.bits() + r*orig_width*depth,
+							iplImage->imageData + r*iplImage->widthStep,
+							orig_width*depth);
+					}
+				} else {
+					for(int r=0; r<iplImage->height; r++) {
+						// need to swap R<->B
+						u8 * buf_out = (u8 *)(qImage.bits()) + r*orig_width*depth;
+						u8 * buf_in = (u8 *)(iplImage->imageData) + r*iplImage->widthStep;
+						memcpy(qImage.bits() + r*orig_width*depth,
+							iplImage->imageData + r*iplImage->widthStep,
+							orig_width*depth);
+
+						for(int pos3 = 0 ; pos3<orig_width*depth; pos3+=depth,
+							buf_out+=3, buf_in+=depth
+							 ) {
+							buf_out[2] = buf_in[0];
+							buf_out[0] = buf_in[2];
+						}
+					}
 				}
 			} else {
 
@@ -155,14 +174,21 @@ QImage iplImageToQImage(IplImage * iplImage, bool swap_RB)
 			{
 				int pos3 = r * iplImage->widthStep;
 				int pos4 = r * orig_width4;
-				for(int c=0; c<orig_width; c++, pos3+=3, pos4+=4)
-				{
-					//buffer4[pos4 + 2] = buffer3[pos3];
-					//buffer4[pos4 + 1] = buffer3[pos3+1];
-					//buffer4[pos4    ] = buffer3[pos3+2];
-					buffer4[pos4   ] = buffer3[pos3];
-					buffer4[pos4 + 1] = buffer3[pos3+1];
-					buffer4[pos4 + 2] = buffer3[pos3+2];
+				if(!swap_RB) {
+
+					for(int c=0; c<orig_width; c++, pos3+=3, pos4+=4)
+					{
+						buffer4[pos4   ] = buffer3[pos3];
+						buffer4[pos4 + 1] = buffer3[pos3+1];
+						buffer4[pos4 + 2] = buffer3[pos3+2];
+					}
+				} else { // SWAP R<->B
+					for(int c=0; c<orig_width; c++, pos3+=3, pos4+=4)
+					{
+						buffer4[pos4 + 2] = buffer3[pos3];
+						buffer4[pos4 + 1] = buffer3[pos3+1];
+						buffer4[pos4    ] = buffer3[pos3+2];
+					}
 				}
 			}
 		} else if(gray_to_bgr32) {

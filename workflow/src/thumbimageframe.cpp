@@ -115,7 +115,7 @@ void ThumbImageFrame::setImageInfoStruct(t_image_info_struct * pinfo)
 	IplImage * img = pinfo->thumbImage.iplImage;
 	QPixmap fullImage;
 	if( img ) {
-		QImage qImg = iplImageToQImage(img); // because image in inverted by OpenCV
+		QImage qImg = iplImageToQImage(img, true); // because image in inverted by OpenCV
 
 		fullImage = QPixmap::fromImage( qImg );
 		fprintf(stderr, "ThumbImageFrame::%s:%d : load '%s' : "
