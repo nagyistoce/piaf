@@ -1762,10 +1762,16 @@ int PiafFilter::processFunction(int indexFunction,
 		mapIplImageToSwImage(img_in, &data_in);
 
 		comLock = true; // lock
-		int ret = 0;
+		int ret = -1;
 		if(pipeW)
 		{
 			ret = swSendImage(indexFunction, &frame, swImage, &data_in, pipeW);
+		}
+		else
+		{
+
+			fprintf(stderr, "PiafFilters::%s:%d : ERROR: pipeW is null\n",
+						__func__, __LINE__);
 		}
 
 		// read image from pipeR
@@ -1773,7 +1779,8 @@ int PiafFilter::processFunction(int indexFunction,
 			if(pipeR) {
 				ret = swReceiveImage(&data_out, pipeR, timeout_ms, &plugin_died);
 
-				if(plugin_died) {
+				if(plugin_died || ret == 0) {
+					ret = -1;
 					// First stop reception
 					fprintf(stderr, "PiafFilters::%s:%d : plugin died pid=%d => close pipe...\n",
 								__func__, __LINE__, childpid);
@@ -1792,8 +1799,16 @@ int PiafFilter::processFunction(int indexFunction,
 				}
 
 			} else {
-				ret = 0;
+				ret = -1;
 			}
+		}
+		else
+		{
+			// Plugin died from timeout
+			plugin_died = true;
+			fprintf(stderr, "PiafFilters::%s:%d : plugin died in swSendImage : pid=%d => close pipe...\n",
+						__func__, __LINE__, childpid);
+			emit signalDied(childpid);
 		}
 
 		comLock = false;

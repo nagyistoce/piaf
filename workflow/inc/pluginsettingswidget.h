@@ -65,7 +65,7 @@ private slots:
 
 signals:
 	/// Signal that current plugin params has changed
-	void selectedFilterChanged();
+	void selectedFilterChanged(PiafFilter *);
 };
 
 #endif // PLUGINSETTINGSWIDGET_H

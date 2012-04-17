@@ -122,6 +122,8 @@ private:
 	/// Sequencer for listing available filters
 	FilterSequencer mFilterSequencer;
 
+	PiafFilter * mpSelectedFilter; ///< Selected item
+
 	/// List of loaded items
 	QList<LoadedPluginTreeWidgetItem *> mLoadedPluginTreeWidgetItemList;
 	QTreeWidgetItem * originalItem; ///< fake first item
@@ -139,7 +141,7 @@ private slots:
 	void on_selectedPluginsTreeWidget_itemDoubleClicked(QTreeWidgetItem* item, int column);
 	void on_selectedPluginsTreeWidget_itemClicked(QTreeWidgetItem* item, int column);
 
-	void on_pluginSettingsWidget_selectedFilterChanged();
+	void on_pluginSettingsWidget_selectedFilterChanged(PiafFilter *);
 
 	void on_downButton_clicked();
 	void on_upButton_clicked();

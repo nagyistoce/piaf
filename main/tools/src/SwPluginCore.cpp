@@ -919,11 +919,11 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 	}
 
 	if((*pstopnow)) {
-		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation.\n", __func__, __LINE__);
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation  => return 0\n", __func__, __LINE__);
 		return 0;
 	}
 	if(iter == itermax) {
-		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation.\n", __func__, __LINE__);
+		fprintf(stderr, SWPLUGIN_SIDE_PRINT "!!!!!!! %s:%d : timeout time elapsed. Cancel operation => return 0\n", __func__, __LINE__);
 		return 0;
 	}
 

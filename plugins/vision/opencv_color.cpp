@@ -23,14 +23,7 @@
 #include <unistd.h>
 
 // OpenCV
-#ifndef OPENCV_22
-#include <cv.h>
-#include <cvaux.h>
-#include <highgui.h>
-#else
-#include <opencv.hpp>
-#include <legacy/compat.hpp>
-#endif
+#include "swopencv.h"
 
 
 // include component header
@@ -99,6 +92,20 @@ swFuncParams YCrCb_params[] = {
 void YCrCb();
 
 
+/// Swap R and B planes
+void swapR_B();
+
+char *RGBlist[] = {"Red", "Green", "Blue", "Alpha"};
+swStringListStruct RGBplane = {
+	4, // nb elements
+	0, // default element
+	RGBlist
+	};
+swFuncParams RGB_params[] = {
+	{"plane", swStringList, (void *)&RGBplane}
+};
+void RGB();
+
 /* swFunctionDescriptor :
 	char * : function name
 	int : number of parameters
@@ -108,11 +115,13 @@ void YCrCb();
 	void * : procedure
 	*/
 swFunctionDescriptor functions[] = {
-	{"HSV", 		2,	HSV_params,  	swImage, swImage, &HSV, NULL},
-	{"HSL",			1,	HSL_params,  	swImage, swImage, &HSL, NULL},
+	{"RGB->n", 		1,	RGB_params,  	swImage, swImage, &RGB, NULL},
+	{"HSV->n", 		1,	HSV_params,  	swImage, swImage, &HSV, NULL},
+	{"HSL->n",		1,	HSL_params,  	swImage, swImage, &HSL, NULL},
+	{"R<->B",		0,	YCrCb_params,	swImage, swImage, &swapR_B, NULL},
 	{"YCrCb",		1,	YCrCb_params,	swImage, swImage, &YCrCb, NULL}
 };
-int nb_functions = 3;
+int nb_functions = 5;
 
 
 IplImage * cvIm1 = NULL;
@@ -147,11 +156,15 @@ void allocateImages()
 		cvImRGB = cvCreateImage(size, IPL_DEPTH_8U, 3);
 
 		if(imIn->depth > 1) {
-			for(int i=0;i<imIn->depth; i++)
+			for(int i=0;i<imIn->depth; i++) {
 				planes1[i] = cvCreateImage(size,  IPL_DEPTH_8U, 1);
-
-			for(int i=imIn->depth; i<4;i++)
+			}
+			for(int i=imIn->depth; i<4;i++) {
 				planes1[i] = NULL;
+			}
+			for(int i=0; i<4;i++) {
+				planes2[i] = NULL;
+			}
 
 			cvImGray = cvCreateImage(size,  IPL_DEPTH_8U, 1);
 		}
@@ -194,7 +207,6 @@ void finishImages()
 {
 	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
 	mapIplImageToSwImage(cvImGray, imOut);
-
 	return;
 
 	if(cvIm2->nChannels>1) {
@@ -206,7 +218,6 @@ void finishImages()
 		// Try to change outpue nchannels
 		fprintf(stderr, "[%s] %s:%d : try to change output nChannels\n",
 				__FILE__, __func__, __LINE__);
-		swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
 		mapIplImageToSwImage(cvImGray, imOut);
 	}
 	else
@@ -215,6 +226,76 @@ void finishImages()
 	}
 }
 
+void RGB()
+{
+	//fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
+	allocateImages();
+
+	//fprintf(stderr, "%s:%d\n", __func__, __LINE__); fflush(stderr);
+	if(cvIm1->nChannels >= 3)
+	{
+		IplImage * to_planes[4] = { planes1[0], planes1[1], planes1[2], planes1[3] };
+		switch(cvIm1->nChannels)
+		{
+		default:
+
+			break;
+		case 1:
+			cvCopy(cvIm1, cvImGray);
+			break;
+		case 3: // copy directly the plane because input image is R,G,B
+			// change destination plane
+			if(RGBplane.curitem>=0 && RGBplane.curitem<3)
+			{
+				to_planes[RGBplane.curitem] = cvImGray;
+			}
+			break;
+		case 4: // map the plane because input image is B,G,R,A and order of curitem is R,G,B,A
+			// change destination plane
+			switch(RGBplane.curitem)
+			{
+			default:
+				break;
+			case 0: // user wants red
+				to_planes[2] = cvImGray;
+				break;
+			case 1: // user wants green
+				to_planes[1] = cvImGray;
+				break;
+			case 2: // user wants blue
+				to_planes[0] = cvImGray;
+				break;
+			case 3: // user wants green
+				to_planes[3] = cvImGray;
+				break;
+			}
+			break;
+		}
+
+		// Separate planes
+		cvCvtPixToPlane(cvIm1, to_planes[0], to_planes[1], to_planes[2], to_planes[3]);
+	}
+
+	finishImages();
+}
+
+void swapR_B()
+{
+	allocateImages();
+
+	switch(cvIm1->nChannels)
+	{
+	default:
+		cvCopy(cvIm1, cvIm2);
+		break;
+	case 3:
+		cvCvtColor(cvIm1, cvIm2, CV_RGB2BGR);
+		break;
+	case 4:
+		cvCvtColor(cvIm1, cvIm2, CV_RGBA2BGRA);
+		break;
+	}
+}
 
 void HSV()
 {
@@ -311,14 +392,15 @@ void signalhandler(int sig)
 int main(int argc, char *argv[])
 {
 	// SwPluginCore load
-	for(int i=0; i<NSIG; i++)
+	for(int i=0; i<NSIG; i++) {
 		signal(i, signalhandler);
+	}
 
-	fprintf(stderr, "registerCategory...\n");
+	fprintf(stderr, "registerCategory '%s'/'%s'...\n", CATEGORY, SUBCATEGORY);
 	plugin.registerCategory(CATEGORY, SUBCATEGORY);
 
 	// register functions
-	fprintf(stderr, "registerFunctions...\n");
+	fprintf(stderr, "register %d functions...\n", nb_functions);
 	plugin.registerFunctions(functions, nb_functions );
 
 	// process loop
