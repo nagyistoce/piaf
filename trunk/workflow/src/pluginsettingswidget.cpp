@@ -141,9 +141,9 @@ void PluginSettingsWidget::updateDisplay()
 					swStringListStruct * s = (swStringListStruct *)func->param_list[i].value;
 					mComboEdit[combocount]->setFixedHeight(28);
 					for(int item=0;item<s->nbitems;item++) {
-						fprintf(stderr, "[SwFilters] %s:%d insert item [%d/%d]='%s'\n",
+						fprintf(stderr, "[PluginSettingsW] %s:%d insert item [%d/%d]='%s'\n",
 								__func__, __LINE__, item, s->nbitems, s->list[item]);
-						mComboEdit[combocount]->insertItem( -1, s->list[item]);
+						mComboEdit[combocount]->insertItem(item, s->list[item]);
 					}
 					combocount++;
 					}
@@ -219,7 +219,7 @@ void PluginSettingsWidget::on_applyButton_clicked()
 							  tr("The new parameters could not be sent to plugin."));
 	}
 
-	emit selectedFilterChanged();
+	emit selectedFilterChanged(mpPiafFilter);
 }
 
 void PluginSettingsWidget::on_revertButton_clicked()

@@ -108,6 +108,7 @@ PluginEditorForm::PluginEditorForm(QWidget *parent) :
 	pWorkspace = NULL;
 	mHasGUI = false;
 
+	mpSelectedFilter = NULL;
 	// Load available plugins
 	mFilterSequencer.loadFilters();
 	mpFilterSequencer = NULL;
@@ -230,6 +231,7 @@ void PluginEditorForm::on_filterSequencer_selectedFilterChanged()
 	{
 		fprintf(stderr, "PluginEditForm::%s:%d : update !!\n", __func__, __LINE__);
 	}
+
 	updateSelectedView();
 }
 
@@ -277,6 +279,7 @@ void PluginEditorForm::updateSelectedView()
 	bool refresh = true;
 	bool a_plugin_crashed = false;
 
+	QTreeWidgetItem * selectedItem = NULL;
 	while(refresh) {
 		refresh = false;
 
@@ -299,9 +302,14 @@ void PluginEditorForm::updateSelectedView()
 
 				if(!curF->plugin_died)
 				{
-					new LoadedPluginTreeWidgetItem (
+					LoadedPluginTreeWidgetItem * item = new LoadedPluginTreeWidgetItem (
 							ui->selectedPluginsTreeWidget,
 							curF);
+
+					if(mpSelectedFilter == curF)
+					{
+						ui->selectedPluginsTreeWidget->setCurrentItem(item);
+					}
 
 				}
 				else
@@ -395,6 +403,7 @@ void PluginEditorForm::updateSelectedView()
 			mpFilterSequencer->loadSequence(mpFilterSequencer->getPluginSequenceFile());
 		}
 	}
+
 
 	update();
 }
@@ -522,6 +531,10 @@ void PluginEditorForm::on_appendPluginButton_clicked()
 	// Add this item
 	item->getFilter()->indexFunction = item->getIndexFunction();
 	PiafFilter * newFilter = mpFilterSequencer->addFilter(item->getFilter());
+	// Select the last one
+	ui->selectedPluginsTreeWidget->setCurrentItem(
+				ui->selectedPluginsTreeWidget->topLevelItem(
+					ui->selectedPluginsTreeWidget->topLevelItemCount() - 1));
 }
 
 
@@ -562,11 +575,12 @@ void PluginEditorForm::on_removePluginButton_clicked()
 	{
 		return;
 	}
-
+	mpSelectedFilter = NULL;
 	LoadedPluginTreeWidgetItem * item =
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
 	if(!item) {
-		return; }
+		return;
+	}
 	if(!mpFilterSequencer) { return; }
 
 	mpFilterSequencer->removeFilter(item->getFilter());
@@ -653,21 +667,25 @@ void PluginEditorForm::cleanAllPlugins()
 }
 
 
-void PluginEditorForm::on_pluginSettingsWidget_selectedFilterChanged()
+void PluginEditorForm::on_pluginSettingsWidget_selectedFilterChanged(PiafFilter * selectedFilter)
 {
 	fprintf(stderr, "PluginEditorForm::%s:%d : update !\n", __func__, __LINE__);
 	if(mpFilterSequencer)
 	{
 		mpFilterSequencer->update();
 	}
+	mpSelectedFilter = selectedFilter;
+	updateSelectedView();
 }
 
 void PluginEditorForm::on_selectedPluginsTreeWidget_itemClicked(QTreeWidgetItem* item, int column)
 {
+	mpSelectedFilter = NULL;
 	if(!item) { return; }
 	LoadedPluginTreeWidgetItem * loaded =
 			(LoadedPluginTreeWidgetItem *)item;
 
+	mpSelectedFilter = loaded->getFilter();
 	ui->pluginSettingsWidget->setPiafFilter(loaded->getFilter());
 
 	// update time histogram
