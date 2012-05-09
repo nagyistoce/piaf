@@ -36,6 +36,8 @@
 #define WKP_EXTERN extern
 #endif
 
+#include <QString>
+
 // Path for saving files (snapshots, ...)
 WKP_EXTERN QString g_imageDirName;
 WKP_EXTERN QString g_measureDirName;

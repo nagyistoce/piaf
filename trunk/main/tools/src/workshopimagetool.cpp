@@ -33,7 +33,6 @@
 #include <QMenu>
 
 
-
 // application specific includes
 #include <QWorkspace>
 
@@ -58,6 +57,8 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv,
 {
 	pWin->hide();
 
+	OrigImgRGB = ProcImgRGB = NULL;
+
 	//fprintf(stderr, "WImgTool::%s:%d : parent=%p\n", __func__, __LINE__, p_parent);
 	pWorkspace = (QWorkspace *) NULL;
 	pParent  = p_parent;
@@ -77,7 +78,7 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv,
 //	}
 
 	mToolMode = MODE_SMARTZOOM;
-	mpViewWidget->setRefImage(&ImgRGB);
+	mpViewWidget->setRefImage(ProcImgRGB);
 
 	slotUpdateView();
 
@@ -133,6 +134,8 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv, QWidget *p_parent,
 	: WorkshopTool(p_parent, name, wflags)
 {
 	//fprintf(stderr, "WImTool::%s:%d : parent=%p\n", __func__, __LINE__, p_parent);
+	OrigImgRGB = ProcImgRGB = NULL;
+
 	pWorkspace = NULL;
 	pParent  = p_parent;
 	pWin->hide();
@@ -148,7 +151,7 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv, QWidget *p_parent,
 	setToolbar();
 
 
-	mpViewWidget->setRefImage(&ImgRGB);
+	mpViewWidget->setRefImage(ProcImgRGB);
 
 	slotUpdateView();
 
@@ -247,7 +250,23 @@ void WorkshopImageTool::init()
 
 void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 {
-	OrigImgRGB = iv->copy();
+	if(OrigImgRGB && (iv->width() != OrigImgRGB->width || iv->height() != OrigImgRGB->height
+			|| iv->depth() != 8*OrigImgRGB->nChannels) )
+	{
+		swReleaseImage(&OrigImgRGB);
+		swReleaseImage(&ProcImgRGB);
+	}
+
+	if(!OrigImgRGB)	{
+		OrigImgRGB = swCreateImage(cvSize(iv->width(), iv->height() ), IPL_DEPTH_8U, iv->depth()/8);
+	}
+	memcpy(OrigImgRGB->imageData, iv->bits(), OrigImgRGB->widthStep * OrigImgRGB->height);
+	if(!ProcImgRGB)	{
+		ProcImgRGB = cvCloneImage(OrigImgRGB);
+	}
+	else {
+		cvCopy(OrigImgRGB, ProcImgRGB);
+	}
 	m_pWorkshopImage = iv;
 
 	tBoxSize oldviewSize = viewSize;
@@ -262,26 +281,24 @@ void WorkshopImageTool::setWorkshopImage(WorkshopImage * iv)
 	bool first = false;
 	if( oldSize.width != imageSize.width
 		|| oldSize.height != imageSize.height
-		|| OrigImgRGB.depth()!=ImgRGB.depth()
+//		|| OrigImgRGB->nChannels*8!=ImgRGB.depth()
 		) {
-		if(ProcImgRGB.isNull()) {
-			first = true;
-		}
+
+//		if(ProcImgRGB.isNull()) {
+//			first = true;
+//		}
 
 		if(aMenuColor) {
-//			if(OrigImgRGB.depth()==8)
-				aMenuColor->show();
-//			else
-//				aMenuColor->hide();
+			aMenuColor->show();
 		}
 
-		ProcImgRGB = OrigImgRGB;
-		if(OrigImgRGB.depth()!=ImgRGB.depth()) { // updae ImgRGB
-			changeViewSize();
-		}
+//		ProcImgRGB = OrigImgRGB;
+//		if(OrigImgRGB->nChannels*8!=ImgRGB.depth()) { // updae ImgRGB
+//			changeViewSize();
+//		}
 	}
 
-	ProcImgRGB = OrigImgRGB;
+	//ProcImgRGB = OrigImgRGB;
 
 	// IF SIZE CHANGED, LET'S CALCULATE ANOTHER VIEW SIZE
 	if(	oldSize.width != imageSize.width
@@ -363,6 +380,10 @@ WorkshopImageTool::~WorkshopImageTool()
 	if(mpegEncoder) {
 		delete mpegEncoder;
 	}
+
+	swReleaseImage(&OrigImgRGB);
+	swReleaseImage(&ProcImgRGB);
+
 //	fprintf(stderr, "%s::%s:%d : deleted.", __FILE__, __func__, __LINE__);
 
 }
@@ -658,12 +679,6 @@ void WorkshopImageTool::changeViewSize()
 		   viewSize.width, viewSize.height, viewPixel);
 #endif
 
-	if( OrigImgRGB.depth() == 8)
-	{
-		for(int i=0; i<256; i++) {
-			ImgRGB.setColor( i, qRgb(i,i,i));
-		}
-	}
 	CalculateZoomWindow();
 }
 
@@ -693,38 +708,25 @@ void WorkshopImageTool::slotFilters()
 
 void WorkshopImageTool::slotUpdateImage()
 {
-	ProcImgRGB = OrigImgRGB;
 //	memcpy(originalImage, OrigImgRGB.bits(),
-//		   OrigImgRGB.width()*OrigImgRGB.height()*(OrigImgRGB.depth()/8) );
+//		   OrigImgRGB.width()*OrigImgRGB.height()*(OrigImgRGB->nChannels*8/8) );
 
 	/******************* FILTER PROCESSING *********************/
 	if(filterManager) {
-		IplImage * imageIn = swCreateImageHeader(cvSize(ProcImgRGB.width(), ProcImgRGB.height()),
-											   IPL_DEPTH_8U, ProcImgRGB.depth()/8);
-
 		PIAF_MSG(SWLOG_DEBUG, "Process image IplImage *=%p = %dx%dx%dx%d",
-				 imageIn,
-				 imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
+				 OrigImgRGB,
+				 OrigImgRGB->width, OrigImgRGB->height, OrigImgRGB->depth, OrigImgRGB->nChannels);
 
-		imageIn->imageData = (char *)ProcImgRGB.bits(); // Buffer
-		IplImage * outputImage = NULL;
-
-		int retproc = filterManager->processImage(imageIn, &outputImage);
+		int retproc = filterManager->processImage(OrigImgRGB, &ProcImgRGB);
 		if(retproc >= 0)
 		{
 			PIAF_MSG(SWLOG_INFO, "=> ret=%d out IplImage *=%p = %dx%dx%dx%d",
-					 retproc, outputImage,
-					 (!outputImage) ? -1: outputImage->width,
-					 (!outputImage) ? -1: outputImage->height,
-					 (!outputImage) ? -1: outputImage->depth,
-					 (!outputImage) ? -1: outputImage->nChannels);
-
-
-			//
-			ProcImgRGB = iplImageToQImage(outputImage, true);
+					 retproc, ProcImgRGB,
+					 (!ProcImgRGB) ? -1: ProcImgRGB->width,
+					 (!ProcImgRGB) ? -1: ProcImgRGB->height,
+					 (!ProcImgRGB) ? -1: ProcImgRGB->depth,
+					 (!ProcImgRGB) ? -1: ProcImgRGB->nChannels);
 		}
-		swReleaseImageHeader(&imageIn);
-		swReleaseImage(&outputImage);
 	}
 
 /*
@@ -736,7 +738,7 @@ void WorkshopImageTool::slotUpdateImage()
 */
 	// record video on demand
 	if(record && mpegEncoder) {
-		unsigned char * p32 = ProcImgRGB.bits();
+		unsigned char * p32 = (unsigned char *)ProcImgRGB->imageData;
 
 		if(mpegEncoder->encodeFrameRGB32( p32 ) == 0) {
 			fprintf(stderr, "WImgTool::%s:%d : Error while encoding !\n", __func__, __LINE__);
@@ -759,7 +761,7 @@ void WorkshopImageTool::slotUpdateView()
 		realScale = 1.f / (2.f - ZoomScale);
 	}
 
-	ImgRGB = ProcImgRGB.copy();
+	ImgRGB = iplImageToQImage( ProcImgRGB );
 
 	/* OBSOLETE : now the zooming is done in the display widget
 	ImgRGB = ProcImgRGB.copy(xZoomOrigine, yZoomOrigine,
@@ -802,7 +804,7 @@ void WorkshopImageTool::slotUpdateView()
 /////////////////////////////////////
 void WorkshopImageTool::slotSaveImage()
 {
-	savedImage = ProcImgRGB;
+	savedImage = ImgRGB;
 	fprintf(stderr, "WorkshopImageTool::%s:%d: %d x %d x%d => emit ImageSaved(&savedImage) !\n",
 			__func__, __LINE__,
 			savedImage.width(), savedImage.height(), savedImage.depth());

@@ -19,6 +19,7 @@
 #define WORKSHOPIMAGETOOL_H
 
 #include "piaf-common.h"
+#include "swopencv.h"
 
 // include files for Qt
 #include <qwidget.h>
@@ -159,8 +160,8 @@ private:
 	int viewPixel;
 	int imagePixel;
 
-	QImage OrigImgRGB;	///< Original image (without processing)
-	QImage ProcImgRGB;	///< Processed image (after processing)
+	IplImage * OrigImgRGB;	///< Original image (without processing)
+	IplImage * ProcImgRGB;	///< Processed image (after processing)
 
 
 	/// Ready-to-use QImage object for RGB image

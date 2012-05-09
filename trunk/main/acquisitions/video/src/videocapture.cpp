@@ -484,11 +484,11 @@ int VideoCaptureDoc::waitForImage()
 		IplImage * imageIn = mpVAcq->readImageRaw();
 		if(imageIn)
 		{
-			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRaw() ok "
-					": %dx%dx%dx%d\n",
-					__func__, __LINE__,
-					imageIn->width, imageIn->height,
-					imageIn->nChannels, imageIn->depth);
+//			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRaw() ok "
+//					": %dx%dx%dx%d\n",
+//					__func__, __LINE__,
+//					imageIn->width, imageIn->height,
+//					imageIn->nChannels, imageIn->depth);
 
 			if(imageIn->width > 0 && imageIn->height>0)
 			{
@@ -546,7 +546,7 @@ int VideoCaptureDoc::loadImage()
 	else
 	{
 		// unlock wait condition to unlock every WorkshopVideoCaptureThread
-		fprintf(stderr, "VideoCapture::%s:%d : acq OK => notify all\n", __func__, __LINE__);
+//		fprintf(stderr, "VideoCapture::%s:%d : acq OK => notify all\n", __func__, __LINE__);
 		mWaitCondition.wakeAll();
 	}
 

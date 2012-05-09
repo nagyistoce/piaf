@@ -73,6 +73,9 @@ OpenNIVideoAcquisition::OpenNIVideoAcquisition()
 
 OpenNIVideoAcquisition::~OpenNIVideoAcquisition()
 {
+	fprintf(stderr, "OpenNIVideoAcquisition::%s:%d : stop video acquisition device",
+					__func__, __LINE__);
+
 	stopAcquisition();
 
 	swReleaseImage(&m_depthRawImage16U);
@@ -264,7 +267,8 @@ int OpenNIVideoAcquisition::startAcquisition()
 
 	start();
 
-	m_captureIsInitialised = true;
+	OPENNI_PRINTF("Set capture to 1 ...");
+	m_captureIsInitialised = 1;
 
 	// update video properties
 	updateVideoProperties();
@@ -301,6 +305,7 @@ int OpenNIVideoAcquisition::grab()
 	//OPENNI_PRINTF("grab...");
 	if(!m_captureIsInitialised) {
 		OPENNI_PRINTF("Capture is not initialized");
+		sleep(1);
 		return -1;
 	}
 
@@ -310,7 +315,7 @@ int OpenNIVideoAcquisition::grab()
 		OPENNI_PRINTF("wait failed");
 		return -1;
 	}
-	OPENNI_PRINTF("unlocked by notify");
+//	OPENNI_PRINTF("unlocked by notify");
 
 	return 0;
 }
@@ -320,6 +325,13 @@ int OpenNIVideoAcquisition::setRawDepthBuffer(void * depthbuf, uint32_t timestam
 {
 	if(!m_depthRawImage16U)
 	{
+		OPENNI_PRINTF("Create m_depthRawImage16U (m_imageSize=%dx%d, 16U, 1",
+					  m_imageSize.width, m_imageSize.height
+					  );
+		if(m_imageSize.width == 0 || m_imageSize.height == 0)
+		{
+
+		}
 		m_depthRawImage16U = swCreateImage(m_imageSize, IPL_DEPTH_16U, 1);
 	}
 
@@ -367,18 +379,22 @@ int OpenNIVideoAcquisition::stopAcquisition()
 	int retry = 0;
 	while(m_isRunning && retry<3000)
 	{
-		usleep(10000);
-		retry += 10;
+		usleep(100000);
+
+		m_run = false;
+		retry += 100;
 	}
+
 	if(depth) {
 		depth.StopGenerating();
-		depth.Release();
+//		depth.Release();
 	}
 
 
-	scriptNode.Release();
-	context.Release();
+//	scriptNode.Release();
+//	context.Release();
 
+	PIAF_MSG(SWLOG_INFO, "Stopped OpenNI");
 	m_captureIsInitialised = 0;
 
 	return 0;
@@ -451,18 +467,19 @@ void init_OpenNI_depth_LUT()
 	}
 
 	g_depth_grayLUT[OPENNI_RAW_UNKNOWN] = 0;
-
 }
+
 
 void OpenNIVideoAcquisition::run()
 {
+	OPENNI_PRINTF("Acquisition loop started ...");
 	m_isRunning = true;
 	m_run = true;
-	OPENNI_PRINTF("Acquisition loop started ...");
 
 	//
 	while( m_run )//&& processEvents() >= 0)
 	{
+//		OPENNI_PRINTF("Acquisition loop : wait for img...");
 		nRetVal = context.WaitOneUpdateAll(depth);
 		if (nRetVal != XN_STATUS_OK)
 		{
@@ -476,8 +493,9 @@ void OpenNIVideoAcquisition::run()
 			depth.GetMetaData(depthMD);
 			const XnDepthPixel* pDepthMap = depthMD.Data();
 
-			OPENNI_PRINTF("Frame %d Middle point is: %u. FPS: %f\n",
-						  depthMD.FrameID(), depthMD(depthMD.XRes() / 2, depthMD.YRes() / 2), xnFPSCalc(&xnFPS));
+//			OPENNI_PRINTF("Frame %d Middle point is: %u. FPS: %f\n",
+//						  depthMD.FrameID(), depthMD(depthMD.XRes() / 2, depthMD.YRes() / 2), xnFPSCalc(&xnFPS));
+
 			setRawDepthBuffer((void *)pDepthMap, depthMD.Timestamp());
 		}
 	}
@@ -582,12 +600,12 @@ IplImage * OpenNIVideoAcquisition::getDepthImage32F()
 
 IplImage * OpenNIVideoAcquisition::readImageRaw()
 {
-	OPENNI_PRINTF("Return m_depthRawImage16U=%p", m_depthRawImage16U);
+//	OPENNI_PRINTF("Return m_depthRawImage16U=%p", m_depthRawImage16U);
 	if(m_depthRawImage16U)
 	{
-		OPENNI_PRINTF("return depth %d x %d x %d x %d",
-					  m_depthRawImage16U->width, m_depthRawImage16U->height,
-					  m_depthRawImage16U->depth, m_depthRawImage16U->nChannels);
+//		OPENNI_PRINTF("return m_depthRawImage16U: %d x %d x %d x %d",
+//					  m_depthRawImage16U->width, m_depthRawImage16U->height,
+//					  m_depthRawImage16U->depth, m_depthRawImage16U->nChannels);
 	}
 
 	return m_depthRawImage16U;

@@ -52,6 +52,8 @@ public:
 	/** @brief Set the image as IplImage. Depth may be >8bit : IPL_DEPTH_16U, IPL_DEPTH_32F...*/
 	int setImage(IplImage * iplImageIn, t_image_info_struct * pinfo = NULL);
 
+	/** @brief Get output ipl image, with filters applied */
+	IplImage * getOutputImage() { return m_outputIplImage; }
 
 	/** @brief Zoom on a part of input image at a specified scale */
 	void zoomOn(int unscaled_x, int unscaled_y, float scale);

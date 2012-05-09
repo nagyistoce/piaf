@@ -134,8 +134,7 @@ void MainImageWidget::setFilterSequencer(FilterSequencer * pFS)
 
 void MainImageWidget::slotUpdateImage()
 {
-	PIAF_MSG(SWLOG_INFO, "update filterseq=%p !!",
-			 mpFilterSequencer);
+	//PIAF_MSG(SWLOG_INFO, "update filterseq=%p !!", mpFilterSequencer);
 	IplImage * imageIn = m_inputIplImage;
 	if(mpFilterSequencer)
 	{
@@ -178,10 +177,14 @@ void MainImageWidget::slotUpdateImage()
 					   imageIn->nChannels, imageIn->depth);
 		m_ui->OSDLabel->setText(OSDStr);
 
-	}
+		m_ui->globalImageLabel->setRefImage(imageIn);
 
-	// refresh display
-	m_ui->globalImageLabel->setRefImage(&m_displayImage);
+	}
+	else {
+
+		// refresh display
+	//	m_ui->globalImageLabel->setRefImage(&m_displayImage);
+	}
 }
 
 int MainImageWidget::setImage(IplImage * imageIn,
@@ -217,7 +220,7 @@ int MainImageWidget::setImage(IplImage * imageIn,
 
 	if(!m_inputIplImage)
 	{
-		m_inputIplImage = cvCloneImage(imageIn);
+		m_inputIplImage = tmCloneImage(imageIn);
 	} else {
 		cvCopy(imageIn, m_inputIplImage);
 	}

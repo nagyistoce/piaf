@@ -203,7 +203,8 @@ HEADERS += \
 	$$LEGACYPATH/inc/nolinux_videodev.h \
 	$$LEGACYPATH/inc/imagewidget.h \
 	$$LEGACYPATH/tools/inc/swimage_utils.h \
-	$$LEGACYPATH/inc/swopencv.h
+	$$LEGACYPATH/inc/swopencv.h \
+    ../main/acquisitions/video/inc/file_video_acquisition_factory.h
 
 
 linux-g++: {
@@ -305,13 +306,13 @@ SOURCES += tools/src/PiafFilter.cpp \
 	src/emamainwindow.cpp \
 	src/thumbimageframe.cpp \
 	src/imageinfo.cpp \
-	src/imgutils.cpp \
 	src/exifdisplayscrollarea.cpp \
 	src/metadatawidget.cpp \
 	src/emaimagemanager.cpp \
 	src/filtermanagerform.cpp \
 	src/plugineditorform.cpp \
 	../main/tools/src/timehistogramwidget.cpp \
+	../main/tools/src/imgutils.cpp \
 	src/maindisplaywidget.cpp \
 	src/timelinewidget.cpp \
 	src/pluginsettingswidget.cpp \
@@ -334,7 +335,7 @@ HEADERS += tools/inc/PiafFilter.h \
 	inc/emamainwindow.h \
 	inc/thumbimageframe.h \
 	inc/imageinfo.h \
-	inc/imgutils.h \
+	../main/tools/inc/imgutils.h \
 	inc/exifdisplayscrollarea.h \
 	inc/metadatawidget.h \
 	inc/emaimagemanager.h \
@@ -491,6 +492,7 @@ message( "FINAL CONFIGURATION ==================================================
 message( "")
 message( "")
 OTHER_FILES += doc/OpenCVToolsForPhoto.txt
+
 
 
 

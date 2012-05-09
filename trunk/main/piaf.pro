@@ -68,8 +68,9 @@ SOURCES += src/main.cpp \
     components/src/workshopmeasure.cpp \
     components/src/workshopimage.cpp \
     components/src/workshopmovie.cpp \
-    tools/src/workshoptool.cpp \
-    tools/src/previewimage.cpp \
+	tools/src/imgutils.cpp \
+	tools/src/workshoptool.cpp \
+	tools/src/previewimage.cpp \
     tools/src/workshopvideocapture.cpp \
     tools/src/SwPluginCore.cpp \
     tools/src/SwFilters.cpp \
@@ -145,8 +146,9 @@ HEADERS += inc/workshop.h \
     components/inc/workshopmeasure.h \
     components/inc/workshopimage.h \
     components/inc/workshopmovie.h \
-    tools/inc/workshoptool.h \
-    tools/inc/previewimage.h \
+	tools/inc/imgutils.h \
+	tools/inc/workshoptool.h \
+	tools/inc/previewimage.h \
     tools/inc/workshopvideocapture.h \
     tools/inc/SwPluginCore.h \
     tools/inc/SwFilters.h \

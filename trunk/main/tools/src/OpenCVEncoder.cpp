@@ -19,6 +19,8 @@
 
 #include "swvideodetector.h"
 #include "OpenCVEncoder.h"
+#include "piaf-common.h"
+#include "imgutils.h"
 
 OpenCVEncoder::OpenCVEncoder(int imageWidth, int imageHeight, int frame_rate) {
 	writer = NULL;
@@ -216,7 +218,9 @@ int OpenCVEncoder::encodeFrameRGB32(unsigned char *RGB32frame)
 
 int OpenCVEncoder::encodeImage(IplImage * image)
 {
-	if(!image) { return -1; }
+	if(!image) {
+		PIAF_MSG(SWLOG_INFO, "ERROR: null image !!");
+		return -1; }
 
 	if(image->nChannels != 3) {
 		// Convert to RGB24
@@ -230,27 +234,13 @@ int OpenCVEncoder::encodeImage(IplImage * image)
 		}
 
 		// Convert
-		switch(image->nChannels)
-		{
-		default:
-			fprintf(stderr, "OpenCVEncoder::%s:%d : unsupported nChannels=%d", __func__, __LINE__, image->nChannels);
-			break;
-		case 1:
-			cvCvtColor(image, imgRgb24, CV_GRAY2RGB);
-			break;
-		case 3:
-			cvCopy(image, imgRgb24);
-			break;
-		case 4:
-			cvCvtColor(image, imgRgb24, CV_BGRA2RGB);
-			break;
-		}
-
+		tmConvert(image, imgRgb24);
+		cvWriteFrame(writer, imgRgb24);
 	}
 	else
 	{
 		cvWriteFrame(writer, image);
-	 }
+	}
 
 	return 1;
 }

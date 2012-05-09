@@ -24,6 +24,7 @@
 
 
 #include "virtualdeviceacquisition.h"
+#include "file_video_acquisition_factory.h"
 
 // for LUT
 #include "openni_videoacquisition.h"

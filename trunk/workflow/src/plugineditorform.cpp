@@ -125,6 +125,9 @@ void PluginEditorForm::slot_refreshFilters()
 	PIAF_MSG(SWLOG_INFO, "Refreshing filters ...");
 	ui->availablePluginsTreeWidget->clear();
 
+	PIAF_MSG(SWLOG_INFO, "Reload filters ...");
+	mFilterSequencer.loadFilters();
+
 	// Display the list of available filters
 	QList<PiafFilter *> availList = mFilterSequencer.getAvailableFilters();
 	QList<PiafFilter *>::iterator it;
@@ -238,6 +241,17 @@ void PluginEditorForm::on_filterSequencer_selectedFilterChanged()
 void PluginEditorForm::on_filterSequencer_signalFilterDied(PiafFilter * filter)
 {
 	if(!filter) return;
+	disconnect(filter, NULL);
+
+	if(filter == mpSelectedFilter)
+	{
+		mpSelectedFilter = NULL;
+		// Back to filter list
+		if(ui->stackedWidget->currentIndex() > 0)
+		{	// we were on histogram or params, so we need to come back to avaliable plugins list
+			ui->stackedWidget->setCurrentIndex(0);
+		}
+	}
 
 	// Display message
 	QMessageBox::warning(NULL, tr("Plugin ") + QString(filter->exec_name) + tr(" crashed"),

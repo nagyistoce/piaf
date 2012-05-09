@@ -7,8 +7,8 @@
 /*|	description			: Entete de la classe VideoAcquisition par fichier										|*/
 /*|-------------------------------------------------------------------------------------------------------------|*/
 
-#ifndef _FILE_VIDEOACQUISITION_
-#define _FILE_VIDEOACQUISITION_
+#ifndef FILE_VIDEOACQUISITION_H
+#define FILE_VIDEOACQUISITION_H
 
 
 #ifndef WIN32
@@ -43,6 +43,9 @@
 
 #include "nolinux_videodev.h"
 #include "virtualdeviceacquisition.h"
+#include "piaf-common.h"
+
+//#include "file_video_acquisition_factory.h"
 
 #ifdef PIAF_LEGACY
 #include "workshopmovie.h"
@@ -63,7 +66,6 @@
  @author Christophe Seyve - Sisell - cseyve@free.fr
  @version 0.1.0 \Date
  */
-
 class FileVideoAcquisition : public VirtualDeviceAcquisition {
 public:
 		
@@ -178,5 +180,7 @@ protected:
 	void purgeVirtualDevice();///< init of VirtualDeviceAcqiosition API variables
 
 };
+
+
 
 #endif

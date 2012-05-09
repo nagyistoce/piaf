@@ -28,6 +28,7 @@
 
 #define IMGUTILS_CPP
 
+#include "piaf-common.h"
 #include "imgutils.h"
 #include <errno.h>
 #include <sys/time.h>
@@ -2327,6 +2328,110 @@ void tmHSV2RGB(float H, float S, float V,
 	*pG = g * 255.f;
 	*pB = b * 255.f;
 }
+
+/** @brief Check image size and resize dest if not of same size */
+void tmAllocAndCloneImage(IplImage * img_in, IplImage **pimg_out)
+{
+	if(pimg_out && img_in)
+	{
+		IplImage * imgout = *pimg_out;
+		if(imgout && (img_in->width != imgout->width
+					  || img_in->height !=imgout->height
+					  || img_in->nChannels !=imgout->nChannels
+					  || img_in->depth !=imgout->depth
+					  )
+				)
+		{
+			PIAF_MSG(SWLOG_INFO, "image size changed %dx%dx%dx%d => %dx%dx%dx%d",
+					 imgout->width,imgout->height,imgout->depth,imgout->nChannels,
+					 img_in->width,img_in->height,img_in->depth,img_in->nChannels
+					 );
+			tmReleaseImage(pimg_out);
+		}
+		imgout = *pimg_out;
+		if(!imgout)
+		{
+			PIAF_MSG(SWLOG_INFO, "Create image %dx%dx%dx%d",
+					 img_in->width,img_in->height,img_in->depth,img_in->nChannels);
+			imgout = *pimg_out = tmCloneImage(img_in);
+		}
+		else
+		{
+			cvCopy(img_in, imgout);
+		}
+	}
+}
+
+/* Convert an IplImage into another, depending on nChannels */
+void tmConvert(IplImage * img_src, IplImage * img_dest)
+{
+	if(!img_src || !img_dest) {
+		return;
+	}
+	if(img_src->nChannels==img_dest->nChannels)
+	{
+		cvCopy(img_src, img_dest);
+	}
+
+	int code = 0;
+	switch(img_src->nChannels)
+	{
+	default:
+		PIAF_MSG(SWLOG_ERROR, "Unsupported nChannels=%d for src", img_src->nChannels);
+		break;
+	case 1:
+		switch(img_dest->nChannels)
+		{
+		default:
+			PIAF_MSG(SWLOG_ERROR, "Unsupported nChannels=%d for dest", img_dest->nChannels);
+			break;
+		case 3: // 1 -> 3
+			code = CV_GRAY2RGB;
+			break;
+		case 4: // 1 -> 4
+			code = CV_GRAY2BGRA;
+			break;
+		}
+		break;
+	case 3:
+		switch(img_dest->nChannels)
+		{
+		default:
+			PIAF_MSG(SWLOG_ERROR, "Unsupported nChannels=%d for dest", img_dest->nChannels);
+			break;
+		case 1: // 3 -> 1
+			code = CV_RGB2GRAY;
+			break;
+		case 4: // 3 -> 4
+			code = CV_RGB2BGRA;
+			break;
+		}
+		break;
+	case 4:
+		switch(img_dest->nChannels)
+		{
+		default:
+			PIAF_MSG(SWLOG_ERROR, "Unsupported nChannels=%d for dest", img_dest->nChannels);
+			break;
+		case 1: // 4 -> 1
+			code = CV_BGRA2GRAY;
+			break;
+		case 3: // 4 -> 3
+			code = CV_BGRA2RGB;
+			break;
+		case 4: // 4 -> 4???
+			cvCopy(img_src, img_dest);
+			break;
+		}
+		break;
+	}
+
+	if(code > 0)
+	{
+		cvCvtColor(img_src, img_dest, code);
+	}
+}
+
 
 
 IplImage * drawHistogram(float ** histo /*[3][256]*/, bool grayscaled)

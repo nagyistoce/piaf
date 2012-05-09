@@ -87,7 +87,7 @@ private:
 	QString mLastDirName; ///< Last opened directory with images
 	QString mLastPluginsDirName; ///< Last opened directory with plugin sequence
 
-	QImage mLoadImage; ///< Loaded image form list
+	IplImage * mLoadImage; ///< Loaded image form list
 	IplImage * mDisplayIplImage; ///< IplImage for display conversion
 
 	/// Filter processing manager

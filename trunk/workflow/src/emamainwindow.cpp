@@ -2194,7 +2194,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 				fprintf(stderr, "Workshop::%s:%d : could not start acquisition on dev '%s'.\n",
 						__func__, __LINE__, txt);
 
-				statusBar()->showMessage(tr("Error: canot initialize acquisition on ") + QString(txt));
+				statusBar()->showMessage(tr("Error: cannot initialize acquisition on ") + QString(txt));
 				delete myVAcq;
 			}
 			else
@@ -2343,7 +2343,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 				if(openniDevice->isAcquisitionRunning())
 				{
-					openniDevice->stopAcquisition();
+					//openniDevice->stopAcquisition();
 
 					statusBar()->showMessage(tr("Initialization OK"));
 					// add into explorer

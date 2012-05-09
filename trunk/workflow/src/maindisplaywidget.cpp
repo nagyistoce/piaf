@@ -284,17 +284,19 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 void MainDisplayWidget::updateDisplay()
 {
 	IplImage * captureImage = ( mPlayGrayscale ? mpFileVA->readImageY() : mpFileVA->readImageRGB32() );
-	PIAF_MSG(SWLOG_INFO, "setImage with IplImage %dx%dx%dx%d",
+	PIAF_MSG(SWLOG_DEBUG, "setImage with IplImage %dx%dx%dx%d",
 			 captureImage->width, captureImage->height, captureImage->nChannels, captureImage->depth
 			 );
 	ui->mainImageWidget->setImage(captureImage, NULL);
+	if(mpegEncoder && mIsRecording)
+	{
+		PIAF_MSG(SWLOG_INFO, "Recording...");
+		mpegEncoder->encodeImage(ui->mainImageWidget->getOutputImage());
+	}
 
 	// Convert to QImage before display
 	m_fullImage = iplImageToQImage( captureImage );
-	if(mpegEncoder && mIsRecording)
-	{
-		mpegEncoder->encodeImage(captureImage);
-	}
+
 
 
 	//ui->mainImageWidget->setImage(m_fullImage, NULL);
@@ -397,7 +399,8 @@ void MainDisplayWidget::slot_mPlayTimer_timeout()
 
 			if(mpegEncoder && mIsRecording)
 			{
-				mpegEncoder->encodeImage(captureImage);
+				PIAF_MSG(SWLOG_INFO, "Recording...");
+				mpegEncoder->encodeImage(ui->mainImageWidget->getOutputImage());
 			}
 
 			m_fullImage = iplImageToQImage( captureImage );
