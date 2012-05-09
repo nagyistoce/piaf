@@ -1469,7 +1469,7 @@ int PiafFilter::waitForAnswer(int timeout)
 	}
 	int iter = 0, maxiter = timeout * 1000 / TIMEOUT_STEP;
 
-	while(iter < maxiter) {
+	while(iter < maxiter && buffer) {
 		iter++;
 		// Waiting for answer :
 		buffer[0] = '\0';
@@ -1720,14 +1720,24 @@ void PiafFilter::setTimeUS(int dt_us)
 bool PiafFilter::waitForUnlock(int timeout_ms)
 {
 	int iter=0;
-	int itermax = timeout_ms*1000/20000;
+	struct timeval tv1, tv2;
+	gettimeofday(&tv1, NULL);
 	bool ok = false;
-	while(!ok && iter<itermax)
+
+	long dt_ms = 0;
+	while(!ok && dt_ms < timeout_ms)
 	{
-		if(comLock)
+		if(comLock) {
 			usleep(20000);
-		else ok = true;
+			gettimeofday(&tv2, NULL);
+			dt_ms = (tv2.tv_sec - tv1.tv_sec)*1000+(tv2.tv_usec - tv1.tv_usec)/1000;
+			PIAF_MSG(SWLOG_INFO, "Waited for %ld ms/max=%d",
+					 dt_ms, timeout_ms);
+		} else {
+			ok = true;
+		}
 	}
+
 	return ok;
 }
 
