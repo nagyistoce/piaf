@@ -447,6 +447,11 @@ int FilterSequencer::removeFilter(PiafFilter * filter)
 */
 int FilterSequencer::loadFilters()
 {
+	// unload loaded ones
+	PIAF_MSG(SWLOG_INFO, "Reload filters : 1) unload all availables...");
+
+	unloadAllAvailable();
+	PIAF_MSG(SWLOG_INFO, "Reload filters : 2) all available filter in file settings...");
 
 	DEBUG_MSG("Loading filters in '%s'", BASE_DIRECTORY "filters/list");
 

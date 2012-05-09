@@ -49,13 +49,14 @@ extern void init_OpenNI_depth_LUT(); // from openni_videoacquisition
 using namespace xn;
 
 
-#define SAMPLE_XML_PATH "../../../../Data/SamplesConfig.xml"
+#define SAMPLE_XML_PATH "/etc/openni/SamplesConfig.xml"
 #define SAMPLE_XML_PATH_LOCAL "SamplesConfig.xml"
 
 OpenNIFileAcquisition::OpenNIFileAcquisition(int idx_device)
 {
 	m_idx_device = idx_device;
 	mVideoFilePath = "";
+
 	init_OpenNI_depth_LUT();
 
 	init();
@@ -73,6 +74,7 @@ OpenNIFileAcquisition::OpenNIFileAcquisition()
 OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 {
 	init();
+	PIAF_MSG(SWLOG_INFO, "Opening file '%s'...", filename);
 	mVideoFilePath = filename;
 
 	// Open filename
@@ -138,6 +140,11 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 				mScaleFactorWidth = 2.f * mMinDistance * tan(fov.fHFOV / 2.)/ (float)mDepthSize.width;
 				mScaleFactorHeight = 2.f * mMinDistance * tan(fov.fVFOV / 2.)/ (float)mDepthSize.height;
 
+				PIAF_MSG(SWLOG_INFO, "Opened file '%s': %dx%d @ %g fps, scX,Y=%g,%g",
+						 filename,
+						 mDepthSize.width, mDepthSize.height,
+						 mDepthFPS,
+						 mScaleFactorWidth, mScaleFactorHeight);
 
 			}
 		}
@@ -154,6 +161,8 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 			}
 		}
 
+		// Repeat option
+		PIAF_MSG(SWLOG_INFO, "VideoRepeat=%c", mVideoRepeat ? 'T':'F');
 		if(!mVideoRepeat)
 		{
 			mOpenNIStatus = mPlayer.SetRepeat(FALSE); // So that when the video ends, the source stops generating
@@ -162,6 +171,9 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 		{
 			mOpenNIStatus = mPlayer.SetRepeat(TRUE);
 		}
+
+
+		PIAF_MSG(SWLOG_INFO, "File '%s' opened ! Success", filename);
 	}
 	else
 	{

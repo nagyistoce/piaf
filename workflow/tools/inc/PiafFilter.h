@@ -278,6 +278,7 @@ public:
 	/** @brief Get list of available filters */
 	QList<PiafFilter *> getAvailableFilters() { return mAvailableFiltersList; }
 
+
 	/** @brief Get loaded filter by index */
 	PiafFilter * getFilter(int idx);
 	/** @brief Get list of loaded filters */

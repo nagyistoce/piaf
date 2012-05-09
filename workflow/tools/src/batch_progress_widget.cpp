@@ -16,6 +16,8 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+#include "piaf-common.h"
+#include "piaf-settings.h"
 
 #include "batch_progress_widget.h"
 #include "ui_batch_progress_widget.h"
@@ -28,8 +30,7 @@
 
 #include "FileVideoAcquisition.h"
 
-#include "piaf-settings.h"
-#include "piaf-common.h"
+#include "imgutils.h"
 #include "OpenCVEncoder.h"
 
 #include "timehistogramwidget.h"
@@ -496,11 +497,13 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 		t_batch_item * item = (*it);
 		if(item->treeItem == treeItem)
 		{
-			CvSize oldSize = cvSize(mLoadImage.width(), mLoadImage.height());
-			int oldNChannels = mLoadImage.depth()/8;
+			CvSize oldSize = cvSize(mLoadImage->width, mLoadImage->height);
+			int oldNChannels = mLoadImage->nChannels;
 			int oldDepth = IPL_DEPTH_8U;
 
-			if(mLoadImage.load(item->absoluteFilePath))
+			swReleaseImage(&mLoadImage);
+			mLoadImage = cvLoadImage(item->absoluteFilePath.toUtf8().data());
+			if(mLoadImage)
 			{
 				fprintf(stderr, "[Batch] %s:%d : loaded '%s'\n",
 						__func__, __LINE__,
@@ -508,7 +511,7 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 //				QPixmap pixmap;
 //				pixmap = pixmap.fromImage(loadImage.scaled(ui->imageLabel->size(),
 //														   Qt::KeepAspectRatio));
-				ui->imageLabel->setRefImage(&mLoadImage);
+				ui->imageLabel->setRefImage(mLoadImage);
 				ui->imageLabel->switchToSmartZoomMode();// reset zooming
 
 				if(strlen(mPreviewFilterSequencer.getPluginSequenceFile())>0)
@@ -576,8 +579,8 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 								loadedImage->depth, loadedImage->nChannels);
 
 						// Copy into QImage
-						mLoadImage = iplImageToQImage(imageOut);
-						ui->imageLabel->setRefImage(&mLoadImage);
+						//mLoadImage = iplImageToQImage(imageOut);
+						ui->imageLabel->setRefImage(mLoadImage);
 						ui->imageLabel->update();
 					}
 				}
@@ -788,15 +791,18 @@ void BatchProgressWidget::on_mDisplayTimer_timeout()
 					);
 
 			// Copy into QImage
-			QImage qImage( (uchar*)mDisplayIplImage->imageData,
-						   mDisplayIplImage->width, mDisplayIplImage->height, mDisplayIplImage->widthStep,
-						   ( mDisplayIplImage->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
-							QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
-							)
-						  );
+//			QImage qImage( (uchar*)mDisplayIplImage->imageData,
+//						   mDisplayIplImage->width, mDisplayIplImage->height, mDisplayIplImage->widthStep,
+//						   ( mDisplayIplImage->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
+//							QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
+//							)
+//						  );
 
-			mLoadImage = qImage.copy();
-			ui->imageLabel->setRefImage(&mLoadImage);
+			swReleaseImage(&mLoadImage);
+			mLoadImage = tmCloneImage(mDisplayIplImage);
+
+			//mLoadImage = qImage.copy();
+			ui->imageLabel->setRefImage(mLoadImage);
 			ui->imageLabel->update();
 		}
 	}

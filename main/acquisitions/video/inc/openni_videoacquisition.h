@@ -77,7 +77,7 @@ Blue for
 
 #define OPENNI_FRAME_W		640
 #define OPENNI_FRAME_H		480
-#define OPENNI_FPS			25
+#define OPENNI_FPS			30
 
 using namespace xn;
 

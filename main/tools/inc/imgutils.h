@@ -126,14 +126,21 @@ void tmPrintProperties(IplImage * img);
 /** @brief Return image layer depth in bytes (e.g. 8bit jpeg is 1 byte, 16bit:2bytes...) */
 int tmByteDepth(IplImage * iplImage);
 
-/** @brief Create an IplImage width OpenCV's cvCreateImage and clear buffer */
+/** @brief Create an IplImage with OpenCV's cvCreateImage and clear buffer */
 #define tmCreateImage(_size, _depth, _channels) \
 	subCreateImage(__FILE__, __func__, __LINE__, (_size), (_depth), (_channels))
 
+/** @brief Create an IplImage header with OpenCV's cvCreateImageHeader and register it */
+#define tmCreateImageHeader(_size, _depth, _channels) \
+	subCreateImageHeader(__FILE__, __func__, __LINE__, (_size), (_depth), (_channels))
 
-/** @brief Create an IplImage width OpenCV's cvCreateImage and clear buffer */
+/** @brief Create an IplImage with OpenCV's cvCreateImage and clear buffer */
 IplImage * subCreateImage(const char * file, const char * func, int line,
 						  CvSize size, int depth, int channels);
+/** @brief Create an IplImage header with OpenCV's cvCreateImageHeader and register it */
+IplImage * subCreateImageHeader(const char * file, const char * func, int line,
+						  CvSize size, int depth, int channels);
+
 /** @brief Create/allocate a copy of an IplImage  */
 #define tmCloneImage(_img) \
 	subCloneImage(__FILE__, __func__, __LINE__, (_img))
@@ -150,13 +157,27 @@ IplImage * subCloneImage(const char * file, const char * func, int line,
 void subReleaseImage(const char * file, const char * func, int line,
 					 IplImage ** img);
 
+/** @brief Release an image header and clear pointer */
+#define tmReleaseImageHeader(_img) \
+	subReleaseImageHeader(__FILE__, __func__, __LINE__, (_img))
+
+/** @brief Release an image header and clear pointer */
+void subReleaseImageHeader(const char * file, const char * func, int line,
+					 IplImage ** img);
+
+
 /** @brief print the list of allocated IplImage */
 void tmPrintIplImages();
 
 
+/** @brief Convert an IplImage into another, depending on nChannels */
+void tmConvert(IplImage * img_src, IplImage * img_dest);
+
 /** @brief Copy an IplImage into another */
 void tmCopyImage(IplImage * img_src, IplImage * img_dest);
 
+/** @brief Copy image size and resize dest if not of same size */
+void tmAllocAndCloneImage(IplImage * img_in, IplImage **pimg_out);
 
 /** @brief Fast conversion from color/16bit image to 8bit grayscale image */
 IplImage * tmFastConvertToGrayscale(IplImage * img);

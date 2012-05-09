@@ -325,10 +325,10 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 		t_batch_item * item = (*it);
 		if(item->treeItem == treeItem)
 		{
-			CvSize oldSize = cvSize(mLoadImage.width(), mLoadImage.height());
-			int oldDepth = mLoadImage.depth();
-
-			if(mLoadImage.load(item->absoluteFilePath))
+			CvSize oldSize = cvSize(mLoadImage->width, mLoadImage->height);
+			int oldDepth = mLoadImage->nChannels;
+			mLoadImage = cvLoadImage(item->absoluteFilePath.toUtf8().data());
+			if(mLoadImage)
 			{
 				fprintf(stderr, "[Batch] %s:%d : loaded '%s'\n",
 						__func__, __LINE__,
@@ -336,14 +336,14 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 //				QPixmap pixmap;
 //				pixmap = pixmap.fromImage(loadImage.scaled(ui->imageLabel->size(),
 //														   Qt::KeepAspectRatio));
-				ui->imageLabel->setRefImage(&mLoadImage);
+				ui->imageLabel->setRefImage(mLoadImage);
 				ui->imageLabel->switchToSmartZoomMode();// reset zooming
 
 				if(strlen(mPreviewFilterManager.getPluginSequenceFile())>0)
 				{
 					// TODO : process image
-					QImage loadedQImage;
-					if(loadedQImage.load(item->absoluteFilePath))
+					IplImage * loadedIplImage = cvLoadImage(item->absoluteFilePath.toUtf8().data());
+					if(loadedIplImage)
 					{
 
 					}
@@ -354,12 +354,12 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 								item->absoluteFilePath.toAscii().data());
 					}
 
-					if(!loadedQImage.isNull())
+					if(!mLoadImage)
 					{
 						if(mBatchOptions.reload_at_change
-						   || oldSize.width != loadedQImage.width()
-						   || oldSize.height != loadedQImage.height()
-						   || oldDepth != loadedQImage.depth()
+						   || oldSize.width != loadedIplImage->width
+						   || oldSize.height != loadedIplImage->nChannels
+						   || oldDepth != loadedIplImage->nChannels
 						   )
 						{
 							fprintf(stderr, "Batch Preview::%s:%d : reload_at_change=%c "
@@ -368,45 +368,42 @@ void BatchFiltersMainWindow::on_filesTreeWidget_itemClicked(
 									__func__, __LINE__,
 									mBatchOptions.reload_at_change ? 'T':'F',
 									oldSize.width, oldSize.height, oldDepth,
-									loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
+									loadedIplImage->width, loadedIplImage->height,
+									loadedIplImage->nChannels
 									);
 							// unload previously loaded filters
 							mPreviewFilterManager.slotUnloadAll();
+
 							// reload same file
 							mPreviewFilterManager.loadFilterList(mPreviewFilterManager.getPluginSequenceFile());
 						}
 
-						oldSize.width = loadedQImage.width();
-						oldSize.height = loadedQImage.height();
-						oldDepth = loadedQImage.depth();
+						oldSize = cvGetSize(loadedIplImage);
+						oldDepth = loadedIplImage->nChannels;
 
 						IplImage * outputImage = NULL;
-						IplImage * inputImageHeader = swCreateImageHeader(cvSize(loadedQImage.width(), loadedQImage.height()),
-																		  IPL_DEPTH_8U, loadedQImage.depth() == 32 ? 4 : 1);
-
-						inputImageHeader->imageData = (char *)loadedQImage.bits();
 
 						fprintf(stderr, "[Batch] %s:%d : process sequence '%s' on image '%s' (%dx%dx%d)\n",
 								__func__, __LINE__,
 								mPreviewFilterManager.getPluginSequenceFile(),
 								item->absoluteFilePath.toAscii().data(),
-								loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
+								loadedIplImage->width, loadedIplImage->height, loadedIplImage->nChannels
 								);
 						// Process this image with filters
-						mPreviewFilterManager.processImage(inputImageHeader, &outputImage);
+						mPreviewFilterManager.processImage(loadedIplImage, &outputImage);
 
 						fprintf(stderr, "[Batch] %s:%d : processd sequence '%s' => display image '%s' (%dx%dx%d)\n",
 								__func__, __LINE__,
 								mPreviewFilterManager.getPluginSequenceFile(),
 								item->absoluteFilePath.toAscii().data(),
-								loadedQImage.width(), loadedQImage.height(), loadedQImage.depth());
+								loadedIplImage->width, loadedIplImage->height, loadedIplImage->nChannels);
 
 						// Copy into QImage
-						mLoadImage = iplImageToQImage(outputImage).copy(); //qImage.copy();
+						//mLoadImage = iplImageToQImage(outputImage).copy(); //qImage.copy();
+						ui->imageLabel->setRefImage(outputImage);
 						swReleaseImage(&outputImage);
-						swReleaseImage(&inputImageHeader);
+						swReleaseImage(&loadedIplImage);
 
-						ui->imageLabel->setRefImage(&mLoadImage);
 						ui->imageLabel->update();
 					}
 				}
@@ -606,15 +603,18 @@ void BatchFiltersMainWindow::on_mDisplayTimer_timeout()
 					);
 
 			// Copy into QImage
-			QImage qImage( (uchar*)mDisplayIplImage->imageData,
-						   mDisplayIplImage->width, mDisplayIplImage->height, mDisplayIplImage->widthStep,
-						   ( mDisplayIplImage->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
-							QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
-							)
-						  );
+//			QImage qImage( (uchar*)mDisplayIplImage->imageData,
+//						   mDisplayIplImage->width, mDisplayIplImage->height, mDisplayIplImage->widthStep,
+//						   ( mDisplayIplImage->nChannels == 4 ? QImage::Format_RGB32://:Format_ARGB32 :
+//							QImage::Format_RGB888 //Set to RGB888 instead of ARGB32 for ignore Alpha Chan
+//							)
+//						  ;
 
-			mLoadImage = qImage.copy();
-			ui->imageLabel->setRefImage(&mLoadImage);
+			//mLoadImage = qImage.copy();
+			swReleaseImage(&mLoadImage);
+			mLoadImage = cvCloneImage(mDisplayIplImage);
+
+			ui->imageLabel->setRefImage(mLoadImage);
 			ui->imageLabel->update();
 		}
 	}
@@ -793,8 +793,8 @@ void BatchFiltersThread::run()
 						//IplImage * loadedImage = cvLoadImage => does not work
 						// There is a conflict between Qt and opencv for PNGs
 						// try like in Piaf with Qt's loading
-						QImage loadedQImage;
-						if(loadedQImage.load(item->absoluteFilePath))
+						IplImage * loadedIplImage = cvLoadImage(item->absoluteFilePath.toUtf8().data());
+						if(loadedIplImage)
 						{
 
 						}
@@ -806,7 +806,7 @@ void BatchFiltersThread::run()
 							item->processing_state = ERROR_READ;
 						}
 
-						if(!loadedQImage.isNull()
+						if(loadedIplImage
 								&& item->processing_state != ERROR_READ)
 						{
 							if(g_debug_BatchFiltersThread) {
@@ -817,9 +817,9 @@ void BatchFiltersThread::run()
 							}
 
 							if(mBatchOptions.reload_at_change
-							   || oldSize.width != loadedQImage.width()
-							   || oldSize.height != loadedQImage.height()
-							   || oldDepth != loadedQImage.depth()
+							   || oldSize.width != loadedIplImage->width
+							   || oldSize.height != loadedIplImage->height
+							   || oldDepth != loadedIplImage->nChannels
 							   )
 							{
 								if(g_debug_BatchFiltersThread) {
@@ -829,7 +829,7 @@ void BatchFiltersThread::run()
 										__func__, __LINE__,
 										mBatchOptions.reload_at_change ? 'T':'F',
 										oldSize.width, oldSize.height, oldDepth,
-										loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
+										loadedIplImage->width, loadedIplImage->height, loadedIplImage->nChannels
 										);
 								}
 								if(encoder) { delete encoder; encoder = NULL; }
@@ -841,26 +841,23 @@ void BatchFiltersThread::run()
 							}
 
 							//
-							oldDepth = loadedQImage.depth();
+							oldDepth = loadedIplImage->nChannels;
 
 							IplImage * outputImage = NULL;
-							IplImage * inputImageHeader = swCreateImageHeader(cvSize(loadedQImage.width(), loadedQImage.height()),
-																			  IPL_DEPTH_8U, loadedQImage.depth() == 32 ? 4 : 1);
-
-							inputImageHeader->imageData = (char *)loadedQImage.bits();
+							IplImage * inputImageHeader = loadedIplImage;
 
 							fprintf(stderr, "[Batch] %s:%d : process sequence '%s' on image '%s' (%dx%dx%d)\n",
 									__func__, __LINE__,
 									mpFilterManager->getPluginSequenceFile(),
 									item->absoluteFilePath.toAscii().data(),
-									loadedQImage.width(), loadedQImage.height(), loadedQImage.depth()
+									loadedIplImage->width, loadedIplImage->height, loadedIplImage->nChannels
 									);
 
 							fprintf(stderr, "[Batch] %s:%d : processd sequence '%s' => display image '%s' (%dx%dx%d)\n",
 									__func__, __LINE__,
 									mpFilterManager->getPluginSequenceFile(),
 									item->absoluteFilePath.toAscii().data(),
-									loadedQImage.width(), loadedQImage.height(), loadedQImage.depth());
+									loadedIplImage->width, loadedIplImage->height, loadedIplImage->nChannels);
 
 
 							// Process this image with filters
@@ -879,7 +876,7 @@ void BatchFiltersThread::run()
 									QString outFile = item->absoluteFilePath
 													  + "-" + mBatchOptions.sequence_name + "." + fi.extension();
 
-									//loadedQImage.save(outFile);
+									//loadedIplImage.save(outFile);
 									cvSaveImage(outFile.toUtf8().data(), outputImage);
 								}
 
@@ -1094,7 +1091,7 @@ void BatchFiltersThread::run()
 								swReleaseImage(&loadedImage);
 							}
 						}
-
+						swReleaseImage(&loadedIplImage);
 
 						// check if we need to make a pause
 						if(mPause) {
