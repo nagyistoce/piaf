@@ -72,7 +72,7 @@ SOURCES += src/main.cpp \
 	tools/src/workshoptool.cpp \
 	tools/src/previewimage.cpp \
     tools/src/workshopvideocapture.cpp \
-    tools/src/SwPluginCore.cpp \
+    ../piaflib/src/SwPluginCore.cpp \
     tools/src/SwFilters.cpp \
     tools/src/workshopimagetool.cpp \
     tools/src/videoplayertool.cpp \
@@ -132,15 +132,18 @@ else {
     }
 }
 
+INCLUDEPATH += ../piaflib/inc
+DEPENDPATH += ../piaflib/
+
 HEADERS += inc/workshop.h \
     inc/objectsexplorer.h \
     inc/sw_component.h \
     inc/sw_library.h \
     inc/sw_structure.h \
-    inc/sw_types.h \
+    ../piaflib/inc/sw_types.h \
     inc/workshoplist.h \
-    inc/SwTypes.h \
-	inc/SwImage.h \
+    ../piaflib/inc/SwTypes.h \
+	../piaflib/inc/SwImage.h \
 	inc/piaf-common.h \
 	components/inc/workshopcomponent.h \
     components/inc/workshopmeasure.h \
@@ -150,7 +153,7 @@ HEADERS += inc/workshop.h \
 	tools/inc/workshoptool.h \
 	tools/inc/previewimage.h \
     tools/inc/workshopvideocapture.h \
-    tools/inc/SwPluginCore.h \
+    ../piaflib/inc/SwPluginCore.h \
     tools/inc/SwFilters.h \
     tools/inc/workshopimagetool.h \
     tools/inc/qlistboxmarker.h \

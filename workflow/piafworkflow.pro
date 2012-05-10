@@ -16,6 +16,8 @@ linux-g++: {
 CONFIG += debug
 
 DEFINES += PIAFWORKFLOW
+PIAFLIB = ../piaflib
+INCLUDEPATH += ../piaflib/inc
 
 unix: {
     DEFINES += VERSION_YY="`date +%Y`" \
@@ -165,7 +167,7 @@ exists(tototatatutu) {
 
 # $$LEGACYPATH/src/main.cpp \
 SOURCES += \
-	$$LEGACYPATH/tools/src/SwPluginCore.cpp \
+	$$PIAFLIB/src/SwPluginCore.cpp \
 #	$$LEGACYPATH/acquisitions/video/src/FileVideoAcquisition.cpp \
 	$$LEGACYPATH/acquisitions/video/src/ffmpeg_file_acquisition.cpp \
 	$$LEGACYPATH/acquisitions/video/src/videocapture.cpp \
@@ -177,15 +179,16 @@ SOURCES += \
 	$$LEGACYPATH/acquisitions/video/src/opencvvideoacquisition.cpp \
 	$$LEGACYPATH/src/plugineditdialog.cpp \
 	$$LEGACYPATH/tools/src/vidacqsettingswindow.cpp \
-	$$LEGACYPATH/src/imagewidget.cpp \
 	$$LEGACYPATH/tools/src/swimage_utils.cpp
 
+
 HEADERS += \
-	$$LEGACYPATH/inc/sw_types.h \
-	$$LEGACYPATH/inc/SwTypes.h \
-	$$LEGACYPATH/inc/SwImage.h \
+	$$PIAFLIB/inc/sw_types.h \
+	$$PIAFLIB/inc/SwTypes.h \
+	$$PIAFLIB/inc/SwImage.h \
+	$$PIAFLIB/inc/SwPluginCore.h \
+	$$PIAFLIB/inc/swopencv.h \
 	$$LEGACYPATH/inc/piaf-common.h \
-	$$LEGACYPATH/tools/inc/SwPluginCore.h \
 	$$LEGACYPATH/tools/inc/qlistboxmarker.h \
 	$$LEGACYPATH/tools/inc/OpenCVEncoder.h \
 	tools/inc/moviebookmarkform.h \
@@ -201,9 +204,7 @@ HEADERS += \
 	$$LEGACYPATH/tools/inc/vidacqsettingswindow.h \
 	$$LEGACYPATH/inc/piaf-settings.h \
 	$$LEGACYPATH/inc/nolinux_videodev.h \
-	$$LEGACYPATH/inc/imagewidget.h \
 	$$LEGACYPATH/tools/inc/swimage_utils.h \
-	$$LEGACYPATH/inc/swopencv.h \
     ../main/acquisitions/video/inc/file_video_acquisition_factory.h
 
 
@@ -316,6 +317,7 @@ SOURCES += tools/src/PiafFilter.cpp \
 	src/maindisplaywidget.cpp \
 	src/timelinewidget.cpp \
 	src/pluginsettingswidget.cpp \
+	tools/src/imagewidget.cpp \
 	tools/src/collectioneditdialog.cpp \
 	tools/src/preferencesdialog.cpp \
 	tools/src/batch_progress_widget.cpp \
@@ -345,6 +347,7 @@ HEADERS += tools/inc/PiafFilter.h \
 	inc/maindisplaywidget.h \
 	inc/timelinewidget.h \
 	inc/pluginsettingswidget.h \
+	tools/inc/imagewidget.h \
 	tools/inc/collectioneditdialog.h \
 	inc/workflowtypes.h \
 	tools/inc/preferencesdialog.h \
@@ -375,7 +378,6 @@ FORMS += ui/navimagewidget.ui \
 	tools/ui/sequence_select_dialog.ui
 
 
-
 unix: {
 	MOC_DIR = .moc
 	OBJECTS_DIR = .obj
@@ -386,7 +388,6 @@ unix: {
 
 INCLUDEPATH += $$LEGACYPATH/ui $$LEGACYPATH/tools/ui
 
-DEPENDPATH += $$INCLUDEPATH
 DEPENDPATH += $$LEGACYPATH/ui
 
 #no more QwT in Qt4 version of piaf DEPENDPATH += ../otherlibs/qwt-sisell-0.1/inc

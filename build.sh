@@ -1,6 +1,5 @@
 #!/bin/bash
 echo "Building piaf..."
-cd main/
 
 
 print_install() {
@@ -13,10 +12,13 @@ if [ -f /Developer/Tools/Qt/qmake ]; then
 	QMAKE="/Developer/Tools/Qt/qmake -r -spec macx-g++ CONFIG+=release "
 fi
 
+cd piaflib
 echo " + building plugins library..."
 $QMAKE piaf-lib.pro && make $@ || print_install 
+cd ..
 
-echo " + building GUI..."
+echo " + building Legacy GUI..."
+cd main
 $QMAKE piaf.pro && make $@ || print_install 
 cd ..
 
