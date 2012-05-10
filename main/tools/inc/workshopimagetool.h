@@ -160,8 +160,8 @@ private:
 	int viewPixel;
 	int imagePixel;
 
-	IplImage * OrigImgRGB;	///< Original image (without processing)
-	IplImage * ProcImgRGB;	///< Processed image (after processing)
+	QImage OrigImgRGB;	///< Original image (without processing)
+	QImage ProcImgRGB;	///< Processed image (after processing)
 
 
 	/// Ready-to-use QImage object for RGB image

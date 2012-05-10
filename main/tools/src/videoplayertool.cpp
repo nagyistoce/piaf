@@ -383,7 +383,7 @@ void VideoPlayerTool::appendBookmark(t_movie_pos pos) {
 	if(m_fileVA) {
 		if(m_fileVA->getPrevAbsolutePosition() == pos.prevAbsPosition) {
 			// this position is the same than added position, so we can get the current image
-			QImage pImage = iplImageToQImage( detailsView->imageView()->getIplImage() );
+			QImage pImage = detailsView->imageView()->getQImage()->copy() ;
 			if(!pImage.isNull()) {
 				//
 				QPixmap pixmap = QPixmap::fromImage( pImage.scaledToHeight(22) );

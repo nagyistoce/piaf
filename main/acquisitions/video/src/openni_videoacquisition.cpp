@@ -386,6 +386,7 @@ int OpenNIVideoAcquisition::stopAcquisition()
 	}
 
 	if(depth) {
+		OPENNI_PRINTF("Stop depth generation ...");
 		depth.StopGenerating();
 //		depth.Release();
 	}
