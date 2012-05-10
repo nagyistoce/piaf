@@ -93,7 +93,7 @@ SOURCES += src/main.cpp \
     tools/src/batchfiltersmainwindow.cpp \
 	tools/src/vidacqsettingswindow.cpp \
 	tools/src/swimage_utils.cpp \
-	src/imagewidget.cpp \
+	tools/src/imagewidget.cpp \
 	tools/src/time_histogram.cpp
 
 # Replaced by OpenCVEncoder.cpp
@@ -177,8 +177,8 @@ HEADERS += inc/workshop.h \
 	tools/inc/vidacqsettingswindow.h \
 	inc/piaf-settings.h \
 	inc/nolinux_videodev.h \
-	inc/imagewidget.h \
-    tools/inc/time_histogram.h \
+	tools/inc/imagewidget.h \
+	tools/inc/time_histogram.h \
 
 exists(/usr/local/include/libfreenect/libfreenect.h) {
 	message("The system knows Freenect ;)")

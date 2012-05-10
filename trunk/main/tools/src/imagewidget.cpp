@@ -15,18 +15,13 @@
  *                                                                         *
  ***************************************************************************/
 
-#include "piaf-common.h"
-#include <math.h>
-
 #include "imagewidget.h"
-#include "imgutils.h"
-
-#include "virtualdeviceacquisition.h" // for iplImageToQImage
-
+#include "piaf-common.h"
 #include <stdio.h>
 #include <QPainter>
 #include <QShortcut>
 
+#include <math.h>
 
 #include <qcolor.h>
 
@@ -34,7 +29,6 @@
 #include <QPixmap>
 #include <QPaintEvent>
 #include <QBitmap>
-
 
 unsigned char RthermicBlack2Red(int p) {
 	int dp = p-170;
@@ -81,73 +75,10 @@ unsigned char BthermicBlue2Red(int p) {
 
 bool g_debug_ImageWidget = false;
 
-IplImage * gLUT_BlueToRed = NULL;
-IplImage * gLUT_BlackToRed = NULL;
-IplImage * gLUT_Inverted = NULL;
-IplImage * gLUT_Indexed = NULL;
-IplImage * gLUT_Gray = NULL;
-
-void initColorLUTs()
-{
-	if(gLUT_BlueToRed) { return; }
-
-	gLUT_BlueToRed = tmCreateImage(cvSize(256,1), IPL_DEPTH_8U, 4);
-	gLUT_BlackToRed = tmCreateImage(cvSize(256,1), IPL_DEPTH_8U, 4);
-	gLUT_Indexed = tmCreateImage(cvSize(256,1), IPL_DEPTH_8U, 4);
-	gLUT_Inverted = tmCreateImage(cvSize(256,1), IPL_DEPTH_8U, 4);
-	gLUT_Gray = tmCreateImage(cvSize(256,1), IPL_DEPTH_8U, 4);
-	int hue = 17;
-	QColor color;
-	for(int col = 0; col<256; col++, hue+=97)
-	{
-		u8 R, G, B, A=255;
-		// Indexed
-		color.setHsv(hue%360, 255, 127);
-		R = color.red();
-		G = color.green();
-		B = color.blue();
-
-#define CONCAT_BGRA (A << 24 | R << 16 | G << 8 | B)
-		*((u32 *)gLUT_Indexed->imageData + col) = CONCAT_BGRA;
-
-		// Blue to red
-		R = RthermicBlue2Red(col);
-		G = GthermicBlue2Red(col);
-		B = BthermicBlue2Red(col);
-		*((u32 *)gLUT_BlueToRed->imageData + col) = CONCAT_BGRA;
-
-		// Black to red
-		R = RthermicBlack2Red(col);
-		G = GthermicBlack2Red(col);
-		B = BthermicBlack2Red(col);
-		*((u32 *)gLUT_BlackToRed->imageData + col) = CONCAT_BGRA;
-
-		// Gray
-		R = G = B = col;
-		*((u32 *)gLUT_Gray->imageData + col) = CONCAT_BGRA;
-
-		// Inverted
-		R = G = B = 255 - col;
-		*((u32 *)gLUT_Inverted->imageData + col) = CONCAT_BGRA;
-	}
-
-//	// Save for debug
-//	cvSaveImage(TMP_DIRECTORY "LUT-gray.png", gLUT_Gray);
-	cvSaveImage(TMP_DIRECTORY "LUT-indexed.png", gLUT_Indexed);
-//	cvSaveImage(TMP_DIRECTORY "LUT-inverted.png", gLUT_Inverted);
-//	cvSaveImage(TMP_DIRECTORY "LUT-blue2red.png", gLUT_BlueToRed);
-//	cvSaveImage(TMP_DIRECTORY "LUT-black2red.png", gLUT_BlackToRed);
-}
-
 
 ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 	: QWidget(parent)
 {
-	initColorLUTs();
-
-
-	m_greyImage = m_displayImageBGRA = NULL;
-
 	mZoomFit = true; // fit to size by default
 	mZoomFitFactor = -1.; // don't know yet the zoom factor
 	xMouseMoveStart = -1;
@@ -155,7 +86,7 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 	xZoomCenter = yZoomCenter = 0;
 
 	//setFocusPolicy (Qt::StrongFocus);
-	m_displayImageBGRA=NULL;
+	dImage=NULL;
 	m_pOriginalImage = NULL;
 
 	m_colorMode = 0;
@@ -177,11 +108,6 @@ ImageWidget::ImageWidget(QWidget *parent, const char *name, Qt::WFlags f)
 											this);
 	connect(shortcut_1, SIGNAL(activated()), this, SLOT(slot_shortcut_1_activated()));
 }
-void ImageWidget::purge()
-{
-	tmReleaseImage(&m_greyImage);
-	tmReleaseImage(&m_displayImageBGRA);
-}
 
 /* display a grid over the image */
 void ImageWidget::showGrid(int steps)
@@ -194,36 +120,9 @@ void ImageWidget::showGrid(int steps)
 	}
 }
 
-void ImageWidget::setRefImage(IplImage *pIm)
+void ImageWidget::setRefImage(QImage *pIm)
 {
-	if(!pIm)
-	{
-		// Clear images
-		m_pOriginalImage = NULL;
-		tmReleaseImage(&m_greyImage);
-		tmReleaseImage(&m_displayImageBGRA);
-		update();
-		return;
-	}
-
-	if(m_displayImageBGRA && (m_displayImageBGRA->width != pIm->width
-			|| m_displayImageBGRA->height != pIm->height) ) {
-		tmReleaseImage(&m_displayImageBGRA);
-	}
-	if(!m_displayImageBGRA)
-	{
-		m_displayImageBGRA = tmCreateImage(cvGetSize(pIm), IPL_DEPTH_8U, 4);
-	}
-	if(m_greyImage && (m_greyImage->width != pIm->width
-			|| m_greyImage->height != pIm->height) ) {
-		tmReleaseImage(&m_greyImage);
-	}
-	if(!m_greyImage)
-	{
-		m_greyImage = tmCreateImage(cvGetSize(pIm), IPL_DEPTH_8U, 1);
-	}
-
-	m_pOriginalImage = pIm;
+	dImage = m_pOriginalImage = pIm;
 
 	setColorMode(m_colorMode);
 }
@@ -338,64 +237,105 @@ int ImageWidget::setEditMode(int mode)
 }
 
 void ImageWidget::setColorMode(int mode)
-{	
-	if(mode >= COLORMODE_GREY && mode <= COLORMODE_MAX )
-	{
+{
+	if(mode >= COLORMODE_GREY && mode <= COLORMODE_MAX ) {
 		m_colorMode = mode;
 	} else {
 		m_colorMode = COLORMODE_GREY;
 	}
 
-	if(m_colorMode == COLORMODE_GREY)
-	{
-		// convert from input image
-		tmConvert(m_pOriginalImage, m_displayImageBGRA);
-	}
-	else {
-		// convert to grey, then use LUT
-		tmConvert(m_pOriginalImage, m_greyImage);
-		m_pLUT = NULL;
-		switch(m_colorMode)
+	if(m_pOriginalImage) {
+		if(m_pOriginalImage->depth()==8) {
+			m_greyImage = QImage();
+			dImage = m_pOriginalImage;
+		}
+		else
 		{
+			if(m_colorMode != COLORMODE_GREY)
+			{
+				fprintf(stderr, "%s:%d : convert to grey\n", __func__, __LINE__);
+				/// \todo FIXME : the colors are not exactly matched in the exact order
+				m_greyImage = m_pOriginalImage->convertToFormat(QImage::Format_Indexed8,
+															 Qt::OrderedDither | Qt::ColorOnly	);
+				dImage = &m_greyImage;
+			}
+			else
+			{
+				// Reset image
+				m_greyImage = QImage();
+				dImage = m_pOriginalImage;
+			}
+		}
+	}
+
+	if(m_colorMode == COLORMODE_GREY) // we changed to normal/grey mode
+	{
+		if(m_pOriginalImage
+				&& m_pOriginalImage != dImage  // we were on a greyscaled image
+				&& m_pOriginalImage->depth() != 8	// and original is not greyscaled
+				)
+		{
+			fprintf(stderr, "%s:%d : grey, back to normal\n", __func__, __LINE__);
+			// back to normal mode
+			dImage = m_pOriginalImage;
+		}
+	}
+
+//	fprintf(stderr, "[ImgW]::%s:%d : Dimage=%p original=%p colormode=%d depth=%d\n",
+//			__func__, __LINE__,
+//			dImage, m_pOriginalImage , m_colorMode,
+//			dImage ? dImage->depth() : 0
+//			);
+	if(dImage) {
+		if(dImage->depth() > 8) {
+			update();
+			return;
+		}
+
+		dImage->setNumColors(256);
+		QColor col;
+		//fprintf(stderr, "ImageWidget::%s:%d : colorMode = %d\n", __func__, __LINE__, m_colorMode);
+		// Change color mode
+		switch(m_colorMode) {
 		default:
-			PIAF_MSG(SWLOG_ERROR, "Invalid color mode %d", m_colorMode);
-			break;
-		case COLORMODE_INDEXED:
-			m_pLUT = gLUT_Indexed;
+		case COLORMODE_GREY:
+			for(int i=0; i<256; i++) {
+				col.setHsv(0,0,i);
+				dImage->setColor(i, col.rgb());
+			}
 			break;
 		case COLORMODE_GREY_INVERTED:
-			m_pLUT = gLUT_Inverted;
-			break;
-		case COLORMODE_THERMIC_BLACK2RED:
-			m_pLUT = gLUT_BlackToRed;
-			break;
-		case COLORMODE_THERMIC_BLUE2RED:
-			m_pLUT = gLUT_BlueToRed;
-			break;
-		}
-		if(m_pLUT) {
-			try {
-				// convert using LUT
-				cvCvtColor(m_greyImage, m_displayImageBGRA, CV_GRAY2BGRA);
-				cvLUT(m_displayImageBGRA, m_displayImageBGRA, m_pLUT);
+			for(int i=0; i<256; i++) {
+				//col.setRgb(255-i, 255-i, 255-i);
+				col.setHsl(0,0,255-i);
+				dImage->setColor(i, col.rgb());
 			}
-			catch(cv::Exception e)
-			{
-				cvZero(m_displayImageBGRA);
-				PIAF_MSG(SWLOG_ERROR, "invalid call to cvLUT: grey=%dx%dx%d "
-						 "=> display=%dx%dx%d / m_pLUT=%p=%dx%dx%d",
-						 m_greyImage->width, m_greyImage->height, m_greyImage->nChannels,
-						 m_displayImageBGRA->width, m_displayImageBGRA->height, m_displayImageBGRA->nChannels,
-						 m_pLUT, m_pLUT->width, m_pLUT->height, m_pLUT->nChannels
-						 );
+			break;
+		case COLORMODE_THERMIC_BLUE2RED: // "Thermic" blue to red
+			for(int i=0; i<256; i++) {
+				dImage->setColor(i, qRgb(RthermicBlue2Red(i), GthermicBlue2Red(i), BthermicBlue2Red(i)));
 			}
+			break;
+		case COLORMODE_THERMIC_BLACK2RED: // "Thermic" black to red
+			for(int i=0; i<256; i++) {
+				dImage->setColor(i, qRgb(RthermicBlack2Red(i), GthermicBlack2Red(i), BthermicBlack2Red(i)));
+			}
+			break;
+		case COLORMODE_INDEXED:
+			col.setHsv(0,0,0);
+			dImage->setColor(0, col.rgb());
+
+			int hue = 17;
+			for(int i=1; i<256; i++, hue+=37) {
+				col.setHsv(hue%360, 255, 127);
+				dImage->setColor(i, col.rgb());
+			}
+			break;
 		}
 	}
 
-	m_displayImage = iplImageToQImage(m_displayImageBGRA);
-	repaint();
+	update();
 }
-
 #define KEY_ZOOM_INC	0.2f
 
 void ImageWidget::focusInEvent ( QFocusEvent * event )
@@ -544,15 +484,14 @@ void ImageWidget::mousePressEvent(QMouseEvent *e) {
 					QRect onDisplay = imageToDisplay(*prect);
 
 					// check if point is on the border
-					if(e->pos().x() >= onDisplay.x()-dmin
-							&& e->pos().x() <= onDisplay.x()+onDisplay.width()+dmin)
+					if(e->pos().x() >= onDisplay.x()-dmin && e->pos().x() <= onDisplay.x()+onDisplay.width()+dmin)
 					{
 						// mouse X is on region
 
 						// now check if it's near the top or bottom border of the rect
-						int dymin = tmmin( (int)abs(e->pos().y() - onDisplay.y()),
-											  (int)abs(e->pos().y() - (onDisplay.y()+onDisplay.height()))
-											  );
+						int dymin = std::min( abs(e->pos().y() - onDisplay.y()),
+										   abs(e->pos().y() - (onDisplay.y()+onDisplay.height()))
+										   );
 						if(dymin < dmin)
 						{
 							dmin = dymin;
@@ -565,7 +504,7 @@ void ImageWidget::mousePressEvent(QMouseEvent *e) {
 						// mouse Y is on region
 
 						// now check if it's near the top or bottom border of the rect
-						int dxmin = tmmin( abs(e->pos().x() - onDisplay.x()),
+						int dxmin = std::min( abs(e->pos().x() - onDisplay.x()),
 										   abs(e->pos().x() - (onDisplay.x()+onDisplay.width()))
 										   );
 						if(dxmin < dmin)
@@ -589,10 +528,9 @@ void ImageWidget::mousePressEvent(QMouseEvent *e) {
 			}break;
 		case EDITMODE_PICKER: {
 			QPoint pt = displayToImage(e->pos());
-/// @todo Fixme : use input image and not display image
-			QRgb colorRGB = m_displayImage.pixel(pt);
+			QRgb colorRGB = dImage->pixel(pt);
 			int colorGrey = qGray(colorRGB);
-			fprintf(stderr, "ImgWidget::%s:%d : "
+			fprintf(stderr, "WImTool::%s:%d : "
 					"(%d,%d) RGB=%d,%d,%d gray=%d",
 					__func__, __LINE__,
 					pt.x(), pt.y(),
@@ -668,7 +606,7 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *e)
 		break;
 	case EDITMODE_PICKER: {
 		QPoint pt = displayToImage(e->pos());
-		QRgb colorRGB = m_displayImage.pixel(pt);
+		QRgb colorRGB = dImage->pixel(pt);
 		int colorGrey = qGray(colorRGB);
 
 		emit signalPicker(colorRGB, colorGrey, pt);
@@ -683,16 +621,16 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *e)
 
 void ImageWidget::clipSmartZooming()
 {
-	if(!m_displayImageBGRA) return;
+	if(!dImage) return;
 
 	int width = size().width() / mZoomFitFactor;
 	int height = size().height() / mZoomFitFactor;
 
-	if(xOrigine + width > m_displayImageBGRA->width) {
-		xOrigine = m_displayImageBGRA->width - width;
+	if(xOrigine + width > dImage->width()) {
+		xOrigine = dImage->width() - width;
 	}
-	if(yOrigine + height > m_displayImageBGRA->height) {
-		yOrigine = m_displayImageBGRA->height - height;
+	if(yOrigine + height > dImage->height()) {
+		yOrigine = dImage->height() - height;
 	}
 
 	// do xO, yO at end to align on left and top
@@ -731,20 +669,20 @@ QPoint ImageWidget::originalToDisplay(int x, int y)
 void ImageWidget::zoomOnDisplayPixel( int xCenterOnDisp, int yCenterOnDisp,
 						  float zoominc )
 {
-	if(!m_displayImageBGRA) return;
+	if(!dImage) return;
 
 	fprintf(stderr, "ImageWidget %p::%s:%d : mZoomFitFactor=%g image=%dx%d => center=%d,%d inc=%g\n",
 			this, __func__,__LINE__,
 			mZoomFitFactor,
-			m_displayImageBGRA->width, m_displayImageBGRA->height,
+			dImage->width(), dImage->height(),
 			xCenterOnDisp, yCenterOnDisp, zoominc);
 
-	if(mZoomFitFactor<=0. && m_displayImageBGRA->width>0 && m_displayImageBGRA->height>0) {
+	if(mZoomFitFactor<=0. && dImage->width()>0 && dImage->height()>0) {
 		int wdisp = size().width()-2;
 		int hdisp = size().height()-2;
 
-		mZoomFitFactor = tmmin( (float)wdisp / (float)m_displayImageBGRA->width,
-								   (float)hdisp / (float)m_displayImageBGRA->height );
+		mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
+								   (float)hdisp / (float)dImage->height() );
 	}
 
 	float curZoom = mZoomFitFactor;
@@ -753,8 +691,8 @@ void ImageWidget::zoomOnDisplayPixel( int xCenterOnDisp, int yCenterOnDisp,
 
 	int disp_w =  size().width();
 	int disp_h =  size().height();
-	float zoommin = tmmin( (float)disp_w / (float)m_displayImageBGRA->width,
-							  (float)disp_h / (float)m_displayImageBGRA->height );
+	float zoommin = std::min( (float)disp_w / (float)dImage->width(),
+							  (float)disp_h / (float)dImage->height() );
 
 	if(mZoomFitFactor < zoommin) {
 		fprintf(stderr, "ImageWidget::%s:%d : mZoomFitFactor=%g < zoommin=%g\n",
@@ -805,7 +743,7 @@ void ImageWidget::zoomOnDisplayPixel( int xCenterOnDisp, int yCenterOnDisp,
 void ImageWidget::wheelEvent ( QWheelEvent * e )
 {
 	if(!e) return;
-	if(!m_displayImageBGRA) return;
+	if(!dImage) return;
 	if(!mZoomFit) return;
 
 
@@ -813,8 +751,8 @@ void ImageWidget::wheelEvent ( QWheelEvent * e )
 		int wdisp = size().width()-2;
 		int hdisp = size().height()-2;
 
-		mZoomFitFactor = tmmin( (float)wdisp / (float)m_displayImageBGRA->width,
-								   (float)hdisp / (float)m_displayImageBGRA->height );
+		mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
+								   (float)hdisp / (float)dImage->height() );
 	}
 
 	float curZoom = mZoomFitFactor;
@@ -823,8 +761,8 @@ void ImageWidget::wheelEvent ( QWheelEvent * e )
 
 	int disp_w =  size().width();
 	int disp_h =  size().height();
-	float zoommin = tmmin( (float)disp_w / (float)m_displayImageBGRA->width,
-							  (float)disp_h / (float)m_displayImageBGRA->height );
+	float zoommin = std::min( (float)disp_w / (float)dImage->width(),
+							  (float)disp_h / (float)dImage->height() );
 
 
 
@@ -866,7 +804,7 @@ void ImageWidget::wheelEvent ( QWheelEvent * e )
 
 void ImageWidget::paintEvent( QPaintEvent * )
 {
-	if(!m_displayImageBGRA) {
+	if(!dImage) {
 		return;
 	}
 
@@ -874,7 +812,7 @@ void ImageWidget::paintEvent( QPaintEvent * )
 	if(g_debug_ImageWidget) {
 		fprintf(stderr, "ImageWidget %p::%s:%d : dImage=%dx%d size=%dx%d => cr=%dx%d fit=%c\n",
 				this, __func__, __LINE__,
-				m_displayImageBGRA->width, m_displayImageBGRA->height,
+				dImage->width(), dImage->height(),
 				size().width(), size().height(),
 				cr.width(), cr.height(), mZoomFit ? 'T':'F');
 	}
@@ -886,15 +824,15 @@ void ImageWidget::paintEvent( QPaintEvent * )
 		int wdisp = size().width();
 		int hdisp = size().height();
 		if(mZoomFitFactor<0.) {
-			mZoomFitFactor = tmmin( (float)wdisp / (float)m_displayImageBGRA->width,
-									   (float)hdisp / (float)m_displayImageBGRA->height );
+			mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
+									   (float)hdisp / (float)dImage->height() );
 
-			m_displayImage = iplImageToQImage(m_displayImageBGRA).scaled(size(), Qt::KeepAspectRatio,
+			m_displayImage = dImage->scaled(size(), Qt::KeepAspectRatio,
 											Qt::SmoothTransformation ).copy(cr);
 		}
 		else
 		{
-			QImage cropImage = iplImageToQImage(m_displayImageBGRA).copy(
+			QImage cropImage = dImage->copy(
 						xOrigine, yOrigine,
 						wdisp/mZoomFitFactor, hdisp/mZoomFitFactor);
 			if(cropImage.isNull())
@@ -919,27 +857,27 @@ void ImageWidget::paintEvent( QPaintEvent * )
 	else
 	{
 		if(cr != this->rect()) {
-			p.drawImage(0,0, m_displayImage.copy(cr));
+			p.drawImage(0,0, dImage->copy(cr));
 		} else {
-			p.drawImage(0,0, m_displayImage);
+			p.drawImage(0,0, *dImage);
 		}
 	}
 
-	if(mGridSteps > 0 && m_displayImageBGRA)
+	if(mGridSteps > 0 && dImage)
 	{
 		p.setPen(QPen(QColor(qRgb(0,0,192))));
 
 		for(int step = 0; step < mGridSteps; step++)
 		{
-			int x = (int)((float)m_displayImageBGRA->width * (float)step
+			int x = (int)((float)dImage->width() * (float)step
 						  / (float)mGridSteps + 0.5f);
-			int y = (int)((float)m_displayImageBGRA->height * (float)step
+			int y = (int)((float)dImage->height() * (float)step
 						  / (float)mGridSteps + 0.5f);
 
 			QPoint P1H = imageToDisplay(QPoint(x, 0));
-			QPoint P2H = imageToDisplay(QPoint(x, m_displayImageBGRA->height));
+			QPoint P2H = imageToDisplay(QPoint(x, dImage->height()));
 			QPoint P1V = imageToDisplay(QPoint(0, y));
-			QPoint P2V = imageToDisplay(QPoint(m_displayImageBGRA->width, y));
+			QPoint P2V = imageToDisplay(QPoint(dImage->width(), y));
 
 			p.drawLine(P1H, P2H); // horizontal line
 			p.drawLine(P1V, P2V); // vertical line

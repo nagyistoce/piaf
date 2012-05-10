@@ -37,7 +37,6 @@
 #define EDITMODE_ROIS	3
 #define EDITMODE_MAX	EDITMODE_ROIS
 
-#include "swopencv.h"
 
 /** \brief Image display widget
 
@@ -52,12 +51,12 @@ public:
 
 	~ImageWidget()
 	{
-		purge();
+
 	}
 
-	IplImage * getIplImage() { return m_displayImageBGRA; };
+	QImage * getQImage() { return dImage; };
 	/** @brief Set pointer to reference image */
-	void setRefImage(IplImage *pIm);
+	void setRefImage(QImage *pIm);
 
 	void setZoomFit(bool on)
 	{
@@ -201,8 +200,6 @@ protected:
 	virtual void wheelEvent ( QWheelEvent * event );
 
 private:
-	void purge();
-
 	/** @brief Edition mode: smart zoom, picker, edit rois... */
 	int mEditMode;
 
@@ -210,7 +207,7 @@ private:
 	QList<QRect *> mROIList;
 	QRect * mSelectedROI;
 
-	IplImage *m_displayImageBGRA; ///< IplImage for display \todo Rename
+	QImage *dImage;
 	int mGridSteps;
 
 	int xOrigine;
@@ -224,10 +221,10 @@ private:
 	float mZoomFitFactor;	///< Fit zoom to size (floating point zoom factor)
 
 	QRect mCropRect; ///< Display rect in image (chen cropped)
-	QImage m_displayImage;	///< QImage for display
-	IplImage * m_pLUT; ///< pointer to look-up-table for colors
-	IplImage * m_pOriginalImage; ///< pointer to original image, not allocated
-	IplImage * m_greyImage; ///< pointer to grayscale version of original image, allocated
+	QImage m_displayImage;	///< Image for display
+
+	QImage * m_pOriginalImage; ///< pointer to original image
+	QImage m_greyImage;
 
 	int xMouseMoveStart, yMouseMoveStart; ///< Start position of mouse when moving
 	int xOriginMoveStart, yOriginMoveStart; ///< Start position of mouse when moving
