@@ -14,6 +14,9 @@ include(../main/opencv.pri)
 TEMPLATE = app
 LANGUAGE = C++
 
+INCLUDEPATH += ../piaflib/inc
+DEPENDPATH += ../piaflib/inc
+
 CONFIG += qt thread \
     warn_on \
     debug_and_release
@@ -62,9 +65,9 @@ HEADERS += inc/colibrimainwindow.h \
 
 linux-g++: {
 	HEADERS += \
-		../main/tools/inc/SwPluginCore.h \
+		../piaflib/inc/SwPluginCore.h \
 		../main/tools/inc/SwFilters.h
-	SOURCES += ../main/tools/src/SwPluginCore.cpp \
+	SOURCES += ../piaflib/src/SwPluginCore.cpp \
 		../main/tools/src/SwFilters.cpp \
 		../main/acquisitions/video/src/swvideodetector.cpp
 }
