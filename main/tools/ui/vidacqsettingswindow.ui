@@ -25,7 +25,7 @@
        <string>Special effects</string>
       </property>
       <property name="currentIndex">
-       <number>2</number>
+       <number>0</number>
       </property>
       <widget class="QWidget" name="tab">
        <attribute name="icon">
@@ -121,6 +121,11 @@
              <item>
               <property name="text">
                <string>1280</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1600</string>
               </property>
              </item>
              <item>
@@ -272,6 +277,11 @@
              <item>
               <property name="text">
                <string>1080</string>
+              </property>
+             </item>
+             <item>
+              <property name="text">
+               <string>1200</string>
               </property>
              </item>
             </widget>

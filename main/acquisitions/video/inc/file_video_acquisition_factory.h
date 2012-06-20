@@ -29,18 +29,24 @@
 class FileVideoAcquisitionFactory
 {
 public:
-	typedef FileVideoAcquisition* (*CreatorFunction) (void);
+	typedef FileVideoAcquisition* (*CreatorFunction) (std::string path);
 	typedef std::map<std::string, CreatorFunction> t_mapFactory;
 
-	static FileVideoAcquisition * CreateInstance(std::string extension)
+	static FileVideoAcquisition * CreateInstance(std::string path)
 	{
+		std::string extension;
+		int pos = path.find_last_of('.');
+		extension = path.substr(pos+1);
+		PIAF_MSG(SWLOG_INFO, "Opening '%s' => ext='%s'",
+				 path.c_str(), extension.c_str());
 		t_mapFactory::iterator it = get_mapFactory()->find(extension);
 		if (it != get_mapFactory()->end())
 		{
 			if (it->second)
 			{
-				PIAF_MSG(SWLOG_DEBUG, "Found FileVideoAcquisition for ext='%s", extension.c_str());
-				return it->second();
+				PIAF_MSG(SWLOG_DEBUG, "Found FileVideoAcquisition for ext='%s",
+						 extension.c_str());
+				return it->second(extension);
 			}
 		}
 

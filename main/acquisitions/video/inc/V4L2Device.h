@@ -34,6 +34,7 @@
 #include "nolinux_videodev.h"
 
 #include "virtualdeviceacquisition.h"
+#include <QMutex>
 
 #define DEFAULT_DEVICE 						"/dev/video0"
 #define MAX_CHANNELS							10
@@ -171,6 +172,7 @@ private:
 
 	int m_idx_device; ///< index of device
 	CvSize m_imageSize; ///< Acquisition size
+	QMutex mImageBufferMutex;
 	IplImage * m_iplImageRGB32; ///< Acquired image in BGRA
 	IplImage * m_iplImageY;		///< Acquired image in grayscaled
 	int m_nChannels;	///< number of channels

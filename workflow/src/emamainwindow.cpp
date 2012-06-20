@@ -25,8 +25,10 @@
 #include <sstream>
 
 #define EMAMAINWINDOW_CPP
-// Implement global variable
 #define WORKSHOP_CPP
+
+// Implement global variable
+#define EmaMainW_CPP
 
 #include "emamainwindow.h"
 #include "ui_emamainwindow.h"
@@ -167,8 +169,8 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 
 
 #ifdef PIAF_LEGACY
-	pWorkshopImage = NULL;
-	pWorkshopImageTool = NULL;
+	pEmaMainWImage = NULL;
+	pEmaMainWImageTool = NULL;
 #endif
 	g_splash->showMessage(QObject::tr("Load plugins ..."), Qt::AlignBottom | Qt::AlignHCenter);
 	g_splash->repaint();
@@ -2049,7 +2051,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 		mV4l2Item->setIcon(0, QIcon(":/icons/16x16/camera-web.png"));
 	}
 
-	fprintf(stderr, "[Workshop]::%s:%d : scanning V4L2 devices in /sys/class/video4linux/ ...\n", __func__, __LINE__);
+	fprintf(stderr, "[EmaMainW]::%s:%d : scanning V4L2 devices in /sys/class/video4linux/ ...\n", __func__, __LINE__);
 	int dev_idx = 0;
 	do {
 		found = false;
@@ -2067,7 +2069,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 		// READ DEVICE NAME
 		if(fv) {
 			fgets(name, 127, fv);
-			fprintf(stderr, "Workshop::%s:%d : opened dev '%s' => name='%s'\n",
+			fprintf(stderr, "EmaMainW::%s:%d : opened dev '%s' => name='%s'\n",
 					__func__, __LINE__, txt, name);
 			found = true;
 			fclose(fv);
@@ -2089,12 +2091,12 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 			sprintf(txt, "%d - %s", dev_idx, ptname);
 		}
 
-		fprintf(stderr, "[Workshop]::%s:%d : scanning V4L2 devices...\n", __func__, __LINE__);
+		fprintf(stderr, "[EmaMainW]::%s:%d : scanning V4L2 devices...\n", __func__, __LINE__);
 		V4L2Device * myVAcq = new V4L2Device(dev_idx);
 
 		if(!myVAcq->isDeviceReady())
 		{
-			fprintf(stderr, "Workshop::%s:%d : V4L2 acquisition dev '%s' not ready\n",
+			fprintf(stderr, "EmaMainW::%s:%d : V4L2 acquisition dev '%s' not ready\n",
 					__func__, __LINE__, txt);
 			failed++;
 			statusBar()->showMessage(tr("V4L2 : Video device init failed for ")+ QString(txt));
@@ -2107,12 +2109,12 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 			found = true;
 
-			fprintf(stderr, "Workshop::%s:%d : starting acquisition on dev '%s' ...\n",
+			fprintf(stderr, "EmaMainW::%s:%d : starting acquisition on dev '%s' ...\n",
 					__func__, __LINE__, txt);
 			// acquisition init
 			if(myVAcq->startAcquisition()<0)
 			{
-				fprintf(stderr, "Workshop::%s:%d : could not start acquisition on dev '%s'.\n",
+				fprintf(stderr, "EmaMainW::%s:%d : could not start acquisition on dev '%s'.\n",
 						__func__, __LINE__, txt);
 
 				statusBar()->showMessage(tr("Error: canot initialize acquisition for ")+ QString(txt));
@@ -2120,14 +2122,14 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 			}
 			else
 			{
-				fprintf(stderr, "Workshop::%s:%d : acquisition started on dev '%s' ...\n",
+				fprintf(stderr, "EmaMainW::%s:%d : acquisition started on dev '%s' ...\n",
 						__func__, __LINE__, txt);
 
 				if(myVAcq->isAcquisitionRunning())
 				{
 					myVAcq->stopAcquisition();
 
-					fprintf(stderr, "Workshop::%s:%d : acquisition running on dev '%s' ...\n",
+					fprintf(stderr, "EmaMainW::%s:%d : acquisition running on dev '%s' ...\n",
 							__func__, __LINE__, txt);
 
 					statusBar()->showMessage(tr("Initialization OK for ")+ QString(txt));
@@ -2164,19 +2166,19 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 		mOpenCVItem->setIcon(0, QIcon(":/icons/22x22/opencv.png"));
 	}
 
-	fprintf(stderr, "[Workshop]::%s:%d : scanning OpenCV devices ...\n", __func__, __LINE__);
+	fprintf(stderr, "[EmaMainW]::%s:%d : scanning OpenCV devices ...\n", __func__, __LINE__);
 	statusBar()->showMessage(tr("Scanning OpenCV devices ... please wait"));
 	int opencv_idx = 0;
 	do {
 		found = false;
 
-		fprintf(stderr, "[Workshop]::%s:%d : scanning OpenCV device [%d]...\n", __func__, __LINE__, opencv_idx);
+		fprintf(stderr, "[EmaMainW]::%s:%d : scanning OpenCV device [%d]...\n", __func__, __LINE__, opencv_idx);
 		OpenCVVideoAcquisition * myVAcq = new OpenCVVideoAcquisition(opencv_idx);
 		sprintf(txt, "OpenCV [%d]", opencv_idx);
 
 		if(!myVAcq->isDeviceReady())
 		{
-			fprintf(stderr, "Workshop::%s:%d : OpenCV acquisition dev '%s' not ready\n",
+			fprintf(stderr, "EmaMainW::%s:%d : OpenCV acquisition dev '%s' not ready\n",
 					__func__, __LINE__, txt);
 			failed++;
 			statusBar()->showMessage(tr("OpenCV: Video device init failed on ") + QString(txt));
@@ -2186,12 +2188,12 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 			found = true;
 
-			fprintf(stderr, "Workshop::%s:%d : starting acquisition on dev '%s' ...\n",
+			fprintf(stderr, "EmaMainW::%s:%d : starting acquisition on dev '%s' ...\n",
 					__func__, __LINE__, txt);
 			// acquisition init
 			if(myVAcq->startAcquisition()<0)
 			{
-				fprintf(stderr, "Workshop::%s:%d : could not start acquisition on dev '%s'.\n",
+				fprintf(stderr, "EmaMainW::%s:%d : could not start acquisition on dev '%s'.\n",
 						__func__, __LINE__, txt);
 
 				statusBar()->showMessage(tr("Error: cannot initialize acquisition on ") + QString(txt));
@@ -2199,11 +2201,12 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 			}
 			else
 			{
-				fprintf(stderr, "Workshop::%s:%d : acquisition started on dev '%s' ...\n",
+				fprintf(stderr, "EmaMainW::%s:%d : acquisition started on dev '%s' ...\n",
 						__func__, __LINE__, txt);
 				if(myVAcq->isAcquisitionRunning())
 				{
-					fprintf(stderr, "Workshop::%s:%d : acquisition running on dev '%s' ...\n",
+					fprintf(stderr, "EmaMainW::%s:%d : acquisition running on dev '%s' ...\n"
+							"Stop acquisition.\n",
 							__func__, __LINE__, txt);
 					statusBar()->showMessage(tr("Initialization on ") + QString(txt));
 					myVAcq->stopAcquisition();
@@ -2216,8 +2219,6 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 						CaptureTreeWidgetItem * item = new CaptureTreeWidgetItem(mOpenCVItem, txt, pVCD);
 						item->setIcon(0, QIcon(":/icons/22x22/opencv.png"));
 					}
-
-		//FIXME			pObjectsExplorer->addVideoAcquisition(pVCD, txt);
 				}
 				else {
 					statusBar()->showMessage(tr("Initialization FAILURE !"));
@@ -2238,7 +2239,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 	// check if there are Kinects connected
 #ifdef HAS_FREENECT
-	fprintf(stderr, "[Workshop]::%s:%d : scanning Freenect devices...\n", __func__, __LINE__);
+	fprintf(stderr, "[EmaMainW]::%s:%d : scanning Freenect devices...\n", __func__, __LINE__);
 	if(!mFreenectItem)
 	{
 		mFreenectItem = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("Freenect"));
@@ -2313,7 +2314,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 		mOpenNIItem->setIcon(0, QIcon(":/icons/22x22/openni.png"));
 	}
 
-	fprintf(stderr, "[Workshop]::%s:%d : scanning OpenNI devices...\n", __func__, __LINE__);
+	fprintf(stderr, "[EmaMainW]::%s:%d : scanning OpenNI devices...\n", __func__, __LINE__);
 	int openni_idx = 0;
 	bool openni_found;
 	do {
@@ -2372,7 +2373,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 	// FIXME : add opencv devices
 
 	// FIXME : add Axis IP cameras
-	fprintf(stderr, "[Workshop]::%s:%d : scanning done.\n", __func__, __LINE__);
+	fprintf(stderr, "[EmaMainW]::%s:%d : scanning done.\n", __func__, __LINE__);
 
 
 }

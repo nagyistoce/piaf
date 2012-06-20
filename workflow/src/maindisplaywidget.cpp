@@ -383,7 +383,8 @@ void MainDisplayWidget::slot_mPlayTimer_timeout()
 	{
 		PIAF_MSG(SWLOG_DEBUG, "Live mode");
 
-		got_picture = (m_pVideoCaptureDoc->waitForImage() >= 0);
+//		got_picture = (m_pVideoCaptureDoc->waitForImage() >= 0);
+		got_picture = true;
 		if(got_picture)
 		{
 			IplImage * captureImage = m_pVideoCaptureDoc->readImage();
@@ -408,8 +409,16 @@ void MainDisplayWidget::slot_mPlayTimer_timeout()
 		else
 		{
 			sleep(1);
-			PIAF_MSG(SWLOG_ERROR, "Live mode: grab failed failed => start capture loop");
-			m_pVideoCaptureDoc->start();
+			static int grab_failed_count;
+			if(grab_failed_count++ > 10)
+			{
+				grab_failed_count = 0;
+				PIAF_MSG(SWLOG_ERROR, "Live mode: grab failed => start capture loop");
+				m_pVideoCaptureDoc->start();
+			}
+			else {
+				PIAF_MSG(SWLOG_ERROR, "Live mode: grab failed");
+			}
 		}
 
 	} else { // WE ARE IN MOVIE MODE

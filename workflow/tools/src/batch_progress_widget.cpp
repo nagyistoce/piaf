@@ -414,6 +414,8 @@ void BatchProgressWidget::enableInteractive(bool on)
 
 void BatchProgressWidget::on_playPauseButton_toggled(bool checked)
 {
+	PIAF_MSG(SWLOG_INFO, "checked=%c", checked ? 'T':'F');
+
 	ui->recordButton->setEnabled(!checked);
 	ui->greyButton->setEnabled(!checked);
 	ui->filesButtonsWidget->setEnabled(!checked);
@@ -497,8 +499,10 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 		t_batch_item * item = (*it);
 		if(item->treeItem == treeItem)
 		{
-			CvSize oldSize = cvSize(mLoadImage->width, mLoadImage->height);
-			int oldNChannels = mLoadImage->nChannels;
+
+			CvSize oldSize = mLoadImage ? cvSize(mLoadImage->width, mLoadImage->height)
+										: cvSize(0,0);
+			int oldNChannels = mLoadImage ? mLoadImage->nChannels : 0;
 			int oldDepth = IPL_DEPTH_8U;
 
 			swReleaseImage(&mLoadImage);
@@ -832,3 +836,8 @@ void BatchProgressWidget::setBatchFiltersThread(BatchFiltersThread  * pBatchThre
 
 
 
+
+void BatchProgressWidget::on_playPauseButton_clicked()
+{
+
+}
