@@ -475,12 +475,14 @@ int VideoCaptureDoc::waitForImage()
 {
 	fprintf(stderr, "VideoCapture::%s:%d : wait for notify\n", __func__, __LINE__);
 	bool ret = mWaitCondition.wait(&mMutex,
-								  50 // ms
+								  500 // ms
 								  );
 	if(!ret) {
 		fprintf(stderr, "VideoCapture::%s:%d : timeout => return -1\n", __func__, __LINE__);
 
 	} else {
+		mImageBufferMutex.lock();
+
 		IplImage * imageIn = mpVAcq->readImageRaw();
 		if(imageIn)
 		{
@@ -513,6 +515,7 @@ int VideoCaptureDoc::waitForImage()
 						__func__, __LINE__,
 						imageIn->width, imageIn->height);
 				usleep(500000);
+				mImageBufferMutex.unlock();
 				return -1;
 			}
 		}
@@ -521,8 +524,10 @@ int VideoCaptureDoc::waitForImage()
 			fprintf(stderr, "VideoCapture::%s:%d : Acquisition problem : readImageRaw() failed\n",
 					__func__, __LINE__);
 			usleep(500000);
+			mImageBufferMutex.unlock();
 			return -1;
 		}
+		mImageBufferMutex.unlock();
 
 		return 0;
 	}
@@ -538,17 +543,21 @@ int VideoCaptureDoc::loadImage()
 		fprintf(stderr, "VideoCapture::%s:%d : no acq => grab failed\n", __func__, __LINE__);
 		return -1;
 	}
+	mImageBufferMutex.lock();
+
 	if(mpVAcq->grab()< 0)
 	{
 		fprintf(stderr, "VideoCapture::%s:%d : grab failed\n", __func__, __LINE__);
+		mImageBufferMutex.unlock();
 		return 0;
 	}
 	else
 	{
 		// unlock wait condition to unlock every WorkshopVideoCaptureThread
-//		fprintf(stderr, "VideoCapture::%s:%d : acq OK => notify all\n", __func__, __LINE__);
+		fprintf(stderr, "VideoCapture::%s:%d : acq OK => notify all\n", __func__, __LINE__);
 		mWaitCondition.wakeAll();
 	}
+	mImageBufferMutex.unlock();
 
 	return 1;
 }

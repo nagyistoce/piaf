@@ -72,15 +72,20 @@ extern "C" {
 
 
 
-/** Video acquisition high-level class, using FFMPEG for decoding
- * Performs device management and image acquisitions.
- @author Christophe Seyve - Sisell - cseyve@free.fr
- @version 0.1.0 \Date
- */
+/** \brief Video acquisition high-level class
 
+	using FFMPEG for decoding, performs file device management
+	and image acquisitions and conversion to IplImage.
+
+	@author Christophe Seyve - Sisell - cseyve@free.fr
+	@version 0.1.0 \Date
+ */
 class FFmpegFileVideoAcquisition : public FileVideoAcquisition
 {
 public:
+	/// creator function registered in factory
+	static FileVideoAcquisition* creatorFunction(std::string path);
+
 	/// Constructor
 	FFmpegFileVideoAcquisition();
 		
@@ -354,6 +359,10 @@ private:
 	IplImage * m_imageRGB32;
 	IplImage * m_imageBGR32;
 	IplImage * m_imageY;
+
+protected:
+	/// value used for registering in factory
+	static std::string mRegistered;
 };
 
 #endif

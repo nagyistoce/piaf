@@ -45,7 +45,9 @@ extern "C" {
 
 
 #define g_debug_V4L2Device	0
-#define V4L2_printf(...)	{fprintf(stderr,"[V4L2 '%s']::%s:%d: ",mVideoDevice,__func__,__LINE__);fprintf(stderr,__VA_ARGS__);fflush(stderr);}
+#define V4L2_printf(...)	{ \
+		fprintf(stderr,"[V4L2 '%s']::%s:%d: ",mVideoDevice,__func__,__LINE__); \
+		fprintf(stderr,__VA_ARGS__);fprintf(stderr,"\n"); fflush(stderr);}
 
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
 static int xioctl(int fd, int request, void * arg)
@@ -213,7 +215,7 @@ int V4L2Device::grab()
 	if(!mGrabEnabled) {
 		fprintf(stderr, "[V4L2]::%s:%d : grab disabled => do not perform\n",
 				__func__, __LINE__);
-		usleep(100000);
+		usleep(1000);
 		return 0;
 	}
 
@@ -227,13 +229,16 @@ int V4L2Device::grab()
 		fprintf(stderr, "\r[V4L2]::%s:%d : acq returned null buffer for %3d ms!", __func__, __LINE__,
 				s_grab_err);
 		fflush(stderr);
-		usleep(100000);
+		usleep(1000);
+		mImageBufferMutex.unlock();
+
 		return -1;
 	} else {
 		s_grab_err = 0;
 	}
 
 	//fprintf(stderr, "[V4L2]::%s:%d : acq ok %p !\n", __func__, __LINE__, rawframebuffer);
+	mImageBufferMutex.unlock();
 	return 0;
 
 }
@@ -591,7 +596,11 @@ V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 
 IplImage * V4L2Device::readImageRaw()
 {
-	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED => return BGR32\n", __FILE__, __func__, __LINE__);
+	static int unimplemented = 0;
+	if(unimplemented++ % 50 == 0)
+	{
+		fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED => return BGR32\n", __FILE__, __func__, __LINE__);
+	}
 	return readImageRGB32(); /// \todo FIXME : return raw value
 }
 
@@ -600,6 +609,7 @@ IplImage * V4L2Device::readImageRGB32()
 {
 	if(!rawframebuffer) {
 		swReleaseImage(&m_iplImageRGB32);
+		mImageBufferMutex.unlock();
 		return NULL;
 	}
 
@@ -621,6 +631,7 @@ IplImage * V4L2Device::readImageRGB32()
 	if(m_capture_palette == VIDEO_PALETTE_RGB32) {
 		memcpy(image,  rawframebuffer, m_imageSize.width*m_imageSize.height*4);
 
+		mImageBufferMutex.unlock();
 		return 0;
 	}
 
@@ -637,13 +648,14 @@ IplImage * V4L2Device::readImageRGB32()
 //			);
 //	cvSaveImage("/dev/shm/piaf-iplImageRGB32.jpg", m_iplImageRGB32);
 
+	mImageBufferMutex.unlock();
 	return m_iplImageRGB32;
 }
 
 IplImage * V4L2Device::readImageY()
 {
-	if(!rawframebuffer) { return NULL; }
 
+	if(!rawframebuffer) { return NULL; }
 	if(!rawframebuffer) {
 		swReleaseImage(&m_iplImageRGB32);
 		return NULL;
@@ -1932,12 +1944,20 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 					}
 				}
 			}
-			else
+			else // format is fine
 			{
 				retry = 0;
-				
-				newSize->width =	video_width = vd.width = v4l2Format.fmt.pix.width;
-				newSize->height = video_height = vd.height = v4l2Format.fmt.pix.height;
+				// Store only if it's not too big
+				if(v4l2Format.fmt.pix.height <= 600)
+				{
+					newSize->width = video_width = vd.width = v4l2Format.fmt.pix.width;
+					newSize->height = video_height = vd.height = v4l2Format.fmt.pix.height;
+				}
+				else
+				{
+					video_width = vd.width = v4l2Format.fmt.pix.width;
+					video_height = vd.height = v4l2Format.fmt.pix.height;
+				}
 				vd.v4l2_pix_fmt = preferred_formats[fmt].pix_fmt;
 				
 				V4L2_printf(" VIDIOC_S_FMT success : \n");
@@ -1958,6 +1978,7 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 	}
 	
 	// set acquisition size
+	V4L2_printf("changeSize with %lu x %lu", newSize->width, newSize->height);
 	int retsize = changeSize(newSize);
 	if(retsize < 0)
 	{
@@ -2073,6 +2094,7 @@ int V4L2Device::stop_capturing() {
 	}
 	mUncompressedJPEGBuffer = NULL;
 	mUncompressedJPEGWidth = mUncompressedJPEGHeight = 0;
+	mImageBufferMutex.unlock();
 
 	return 0;
 }

@@ -135,6 +135,7 @@ private slots:
 	void on_loadButton_clicked();
 
 	void on_mDisplayTimer_timeout();
+	void on_playPauseButton_clicked();
 };
 
 #endif // BATCH_PROGRESS_WIDGET_H

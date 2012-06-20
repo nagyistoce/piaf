@@ -191,6 +191,7 @@ private:
     bool m_running;
 
     QTimer *pImageTimer;
+	QMutex mImageBufferMutex;
 
 	QMutex mMutex;
 	QWaitCondition mWaitCondition;

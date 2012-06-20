@@ -127,6 +127,7 @@ void VidAcqSettingsWindow::updateVideoProperties()
 		}
 		CHANGE_SLIDER(ui->jpegQualityHorizontalSlider, ui->jpegQualityLabel, m_video_properties.jpeg_quality);
 
+
 		// SIZE
 		CHANGE_COMBO_TEXT(ui->widthComboBox, m_video_properties.frame_width);
 		CHANGE_COMBO_TEXT(ui->heightComboBox, m_video_properties.frame_height);

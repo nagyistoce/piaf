@@ -211,6 +211,8 @@ CvSize OpenCVVideoAcquisition::getImageSize()
 int OpenCVVideoAcquisition::stopAcquisition()
 {
 	if(m_capture) {
+		OpenCVAcq_printf( "[VidAcq]::%s:%d : stopping capture !\n",
+				__func__, __LINE__);
 		cvReleaseCapture( &m_capture );
 		m_capture = NULL;
 	}
@@ -222,8 +224,12 @@ int OpenCVVideoAcquisition::stopAcquisition()
 
 	m_captureIsInitialised = 0;
 
+	OpenCVAcq_printf( "[VidAcq]::%s:%d : acquisition stopped !\n",
+			__func__, __LINE__);
+
 	return 0;
 }
+
 IplImage * OpenCVVideoAcquisition::readImageRaw()
 {
 	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED => return BGR32\n", __FILE__, __func__, __LINE__);

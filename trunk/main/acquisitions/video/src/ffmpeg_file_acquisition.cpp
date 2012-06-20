@@ -9,7 +9,10 @@
  ***************************************************************************/
 #include <math.h>
 
+#include "file_video_acquisition_factory.h"
+
 #include "ffmpeg_file_acquisition.h"
+
 #include "swvideodetector.h"
 #include "piaf-common.h"
 
@@ -25,7 +28,18 @@ extern "C" {
 #define URLPB(pb) &(pb)
 #endif
 
+#define EXTENSION_AVI	"avi,wmv,mov,mpg,mp4"
 
+std::string FFmpegFileVideoAcquisition::mRegistered =
+	FileVideoAcquisitionFactory::RegisterCreatorFunction(
+		(EXTENSION_AVI), FFmpegFileVideoAcquisition::creatorFunction);
+
+
+FileVideoAcquisition* FFmpegFileVideoAcquisition::creatorFunction(std::string path)
+{
+	PIAF_MSG(SWLOG_INFO, "Create FFmpegFileVideoAcquisition(path='%s')", path.c_str() );
+	return new FFmpegFileVideoAcquisition( path.c_str() );
+}
 
 FFmpegFileVideoAcquisition::FFmpegFileVideoAcquisition()
 {
