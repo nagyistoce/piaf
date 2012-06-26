@@ -655,7 +655,8 @@ void MainImageWidget::on_snapButton_clicked()
 {
 	emit signalSnapButtonClicked();
 
-	emit signalSnapshot(m_fullImage);
+	// save processed
+	emit signalSnapshot(m_displayImage);
 }
 
 

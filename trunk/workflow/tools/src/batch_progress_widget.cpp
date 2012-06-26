@@ -41,7 +41,7 @@ BatchProgressWidget::BatchProgressWidget(QWidget *parent) :
     ui(new Ui::BatchProgressWidget)
 {
     ui->setupUi(this);
-
+	mLoadImage = NULL;
 	mpBatchTask = NULL;	// no current batch task
 	mBatchTaskAllocated = false;	//
 
@@ -89,9 +89,10 @@ void BatchProgressWidget::allocateBatchTask()
 	// Read batch options in GUI (defaults)
 	if(!mpBatchTask)
 	{
-		PIAF_MSG(SWLOG_INFO, "create new watch task");
 		mpBatchTask = new t_batch_task;
 		mpBatchTask->sequencePath = "(none)";
+		PIAF_MSG(SWLOG_INFO, "create new batch task");
+		mBatchTaskAllocated = true;
 	}
 
 	mpBatchTask->options.reload_at_change = ui->reloadPluginCheckBox->isChecked();
@@ -102,6 +103,11 @@ void BatchProgressWidget::allocateBatchTask()
 	if(mpBatchThread)
 	{
 		mpBatchThread->setOptions(mpBatchTask->options);
+	}
+	else
+	{
+		PIAF_MSG(SWLOG_INFO, "new batch task with no thread");
+
 	}
 }
 
@@ -212,9 +218,12 @@ void BatchProgressWidget::on_loadButton_clicked()
  * Set the plugin sequence */
 void BatchProgressWidget::setPluginSequence(QString fileName)
 {
+	PIAF_MSG(SWLOG_INFO, "set plugin sequence '%s'", fileName.toAscii().data());
 	if(!mpBatchTask)
 	{
-		mpBatchTask = new t_batch_task;
+		PIAF_MSG(SWLOG_INFO, "allocate batch task");
+		allocateBatchTask();
+		mpBatchTask->sequencePath = fileName;
 		mBatchTaskAllocated = true;
 	}
 
@@ -254,6 +263,7 @@ void BatchProgressWidget::setPluginSequence(QString fileName)
   */
 int BatchProgressWidget::setBatchTask(t_batch_task * pTask)
 {
+	PIAF_MSG(SWLOG_INFO, "Set batch task %p", pTask);
 	purgeBatchTask(mpBatchTask);
 	mBatchTaskAllocated = false; // keep in mind we received this pointer from external
 
@@ -277,6 +287,7 @@ void BatchProgressWidget::setFilesList(QStringList files)
 {
 	if(!mpBatchTask)
 	{
+		PIAF_MSG(SWLOG_INFO, "no task, but input list : allocate batch task");
 		allocateBatchTask();
 	}
 
@@ -421,29 +432,42 @@ void BatchProgressWidget::on_playPauseButton_toggled(bool checked)
 	ui->filesButtonsWidget->setEnabled(!checked);
 
 	// Start thread and timer
-	if(!mDisplayTimer.isActive()) {
-		mDisplayTimer.start(1000);
+	if(checked)
+	{
+		if(!mDisplayTimer.isActive()) {
+			mDisplayTimer.start(1000);
+		}
+	} else {
+		mDisplayTimer.stop();
 	}
 
 	if(checked)
 	{
+		if(!mpBatchThread)
+		{
+			PIAF_MSG(SWLOG_INFO, "Allocated batch thread...");
+			/// \todo allocate if needed
+			mpBatchThread = new BatchFiltersThread();
+			mBatchThreadAllocated = true;
+		}
+
 		if(mpBatchThread) {
 			if(!mpBatchThread->isRunning())
 			{
-				if(mpBatchThread) mpBatchThread->start();
+				PIAF_MSG(SWLOG_INFO, "Start thread...");
+				if(mpBatchThread) { mpBatchThread->start(); }
 			}
 
 			//
+			PIAF_MSG(SWLOG_INFO, "Start processing on thread...");
 			mpBatchThread->startProcessing(true);
 
+			PIAF_MSG(SWLOG_INFO, "Set pause on processing to false on thread...");
 			mpBatchThread->setPause(false); // set pause on
-		}
-		else
-		{
-			/// \todo allocate if needed
 		}
 	} else {
 		if(mpBatchThread) {
+			PIAF_MSG(SWLOG_INFO, "Set pause on processing to true on thread...");
 			mpBatchThread->setPause(true); // set pause on
 		}
 		else
@@ -499,8 +523,8 @@ void BatchProgressWidget::on_filesTreeWidget_itemClicked(
 		t_batch_item * item = (*it);
 		if(item->treeItem == treeItem)
 		{
-
-			CvSize oldSize = mLoadImage ? cvSize(mLoadImage->width, mLoadImage->height)
+			CvSize oldSize = mLoadImage ? cvSize(mLoadImage->width,
+												 mLoadImage->height)
 										: cvSize(0,0);
 			int oldNChannels = mLoadImage ? mLoadImage->nChannels : 0;
 			int oldDepth = IPL_DEPTH_8U;
