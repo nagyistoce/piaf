@@ -757,9 +757,10 @@ void MainDisplayWidget::on_mainImageWidget_signalSnapshot(QImage snap)
 	QFileInfo fi;
 	do {
 		fi.setFile(absPath);
-		if(fi.exists())
+		if( fi.exists() )
 		{
 			mSnapCounter++; //  -042.png already exists, so next will be 0043 ... until the file does not exists
+			absPath = savePath.absoluteFilePath(mSourceName + number);
 		}
 		else
 		{
@@ -773,7 +774,7 @@ void MainDisplayWidget::on_mainImageWidget_signalSnapshot(QImage snap)
 			}
 			return;
 		}
-	}
+	} while(mSnapCounter<1000);
 }
 
 
