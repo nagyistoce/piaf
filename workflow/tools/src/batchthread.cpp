@@ -40,7 +40,6 @@ BatchFiltersThread::BatchFiltersThread()
 	mRun = mRunning = mProcessing = false;
 	mpFilterSequencer = NULL;
 
-
 	mpBatchTask = NULL;	// no current batch task
 
 
@@ -59,6 +58,7 @@ BatchFiltersThread::BatchFiltersThread()
 
 BatchFiltersThread::~BatchFiltersThread()
 {
+	PIAF_MSG(SWLOG_INFO, "Stopping thread %p", this);
 	mRun = false; // tell thread to stop
 	while(mRunning)
 	{
@@ -76,20 +76,26 @@ void BatchFiltersThread::setOptions(t_batch_options options)
 	{
 		mpBatchTask->options = options;
 	}
+	else
+	{
+		PIAF_MSG(SWLOG_WARNING, "no batch task...");
 	}
+}
 
 void BatchFiltersThread::startProcessing(bool on)
 {
+	PIAF_MSG(SWLOG_INFO, "start processing (%c)...", on ? 'T':'F');
 	mProcessing = on;
 }
 
 void BatchFiltersThread::setPause(bool on)
 {
+	PIAF_MSG(SWLOG_INFO, "set pause (%c)...", on ? 'T':'F');
 	mPause = on;
 }
 
 
-bool g_debug_BatchFiltersThread = false;
+bool g_debug_BatchFiltersThread = true;
 
 
 void BatchFiltersThread::allocHistogram(float maxproctime_us)
@@ -112,21 +118,30 @@ void BatchFiltersThread::run()
 {
 	mRunning = true;
 	mRun = true;
+	PIAF_MSG(SWLOG_INFO, "Thread started.");
 
 	while(mRun)
 	{
-		if(g_debug_BatchFiltersThread) {
+		//if(g_debug_BatchFiltersThread)
+		{
 			fprintf(stderr, "BatchThread::%s:%d : processing='%c'\n", __func__, __LINE__,
 					mProcessing ? 'T':'F');
 		}
-		bool procnow = mProcessing;
+
+		PIAF_MSG(SWLOG_INFO, "\tThread iteration: proc=%c && mRun=%c",
+				 mProcessing ? 'T':'F',
+				 mRun ? 'T':'F'
+				 );
+
+		bool procnow = (mProcessing && mRun);
 		if(procnow) {
 			if(!mpBatchTask) {
-				PIAF_MSG(SWLOG_DEBUG, "no task, no processing");
+
+				PIAF_MSG(SWLOG_WARNING, "no task, no processing");
 				procnow = false;
 			}
 			else if(mpBatchTask->itemsList.isEmpty()) {
-				PIAF_MSG(SWLOG_DEBUG, "no item in task");
+				PIAF_MSG(SWLOG_WARNING, "no item in task");
 				procnow = false;
 			} else {
 				PIAF_MSG(SWLOG_INFO, "%d items in task, processing...",
@@ -136,7 +151,8 @@ void BatchFiltersThread::run()
 				bool at_least_one = false;
 				QList<t_batch_item *>::iterator it;
 				for(it = mpBatchTask->itemsList.begin();
-					mRun && it != mpBatchTask->itemsList.end() && !at_least_one; ++it)
+					mRun && it != mpBatchTask->itemsList.end()
+					&& !at_least_one; ++it)
 				{
 					t_batch_item * item = (*it);
 					if(item->processing_state == UNPROCESSED)
@@ -152,6 +168,7 @@ void BatchFiltersThread::run()
 
 				if(!at_least_one)
 				{
+					PIAF_MSG(SWLOG_INFO, "there is no item to process");
 					procnow = false;
 				}
 			}
@@ -536,9 +553,7 @@ void BatchFiltersThread::run()
 
 	}
 
-	if(g_debug_BatchFiltersThread) {
-		fprintf(stderr, "BatchFiltersThread::%s:%d: Thread ended.\n", __func__, __LINE__);
-	}
+	PIAF_MSG(SWLOG_INFO, "Thread ended.");
 	mRunning = false;
 }
 

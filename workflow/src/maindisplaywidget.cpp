@@ -746,15 +746,34 @@ void MainDisplayWidget::on_mainImageWidget_signalSnapshot(QImage snap)
 {
 	MDW_printf(EMALOG_INFO, "Snapshot %dx%dx%d !",
 			   snap.width(), snap.height(), snap.depth());
+	// don't save swice on same file
+
 	QString number;
-	number.sprintf("-%03d.png", mSnapCounter);
 
 	QDir savePath( m_workflow_settings.defaultImageDir );
+
+	number.sprintf("-%03d.png", mSnapCounter);
 	QString absPath = savePath.absoluteFilePath(mSourceName + number);
-	snap.save(absPath);
-
-	MDW_printf(EMALOG_INFO, "=> saved as '%s'", absPath.toAscii().data());
-
-	mSnapCounter++;
+	QFileInfo fi;
+	do {
+		fi.setFile(absPath);
+		if(fi.exists())
+		{
+			mSnapCounter++; //  -042.png already exists, so next will be 0043 ... until the file does not exists
+		}
+		else
+		{
+			bool saved = snap.save(absPath);
+			if(saved) {
+				mSnapCounter++; // Save -042.png, so next will be 0043, we can increase counter now
+				MDW_printf(EMALOG_INFO, "=> saved as '%s'", absPath.toAscii().data());
+			} else {
+				QMessageBox::critical(NULL, tr("Can't save image"),
+									  tr("Can't save image file ") + absPath);
+			}
+			return;
+		}
+	}
 }
+
 
