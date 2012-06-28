@@ -460,7 +460,8 @@ void MainDisplayWidget::on_speedComboBox_currentIndexChanged(QString val)
 {
 	bool ok = false;
 	val.replace("x", "");
-
+	PIAF_MSG(SWLOG_INFO, "Movie player speed changed x%g to '%s'",
+			 mPlaySpeed, val.toAscii().data());
 	if(val.contains("/"))
 	{
 		QStringList split = val.split("/");
@@ -468,7 +469,17 @@ void MainDisplayWidget::on_speedComboBox_currentIndexChanged(QString val)
 		{
 			int denom = split[1].toInt(&ok);
 			if(ok) {
-				mPlaySpeed = 1.f / (float)denom;
+				if(denom > 0)
+				{
+					mPlaySpeed = 1.f / (float)denom;
+					PIAF_MSG(SWLOG_INFO, "Movie player speed changed to ratio %g",
+							 mPlaySpeed);
+				}
+				else
+				{
+					PIAF_MSG(SWLOG_ERROR, "Invalid speed denominator read : %d => do not change speed",
+							 denom);
+				}
 			}
 		}
 		else {
@@ -482,12 +493,18 @@ void MainDisplayWidget::on_speedComboBox_currentIndexChanged(QString val)
 		mPlaySpeed = val.toInt(&ok);
 	}
 
-	fprintf(stderr, "MainDisplayWidget::%s:%d : val='%s' playspeed=%g ok=%c\n",
-			__func__, __LINE__,
-			val.toAscii().data(),
-			mPlaySpeed, ok?'T':'F');
-	if(mpFileVA->getFrameRate()>0) {
-		mPlayTimer.setInterval((int)(1000.f /(mPlaySpeed * (float)mpFileVA->getFrameRate())));
+	PIAF_MSG(SWLOG_INFO, "Movie player speed changed to x%g * movie fps=%g => play at %g fps",
+			 mPlaySpeed,
+			 mpFileVA->getFrameRate(),
+			 mpFileVA->getFrameRate() > 0 ? mPlaySpeed * (float)mpFileVA->getFrameRate()
+										  : mPlaySpeed * 25.f);
+	if(mpFileVA->getFrameRate()>0)
+	{
+		mPlayTimer.setInterval((int)roundf(1000.f /(mPlaySpeed * (float)mpFileVA->getFrameRate())));
+	} else {
+		PIAF_MSG(SWLOG_WARNING, "Movie player FPS is %g => change timer as if it were 25 fps",
+				 mpFileVA->getFrameRate());
+		mPlayTimer.setInterval((int)(1000.f /(mPlaySpeed * 25.f)));
 	}
 }
 

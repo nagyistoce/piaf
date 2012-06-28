@@ -640,7 +640,11 @@ void FilterSequencer::unloadAllLoaded()
 				}
 //#endif
 				// wait for process flag to go down
-				while(lockProcess) {
+				int retry = 0;
+				while(lockProcess && retry < 10000) {
+					fprintf(stderr, "\tDelete filter '%s': process is locked\n",
+						pv->funcList[pv->indexFunction].name);
+					retry += 10;
 					usleep(10000);
 				}
 

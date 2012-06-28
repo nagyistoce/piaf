@@ -1369,8 +1369,12 @@ void EmaMainWindow::slot_thumbImage_doubleClicked(QString fileName)
 	EMAMW_printf(EMALOG_INFO, "double-click on '%s'", fileName.toUtf8().data());
 	QFileInfo fi(fileName);
 	if(!fi.exists()) {
+
 		EMAMW_printf(SWLOG_ERROR, "File '%s' does not exists",
 				 fileName.toAscii().data());
+		QMessageBox::critical(NULL, tr("File not found"),
+							  tr("File ")+fileName+tr(" does not exist.")
+							  );
 		return;
 	}
 
