@@ -211,14 +211,15 @@ void FilterSequencer::init() {
 	lockProcess = false;
 	mNoWarning = false;
 	mAutoReloadSequence = false; // do not reload plugins when user need to confirm or make modifications
-
-	imageTmp = NULL;
 }
 
 void FilterSequencer::purge() {
 	fprintf(stderr, "FilterSequencer::%s:%d DELETE FilterSequencer\n", __func__, __LINE__);
 
 	unloadAllLoaded();
+
+	clearImageTmpList();
+
 	fprintf(stderr, "FilterSequencer::%s:%d DELETE FilterSequencer\n", __func__, __LINE__);
 
 	unloadAllAvailable();
@@ -269,7 +270,7 @@ PiafFilter *  FilterSequencer::addFilter(PiafFilter * newFilter, int id)
 {
 	fprintf(stderr, "FilterSequencer::%s:%d : adding filter %p at id=%d\n",
 			__func__ ,__LINE__, newFilter, id);
-
+	clearImageTmpList(); // clear before next use
 
 	if(id==-1)
 	{
@@ -969,7 +970,18 @@ IMAGE PROCESSING  SECTION
 */
 
 
-
+void FilterSequencer::clearImageTmpList()
+{
+	QList<IplImage *>::iterator it;
+	for(it = imageTmpList.begin(); it != imageTmpList.end(); it++)
+	{
+		///< Temporary image for storing different steps of plugin sequence
+		IplImage * img = (*it);
+		swReleaseImage(&img);
+	}
+	// Remove all items
+	imageTmpList.clear();
+}
 
 int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 {
@@ -990,32 +1002,6 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 			 imageIn,
 			 imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
 
-	if(imageTmp
-			&& (imageTmp->width != imageIn->width
-				|| imageTmp->height != imageIn->height
-				|| imageTmp->depth != imageIn->depth
-				|| imageTmp->nChannels != imageIn->nChannels
-				) )
-	{
-		swReleaseImage(&imageTmp);
-	}
-
-	// send image to process
-	if(!imageTmp)
-	{
-		imageTmp = cvCloneImage(imageIn);
-
-		fprintf(stderr, "FilterSequencer::%s:%d allocate tmp image struct for "
-				"image={%dx%d depth=%d nChannels=%d }...\n",
-				__func__, __LINE__,
-				imageTmp->width, imageTmp->height,
-				imageTmp->depth, imageTmp->nChannels
-				);
-	}
-	else
-	{
-		cvCopy(imageIn, imageTmp);
-	}
 
 	if(mLoadedFiltersList.isEmpty()) {
 //		fprintf(stderr, "[FilterSequencer]::%s:%d : filter list is empty\n", __func__, __LINE__);
@@ -1048,8 +1034,10 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 					mLoadedFiltersList.count());
 		}
 
+		IplImage * imagePrev = imageIn;
 		if(!mLoadedFiltersList.isEmpty())
 		{
+
 			bool finalreached = false;
 			QList<PiafFilter *>::iterator it;
 			int filtidx = 0;
@@ -1058,24 +1046,52 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 					&& ret && !finalreached;
 					++it, ++filtidx )
 			{
+				IplImage * imageOut = NULL;
+
+				if(filtidx >= imageTmpList.count())
+				{
+
+				} else {
+					imageOut = imageTmpList.at(filtidx);
+				}
 				PiafFilter * pv = (*it);
 				finalreached |= pv->isFinal();
 
 				// process
-				if( pv->enabled )
+				if( !pv->enabled ) // not enabled = just copy output
 				{
+					if(imageOut && (imageOut->height != imagePrev->height
+									|| imageOut->widthStep != imagePrev->widthStep )
+							)
+					{
+						swReleaseImage(&imageOut);
+					}
+
+					if(!imageOut)
+					{
+						imageOut = cvCloneImage(imagePrev);
+					}
+					else
+					{
+						cvCopy(imagePrev, imageOut );
+					}
+				} else {
 					if(g_debug_FilterSequencer)
 					{
-						fprintf(stderr, "FilterSequencer::%s:%d processing filter [%d] func[%d]=%s\n",
+						fprintf(stderr, "FilterSequencer::%s:%d processing "
+								"filter [%d] func[%d]=%s : in =%p:%dx%dx%dx%d "
+								"-> out=%p\n",
 								__func__, __LINE__,
 								filtidx,
 								pv->indexFunction,
-								pv->funcList[pv->indexFunction].name);
+								pv->funcList[pv->indexFunction].name,
+								imageIn, imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels
+								);
 					}
 
 					ret = pv->processFunction(pv->indexFunction,
-											  imageTmp,
-											  &imageTmp, 2000 );
+											  imagePrev,
+											  &imageOut, 2000 );
 					if(ret>=0)
 					{
 						step++;
@@ -1097,12 +1113,44 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 								);
 					}
 				}
+
+				if(imageOut)
+				{
+					imagePrev = imageOut;
+					if(filtidx >= imageTmpList.count())
+					{
+						// Append this image
+						PIAF_MSG(SWLOG_INFO,
+								 "Append image pointer for filter [%d] -> %p",
+								 filtidx,
+								 imageOut);
+						imageTmpList.append(imageOut);
+					}
+					else // check if the pointer has changed its size
+					{
+						if(imageOut != imageTmpList.at(filtidx))
+						{
+							PIAF_MSG(SWLOG_INFO, "Pointer for filter [%d] changed : %p -> %p",
+									 filtidx,
+									 imageTmpList.at(filtidx), imageOut);
+							// Remove and reinsert
+							imageTmpList.removeAt(filtidx);
+							imageTmpList.insert(filtidx, imageOut);
+						}
+					}
+				}
+
 			}
 
 			id++;
 		}
 
 		lockProcess = false;
+
+		if(pimageOut)
+		{
+			*pimageOut = imagePrev;
+		}
 
 		// store accumulated time in output image
 		deltaTus = total_time_us;
@@ -1162,10 +1210,6 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 
 	if(global_return >= 0)
 	{
-		if(pimageOut)
-		{
-			*pimageOut = imageTmp;
-		}
 		return deltaTus;
 	}
 	return global_return;
@@ -1800,10 +1844,13 @@ int PiafFilter::processFunction(int indexFunction,
 
 				if(plugin_died || ret == 0) {
 					ret = -1;
+					PIAF_MSG(SWLOG_ERROR, "Plugin died for plugin pid=%d", childpid);
 					// First stop reception
 					fprintf(stderr, "PiafFilters::%s:%d : plugin died pid=%d => close pipe...\n",
 								__func__, __LINE__, childpid);
-					emit signalDied(childpid);
+//					fprintf(stderr, "PiafFilters::%s:%d : plugin died pid=%d => close pipe...\n",
+//								__func__, __LINE__, childpid);
+//					emit signalDied(childpid);
 				}
 				else
 				{
@@ -1818,6 +1865,8 @@ int PiafFilter::processFunction(int indexFunction,
 				}
 
 			} else {
+				PIAF_MSG(SWLOG_ERROR, "Invalid PipeR for plugin pid=%d", childpid);
+
 				ret = -1;
 			}
 		}
