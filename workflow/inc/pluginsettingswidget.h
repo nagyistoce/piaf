@@ -29,6 +29,7 @@
 #include <QWidget>
 #include <QLineEdit>
 #include <QComboBox>
+#include <QLabel>
 
 namespace Ui {
     class PluginSettingsWidget;
@@ -53,6 +54,8 @@ private:
     Ui::PluginSettingsWidget *ui;
 	PiafFilter * mpPiafFilter;
 
+	int mNbParams;		///< numbr of parameters -> number of
+	QLabel ** mLabels;
 	QLineEdit ** mParamsEditLines ;
 	QComboBox ** mComboEdit ;
 

@@ -37,6 +37,10 @@ PluginSettingsWidget::PluginSettingsWidget(QWidget *parent) :
 {
     ui->setupUi(this);
 	mpPiafFilter = NULL;
+
+	mNbParams = 0;
+
+	mLabels = NULL;
 	mParamsEditLines = NULL;
 	mComboEdit = NULL;
 }
@@ -74,6 +78,42 @@ void PluginSettingsWidget::changeEvent(QEvent *e)
 void PluginSettingsWidget::clearDisplay()
 {
 	PIAF_MSG(SWLOG_DEBUG, "clear display : fix clearing");
+
+	// for each parameter :
+	if(mLabels) {
+		for(int row = 0; row < mNbParams; row++)
+		{
+			if(mLabels[row])
+			{
+				delete mLabels[row];
+			}
+		}
+		delete [] mLabels;
+		mLabels = NULL;
+	}
+	if(mParamsEditLines)
+	{
+		for(int row = 0; row < mNbParams; row++)
+		{
+			if(mParamsEditLines[row])
+			{
+				delete mParamsEditLines[row];
+			}
+		}
+		delete [] mParamsEditLines;
+		mParamsEditLines = NULL;
+	}
+	if(mComboEdit) {
+		for(int row = 0; row < mNbParams; row++)
+		{
+			if(mComboEdit[row])
+			{
+				delete mComboEdit[row];
+			}
+		}
+		delete [] mComboEdit;
+		mComboEdit = NULL;
+	}
 }
 
 void PluginSettingsWidget::updateDisplay()
@@ -103,15 +143,15 @@ void PluginSettingsWidget::updateDisplay()
 		ui->nbParamsLabel->setText(nbParamsStr);
 		QGridLayout * fgrid = ui->gridLayout;
 
+		clearDisplay();
 
-		if(func->nb_params>0)
+
+		if(func->nb_params > 0)
 		{
+			mNbParams = func->nb_params;
 
-			// for each parameter :
-			if(mParamsEditLines)
-				delete [] mParamsEditLines;
-			if(mComboEdit)
-				delete [] mComboEdit;
+			mLabels = new QLabel * [ func->nb_params ]; // for lists
+			memset(mLabels, 0, sizeof(QLabel *) * func->nb_params);
 
 			mParamsEditLines = new QLineEdit * [ func->nb_params ]; // for scalars
 			memset(mParamsEditLines, 0, sizeof(QLineEdit *) * func->nb_params);
@@ -125,9 +165,9 @@ void PluginSettingsWidget::updateDisplay()
 			for(int i=0; i<func->nb_params; i++)
 			{
 				// Add param name then param value
-				QLabel *pname = new QLabel(QString(func->param_list[i].name),
+				mLabels[i] = new QLabel(QString(func->param_list[i].name),
 										   this);
-				fgrid->addWidget(pname, i, 0);
+				fgrid->addWidget(mLabels[i], i, 0);
 
 				char txt[1024]="";
 				swGetStringValueFromType(func->param_list[i].type,

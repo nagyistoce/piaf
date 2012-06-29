@@ -56,6 +56,14 @@ BatchFiltersThread::BatchFiltersThread()
 	mDisplayImage = NULL;
 }
 
+int BatchFiltersThread::setBatchTask(t_batch_task * pTask)
+{
+	PIAF_MSG(SWLOG_INFO, "Set new batch task %p", pTask);
+	mpBatchTask = pTask;
+
+	return (mpBatchTask != NULL ? 0 : -1);
+}
+
 BatchFiltersThread::~BatchFiltersThread()
 {
 	PIAF_MSG(SWLOG_INFO, "Stopping thread %p", this);
@@ -416,6 +424,11 @@ void BatchFiltersThread::run()
 										}
 										resume = false;
 									} else {
+										if(!mpFilterSequencer)
+										{
+											PIAF_MSG(SWLOG_ERROR, "ERROR: NO sequencer !");
+											continue;
+										}
 										int retproc = mpFilterSequencer->processImage(inputImage, &outputImage);
 
 										if(retproc < 0) {
@@ -423,7 +436,8 @@ void BatchFiltersThread::run()
 											item->processing_state = ERROR_PROCESS;
 											// but it may be reloaded on next frame
 										}
-										else {
+										else
+										{
 											// Store statistics
 											appendTimeUS(retproc /* as deltaTus */);
 
@@ -476,10 +490,14 @@ void BatchFiltersThread::run()
 													fprintf(stderr, "clone disp=%dx%dx%d",
 															mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
 												}
-												else {
-													//fprintf(stderr, "disp=%dx%dx%d", mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
+												else
+												{
+													PIAF_MSG(SWLOG_INFO,
+															 "copy disp=%dx%dx%d",
+															 mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
 													cvCopy(outputImage, mDisplayImage);
 												}
+
 												mDisplayMutex.unlock();
 
 											}

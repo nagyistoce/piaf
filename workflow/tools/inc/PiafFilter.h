@@ -326,7 +326,9 @@ protected:
 	void init();
 	void purge();
 
-	IplImage * imageTmp; ///< Temporary image
+	void clearImageTmpList();
+
+	QList<IplImage *> imageTmpList; ///< Temporary image for storing different steps of plugin sequence
 	bool lockProcess;
 
 	bool mNoWarning; ///< Don't show warning on plugin crash

@@ -34,6 +34,7 @@
 #include "OpenCVEncoder.h"
 
 #include "timehistogramwidget.h"
+#include "piaf-common.h"
 
 
 BatchProgressWidget::BatchProgressWidget(QWidget *parent) :
@@ -77,10 +78,18 @@ BatchProgressWidget::BatchProgressWidget(QWidget *parent) :
 void BatchProgressWidget::allocateBatchThread()
 {
 	if(mpBatchThread) { return; }
+	PIAF_MSG(SWLOG_INFO, "Allocate batch thread...");
 	mpBatchThread = new BatchFiltersThread();
 
+	if(!mpBatchTask) { allocateBatchTask(); }
+
+	PIAF_MSG(SWLOG_INFO, "Set batch task %p", mpBatchTask);
+	mpBatchThread->setBatchTask( mpBatchTask );
+
 	// assign a filter manager to background processing thread
-//	mpBatchThread->setFilterSequencer(&mFilterSequencer);
+	PIAF_MSG(SWLOG_INFO, "Set filter sequencer to thread %p",
+			 mpBatchThread);
+	mpBatchThread->setFilterSequencer( &mFilterSequencer );
 }
 
 
@@ -446,9 +455,7 @@ void BatchProgressWidget::on_playPauseButton_toggled(bool checked)
 		if(!mpBatchThread)
 		{
 			PIAF_MSG(SWLOG_INFO, "Allocated batch thread...");
-			/// \todo allocate if needed
-			mpBatchThread = new BatchFiltersThread();
-			mBatchThreadAllocated = true;
+			allocateBatchThread();
 		}
 
 		if(mpBatchThread) {
@@ -465,6 +472,7 @@ void BatchProgressWidget::on_playPauseButton_toggled(bool checked)
 			PIAF_MSG(SWLOG_INFO, "Set pause on processing to false on thread...");
 			mpBatchThread->setPause(false); // set pause on
 		}
+
 	} else {
 		if(mpBatchThread) {
 			PIAF_MSG(SWLOG_INFO, "Set pause on processing to true on thread...");
@@ -767,14 +775,14 @@ void BatchProgressWidget::on_mDisplayTimer_timeout()
 		}
 		else {
 			/// \todo allocate if needed
+			PIAF_MSG(SWLOG_ERROR, "[Batch]: no batch thread");
+		}
+		if(mpBatchThread) {
+			mpBatchThread->lockDisplay(false);
 		}
 
 		if(!imgRGBdisplay) {
-			if(mpBatchThread) {
-				mpBatchThread->lockDisplay(false);
-			}
-			fprintf(stderr, "[Batch]::%s:%d : no display image\n",
-					__func__, __LINE__);
+			PIAF_MSG(SWLOG_ERROR, "[Batch]: no display image");
 		} else {
 //			if(imgRGBdisplay->nChannels == 4 && imgRGBdisplay->imageData[0]==0)
 //			{	// FORCE ALPHA CHANNEL
@@ -843,6 +851,7 @@ void BatchProgressWidget::on_mDisplayTimer_timeout()
 		ui->timeHistoWidget->displayHisto(time_histo);
 	}
 }
+
 void BatchProgressWidget::setBatchFiltersThread(BatchFiltersThread  * pBatchThread)
 {
 	if(mpBatchThread && mBatchThreadAllocated)
@@ -851,17 +860,10 @@ void BatchProgressWidget::setBatchFiltersThread(BatchFiltersThread  * pBatchThre
 	}
 	mpBatchThread = pBatchThread;
 	mBatchThreadAllocated = false;
+
+	PIAF_MSG(SWLOG_INFO, "Set filter sequencer to thread %p",
+			 mpBatchThread);
+	mpBatchThread->setFilterSequencer( &mFilterSequencer );
 }
 
 
-
-
-
-
-
-
-
-void BatchProgressWidget::on_playPauseButton_clicked()
-{
-
-}

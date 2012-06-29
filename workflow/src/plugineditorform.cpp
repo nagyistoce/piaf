@@ -623,6 +623,7 @@ void PluginEditorForm::on_activateButton_clicked()
 	LoadedPluginTreeWidgetItem * item =
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
 	if(!item) { return; }
+
 	mpFilterSequencer->toggleFilterDisableFlag(item->getFilter());
 	ui->selectedPluginsTreeWidget->setCurrentItem(item);
 }
@@ -692,15 +693,20 @@ void PluginEditorForm::on_pluginSettingsWidget_selectedFilterChanged(PiafFilter 
 	updateSelectedView();
 }
 
-void PluginEditorForm::on_selectedPluginsTreeWidget_itemClicked(QTreeWidgetItem* item, int column)
+void PluginEditorForm::on_selectedPluginsTreeWidget_itemClicked(QTreeWidgetItem* item,
+																int column)
 {
 	mpSelectedFilter = NULL;
 	if(!item) { return; }
-	LoadedPluginTreeWidgetItem * loaded =
-			(LoadedPluginTreeWidgetItem *)item;
+
+	LoadedPluginTreeWidgetItem * loaded = (LoadedPluginTreeWidgetItem *)item;
 
 	mpSelectedFilter = loaded->getFilter();
-	ui->pluginSettingsWidget->setPiafFilter(loaded->getFilter());
+	PIAF_MSG(SWLOG_INFO, "Selected: loaded=%p name='%s'", loaded,
+			 mpSelectedFilter ? mpSelectedFilter->name() : "(null)"
+			 );
+
+	ui->pluginSettingsWidget->setPiafFilter( loaded->getFilter() );
 
 	// update time histogram
 	updateTimeHistogram();
