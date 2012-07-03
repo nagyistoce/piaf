@@ -107,7 +107,7 @@ QImage iplImageToQImage(IplImage * iplImage, bool swap_RB)
 
 	QImage qImage(orig_width, orig_height,
 				   depth > 1 ? QImage::Format_RGB32 : QImage::Format_Indexed8);
-	memset(qImage.bits(), 127, orig_width*iplImage->height*depth);
+	memset(qImage.bits(), 127, orig_width*orig_height*depth);
 
 	switch(iplImage->depth) {
 	default:
