@@ -586,6 +586,7 @@ IplImage * FreenectVideoAcquisition::readImageRGB32()
 					line8u[c] = g_freenect_depth_grayLUT[ linedepth[c] ];
 				}
 			}
+
 			fprintf(stderr, "[Freenect]::%s:%d: mode = %d => 2Cm => gray => BGR32\n",
 					__func__, __LINE__, mode);
 			cvCvtColor(m_grayImage, m_bgr32Image, CV_GRAY2BGRA);

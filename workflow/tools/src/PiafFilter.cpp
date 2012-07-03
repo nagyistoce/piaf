@@ -60,6 +60,8 @@
 //#include "videocapture.h"
 #include "piaf-common.h"
 
+#define CUSTOM_SEQ_FILE	SHM_DIRECTORY "customseq.flist"
+
 
 bool g_debug_PiafSignalHandler = false;
 bool g_debug_FilterSequencer = false;
@@ -268,13 +270,14 @@ void FilterSequencer::unloadAllAvailable()
 */
 PiafFilter *  FilterSequencer::addFilter(PiafFilter * newFilter, int id)
 {
-	fprintf(stderr, "FilterSequencer::%s:%d : adding filter %p at id=%d\n",
-			__func__ ,__LINE__, newFilter, id);
+	PIAF_MSG(SWLOG_INFO, "FilterSequencer: adding filter %p at idx=%d\n",
+			newFilter, id);
 	clearImageTmpList(); // clear before next use
 
 	if(id==-1)
 	{
 		mLoadedFiltersList.append( newFilter );
+
 
 		idEditPlugin = mLoadedFiltersList.count()-1;
 		idViewPlugin = idEditPlugin;
@@ -293,9 +296,11 @@ PiafFilter *  FilterSequencer::addFilter(PiafFilter * newFilter, int id)
 		}
 	}
 
+	// Save the sequence here because the plugin won't
+	// send its params since it already crashed
+	saveSequence(SHM_DIRECTORY "crashedsequence.flist");
 
-	fprintf(stderr, "[FilterSequencer]::%s:%d : start process '%s' func %d\n",
-			__func__, __LINE__,
+	PIAF_MSG(SWLOG_INFO, "[FilterSequencer]:start process '%s' func %d\n",
 			newFilter->exec_name, newFilter->indexFunction);
 	// start process
 	newFilter->loadChildProcess();
@@ -305,7 +310,7 @@ PiafFilter *  FilterSequencer::addFilter(PiafFilter * newFilter, int id)
 	connect(newFilter, SIGNAL(signalParamsChanged()), this, SLOT(slot_signalParamsChanged()));
 
 	// save current list
-	strcpy(mPluginSequenceFile, TMP_DIRECTORY "customseq.flist");
+	strcpy(mPluginSequenceFile, CUSTOM_SEQ_FILE);
 	saveSequence(mPluginSequenceFile);
 
 	return newFilter;
@@ -314,7 +319,7 @@ PiafFilter *  FilterSequencer::addFilter(PiafFilter * newFilter, int id)
 void FilterSequencer::slot_signalParamsChanged()
 {
 	// save current list in temp sequence file
-	strcpy(mPluginSequenceFile, TMP_DIRECTORY "customseq.flist");
+	strcpy(mPluginSequenceFile, CUSTOM_SEQ_FILE);
 
 	fprintf(stderr, "[FilterSequencer]::%s:%d : params changed ! save tmp sequence as '%s'\n",
 			__func__, __LINE__, mPluginSequenceFile);
@@ -356,8 +361,9 @@ void FilterSequencer::slotFilterDied(int pid)
 	}
 
 	// Signal that it changed
-	fprintf(stderr, "[PiafFilterMng]::%s:%d : dead filter pid=%d => send filter changed...\n",
-			__func__, __LINE__, pid);
+	PIAF_MSG(SWLOG_WARNING,
+			 "[PiafFilterMng]: dead filter pid=%d => send filter changed...",
+			 pid);
 	emit selectedFilterChanged();
 }
 
@@ -366,7 +372,11 @@ int FilterSequencer::removeFilter(int id)
 {
 	// unload child process
 	PiafFilter * pv = mLoadedFiltersList.at((uint)id);
-	if(!pv) { return -1; }
+	if(!pv) {
+		PIAF_MSG( SWLOG_WARNING, "filter not found at idx=%d",
+				  id );
+		return -1;
+	}
 
 	return removeFilter(pv);
 }
@@ -374,7 +384,9 @@ int FilterSequencer::removeFilter(int id)
 
 int FilterSequencer::removeFilter(PiafFilter * filter)
 {
-	if(!filter) { return -1; }
+	if(!filter) {
+		PIAF_MSG( SWLOG_WARNING, "filter is null" );
+		return -1; }
 
 	// unload child process
 	int id = mLoadedFiltersList.indexOf(filter);
@@ -382,7 +394,6 @@ int FilterSequencer::removeFilter(PiafFilter * filter)
 
 	if(id>=0 && filter)
 	{
-
 		if(id==idEditPlugin || id==idViewPlugin || id==(int)mLoadedFiltersList.count()-1)
 		{
 			fprintf(stderr, "[PiafFilterMng]::%s:%d : will reset\n", __func__, __LINE__);
@@ -400,7 +411,7 @@ int FilterSequencer::removeFilter(PiafFilter * filter)
 		if(g_debug_FilterSequencer) {
 			fprintf(stderr, "%s:%d : removing from mLoadedFiltersList...\n", __func__, __LINE__);
 		}
-		mLoadedFiltersList.removeOne(filter);
+		mLoadedFiltersList.removeOne(filter)
 
 		if(g_debug_FilterSequencer) {
 			fprintf(stderr, "%s:%d : deleting...\n", __func__, __LINE__);
@@ -768,25 +779,28 @@ Format is simple : exec name and function index are needed, then parameters,
 
 int FilterSequencer::saveSequence(char * filename)
 {
-	fprintf(stderr, "FilterSequencer::%s:%d('%s')...\n",
-			__func__, __LINE__, filename);
+	PIAF_MSG(SWLOG_INFO, "[FilterSequencer] saving('%s')...\n",
+			 filename);
 
 	if(!strstr(filename, FILTERLIST_EXTENSION)) {
 		strcat(filename, FILTERLIST_EXTENSION);
 	}
 
 	if(mLoadedFiltersList.isEmpty()) {
+		PIAF_MSG(SWLOG_WARNING, "no filter in list => save nothing");
 		 return -1;
 	 }
 
-	printf("Save filter list into file '%s'\n", filename);
+	PIAF_MSG(SWLOG_INFO, "[FilterSequencer] Save filter list into file '%s'",
+			 filename);
 
 	// process each filter
 	FILE * f = fopen(filename, "w");
 	if(!f)
 	{
 		int errnum = errno;
-		fprintf(stderr, "PiafFilters::%s:%d : error while opening file '%s' : %d='%s'\n",
+		PIAF_MSG(SWLOG_ERROR, "[FilterSequencer] error while opening file '%s' "
+				 "for writing: %d='%s'\n",
 				__func__,__LINE__,
 				filename, errnum, strerror(errnum)
 				);
@@ -798,13 +812,16 @@ int FilterSequencer::saveSequence(char * filename)
 	for(it = mLoadedFiltersList.begin(); it != mLoadedFiltersList.end(); ++it, ++idx) {
 		PiafFilter * filter = (*it);
 		// process
-#ifdef __SWPLUGIN_DEBUG__
-		fprintf(stderr, "FILTERMANAGER: saving filter %s\n",
-				filter->funcList[filter->indexFunction].name);
-#endif
+		PIAF_MSG(SWLOG_INFO, "[FilterSequencer]: saving filter exec='%s' "
+				 "/ func[%d]='%s' \n",
+				 filter->exec_name,
+				 filter->indexFunction, filter->funcList[ filter->indexFunction].name
+				 );
+
 		fprintf(f, "%s\t%d\n",
 				filter->exec_name,
 				filter->indexFunction);
+
 		// --- read parameters from plugin
 		// send request and wait for answer
 		filter->sendRequest(SWFRAME_ASKFUNCTIONDESC);
@@ -815,20 +832,16 @@ int FilterSequencer::saveSequence(char * filename)
 			char * ret = fgets(txt, 1023, filter->pipeR);
 			if(ret)
 			{
-#ifdef __SWPLUGIN_DEBUG__
-				fprintf(stderr, "[PluginSequencer]::%s:%d : read params "
+				PIAF_MSG(SWLOG_INFO, "[FilterSequencer]: read params "
 						"from plugin [%d]:'%s' : params='%s'\n",
-						__func__, __LINE__,
 						idx, filter->name(),
 						txt);
-#endif
 				fprintf(f, "%s", txt);
 			}
 			else
 			{
-				fprintf(stderr, "[PluginSequencer]::%s:%d : could not read answer "
+				PIAF_MSG(SWLOG_ERROR, "[FilterSequencer]: could not read parameters answer "
 						"from plugin [%d]:'%s'\n",
-						__func__, __LINE__,
 						idx, filter->name());
 			}
 		}
@@ -1076,12 +1089,11 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 						cvCopy(imagePrev, imageOut );
 					}
 				} else {
-					if(g_debug_FilterSequencer)
+//					if(g_debug_FilterSequencer)
 					{
-						fprintf(stderr, "FilterSequencer::%s:%d processing "
+						PIAF_MSG(SWLOG_DEBUG, "[FilterSequencer]: processing "
 								"filter [%d] func[%d]=%s : in =%p:%dx%dx%dx%d "
 								"-> out=%p\n",
-								__func__, __LINE__,
 								filtidx,
 								pv->indexFunction,
 								pv->funcList[pv->indexFunction].name,
@@ -1106,9 +1118,9 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 						global_return --;
 						crashedPlugins.append(pv);
 
-						fprintf(stderr, "[PiafFiltersManager]::%s:%d : filter '%s' failed "
-								"=> will return %d\n",
-								__func__, __LINE__, pv->exec_name,
+						PIAF_MSG(SWLOG_ERROR, "[FilterSequencer]: filter [%d] '%s' failed "
+								"=> will return global=%d\n",
+								filtidx, pv->exec_name,
 								global_return
 								);
 					}
@@ -1164,6 +1176,7 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 					"=> unload then reload plugin sequence '%s'\n",
 					__func__, __LINE__,
 					getPluginSequenceFile());
+
 			// unload previously loaded filters
 			unloadAllLoaded();
 
@@ -1181,8 +1194,9 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 												  QMessageBox::Yes, QMessageBox::No);
 			if(answer == QMessageBox::Yes)
 			{
-				/// \fixme save in /dev/shm
-				saveSequence(SHM_DIRECTORY "crashedsequence.flist");
+				// Too late to save the sequence here because the plugin won't
+				// send its params since it already crashed
+				//saveSequence(SHM_DIRECTORY "crashedsequence.flist");
 
 				// unload previously loaded filters
 				unloadAllLoaded();

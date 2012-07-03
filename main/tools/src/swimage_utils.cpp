@@ -185,12 +185,15 @@ IplImage * convertSwImageToIplImage(swImageStruct * swim, IplImage ** pimg)
 	IplImage * img = *pimg;
 	if(img && (img->widthStep != swim->pitch || img->height != swim->height))
 	{
-		fprintf(stderr, "[%s] %s:%d : size does not match => "
+		if(img) {
+			fprintf(stderr, "[%s] %s:%d : size does not match => "
 				"release IplImage=%dx%d x nChannels=%d x depth=%d\n",
 				__FILE__, __func__, __LINE__,
 				img->width, img->height, img->nChannels, img->depth
 				);
-		cvReleaseImage(pimg);
+			cvReleaseImage(&img);
+		}
+
 		*pimg = img = NULL;
 	}
 
