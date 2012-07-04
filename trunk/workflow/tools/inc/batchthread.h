@@ -66,6 +66,9 @@ typedef struct {
 	QString sequence_name;				///< name of sequence file
 } t_batch_options;
 
+/** @brief Print task and its file items */
+void printBatchOptions(t_batch_options * pOptions);
+
 
 /** @brief Batch processing task
   */
@@ -76,6 +79,9 @@ typedef struct {
 	QString sequencePath;				///< Path to plugins sequence
 	t_batch_options options;			///< processing options
 } t_batch_task;
+
+/** @brief Print task and its file items */
+void printBatchTask(t_batch_task * pTask);
 
 /** @brief Delete task and its file items */
 void purgeBatchTask(t_batch_task * pTask);

@@ -391,7 +391,13 @@ void BatchProgressWidget::on_delButton_clicked()
 void BatchProgressWidget::on_recordButton_toggled(bool checked)
 {
 	mpBatchTask->options.record_output = checked;
-	if(mpBatchThread) mpBatchThread->setOptions(mpBatchTask->options);
+	if(mpBatchThread) {
+		mpBatchThread->setOptions(mpBatchTask->options);
+	}
+	else
+	{
+		PIAF_MSG(SWLOG_WARNING, "no batch thread");
+	}
 }
 
 void BatchProgressWidget::on_viewButton_toggled(bool checked)
@@ -401,7 +407,13 @@ void BatchProgressWidget::on_viewButton_toggled(bool checked)
 	fprintf(stderr, "[Batch]::%s:%d : display = %c\n",
 			__func__, __LINE__, mpBatchTask->options.view_image ? 'T':'F');
 
-	if(mpBatchThread) mpBatchThread->setOptions(mpBatchTask->options);
+	if(mpBatchThread) {
+		mpBatchThread->setOptions(mpBatchTask->options);
+	}
+	else
+	{
+		PIAF_MSG(SWLOG_WARNING, "no batch thread");
+	}
 }
 
 void BatchProgressWidget::on_greyButton_toggled(bool checked)
@@ -416,7 +428,13 @@ void BatchProgressWidget::on_greyButton_toggled(bool checked)
 		ui->greyButton->setText(tr("Color"));
 	}
 
-	if(mpBatchThread) mpBatchThread->setOptions(mpBatchTask->options);
+	if(mpBatchThread) {
+		mpBatchThread->setOptions(mpBatchTask->options);
+	}
+	else
+	{
+		PIAF_MSG(SWLOG_WARNING, "no batch thread");
+	}
 }
 
 
@@ -772,6 +790,10 @@ void BatchProgressWidget::on_mDisplayTimer_timeout()
 		{
 			mpBatchThread->lockDisplay(true); // lock display for thread-safe execution
 			IplImage * imgRGBdisplay = mpBatchThread->getDisplayImage();
+
+			if(!imgRGBdisplay) {
+				PIAF_MSG(SWLOG_ERROR, "[Batch]: no display image");
+			}
 		}
 		else {
 			/// \todo allocate if needed
