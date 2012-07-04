@@ -411,7 +411,7 @@ int FilterSequencer::removeFilter(PiafFilter * filter)
 		if(g_debug_FilterSequencer) {
 			fprintf(stderr, "%s:%d : removing from mLoadedFiltersList...\n", __func__, __LINE__);
 		}
-		mLoadedFiltersList.removeOne(filter)
+		mLoadedFiltersList.removeOne(filter);
 
 		if(g_debug_FilterSequencer) {
 			fprintf(stderr, "%s:%d : deleting...\n", __func__, __LINE__);
@@ -801,7 +801,6 @@ int FilterSequencer::saveSequence(char * filename)
 		int errnum = errno;
 		PIAF_MSG(SWLOG_ERROR, "[FilterSequencer] error while opening file '%s' "
 				 "for writing: %d='%s'\n",
-				__func__,__LINE__,
 				filename, errnum, strerror(errnum)
 				);
 		return -errnum;
@@ -1092,12 +1091,13 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 //					if(g_debug_FilterSequencer)
 					{
 						PIAF_MSG(SWLOG_DEBUG, "[FilterSequencer]: processing "
-								"filter [%d] func[%d]=%s : in =%p:%dx%dx%dx%d "
+								"filter [%d] func[%d]='%s' : in =%p:%dx%dx%dx%d "
 								"-> out=%p\n",
 								filtidx,
 								pv->indexFunction,
 								pv->funcList[pv->indexFunction].name,
-								imageIn, imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels
+								imageIn, imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels,
+								imageOut
 								);
 					}
 

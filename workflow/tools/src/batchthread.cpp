@@ -56,11 +56,92 @@ BatchFiltersThread::BatchFiltersThread()
 	mDisplayImage = NULL;
 }
 
+/*
+ * Print task and its file items
+ */
+void printBatchOptions(t_batch_options * pOptions)
+{
+	if(!pOptions)
+	{
+		fprintf(stderr, "\tBatch options is NULL !");
+		return;
+	}
+
+	fprintf(stderr, "\tBatch options : %p\n"
+			"\t\t use_grey=%c\n"
+			"\t\t reload_at_change=%c\n"
+			"\t\t view_image=%c\n"
+			"\t\t sequence_name='%s'\n"
+			, pOptions,
+			pOptions->use_grey ? 'T':'F',
+			pOptions->reload_at_change ? 'T':'F',
+			pOptions->record_output ? 'T':'F',
+			pOptions->sequence_name.toAscii().data()
+			);
+	fflush(stderr);
+}
+
+
+/*
+ * Print task and its file items
+ */
+void printBatchTask(t_batch_task * pTask)
+{
+	if(!pTask)
+	{
+		fprintf(stderr, "\tBatch task is NULL !");
+		return;
+	}
+	fprintf(stderr, "\tBatch task: %p\n"
+			"\t\t title='%s'\n"
+			"\t\t progress = %d %%\n"
+			"\t\t sequence='%s'\n"
+			"\t\t itemsList=%d items\n"
+			, pTask,
+			pTask->title.toAscii().data(),
+			pTask->progress,
+			pTask->sequencePath.toAscii().data(),
+			pTask->itemsList.count()
+			);
+
+	QList<t_batch_item *>::iterator item;
+	int idx = 0;
+	for(item = pTask->itemsList.begin();
+		item != pTask->itemsList.end();
+		item++, idx++)
+	{
+		t_batch_item * pItem = (*item);
+
+		fprintf(stderr, "\t\t\titem[%d]='%s' former_state=%d is_movie=%c "
+				"proc_state=%d prog=%g treeItem=%p\n",
+				idx,
+				pItem->absoluteFilePath.toAscii().data(),
+				(int)pItem->former_state,
+				pItem->is_movie ? 'T':'F',
+				(int)pItem->processing_state,
+				pItem->progress,
+				pItem->treeItem
+				);
+	}
+
+	fprintf(stderr, "\t\tBatch options: ");
+	printBatchOptions(&pTask->options);
+
+}
+
+
 int BatchFiltersThread::setBatchTask(t_batch_task * pTask)
 {
 	PIAF_MSG(SWLOG_INFO, "Set new batch task %p", pTask);
 	mpBatchTask = pTask;
 
+	if(mpBatchTask) {
+		PIAF_MSG(SWLOG_INFO, "Set new batch task's options");
+
+		setOptions(mpBatchTask->options);
+
+		printBatchTask(pTask);
+	}
 	return (mpBatchTask != NULL ? 0 : -1);
 }
 
@@ -83,6 +164,8 @@ void BatchFiltersThread::setOptions(t_batch_options options)
 	if(mpBatchTask)
 	{
 		mpBatchTask->options = options;
+		printBatchOptions(&options);
+		printBatchOptions(&mpBatchTask->options);
 	}
 	else
 	{
@@ -323,12 +406,19 @@ void BatchFiltersThread::run()
 									}
 
 									if(!mDisplayImage) {
+										PIAF_MSG(SWLOG_INFO, "Create image cpoy for display=%d x %d x %db x %d ch",
+												 loadedImage->width, loadedImage->height,
+												 loadedImage->depth, loadedImage->nChannels);
 										mDisplayImage = swCreateImage(cvGetSize(loadedImage),
 																	  loadedImage->depth, loadedImage->nChannels);
 										cvSet(mDisplayImage, cvScalarAll(255));
 									}
 
 									cvCopy(outputImage, mDisplayImage);
+								}
+								else
+								{
+									PIAF_MSG(SWLOG_INFO, "No view");
 								}
 
 								// Set the state to processed
