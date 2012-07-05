@@ -999,9 +999,10 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 {
 	if(!imageIn)
 	{
-		fprintf(stderr, "[FilterSequencer]::%s:%d: NULL input image\n", __func__, __LINE__);
+		PIAF_MSG(SWLOG_ERROR, "[FilterSequencer]: ERROR: input image is NULL" );
 		return -1;
 	}
+
 	int deltaTus = 0;
 	if(g_debug_FilterSequencer)
 	{
@@ -1016,7 +1017,7 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 
 
 	if(mLoadedFiltersList.isEmpty()) {
-//		fprintf(stderr, "[FilterSequencer]::%s:%d : filter list is empty\n", __func__, __LINE__);
+		PIAF_MSG(SWLOG_ERROR, "[FilterSequencer]: ERROR: filter list is empty" );
 		return -1;
 	}
 

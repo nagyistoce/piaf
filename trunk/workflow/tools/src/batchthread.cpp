@@ -71,10 +71,12 @@ void printBatchOptions(t_batch_options * pOptions)
 			"\t\t use_grey=%c\n"
 			"\t\t reload_at_change=%c\n"
 			"\t\t view_image=%c\n"
+			"\t\t record_output=%c\n"
 			"\t\t sequence_name='%s'\n"
 			, pOptions,
 			pOptions->use_grey ? 'T':'F',
 			pOptions->reload_at_change ? 'T':'F',
+			pOptions->view_image ? 'T':'F',
 			pOptions->record_output ? 'T':'F',
 			pOptions->sequence_name.toAscii().data()
 			);
@@ -164,7 +166,9 @@ void BatchFiltersThread::setOptions(t_batch_options options)
 	if(mpBatchTask)
 	{
 		mpBatchTask->options = options;
+		PIAF_MSG(SWLOG_INFO, "param: options=");
 		printBatchOptions(&options);
+		PIAF_MSG(SWLOG_INFO, "task's options=");
 		printBatchOptions(&mpBatchTask->options);
 	}
 	else
@@ -358,9 +362,9 @@ void BatchFiltersThread::run()
 
 								// unload previously loaded filters
 								mpFilterSequencer->unloadAllLoaded();
+
 								// reload same file
 								mpFilterSequencer->loadFilterList(mpFilterSequencer->getPluginSequenceFile());
-
 							}
 							oldSize.width = loadedImage->width;
 							oldSize.height = loadedImage->height;
@@ -376,11 +380,13 @@ void BatchFiltersThread::run()
 									);
 
 							// Process this image with filters
-							int retproc = mpFilterSequencer->processImage(loadedImage, &outputImage);
+							int retproc = mpFilterSequencer->processImage(loadedImage,
+																		  &outputImage);
 							if(retproc < 0)
 							{
 								item->processing_state = ERROR_PROCESS;
-
+								PIAF_MSG(SWLOG_ERROR, "Error processing file item '%s'",
+										 item->absoluteFilePath.toAscii().data());
 							} else {
 								// Store statistics
 								appendTimeUS(retproc /*deltaTus*/);
@@ -428,16 +434,19 @@ void BatchFiltersThread::run()
 
 						}
 						else {
+							PIAF_MSG(SWLOG_INFO, "Loading '%s' as a movie ...",
+									 item->absoluteFilePath.toAscii().data() );
+
 							/// @todo : use factory Load ad movie
-							FileVideoAcquisition * fva = (FileVideoAcquisition *)new FFmpegFileVideoAcquisition(
-									item->absoluteFilePath.toUtf8().data());
+							FileVideoAcquisition * fva =
+									(FileVideoAcquisition *)new FFmpegFileVideoAcquisition(
+										item->absoluteFilePath.toUtf8().data());
 							CvSize size = cvSize(fva->getImageSize().width,
 												 fva->getImageSize().height);
 							if(size.width <=0 || size.height <=0)
 							{
-								fprintf(stderr, "BatchThread::%s:%d : invalid image size : %dx%d "
-										"=> file='%s' has processing ERROR\n",
-										__func__, __LINE__,
+								PIAF_MSG(SWLOG_ERROR, "[BatchThread]: invalid image size : %dx%d "
+										"=> file='%s' has processing ERROR",
 										size.width, size.height,
 										item->absoluteFilePath.toUtf8().data()
 										);
@@ -447,12 +456,15 @@ void BatchFiltersThread::run()
 								item->progress = 1.f;
 
 							} else {
+								PIAF_MSG(SWLOG_INFO, "Could load '%s' as a movie "
+										 "... go on processing",
+										 item->absoluteFilePath.toAscii().data() );
 								IplImage * loadedImage = swCreateImage(size,
 															IPL_DEPTH_8U,
 															mpBatchTask->options.use_grey ? 1:4);
 								// Loop on images
 								IplImage * outputImage = NULL;
-
+								int frame_idx = 0; // local file frame counter
 								bool resume = true;
 								while(resume && mRun)
 								{
@@ -492,6 +504,11 @@ void BatchFiltersThread::run()
 											{
 												ret = 0;
 											}
+											else
+											{
+												PIAF_MSG(SWLOG_ERROR, "could not read Y image of '%s ...",
+														 item->absoluteFilePath.toAscii().data() );
+											}
 
 										}
 										else
@@ -502,18 +519,27 @@ void BatchFiltersThread::run()
 											{
 												ret = 0;
 											}
+											else
+											{
+												PIAF_MSG(SWLOG_ERROR, "could not read RGB32 image of '%s'' ...",
+														 item->absoluteFilePath.toAscii().data() );
+											}
 										}
 									}
 
 									if(!read_frame)
 									{
+										PIAF_MSG(SWLOG_INFO, "EOF of '%s ...",
+												 item->absoluteFilePath.toAscii().data() );
 										if(g_debug_BatchFiltersThread) {
 											fprintf(stderr, "BatchThread::%s:%d : File '%s' EOF\n",
 												__func__, __LINE__, item->absoluteFilePath.toAscii().data()
 												);fflush(stderr);
 										}
+
 										resume = false;
 									} else {
+										frame_idx++;
 										if(!mpFilterSequencer)
 										{
 											PIAF_MSG(SWLOG_ERROR, "ERROR: NO sequencer !");
@@ -522,6 +548,10 @@ void BatchFiltersThread::run()
 										int retproc = mpFilterSequencer->processImage(inputImage, &outputImage);
 
 										if(retproc < 0) {
+											PIAF_MSG(SWLOG_ERROR, "error processing image # %d of '%s ...",
+													 frame_idx,
+													 item->absoluteFilePath.toAscii().data() );
+
 											// Set the state to processing error
 											item->processing_state = ERROR_PROCESS;
 											// but it may be reloaded on next frame

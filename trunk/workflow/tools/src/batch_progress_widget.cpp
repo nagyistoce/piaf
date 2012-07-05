@@ -235,11 +235,17 @@ void BatchProgressWidget::setPluginSequence(QString fileName)
 		mpBatchTask->sequencePath = fileName;
 		mBatchTaskAllocated = true;
 	}
+	if(!mpBatchThread)
+	{
+		allocateBatchThread();
+	}
 
 	QFileInfo fi(fileName);
 	if(fi.isFile() && fi.exists())
 	{
 		mLastPluginsDirName = fi.absoluteDir().absolutePath();
+		PIAF_MSG(SWLOG_INFO, "Load filter sequence '%s'",
+				 mLastPluginsDirName.toAscii().data());
 
 		if(mFilterSequencer.loadFilterList(fi.absoluteFilePath().toUtf8().data()) < 0)
 		{
@@ -351,7 +357,13 @@ void BatchProgressWidget::on_addButton_clicked()
 
 void BatchProgressWidget::on_resetButton_clicked()
 {
-	if(!mpBatchTask) { return; }
+	if(!mpBatchTask)
+	{
+		QMessageBox::critical(NULL, tr("No batch task"),
+							  tr("ERROR: no batch task")
+							  );
+		return;
+	}
 
 	QList<t_batch_item *>::iterator it;
 	for(it = mpBatchTask->itemsList.begin(); it != mpBatchTask->itemsList.end(); ++it)
@@ -390,6 +402,13 @@ void BatchProgressWidget::on_delButton_clicked()
 
 void BatchProgressWidget::on_recordButton_toggled(bool checked)
 {
+	if(!mpBatchTask)
+	{
+		QMessageBox::critical(NULL, tr("No batch task"),
+							  tr("ERROR: no batch task")
+							  );
+		return;
+	}
 	mpBatchTask->options.record_output = checked;
 	if(mpBatchThread) {
 		mpBatchThread->setOptions(mpBatchTask->options);
@@ -402,10 +421,17 @@ void BatchProgressWidget::on_recordButton_toggled(bool checked)
 
 void BatchProgressWidget::on_viewButton_toggled(bool checked)
 {
+	if(!mpBatchTask)
+	{
+		QMessageBox::critical(NULL, tr("No batch task"),
+							  tr("ERROR: no batch task")
+							  );
+		return;
+	}
 	mpBatchTask->options.view_image = checked;
 
-	fprintf(stderr, "[Batch]::%s:%d : display = %c\n",
-			__func__, __LINE__, mpBatchTask->options.view_image ? 'T':'F');
+	PIAF_MSG(SWLOG_INFO, "[BatchProgW] view_image= %c\n",
+			mpBatchTask->options.view_image ? 'T':'F');
 
 	if(mpBatchThread) {
 		mpBatchThread->setOptions(mpBatchTask->options);
