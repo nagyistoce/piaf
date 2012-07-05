@@ -1625,6 +1625,12 @@
    <property name="text">
     <string>External batch processor </string>
    </property>
+   <property name="statusTip">
+    <string>Launch external batch processor (independant window, maybe launched several times)</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+B</string>
+   </property>
    <property name="iconVisibleInMenu">
     <bool>true</bool>
    </property>
