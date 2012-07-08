@@ -384,6 +384,8 @@ signals:
 	/** @brief Selected filter changed or its parameters changed */
 	void selectedFilterChanged();
 	void signalFilterDied(PiafFilter *);
+	/** @brief Signal to warn for pluign error (loading, executing ... ) */
+	void signalPluginError(QString );
 	/** @brief Signal that processing is done with success */
 	void signalProcessingDone();
 };

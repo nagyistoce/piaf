@@ -244,8 +244,10 @@ void BatchProgressWidget::setPluginSequence(QString fileName)
 	if(fi.isFile() && fi.exists())
 	{
 		mLastPluginsDirName = fi.absoluteDir().absolutePath();
-		PIAF_MSG(SWLOG_INFO, "Load filter sequence '%s'",
-				 mLastPluginsDirName.toAscii().data());
+		PIAF_MSG(SWLOG_INFO, "Load filter sequence in directory '%s': sequence file '%s'",
+				 mLastPluginsDirName.toAscii().data(),
+				 fi.absoluteFilePath().toUtf8().data()
+				 );
 
 		if(mFilterSequencer.loadFilterList(fi.absoluteFilePath().toUtf8().data()) < 0)
 		{
@@ -508,6 +510,9 @@ void BatchProgressWidget::on_playPauseButton_toggled(bool checked)
 				PIAF_MSG(SWLOG_INFO, "Start thread...");
 				if(mpBatchThread) { mpBatchThread->start(); }
 			}
+
+			PIAF_MSG(SWLOG_INFO, "Set sequencer on thread...");
+			mpBatchThread->setFilterSequencer(&mFilterSequencer);
 
 			//
 			PIAF_MSG(SWLOG_INFO, "Start processing on thread...");
@@ -815,7 +820,7 @@ void BatchProgressWidget::on_mDisplayTimer_timeout()
 		if(mpBatchThread)
 		{
 			mpBatchThread->lockDisplay(true); // lock display for thread-safe execution
-			IplImage * imgRGBdisplay = mpBatchThread->getDisplayImage();
+			imgRGBdisplay = mpBatchThread->getDisplayImage();
 
 			if(!imgRGBdisplay) {
 				PIAF_MSG(SWLOG_ERROR, "[Batch]: no display image");
