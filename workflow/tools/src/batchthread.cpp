@@ -613,7 +613,7 @@ void BatchFiltersThread::run()
 												else
 												{
 													PIAF_MSG(SWLOG_INFO,
-															 "copy disp=%dx%dx%d",
+															 "copy disp=%dx%dx%d in mDisplayImage",
 															 mDisplayImage->width, mDisplayImage->height, mDisplayImage->nChannels);
 													cvCopy(outputImage, mDisplayImage);
 												}

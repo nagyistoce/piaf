@@ -866,12 +866,16 @@ int FilterSequencer::loadSequence(char * filename)
 		strcat(fname, FILTERLIST_EXTENSION);
 	}
 
-	fprintf(stderr, "[PiafFilterMngr]::%s:%d : Loading file '%s'...\n", __func__, __LINE__, filename);
+	PIAF_MSG(SWLOG_INFO, "[FilterSequencer %p]: Loading file '%s'...\n", this, filename);
 	// process each image
 
 	FILE * f = fopen(fname, "r");
 	if(!f) {
-		fprintf(stderr, "[PiafFilterMngr]::%s:%d : cannot load file '%s'\n", __func__, __LINE__, filename);
+		int errnum = errno;
+		PIAF_MSG(SWLOG_ERROR, "[FilterSequencer %p]: cannot load file '%s'. Err=%d='%s'",
+				 this, filename,
+				 errnum, strerror(errnum)
+				 );
 		return -1;
 	}
 
@@ -888,28 +892,70 @@ int FilterSequencer::loadSequence(char * filename)
 		if(retline) {
 			// check if filter is available
 			PiafFilter * foundPV = NULL;
+			if(mAvailableFiltersList.isEmpty())
+			{
+				PIAF_MSG(SWLOG_INFO, "Loading available plugins list ...");
+				loadFilters();
+			}
+
+			PIAF_MSG(SWLOG_INFO, "Loading available plugins list ...");
 			if(!mAvailableFiltersList.isEmpty())
 			{
-				QList<PiafFilter *>::iterator it;
-				for(it = mAvailableFiltersList.begin();
-						it!=mAvailableFiltersList.end() && !foundPV; ++it)
+				int retry = 0;
+				while(foundPV == NULL && retry < 2) // Two chances to load the filter
 				{
-					PiafFilter * filter = (*it);
-					if(filter) {
-						if(strncmp(filter->exec_name, line, strlen((filter->exec_name)))==0) {
-							foundPV = filter;
+					retry++;
+					QList<PiafFilter *>::iterator it;
+					for(it = mAvailableFiltersList.begin();
+							it!=mAvailableFiltersList.end() && !foundPV; ++it)
+					{
+						PiafFilter * filter = (*it);
+						if(filter) {
+							if(strncmp(filter->exec_name, line, strlen((filter->exec_name)))==0) {
+								foundPV = filter;
+								PIAF_MSG(SWLOG_INFO, "\t[FilterSequencer %p]: FOUND filter for filter=%p\n",
+										this, filter);
+							}
+						} else {
+							PIAF_MSG(SWLOG_ERROR, "\t[FilterSequencer %p]: no filter for filter=%p\n",
+									this, filter);
 						}
-					} else {
-						fprintf(stderr, "[PiafFilterMngr]::%s:%d : no filter for filter=%p\n",
-								__func__, __LINE__, filter);
+					}
+
+					if(!foundPV) // load directly the file into available plugins list
+					{ // because the plugin file may exist and is no more in the list handled by the GUI,
+						// so it is not loaded by loadFilters()
+						char filename[1024];
+						strcpy(filename, line);
+						// split by tab
+						char * tab = strstr(filename, "\t");
+						if(tab)
+						{
+							*tab = '\0';
+						}
+						PIAF_MSG(SWLOG_WARNING, "plugin '%s' is not in available list. "
+								 "Try to load it directly '%s' ...",
+								 line, filename);
+						loadFilter(filename);
 					}
 				}
 			}
+			else {
+				PIAF_MSG(SWLOG_ERROR, "Available plugin list is not loaded");
+			}
+
 
 			int id = -1;
 			if(!foundPV) {
-				fprintf(stderr, "[FilterSequencer]::%s:%d : Filter exec '%s' seems not to be unknown.\n",
-						__func__, __LINE__, line);
+				PIAF_MSG(SWLOG_ERROR, "\t[FilterSequencer %p]: Filter exec '%s' "
+						 "seems not to be unknown.\n",
+						this, line);
+				QString errMsg = tr("Filter binary '")+line+ tr("' seems not to be unknown.");
+				QMessageBox::critical(NULL, tr("Plugin loading error"),
+									  errMsg
+									  );
+				emit signalPluginError(errMsg);
+
 			} else {
 				// read function index
 				char * pid = nextTab(line);
@@ -917,21 +963,23 @@ int FilterSequencer::loadSequence(char * filename)
 				{
 					sscanf(pid, "%d", &id);
 					if(id >= foundPV->nbfunctions()) {
-	#ifdef __SWPLUGIN_DEBUG__
-						fprintf(stderr, "slotLoad: read function index for filter from exec '%s' is superior to function number %d\n",
-							foundPV->exec_name, foundPV->nbfunctions());
-	#endif
+#ifdef __SWPLUGIN_DEBUG__
+					fprintf(stderr, "slotLoad: read function index for filter from exec '%s' is superior to function number %d\n",
+						foundPV->exec_name, foundPV->nbfunctions());
+#endif
 						id = -1;
+					}
+					else
+					{
+
 					}
 				}
 				else {
-					fprintf(stderr, "[PiafFilters]::%s:%d: Cannot read function index for filter from exec '%s'\n",
-							__func__, __LINE__,
+					PIAF_MSG(SWLOG_ERROR, "\t[FilterSequencer %p]: Cannot read function index for filter from exec '%s'\n",
+							this,
 							foundPV->exec_name);
 				}
 			}
-
-
 
 			// read parameters
 			line[0] = '\0';
@@ -949,10 +997,11 @@ int FilterSequencer::loadSequence(char * filename)
 				// add filter to collection
 				addFilter(newPV, -1);
 
-	#ifdef __SWPLUGIN_DEBUG__
-				fprintf(stderr, "[PiafFilterMng]::%s:%d : Loaded filter '%s' \n", __func__, __LINE__,
-						newPV->filter->funcList[newPV->indexFunction].name);
-	#endif
+#ifdef __SWPLUGIN_DEBUG__
+				PIAF_MSG(SWLOG_INFO, "\t[FilterSequencer %p]: Loaded filter '%s'",
+						 this,
+						 newPV->filter->funcList[newPV->indexFunction].name);
+#endif
 
 				// send parameters
 				if(newPV->pipeW) {
@@ -965,7 +1014,7 @@ int FilterSequencer::loadSequence(char * filename)
 
 	fclose(f);
 
-
+	// Emit signal to refresh GUI
 	emit selectedFilterChanged();
 	return 0;
 }
@@ -999,7 +1048,7 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 {
 	if(!imageIn)
 	{
-		PIAF_MSG(SWLOG_ERROR, "[FilterSequencer]: ERROR: input image is NULL" );
+		PIAF_MSG(SWLOG_ERROR, "[FilterSequencer %p]: ERROR: input image is NULL", this);
 		return -1;
 	}
 
@@ -1017,7 +1066,7 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 
 
 	if(mLoadedFiltersList.isEmpty()) {
-		PIAF_MSG(SWLOG_ERROR, "[FilterSequencer]: ERROR: filter list is empty" );
+		PIAF_MSG(SWLOG_ERROR, "[FilterSequencer %p]: ERROR: filter list is empty", this );
 		return -1;
 	}
 
