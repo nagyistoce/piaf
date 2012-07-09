@@ -18,6 +18,7 @@
 #include "vidacqsettingswindow.h"
 #include "ui_vidacqsettingswindow.h"
 #include <QMessageBox>
+#include "piaf-common.h"
 
 VidAcqSettingsWindow::VidAcqSettingsWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -87,22 +88,26 @@ void VidAcqSettingsWindow::updateVideoProperties()
 
 		m_video_properties = mpVideoCaptureDoc->getVideoProperties();
 
+		PIAF_MSG(SWLOG_INFO, "Received props=");
+		printVideoProperties(&m_video_properties);
+
 		QString str;
 
 #define CHANGE_SLIDER(_slider,_label,_value)	\
-		if((_slider)->value() != (_value)) { \
+		if((_slider)->value() != (_value) || 1) { \
 			str.sprintf("%d", (int)(_value)); \
 			QLabel * _labelptr = (_label); \
-			if(_labelptr) _labelptr->setText(str); \
+			if(_labelptr) { _labelptr->setText(str); } \
 			(_slider)->blockSignals(true); \
 			(_slider)->setValue((int)(_value)); \
 			(_slider)->blockSignals(false); \
 		}
+
 #define CHANGE_COMBO_INDEX(_combo,_label,_value)	\
 		if((_combo)->currentIndex() != (_value)) { \
 			str.sprintf("%d", (int)(_value)); \
 			QLabel * _labelptr = (_label); \
-			if(_labelptr) _labelptr->setText(str); \
+			if(_labelptr) { _labelptr->setText(str); } \
 			(_combo)->blockSignals(true); \
 			(_combo)->setCurrentIndex((_value)); \
 			(_combo)->blockSignals(false); \
@@ -138,7 +143,8 @@ void VidAcqSettingsWindow::updateVideoProperties()
 		// BRIGHTNESS...
 		CHANGE_COMBO_INDEX(ui->brightnessModeComboBox, ui->brightnessModeLabel, m_video_properties.auto_brightness);
 
-		CHANGE_SLIDER(ui->brightnessSlider, ui->brightnessLabel, m_video_properties.brightness);
+		CHANGE_SLIDER(ui->brightnessSlider,
+					  ui->brightnessLabel, m_video_properties.brightness);
 		CHANGE_SLIDER(ui->contrastSlider, ui->contrastLabel, m_video_properties.contrast);
 		CHANGE_SLIDER(ui->hueSlider, ui->hueLabel, m_video_properties.hue);
 		CHANGE_SLIDER(ui->saturationSlider, ui->saturationLabel, m_video_properties.saturation);
@@ -383,6 +389,8 @@ void VidAcqSettingsWindow::on_zoomRelativeSlider_valueChanged(int value)
 void VidAcqSettingsWindow::on_zoomAbsoluteSlider_valueChanged(int value)
 {
 	m_video_properties.zoom_absolute = value;
+	fprintf(stderr, "VidAcqSettings::%s:%d : changed zoom absolute to %d\n",
+			__func__, __LINE__, m_video_properties.zoom_absolute);fflush(stderr);
 	sendVideoProperties();
 }
 

@@ -1066,7 +1066,7 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 
 
 	if(mLoadedFiltersList.isEmpty()) {
-		PIAF_MSG(SWLOG_ERROR, "[FilterSequencer %p]: ERROR: filter list is empty", this );
+		PIAF_MSG(SWLOG_TRACE, "[FilterSequencer %p]: ERROR: filter list is empty", this );
 		return -1;
 	}
 
