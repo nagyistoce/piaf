@@ -151,10 +151,10 @@ void MainImageWidget::slotUpdateImage()
 		}
 		else
 		{
-			fprintf(stderr, "[MainImageWidget]::%s:%d: sequence returned %d ! "
-					"=> copy in out=%p\n",
-					__func__, __LINE__,
-					ret, m_outputIplImage);
+//			fprintf(stderr, "[MainImageWidget]::%s:%d: sequence returned %d ! "
+//					"=> copy in out=%p\n",
+//					__func__, __LINE__,
+//					ret, m_outputIplImage);
 
 			m_displayImage = m_fullImage.copy();
 		}

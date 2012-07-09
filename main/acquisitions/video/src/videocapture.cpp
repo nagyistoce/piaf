@@ -328,6 +328,7 @@ int VideoCaptureDoc::allocateImages()
 t_video_properties VideoCaptureDoc::getVideoProperties()
 {
 	if(!mpVAcq) {
+		PIAF_MSG(SWLOG_ERROR, "no video acquisition");
 		t_video_properties empty;
 		memset(&empty, 0, sizeof(t_video_properties));
 		return empty;
@@ -554,7 +555,7 @@ int VideoCaptureDoc::loadImage()
 	else
 	{
 		// unlock wait condition to unlock every WorkshopVideoCaptureThread
-		fprintf(stderr, "VideoCapture::%s:%d : acq OK => notify all\n", __func__, __LINE__);
+		//fprintf(stderr, "VideoCapture::%s:%d : acq OK => notify all\n", __func__, __LINE__);
 		mWaitCondition.wakeAll();
 	}
 	mImageBufferMutex.unlock();

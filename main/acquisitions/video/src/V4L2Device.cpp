@@ -247,6 +247,7 @@ int V4L2Device::grab()
 t_video_properties V4L2Device::updateVideoProperties()
 {
 	if(!initialised) {
+		V4L2_printf("ERROR: not initialized");
 		memset(&m_video_properties, 0, sizeof(t_video_properties));
 		return m_video_properties;
 	}
@@ -430,7 +431,8 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 		}
 	}
 
-	if(m_video_properties.auto_white_balance != props.auto_white_balance) {
+	if(m_video_properties.auto_white_balance
+			!= props.auto_white_balance) {
 		setCameraControl(V4L2_CID_AUTO_WHITE_BALANCE, props.auto_white_balance);
 	}
 	if(props.do_white_balance) {
@@ -462,7 +464,7 @@ int V4L2Device::setVideoProperties(t_video_properties props)
 		V4L2_printf("change br=%d/contrast=%d/saturation=%d/hue=%d/whiteness=%d...\n",
 				props.brightness, props.contrast, props.saturation, props.hue, props.white_balance);
 
-		// copy vaklues directly in V4L2
+		// copy values directly in V4L2
 		setCameraControl(V4L2_CID_BRIGHTNESS, props.brightness);
 		setCameraControl(V4L2_CID_CONTRAST, props.contrast);
 		setCameraControl(V4L2_CID_SATURATION, props.saturation);
@@ -586,8 +588,10 @@ V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 		setCameraControl(V4L2_CID_ZOOM_CONTINUOUS, props.zoom_continuous);
 	}
 
-	fprintf(stderr, "V4L2Device::%s:%d : props=\n", __func__, __LINE__);
-	m_video_properties = props;
+	fprintf(stderr, "finally V4L2Device::%s:%d : props=\n", __func__, __LINE__);
+
+	//m_video_properties = props;
+	updateVideoProperties();
 	printVideoProperties(&m_video_properties);
 
 	return 0;
@@ -597,7 +601,7 @@ V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 IplImage * V4L2Device::readImageRaw()
 {
 	static int unimplemented = 0;
-	if(unimplemented++ % 50 == 0)
+	if((unimplemented++) % 50 == 0)
 	{
 		fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED => return BGR32\n", __FILE__, __func__, __LINE__);
 	}
@@ -1191,6 +1195,7 @@ int V4L2Device::start_capturing() {
 		return -1;
 	}
 
+	initialised = true;
 	mGrabEnabled = true;
 
 	return 0;
@@ -1976,7 +1981,8 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 			}
 		}
 	}
-	
+	initialised = true;
+
 	// set acquisition size
 	V4L2_printf("changeSize with %lu x %lu", newSize->width, newSize->height);
 	int retsize = changeSize(newSize);
@@ -1987,7 +1993,6 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 		return -1;
 	}
 
-	initialised = true;
 //    echo();
 
 	return 0;
@@ -2950,11 +2955,15 @@ int V4L2Device::setCameraControl(unsigned int controlId, int value)
 
 	if(clist[0].value != value)
 	{
-		fprintf(stderr, "[V4L2]::%s:%d : VIDIOC_S_EXT_CTRLS could not change value for "
-				"id=0x%08x val=%d => current val = %d\n", __func__, __LINE__,
+		int errnum=errno;
+		fprintf(stderr, "[V4L2]::%s:%d : VIDIOC_S_EXT_CTRLS "
+				"could not change value for "
+				"id=0x%08x val=%d => current val = %d. Err=%d='%s'\n",
+				__func__, __LINE__,
 				controlId, value,
-				clist[0].value);
-
+				clist[0].value,
+				errnum, strerror(errnum));
+		return -1;
 	}
 	return 0;
 }
