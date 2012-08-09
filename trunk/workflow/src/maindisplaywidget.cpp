@@ -767,16 +767,19 @@ void MainDisplayWidget::on_mainImageWidget_signalSnapshot(QImage snap)
 
 	QString number;
 
-	QDir savePath( m_workflow_settings.defaultImageDir );
+	QDir savePath( g_workflow_settings.defaultImageDir );
 
 	number.sprintf("-%03d.png", mSnapCounter);
 	QString absPath = savePath.absoluteFilePath(mSourceName + number);
+
 	QFileInfo fi;
 	do {
 		fi.setFile(absPath);
 		if( fi.exists() )
 		{
+			MDW_printf(EMALOG_INFO, "file '%s' already exists", absPath.toAscii().data());
 			mSnapCounter++; //  -042.png already exists, so next will be 0043 ... until the file does not exists
+			number.sprintf("-%03d.png", mSnapCounter);
 			absPath = savePath.absoluteFilePath(mSourceName + number);
 		}
 		else
@@ -791,7 +794,9 @@ void MainDisplayWidget::on_mainImageWidget_signalSnapshot(QImage snap)
 			}
 			return;
 		}
-	} while(mSnapCounter<1000);
+	} while(mSnapCounter<10000);
+
+	MDW_printf(EMALOG_INFO, "Snapcounter overflow: %d and it could not save image", mSnapCounter);
 }
 
 

@@ -145,8 +145,8 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 	mpQuickCollection = NULL;
 	QString quickTitle = tr("Quick collection");
 	QList<EmaCollection *>::iterator cit;
-	for(cit = m_workflow_settings.collectionList.begin();
-		cit != m_workflow_settings.collectionList.end();
+	for(cit = g_workflow_settings.collectionList.begin();
+		cit != g_workflow_settings.collectionList.end();
 		++cit)
 	{
 		if(quickTitle == (*cit)->title)
@@ -162,7 +162,7 @@ EmaMainWindow::EmaMainWindow(QWidget *parent)
 		mpQuickCollection->comment = tr("Quick collection to create temporary selection");
 		mpQuickCollection->treeViewItem =
 		mpQuickCollectionRootItem = new CollecTreeWidgetItem(ui->collecTreeWidget, mpQuickCollection);
-		m_workflow_settings.collectionList.append(mpQuickCollection);
+		g_workflow_settings.collectionList.append(mpQuickCollection);
 	}
 
 	updateCollectionsTreeWidgetItems();
@@ -281,7 +281,7 @@ void EmaMainWindow::appendCollection(QDomElement collecElem, EmaCollection * par
 	else
 	{
 		// append to collections list
-		m_workflow_settings.collectionList.append(newCollec);
+		g_workflow_settings.collectionList.append(newCollec);
 	}
 }
 
@@ -308,14 +308,15 @@ void EmaMainWindow::loadSettings()
 
 
 	//================ DEFAULT SETTINGS ================
-	m_workflow_settings.defaultImageDir = QString(home) + "/" + tr("Images");
-	m_workflow_settings.defaultMovieDir = QString(home) + "/" + tr("Movies");
-	m_workflow_settings.defaultMeasureDir = QString(home) + "/" + tr("Measures");
+	g_workflow_settings.defaultImageDir = QString(home) + "/" + tr("Images");
+	g_workflow_settings.defaultMovieDir = QString(home) + "/" + tr("Movies");
+	g_workflow_settings.defaultMeasureDir = QString(home) + "/" + tr("Measures");
+	g_workflow_settings.defaultSequenceDir = QString(home) + "/" + tr("PluginSequences");
 
-	m_workflow_settings.maxV4L2 = 5;// because fast
-	m_workflow_settings.maxOpenCV = 5;// because slow: need to open devices
-	m_workflow_settings.maxOpenNI = 5;// because slow: need to open devices
-	m_workflow_settings.maxFreenect = 5;// because slow: need to open devices
+	g_workflow_settings.maxV4L2 = 5;// because fast
+	g_workflow_settings.maxOpenCV = 5;// because slow: need to open devices
+	g_workflow_settings.maxOpenNI = 5;// because slow: need to open devices
+	g_workflow_settings.maxFreenect = 5;// because slow: need to open devices
 
 	// Concatenate configuration directories
 	QFile file( QString(home) + "/" + PIAFWKFL_SETTINGS_XML );
@@ -359,14 +360,15 @@ void EmaMainWindow::loadSettings()
 
 			if(e.tagName().compare("General")==0) // Read default directories
 			{
-				m_workflow_settings.defaultImageDir = e.attribute("ImageDir", m_workflow_settings.defaultImageDir);
-				m_workflow_settings.defaultMovieDir = e.attribute("MovieDir", m_workflow_settings.defaultMovieDir);
-				m_workflow_settings.defaultMeasureDir = e.attribute("MeasureDir", m_workflow_settings.defaultMeasureDir);
+				g_workflow_settings.defaultImageDir = e.attribute("ImageDir", g_workflow_settings.defaultImageDir);
+				g_workflow_settings.defaultMovieDir = e.attribute("MovieDir", g_workflow_settings.defaultMovieDir);
+				g_workflow_settings.defaultMeasureDir = e.attribute("MeasureDir", g_workflow_settings.defaultMeasureDir);
+				g_workflow_settings.defaultSequenceDir = e.attribute("SequenceDir", g_workflow_settings.defaultSequenceDir);
 
-				m_workflow_settings.maxV4L2 = e.attribute("maxV4L2", "5").toInt();
-				m_workflow_settings.maxOpenCV = e.attribute("maxOpenCV", "5").toInt();
-				m_workflow_settings.maxOpenNI = e.attribute("maxOpenNI", "1").toInt();
-				m_workflow_settings.maxFreenect = e.attribute("maxFreenect", "5").toInt();
+				g_workflow_settings.maxV4L2 = e.attribute("maxV4L2", "5").toInt();
+				g_workflow_settings.maxOpenCV = e.attribute("maxOpenCV", "5").toInt();
+				g_workflow_settings.maxOpenNI = e.attribute("maxOpenNI", "1").toInt();
+				g_workflow_settings.maxFreenect = e.attribute("maxFreenect", "5").toInt();
 
 			}
 
@@ -461,11 +463,11 @@ void EmaMainWindow::saveSettings()
 
 	// Save list of files
 	mSettings.beginWriteArray("folders");
-	for (int i = 0; i < m_workflow_settings.directoryList.size(); ++i) {
+	for (int i = 0; i < g_workflow_settings.directoryList.size(); ++i) {
 		mSettings.setArrayIndex(i);
-		mSettings.setValue("path", m_workflow_settings.directoryList.at(i)->fullpath);
+		mSettings.setValue("path", g_workflow_settings.directoryList.at(i)->fullpath);
 		EMAMW_printf(EMALOG_DEBUG, "\tadded directory '%s'",
-					 m_workflow_settings.directoryList.at(i)->fullpath.toAscii().data());
+					 g_workflow_settings.directoryList.at(i)->fullpath.toAscii().data());
 		//settings.setValue("password", list.at(i).password);
 	}
 
@@ -507,24 +509,26 @@ void EmaMainWindow::saveSettings()
 	// Append default directories
 	QDomElement elemDirectories = mSettingsDoc.createElement("General");
 
-	elemDirectories.setAttribute("ImageDir", m_workflow_settings.defaultImageDir);
-	elemDirectories.setAttribute("MovieDir", m_workflow_settings.defaultMovieDir);
-	elemDirectories.setAttribute("MeasureDir", m_workflow_settings.defaultMeasureDir);
+	elemDirectories.setAttribute("ImageDir", g_workflow_settings.defaultImageDir);
+	elemDirectories.setAttribute("MovieDir", g_workflow_settings.defaultMovieDir);
+	elemDirectories.setAttribute("MeasureDir", g_workflow_settings.defaultMeasureDir);
+	elemDirectories.setAttribute("SequenceDir", g_workflow_settings.defaultSequenceDir);
 
-	elemDirectories.setAttribute("maxV4L2", m_workflow_settings.maxV4L2);
-	elemDirectories.setAttribute("maxOpenCV", m_workflow_settings.maxOpenCV);
-	elemDirectories.setAttribute("maxOpenNI", m_workflow_settings.maxOpenNI);
-	elemDirectories.setAttribute("maxFreenect", m_workflow_settings.maxFreenect);
+
+	elemDirectories.setAttribute("maxV4L2", g_workflow_settings.maxV4L2);
+	elemDirectories.setAttribute("maxOpenCV", g_workflow_settings.maxOpenCV);
+	elemDirectories.setAttribute("maxOpenNI", g_workflow_settings.maxOpenNI);
+	elemDirectories.setAttribute("maxFreenect", g_workflow_settings.maxFreenect);
 
 	elemGUI.appendChild(elemDirectories);
 
 
 	// Here we append a new element to the end of the document
 	QDomElement elemFolders = mSettingsDoc.createElement("Folders");
-	for (int i = 0; i < m_workflow_settings.directoryList.size(); ++i) {
+	for (int i = 0; i < g_workflow_settings.directoryList.size(); ++i) {
 		//mSettings.setValue("path", m_workflow_settings.directoryList.at(i));
 
-		t_folder * folder = m_workflow_settings.directoryList.at(i) ;
+		t_folder * folder = g_workflow_settings.directoryList.at(i) ;
 		QDomElement elem = mSettingsDoc.createElement("folder");
 		elem.setAttribute("fullpath", folder->fullpath);
 		elem.setAttribute("filename", folder->filename);
@@ -534,7 +538,7 @@ void EmaMainWindow::saveSettings()
 		elemFolders.appendChild(elem);
 
 		EMAMW_printf(EMALOG_INFO, "\tadded directory '%s' to XML",
-					 m_workflow_settings.directoryList.at(i)->fullpath.toAscii().data()
+					 g_workflow_settings.directoryList.at(i)->fullpath.toAscii().data()
 					 );
 	}
 
@@ -542,9 +546,9 @@ void EmaMainWindow::saveSettings()
 
 	// SAVE COLLECTIONS
 	QDomElement elemCollecs = mSettingsDoc.createElement("Collections");
-	for(int i = 0; i < m_workflow_settings.collectionList.size(); ++i)
+	for(int i = 0; i < g_workflow_settings.collectionList.size(); ++i)
 	{
-		EmaCollection * collec = m_workflow_settings.collectionList.at(i);
+		EmaCollection * collec = g_workflow_settings.collectionList.at(i);
 		addCollectionToXMLSettings(&elemCollecs, *collec);
 	}
 	elemGUI.appendChild(elemCollecs);
@@ -765,13 +769,13 @@ void EmaMainWindow::on_filesClearButton_clicked()
 	DirectoryTreeWidgetItem * del_dir = (DirectoryTreeWidgetItem *)item;
 	// remove from list
 	QList<t_folder *>::iterator it;
-	for(it = m_workflow_settings.directoryList.begin();
-		it != m_workflow_settings.directoryList.end(); )
+	for(it = g_workflow_settings.directoryList.begin();
+		it != g_workflow_settings.directoryList.end(); )
 	{
 		t_folder * folder = (*it);
 		if(folder->fullpath == del_dir->getFullPath())
 		{
-			it = m_workflow_settings.directoryList.erase(it);
+			it = g_workflow_settings.directoryList.erase(it);
 		} else {
 			++it;
 		}
@@ -966,7 +970,10 @@ void DirectoryTreeWidgetItem::init()
 {
 	QFileInfo fi(mFullPath);
 	mName = fi.baseName();
-	setText(0, fi.completeBaseName());
+	QString completeName = fi.fileName();
+	//completeName.replace(fi.suffix(), "");
+
+	setText(0, completeName);
 	mFakeSubItem = NULL;
 	mIsFile = false;
 
@@ -989,7 +996,7 @@ void DirectoryTreeWidgetItem::init()
 	{
 		mIsFile = true;
 
-		setText(0, fi.baseName());
+		setText(0, completeName);
 		setText(1, fi.suffix());
 	}
 }
@@ -1005,7 +1012,7 @@ DirectoryTreeWidgetItem * EmaMainWindow::appendDirectoryToLibrary(QString path,
 	folder->extension = fi.suffix();
 	folder->filename = fi.baseName();
 	folder->expanded = false;
-	m_workflow_settings.directoryList.append(folder);
+	g_workflow_settings.directoryList.append(folder);
 
 	DirectoryTreeWidgetItem * new_dir ;
 	if(!itemParent) {
@@ -1613,7 +1620,7 @@ void EmaMainWindow::on_actionPreferences_activated()
 {
 	PreferencesDialog * newPrefDialog = new PreferencesDialog(NULL);
 	/// FIXME
-	newPrefDialog->setSettings(&m_workflow_settings);
+	newPrefDialog->setSettings(&g_workflow_settings);
 	newPrefDialog->setAttribute( Qt::WA_DeleteOnClose );
 
 	connect(newPrefDialog, SIGNAL(destroyed()), this, SLOT(saveSettings()));
@@ -1663,7 +1670,7 @@ void EmaMainWindow::slot_newCollDialog_signalNewCollection(EmaCollection collec)
 	EMAMW_printf(SWLOG_INFO, "Adding new collection '%s'", collec.title.toAscii().data());
 
 	EmaCollection * new_collec = new EmaCollection(collec);
-	m_workflow_settings.collectionList.append(new_collec);
+	g_workflow_settings.collectionList.append(new_collec);
 	if(mpCurrentCollection )
 	{
 		EMAMW_printf(SWLOG_INFO, "\tAdding '%s' AS SUB-collection OF '%s'",
@@ -1704,7 +1711,7 @@ void EmaMainWindow::on_collecDeleteButton_clicked()
 							 tr("Do you really want to delete collection ")+selectedCollection->title+tr("?")
 							 ) == QMessageBox::Yes)
 	{
-		removeCollection(&m_workflow_settings.collectionList, selectedCollection);
+		removeCollection(&g_workflow_settings.collectionList, selectedCollection);
 
 		saveSettings();
 	}
@@ -2156,7 +2163,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 		dev_idx++;
 
-	} while( dev_idx<m_workflow_settings.maxV4L2 );
+	} while( dev_idx<g_workflow_settings.maxV4L2 );
 
 	mV4l2Item->setExpanded(true);
 
@@ -2233,7 +2240,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 		opencv_idx++;
 
-	} while(opencv_idx < m_workflow_settings.maxOpenCV);
+	} while(opencv_idx < g_workflow_settings.maxOpenCV);
 
 	mOpenCVItem->setExpanded(true);
 
@@ -2304,7 +2311,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 		freenect_idx++;
 
-	} while(freenect_found && freenect_idx<m_workflow_settings.maxFreenect);
+	} while(freenect_found && freenect_idx<g_workflow_settings.maxFreenect);
 	mFreenectItem->setExpanded(true);
 
 #endif // HAS_FREENECT
@@ -2369,7 +2376,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 			openniDevice = NULL;
 		}
 	} while(openni_found
-			&& openni_idx<m_workflow_settings.maxOpenNI
+			&& openni_idx<g_workflow_settings.maxOpenNI
 			);
 	mOpenNIItem->setExpanded(true);
 #endif // HAS_OPENNI
@@ -2444,8 +2451,8 @@ void EmaMainWindow::on_deviceTreeWidget_itemDoubleClicked(QTreeWidgetItem *item,
 void EmaMainWindow::updateCollectionsTreeWidgetItems()
 {
 	QList<EmaCollection *>::iterator cit;
-	for(cit = m_workflow_settings.collectionList.begin();
-		cit != m_workflow_settings.collectionList.end();
+	for(cit = g_workflow_settings.collectionList.begin();
+		cit != g_workflow_settings.collectionList.end();
 		++cit )
 	{
 		EmaCollection * pcol = (*cit);

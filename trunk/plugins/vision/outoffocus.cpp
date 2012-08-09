@@ -22,6 +22,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>
+#include <sys/time.h>
 
 #include <math.h>
 
@@ -106,10 +107,30 @@ swFuncParams Sin_params[] = {
 	{"reduction (mode 1)", swS32, (void *)&slope}
 	};
 
-	
+float underexposure_gamma = 1.2f;
+swFuncParams UnderExpo_params[] = {
+	{ "gamma", swFloat,  (void *)&underexposure_gamma}
+};
+
+float overexposure_gamma = 0.8f;
+swFuncParams OverExpo_params[] = {
+	{ "gamma", swFloat,  (void *)&overexposure_gamma}
+};
+
+float random_gamma_min = 0.4f;
+float random_gamma_max = 1.6f;
+i32 randomexposure_modulo = 25;
+
+swFuncParams RandomExpo_params[] = {
+	{ "gamma_min", swFloat,  (void *)&random_gamma_min},
+	{ "gamma_max", swFloat,  (void *)&random_gamma_max},
+	{ "change modulo", swS32,  (void *)&randomexposure_modulo}
+};
+
 void underexposure();
 void overexposure();
-	
+void randomexposure();
+
 	
 /* swFunctionDescriptor : 
 	char * : function name
@@ -124,16 +145,18 @@ swFunctionDescriptor functions[] = {
 	{"Motion blur", 	2, 	motionblur_params,	swImage, swImage, &motionblur, NULL},
 	{"Noisify", 	1, 	noisify_params,	swImage, swImage, &noisify, NULL},
 	{"Offset", 		2, 	offset_params,	swImage, swImage, &offset, NULL},
-	{"Over-exposure", 		0, 	NULL,	swImage, swImage, &overexposure, NULL},
-	{"Under-exposure", 		0, 	NULL,	swImage, swImage, &underexposure, NULL}
+	{"Over-exposure", 		1, OverExpo_params, 	swImage, swImage, &overexposure, NULL},
+	{"Under-exposure", 		1, UnderExpo_params, 	swImage, swImage, &underexposure, NULL},
+	{"Random-exposure", 	3, RandomExpo_params, 	swImage, swImage, &randomexposure, NULL}
 };
-int nb_functions = 6;
+int nb_functions = 7;
 
 /******************* END OF USER SECTION ********************/
 
 
 
-void offset() {
+void offset()
+{
 	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
 	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
 	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
@@ -145,14 +168,16 @@ void offset() {
 	
 	int imSize = (int)imIn->buffer_size;
 	int off = (offset_x + offset_y*width)*depth;
-	for(int pix = abs(off); pix<imSize-abs(off); pix++) 
+	for(int pix = abs(off); pix<imSize-abs(off); pix++)
+	{
 		imageOut[pix+off] = imageIn[pix];
+	}
 }
 
 unsigned char underexposure_init = 0;
-unsigned char GammaCorrection[257];
-
-void underexposure() {
+unsigned char GammaCorrection[257]={0};
+void underexposure()
+{
 	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
 	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
 	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
@@ -161,18 +186,28 @@ void underexposure() {
 	
 	if(!underexposure_init) {
 		underexposure_init = 1;
+		GammaCorrection[0]=0;
 		for(int i=0; i<=256; i++) {
-			GammaCorrection[i] = (unsigned char)roundf(((float)(i*i)/255.f));
+			GammaCorrection[i] = (unsigned char)roundf( pow( (double)i/255. , underexposure_gamma)*255.f);
+			fprintf(stderr, "Gamma[%d] = %g^%g = %g\n",
+					i,
+					(double)i/255. , underexposure_gamma,
+					GammaCorrection[i]
+					);
 		}
+
 	}
 	int width = imIn->width;
 	int height = imIn->height;
 	int depth = imIn->depth;
 	
 	int imSize = (int)imIn->buffer_size;
-	for(int pix = 0; pix<imSize; pix++) 
+	for(int pix = 0; pix<imSize; pix++) {
 		imageOut[pix] = GammaCorrection[imageIn[pix]];
+	}
 }
+
+unsigned char overexposure_init = 0;
 
 void overexposure() {
 	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
@@ -180,23 +215,87 @@ void overexposure() {
 	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
 	unsigned char * imageOut = (unsigned char *)imOut->buffer;
 	
-	
-	if(!underexposure_init) {
-		underexposure_init = 1;
+	static float last_gamma = -1.f;
+	if(!overexposure_init || last_gamma!=overexposure_gamma)
+	{
+		overexposure_init = 1;
+		GammaCorrection[0]=0;
 		for(int i=0; i<=256; i++) {
-			int val = roundf( sqrt(((float)i/240.f)) * 255.f );
-			if(val>255) val = 255;
-			GammaCorrection[i] = (unsigned char)val;
+			GammaCorrection[i] = (unsigned char)roundf( pow( (double)i/255. , overexposure_gamma)*255.f);
+			fprintf(stderr, "Gamma[%d] = %g^%g = %d\n",
+					i,
+					(double)i/255. , overexposure_gamma,
+					(int)GammaCorrection[i]
+					);
 		}
+
+		last_gamma = overexposure_gamma;
 	}
+
 	int width = imIn->width;
 	int height = imIn->height;
 	int depth = imIn->depth;
 	
 	int imSize = (int)imIn->buffer_size;
-	for(int pix = 0; pix<imSize; pix++) 
+	for(int pix = 0; pix<imSize; pix++) {
 		imageOut[pix] = GammaCorrection[imageIn[pix]];
+	}
 }
+
+
+
+
+
+bool random_initialised = false;
+
+int nbiteration = 0;
+void randomexposure() {
+	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
+	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
+	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
+	unsigned char * imageOut = (unsigned char *)imOut->buffer;
+
+
+	// Compute gamma LUT at every frame
+	GammaCorrection[0]=0;
+	struct timeval tv;
+	gettimeofday(&tv, NULL);
+	unsigned int seed = tv.tv_usec;
+
+	if( random_initialised || (nbiteration % randomexposure_modulo == 0) )
+	{
+		double gamma = (double)rand_r(&seed)/(double)RAND_MAX * (random_gamma_max - random_gamma_min) + random_gamma_min;
+
+		for(int i=0; i<=256; i++) {
+			GammaCorrection[i] = (unsigned char)roundf( pow( (double)i/255., gamma)*255.f);
+	//		fprintf(stderr, "Gamma[%d] = %g^%g = %d\n",
+	//				i,
+	//				(double)i/255. , gamma,
+	//				(int)GammaCorrection[i]
+	//				);
+		}
+	}
+
+	nbiteration++;
+
+
+	int width = imIn->width;
+	int height = imIn->height;
+	int depth = imIn->depth;
+
+	int imSize = (int)imIn->buffer_size;
+	for(int pix = 0; pix<imSize; pix++) {
+		imageOut[pix] = GammaCorrection[imageIn[pix]];
+	}
+}
+
+
+
+
+
+
+
+
 
 fftw_real *a = NULL, *b = NULL, *bstat = NULL, *c = NULL, maxc;
 fftw_complex *A, *B, * C = NULL; // C[M][N/2+1];

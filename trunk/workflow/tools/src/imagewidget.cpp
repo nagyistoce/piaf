@@ -351,9 +351,11 @@ void ImageWidget::setColorMode(int mode)
 		// convert from input image
 		tmConvert(m_pOriginalImage, m_displayImageBGRA);
 	}
-	else {
-		// convert to grey, then use LUT
+	else
+	{
+		// convert to grey 8bit, then use LUT
 		tmConvert(m_pOriginalImage, m_greyImage);
+
 		m_pLUT = NULL;
 		switch(m_colorMode)
 		{

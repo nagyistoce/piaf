@@ -396,6 +396,17 @@ void BatchFiltersThread::run()
 									QFileInfo fi(item->absoluteFilePath);
 									QString outFile = item->absoluteFilePath
 													  + "-" + mpBatchTask->options.sequence_name + "." + fi.suffix();
+									QFileInfo fiout(outFile);
+									int idx = 0;
+									while(fiout.exists())
+									{
+										outFile = item->absoluteFilePath
+														  + "-" + mpBatchTask->options.sequence_name + QString::number(idx) + "." + fi.suffix();
+										idx++;
+
+										fiout.setFile(outFile);
+									}
+
 									cvSaveImage(outFile.toUtf8().data(), outputImage);
 								}
 
@@ -569,6 +580,17 @@ void BatchFiltersThread::run()
 													QFileInfo fi(item->absoluteFilePath);
 													QString outputFile = item->absoluteFilePath
 																	  + "-" + mpBatchTask->options.sequence_name + ".avi";
+													QFileInfo fiout(outputFile);
+													int idx = 0;
+													while(fiout.exists())
+													{
+														outputFile = item->absoluteFilePath
+																		  + "-" + mpBatchTask->options.sequence_name + QString::number(idx) + ".avi";
+														idx++;
+
+														fiout.setFile(outputFile);
+													}
+													// Create encoder
 													encoder = new OpenCVEncoder(outputImage->width,
 																				outputImage->height,
 																				(int)roundf(fva->getFrameRate()));
