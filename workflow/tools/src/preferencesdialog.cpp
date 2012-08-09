@@ -27,7 +27,7 @@ PreferencesDialog::PreferencesDialog(QWidget *parent) :
     ui(new Ui::PreferencesDialog)
 {
     ui->setupUi(this);
-	setSettings( &m_workflow_settings );
+	setSettings( &g_workflow_settings );
 }
 
 void PreferencesDialog::setSettings(t_workflow_settings * pworkflow_settings)

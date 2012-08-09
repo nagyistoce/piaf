@@ -19,6 +19,7 @@
 #include <stdlib.h>
 
 #include "swvideodetector.h"
+#include "piaf-common.h"
 
 void SavePPMFile(char *filename, bool colored, CvSize size, unsigned char *buffer)
 {
@@ -384,7 +385,15 @@ IplImage * swAddBorder4x(IplImage * originalImage) {
 int swConvert(IplImage *imageIn, IplImage * imageRGBA)
 {
 
+	if(imageIn->depth != imageRGBA->depth)
+	{
+		PIAF_MSG(SWLOG_ERROR, "Cannot convert with different depths %d != %d",
+				 imageIn->depth , imageRGBA->depth);
 
+		return -1;
+	}
+
+	try {
 	// convert
 	switch(imageIn->nChannels)
 	{
@@ -430,6 +439,11 @@ int swConvert(IplImage *imageIn, IplImage * imageRGBA)
 		}
 
 		break;
+	}
+	}
+	catch(cv::Exception e)
+	{
+		PIAF_MSG(SWLOG_ERROR, "Caught OpenCV exception");
 	}
 
 	return 0;

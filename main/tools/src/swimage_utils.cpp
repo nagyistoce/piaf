@@ -185,7 +185,7 @@ IplImage * convertSwImageToIplImage(swImageStruct * swim, IplImage ** pimg)
 	IplImage * img = *pimg;
 	if(img && (img->widthStep != swim->pitch || img->height != swim->height))
 	{
-		if(img) {
+		if(img && img->width > 0) {
 			fprintf(stderr, "[%s] %s:%d : size does not match => "
 				"release IplImage=%dx%d x nChannels=%d x depth=%d\n",
 				__FILE__, __func__, __LINE__,

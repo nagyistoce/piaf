@@ -847,6 +847,9 @@ int FilterSequencer::saveSequence(char * filename)
 	}
 
 	fclose(f);
+
+
+
 	return 0;
 }
 
@@ -1581,7 +1584,8 @@ int PiafFilter::waitForAnswer(int timeout)
 	}
 	int iter = 0, maxiter = timeout * 1000 / TIMEOUT_STEP;
 
-	while(iter < maxiter && buffer) {
+	while(iter < maxiter && buffer)
+	{
 		iter++;
 		// Waiting for answer :
 		buffer[0] = '\0';
@@ -1600,7 +1604,9 @@ int PiafFilter::waitForAnswer(int timeout)
 				return 1;
 			}
 			else
+			{
 				usleep(TIMEOUT_STEP);
+			}
 		}
 	}
 	return 0;

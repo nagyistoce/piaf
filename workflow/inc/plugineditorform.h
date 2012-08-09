@@ -132,6 +132,8 @@ private:
 	bool mAutoReloadSequence;///< automatically reload sequence after a crash
 
 	void updateTimeHistogram();
+
+	QString mLastSequencePath; ///< directory path of last loaded sequence
 private slots:
 	/// Refresh function
 	void slot_refreshFilters();

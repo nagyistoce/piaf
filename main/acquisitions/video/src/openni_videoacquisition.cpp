@@ -96,8 +96,8 @@ int OpenNIVideoAcquisition::init()
 	m_got_rgb = 0;
 	m_got_depth = 0;
 
-	depth = NULL;
-	context = NULL;
+	mDepthGenerator = NULL;
+	mContext = NULL;
 
 	m_captureIsInitialised = false;
 
@@ -152,24 +152,24 @@ int OpenNIVideoAcquisition::init()
 	if(fn)
 	{
 		OPENNI_PRINTF("Reading config from: '%s'\n", fn);
-		nRetVal = context.InitFromXmlFile(fn, scriptNode, &errors);
+		nRetVal = mContext.InitFromXmlFile(fn, scriptNode, &errors);
 	}
 	else
 	{
-		OPENNI_PRINTF("No config file found");
+		OPENNI_PRINTF("No config file found => enumerate ");
 
-		nRetVal = context.Init();
+		nRetVal = mContext.Init();
 
-		if(m_idx_device == 0) // take first
+		if(m_idx_device == -1) // take first
 		{
-			nRetVal = depth.Create(context);
+			nRetVal = mDepthGenerator.Create(mContext);
 		} else {
 	//		CHECK_RC(nRetVal, "could not initialize context");
 
 			// Read from tree
 			NodeInfoList list;
 			OPENNI_PRINTF("EnumerateProductionTrees...");
-			nRetVal = context.EnumerateProductionTrees(XN_NODE_TYPE_DEPTH,
+			nRetVal = mContext.EnumerateProductionTrees(XN_NODE_TYPE_DEPTH,
 													   NULL, list, NULL);
 
 			if(list.IsEmpty())
@@ -180,31 +180,63 @@ int OpenNIVideoAcquisition::init()
 			else// find in list
 			{
 
-				return -1;/// \bug FIXME
+//				return -1;/// \bug FIXME
 
 				OPENNI_PRINTF("Looking for device # %d", m_idx_device);
 				NodeInfoList::Iterator nodeIt = list.Begin();
-				for(int devIdx = 0; devIdx < m_idx_device; devIdx++)
+				NodeInfo selinfo = (*nodeIt); // selected node info
+				bool found = false;
+				for(int devIdx = 0;
+					nodeIt != list.End()
+					//devIdx < m_idx_device
+					; devIdx++)
 				{
-					OPENNI_PRINTF("inc node");
+					NodeInfo info = (*nodeIt);
+					OPENNI_PRINTF("\t node [%d]: info={\n"
+								  "\t\tCreationInfo='%s' InstanceName='%s' \n"
+								  "\t\tVersion={%d.%d.%d (maintenance).%d (build)}\n"
+								  "\t\tadditional data='%s'\n"
+								  "\t}",
+								  devIdx,
+								   info.GetCreationInfo(),
+								  info.GetInstanceName(),
+								  (int)info.GetDescription().Version.nMajor,
+								  (int)info.GetDescription().Version.nMinor,
+								  (int)info.GetDescription().Version.nMaintenance,
+								  (int)info.GetDescription().Version.nBuild,
+								  info.GetAdditionalData()
+								  );
+					if(devIdx == m_idx_device)
+					{
+						OPENNI_PRINTF("\tWE FOUND THE WANTED NODE !!");
+						selinfo = (*nodeIt);
+						found = true;
+					}
 					nodeIt++;
 				}
 
-				// Open Device
-				NodeInfo info = (*nodeIt);
-//				OPENNI_PRINTF("CreateProductionTree name='%s' ...",
-//							  info.GetDescription().strName);
-				nRetVal = context.CreateProductionTree(info);
+				if(!found)
+				{
+					OPENNI_PRINTF("\tWE COULD NOT FIND THE WANTED NODE !!");
 
-				//CHECK_RC(nRetVal, "CreateProductionTree");
+				}
+				else
+				{
+					// Open Device
+	//				OPENNI_PRINTF("CreateProductionTree name='%s' ...",
+	//							  info.GetDescription().strName);
+					nRetVal = mContext.CreateProductionTree(selinfo);
 
-				OPENNI_PRINTF("GetInstance ...");
-				nRetVal = info.GetInstance(depth);
-				//CHECK_RC(nRetVal, "CreateProductionTree");
+					//CHECK_RC(nRetVal, "CreateProductionTree");
+
+					OPENNI_PRINTF("GetInstance to create depth...");
+					nRetVal = selinfo.GetInstance(mDepthGenerator);
+					//CHECK_RC(nRetVal, "CreateProductionTree");
+				}
 			}
 		}
 
-		if(depth)
+		if(mDepthGenerator)
 		{
 			XnMapOutputMode mode;
 			mode.nXRes = OPENNI_FRAME_W;
@@ -212,7 +244,7 @@ int OpenNIVideoAcquisition::init()
 			mode.nFPS = OPENNI_FPS;
 			OPENNI_PRINTF("set mode = %dx%d @ %d fps",
 						  (int)mode.nXRes, (int)mode.nYRes, (int)mode.nFPS);
-			depth.SetMapOutputMode(mode);
+			mDepthGenerator.SetMapOutputMode(mode);
 			m_imageSize = cvSize(mode.nXRes, mode.nYRes);
 		}
 
@@ -233,7 +265,7 @@ int OpenNIVideoAcquisition::init()
 		return (nRetVal);
 	}
 
-	nRetVal = context.FindExistingNode(XN_NODE_TYPE_DEPTH, depth);
+	nRetVal = mContext.FindExistingNode(XN_NODE_TYPE_DEPTH, mDepthGenerator);
 	CHECK_RC(nRetVal, "Find depth generator");
 
 	nRetVal = xnFPSInit(&xnFPS, 180);
@@ -253,14 +285,14 @@ int OpenNIVideoAcquisition::startAcquisition()
 		OPENNI_PRINTF("Could not start acquisition ...");
 		return -1;
 	}
-	if(!depth)
+	if(!mDepthGenerator)
 	{
 		OPENNI_PRINTF("Could not start depth ...");
 		return -1;
 	}
 	m_run = true;
 
-	depth.StartGenerating();
+	mDepthGenerator.StartGenerating();
 
 	// start event thread
 	OPENNI_PRINTF("Starting thread ...");
@@ -385,9 +417,9 @@ int OpenNIVideoAcquisition::stopAcquisition()
 		retry += 100;
 	}
 
-	if(depth) {
+	if(mDepthGenerator) {
 		OPENNI_PRINTF("Stop depth generation ...");
-		depth.StopGenerating();
+		mDepthGenerator.StopGenerating();
 //		depth.Release();
 	}
 
@@ -481,7 +513,7 @@ void OpenNIVideoAcquisition::run()
 	while( m_run )//&& processEvents() >= 0)
 	{
 //		OPENNI_PRINTF("Acquisition loop : wait for img...");
-		nRetVal = context.WaitOneUpdateAll(depth);
+		nRetVal = mContext.WaitOneUpdateAll(mDepthGenerator);
 		if (nRetVal != XN_STATUS_OK)
 		{
 			OPENNI_PRINTF("UpdateData failed: '%s'", xnGetStatusString(nRetVal));
@@ -491,7 +523,7 @@ void OpenNIVideoAcquisition::run()
 		{
 			xnFPSMarkFrame(&xnFPS);
 
-			depth.GetMetaData(depthMD);
+			mDepthGenerator.GetMetaData(depthMD);
 			const XnDepthPixel* pDepthMap = depthMD.Data();
 
 //			OPENNI_PRINTF("Frame %d Middle point is: %u. FPS: %f\n",
@@ -558,9 +590,18 @@ IplImage * OpenNIVideoAcquisition::readImageRGB32()
 			}
 
 			OPENNI_PRINTF("mode = %d => 2Cm => gray => BGR32\n", mode);
+			try {
+				cvCvtColor(m_grayImage, m_bgr32Image, CV_GRAY2BGRA);
+			}
+			catch(cv::Exception e)
+			{
+				OPENNI_PRINTF("Unable to use cvCvtColor(m_grayImage=%dx%dx%dx%d, m_bgr32Image=%dx%dx%dx%d, CV_GRAY2BGRA)",
+							  m_grayImage->width, m_grayImage->height, m_grayImage->depth, m_grayImage->nChannels,
+							  m_bgr32Image->width, m_bgr32Image->height, m_bgr32Image->depth, m_bgr32Image->nChannels);
+			}
 
-			cvCvtColor(m_grayImage, m_bgr32Image, CV_GRAY2BGRA);
 		}
+
 
 		break;
 	}

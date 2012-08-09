@@ -198,9 +198,9 @@ private:
 
 	// OPENNI STRUCTURES
 	/// OpenNI context
-	Context context;
+	Context mContext;
 	int m_OPENNI_dev;
-	DepthGenerator depth;
+	DepthGenerator mDepthGenerator;
 	XnFPSData xnFPS;
 	DepthMetaData depthMD;
 	XnStatus nRetVal;

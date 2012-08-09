@@ -27,6 +27,7 @@
 #include "ui_plugineditorform.h"
 
 #include "piaf-common.h"
+#include "piafworkflow-settings.h"
 
 #include <QMessageBox>
 #include <QFileDialog>
@@ -562,10 +563,16 @@ void PluginEditorForm::on_loadButton_clicked()
 
 	QString path = QFileDialog::getOpenFileName(NULL,
 												tr("Open sequence"),
+												g_workflow_settings.defaultSequenceDir,
 												tr("Sequences (*.flist)"));
 	if(path.isEmpty()) return;
 
 	mpFilterSequencer->loadSequence(path.toUtf8().data());
+
+	// Store last sequence directory
+	QFileInfo fi(path);
+	g_workflow_settings.defaultSequenceDir = fi.absoluteDir().absolutePath();
+
 }
 
 void PluginEditorForm::on_saveButton_clicked()
@@ -577,10 +584,16 @@ void PluginEditorForm::on_saveButton_clicked()
 
 	QString path = QFileDialog::getSaveFileName(NULL,
 												tr("Save sequence"),
+												g_workflow_settings.defaultSequenceDir,
 												tr("Sequences (*.flist)"));
 	if(path.isEmpty()) return;
 
 	mpFilterSequencer->saveSequence(path.toUtf8().data());
+
+	// Store last sequence directory
+	QFileInfo fi(path);
+	g_workflow_settings.defaultSequenceDir = fi.absoluteDir().absolutePath();
+
 }
 
 void PluginEditorForm::on_removePluginButton_clicked()

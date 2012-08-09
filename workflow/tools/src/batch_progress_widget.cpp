@@ -120,6 +120,9 @@ void BatchProgressWidget::allocateBatchTask()
 	}
 }
 
+
+
+
 /*
  * Delete task and its file items
  */
@@ -918,5 +921,9 @@ void BatchProgressWidget::setBatchFiltersThread(BatchFiltersThread  * pBatchThre
 			 mpBatchThread);
 	mpBatchThread->setFilterSequencer( &mFilterSequencer );
 }
+
+
+
+
 
 

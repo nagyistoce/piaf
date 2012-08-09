@@ -112,6 +112,8 @@ void threshold();
 void erode();
 void median_func();
 void low_update();
+void motion();
+
 /* swFunctionDescriptor : 
 	char * : function name
 	int : number of parameters
@@ -127,9 +129,10 @@ swFunctionDescriptor functions[] = {
 	{"Flip Horiz", 		0, 	NULL, 				swImage, swImage, &flip_horiz, NULL},
 	{"Invert", 		0, 	NULL, 				swImage, swImage, &invert, NULL},
 	{"Threshold", 	2, 	threshold_params, 	swImage, swImage, &threshold, NULL},
-	{"Lighten", 	2,	erode_params,  		swImage, swImage, &erode, NULL}
+	{"Lighten", 	2,	erode_params,  		swImage, swImage, &erode, NULL},
+	{"Motion",		0,	NULL,  		swImage, swImage, &motion, NULL}
 };
-int nb_functions = 7;
+int nb_functions = 8;
 
 /******************* END OF USER SECTION ********************/
 
@@ -196,6 +199,28 @@ void low_update() {
 	}
 }
 
+// function motion
+unsigned char * motion_imageOld = NULL;
+void motion()
+{
+	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
+	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
+	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
+	unsigned char * imageOut = (unsigned char *)imOut->buffer;
+	if(!motion_imageOld)
+	{
+		motion_imageOld = new unsigned char [ imIn->buffer_size ];
+	}
+	else
+	{
+		for(unsigned long r = 0; r < imIn->buffer_size; r++)
+		{
+			imageOut[r] = abs((int)imageIn[r] - (int)motion_imageOld[r]);
+		}
+	}
+
+	memcpy(motion_imageOld, imageIn, imIn->buffer_size);
+}
 
 
 

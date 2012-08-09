@@ -16,6 +16,9 @@ typedef struct {
 	/// Default movie directory for saving capture sequences
 	QString defaultMovieDir;
 
+	/// Last sequence directory for saving plugins sequences
+	QString defaultSequenceDir;
+
 
 
 	/// List of input directories
@@ -39,9 +42,9 @@ typedef struct {
 } t_workflow_settings ;
 
 #ifdef EMAMAINWINDOW_CPP
-t_workflow_settings m_workflow_settings;
+t_workflow_settings g_workflow_settings;
 #else
-extern t_workflow_settings m_workflow_settings;
+extern t_workflow_settings g_workflow_settings;
 #endif
 
 #endif // PIAFWORKFLOWSETTINGS_H
