@@ -613,6 +613,7 @@ IplImage * OpenNIVideoAcquisition::getDepthImage32F()
 {
 	if(!m_depthRawImage16U)
 	{
+		OPENNI_PRINTF("16b is null");
 		return NULL;
 	}
 
@@ -645,10 +646,12 @@ IplImage * OpenNIVideoAcquisition::readImageRaw()
 //	OPENNI_PRINTF("Return m_depthRawImage16U=%p", m_depthRawImage16U);
 	if(m_depthRawImage16U)
 	{
-//		OPENNI_PRINTF("return m_depthRawImage16U: %d x %d x %d x %d",
-//					  m_depthRawImage16U->width, m_depthRawImage16U->height,
-//					  m_depthRawImage16U->depth, m_depthRawImage16U->nChannels);
+		OPENNI_PRINTF("return m_depthRawImage16U: %d x %d x %d x %d",
+					  m_depthRawImage16U->width, m_depthRawImage16U->height,
+					  m_depthRawImage16U->depth, m_depthRawImage16U->nChannels);
 	}
+
+
 
 	return m_depthRawImage16U;
 }
