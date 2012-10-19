@@ -583,6 +583,14 @@ void MainImageWidget::on_roiButton_toggled(bool checked)
 	}
 }
 
+void MainImageWidget::on_gtButton_toggled(bool checked)
+{
+	if(checked) {
+		m_ui->infoLabel->setText(tr("GroundTruth"));
+		m_ui->globalImageLabel->setEditMode(EDITMODE_ROIS); /// @todo FIXME: just for test
+	}
+}
+
 void MainImageWidget::on_grayscaleButton_toggled(bool checked)
 {
 	if(checked) {
@@ -658,5 +666,7 @@ void MainImageWidget::on_snapButton_clicked()
 	// save processed
 	emit signalSnapshot(m_displayImage);
 }
+
+
 
 

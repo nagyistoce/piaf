@@ -290,7 +290,7 @@ void MainDisplayWidget::updateDisplay()
 	ui->mainImageWidget->setImage(captureImage, NULL);
 	if(mpegEncoder && mIsRecording)
 	{
-		PIAF_MSG(SWLOG_INFO, "Recording...");
+		PIAF_MSG(SWLOG_TRACE, "Recording...");
 		mpegEncoder->encodeImage(ui->mainImageWidget->getOutputImage());
 	}
 
@@ -716,6 +716,9 @@ void MainDisplayWidget::startRecording()
 {
 	if(!mpegEncoder)
 	{
+		PIAF_MSG(SWLOG_INFO, "create movie encoder %dx%d @ %dfps",
+				 m_fullImage.width(), m_fullImage.height(),
+				 25 );
 		mpegEncoder = new OpenCVEncoder(m_fullImage.width(), m_fullImage.height(),
 										25);
 		mpegEncoder->setQuality(75);
@@ -725,18 +728,19 @@ void MainDisplayWidget::startRecording()
 	fileext.sprintf(FORMAT_AVI, mMovieCounter);
 	QString movieFile = mSourceName + fileext;
 
-	fprintf(stderr, "[MainDisplayWidget]::%s:%d: Starting encoding file '%s'\n",
-			__func__, __LINE__, movieFile.toUtf8().data());
+	PIAF_MSG(SWLOG_INFO, "Starting encoding file '%s'\n",
+			movieFile.toUtf8().data());
 
-	if(mpegEncoder->startEncoder( movieFile.toUtf8().data() )) {
+	if(mpegEncoder->startEncoder( movieFile.toUtf8().data() ))
+	{
 		mIsRecording = true;
 	} else {
 		mIsRecording = false;
 	}
 
-	fprintf(stderr, "[MainDisplayWidget]::%s:%d: Starting encoding file '%s' => record=%c\n",
-			__func__, __LINE__, movieFile.toUtf8().data() ,
-			mIsRecording?'T':'F');
+	PIAF_MSG(SWLOG_INFO, "Starting encoding file '%s' => recording=%c\n",
+			 movieFile.toUtf8().data() ,
+			 mIsRecording?'T':'F');
 }
 
 void MainDisplayWidget::stopRecording()

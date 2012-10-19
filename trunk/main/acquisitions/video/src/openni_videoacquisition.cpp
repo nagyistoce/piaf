@@ -195,7 +195,7 @@ int OpenNIVideoAcquisition::init()
 					OPENNI_PRINTF("\t node [%d]: info={\n"
 								  "\t\tCreationInfo='%s' InstanceName='%s' \n"
 								  "\t\tVersion={%d.%d.%d (maintenance).%d (build)}\n"
-								  "\t\tadditional data='%s'\n"
+								  "\t\tadditional data=%p\n"
 								  "\t}",
 								  devIdx,
 								   info.GetCreationInfo(),

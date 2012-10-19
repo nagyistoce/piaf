@@ -112,6 +112,8 @@ swFuncParams findSquare_params[] = {
 void findSquare();
 void findTriangle();
 
+
+u8 save_snapshots = 0;
 short findFace_width = 30;
 char * face_list[] = {
 		"frontalface_default",
@@ -143,7 +145,8 @@ swStringListStruct face_profile = {
 
 swFuncParams findFace_params[] = {
 	{"Face size (% of height)", swS16, (void *)&findFace_width},
-	{"Profile", swStringList, (void *)&face_profile }
+	{"Profile", swStringList, (void *)&face_profile },
+	{"Save snapshots", swU8, (void *)&save_snapshots }
 };
 void findFace();
 
@@ -161,7 +164,7 @@ swFunctionDescriptor functions[] = {
 	{"HoughP", 	3,	houghP_params, swImage, swImage, &HoughP, NULL},
 	{"Squares", 	2,	findSquare_params, swImage, swImage, &findSquare, NULL},
 	{"Triangles", 	2,	findSquare_params, swImage, swImage, &findTriangle, NULL},
-	{"Faces",		2,	findFace_params, swImage, swImage, &findFace, NULL}
+	{"Faces",		3,	findFace_params, swImage, swImage, &findFace, NULL}
 };
 int nb_functions = 5;
 
