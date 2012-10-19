@@ -115,6 +115,8 @@ private slots:
 
 	void on_depthButton_toggled(bool checked);
 
+	void on_gtButton_toggled(bool checked);
+
 private:
 	Ui::MainImageWidget *m_ui;
 

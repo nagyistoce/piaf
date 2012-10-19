@@ -56,16 +56,27 @@
 #define tmmax(a,b) ((a)>(b)?(a):(b))
 #endif
 
+#ifndef SHM_DIRECTORY
+
 // DEBUG IMAGES DIRECTORY AND EXTENSION
 #ifdef LINUX //not __X11_DARWIN__
 #define SHM_DIRECTORY	"/dev/shm/"
 #define TMP_DIRECTORY	"/tmp/"
-#define IMG_EXTENSION	".pgm"
 #else
-#define SHM_DIRECTORY	"/Users/tof/tmp/"
-#define TMP_DIRECTORY	"/Users/tof/tmp/"
-#define IMG_EXTENSION	".jpg"
+#define SHM_DIRECTORY	"~/tmp/"
+#define TMP_DIRECTORY	"~/tmp/"
 #endif
+
+#endif // SHM_DIRECTORY
+
+#ifndef IMG_EXTENSION
+#ifdef LINUX //not __X11_DARWIN__
+#define IMG_EXTENSION   ".pgm"
+#else
+#define IMG_EXTENSION   ".jpg"
+#endif
+#endif // IMG_EXTENSION
+
 
 // TYPEDEFS FOR MULTIPLE ARCHITECTURE TYPES (32bit, 64bit...)
 #ifndef u8

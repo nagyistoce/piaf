@@ -200,8 +200,10 @@ void ImageWidget::setRefImage(IplImage *pIm)
 	{
 		// Clear images
 		m_pOriginalImage = NULL;
+
 		tmReleaseImage(&m_greyImage);
 		tmReleaseImage(&m_displayImageBGRA);
+
 		update();
 		return;
 	}
