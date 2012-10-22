@@ -15,6 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <stdio.h>
+
 #include "vidacqsettingswindow.h"
 #include "ui_vidacqsettingswindow.h"
 #include <QMessageBox>

@@ -16,6 +16,8 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <stdio.h>
+
 #include "swopencv.h"
 #include "swimage_utils.h"
 
