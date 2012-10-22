@@ -14,6 +14,9 @@
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
+
+#include <stdio.h>
+
 #include "opencvvideoacquisition.h"
 #include "swvideodetector.h"
 

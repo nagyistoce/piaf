@@ -15,6 +15,7 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <stdio.h>
 
 #include "virtualdeviceacquisition.h"
 #include "piaf-common.h"

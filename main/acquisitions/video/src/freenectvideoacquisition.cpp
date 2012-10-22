@@ -16,6 +16,8 @@
  *                                                                         *
  ***************************************************************************/
 
+#include <stdio.h>
+
 #include "freenectvideoacquisition.h"
 
 #include "swvideodetector.h"
