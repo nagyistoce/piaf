@@ -24,12 +24,18 @@
 
 #ifndef PLUGINEDITORFORM_H
 #define PLUGINEDITORFORM_H
+#include <stdlib.h>
+#include <string.h>
+
+#include "PiafFilter.h"
+
+#include <vector>
 
 #include <QWidget>
-#include "PiafFilter.h"
 
 #include <QTreeWidgetItem>
 #include <QWorkspace>
+
 
 namespace Ui {
     class PluginEditorForm;

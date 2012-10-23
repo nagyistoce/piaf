@@ -602,6 +602,11 @@ void PluginEditorForm::on_removePluginButton_clicked()
 	{
 		return;
 	}
+
+	// remove from parameters settings widget
+	ui->pluginSettingsWidget->setPiafFilter( NULL );
+
+	// Check if a plugin is selected
 	mpSelectedFilter = NULL;
 	LoadedPluginTreeWidgetItem * item =
 			(LoadedPluginTreeWidgetItem *)ui->selectedPluginsTreeWidget->selectedItems().at(0);
