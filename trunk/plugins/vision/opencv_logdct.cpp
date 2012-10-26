@@ -46,11 +46,25 @@ void LogDCT();
 uchar LogDCT_radius = 5;
 float LogDCT_coef = 0.5f;
 uchar LogDCT_add = 100;
+char * LogDCT_outputnames_list[] = {
+		"LogDCT",
+		"Log DCT Cropped",
+		"Log DCT Inv",
+		"DCT Inv",
+		"DCT Inv - X",
+		"Final"};
+
+swStringListStruct  LogDCT_output = {
+	5, // nb elements
+	4, // default element
+	LogDCT_outputnames_list
+	};
 
 swFuncParams LogDCT_params[] = {
 	{"LogDCT_mode", swU8, (void *)&LogDCT_radius},
 	{"LogDCT_coef", swFloat, (void *)&LogDCT_coef},
-	{"LogDCT_add", swU8, (void *)&LogDCT_add}
+	{"LogDCT_add", swU8, (void *)&LogDCT_add},
+	{"Output", swStringList, (void *)& LogDCT_output}
 
 };
 
@@ -63,7 +77,7 @@ swFuncParams LogDCT_params[] = {
 	void * : procedure
 	*/
 swFunctionDescriptor functions[] = {
-	{"LogDCT", 		3,	LogDCT_params,  	swImage, swImage, &LogDCT, NULL}
+	{"LogDCT", 		4,	LogDCT_params,  	swImage, swImage, &LogDCT, NULL}
 };
 int nb_functions = 1;
 
@@ -118,6 +132,7 @@ void allocateImages()
 			cvImGray = cvCreateImageHeader(size,  IPL_DEPTH_8U, 1);
 		}
 	}
+
 	if(!cvIm2) {
 		cvIm2 = cvCreateImageHeader(size,  IPL_DEPTH_8U, imIn->depth);
 		if(imIn->depth > 1) {
@@ -131,19 +146,27 @@ void allocateImages()
 		}
 	}
 
-	cvIm1->imageData = (char *)imageIn;
+	if(imIn->depth == 4)
+	{
+		cvIm1->imageData = (char *)imageIn;
+	}
 	cvIm2->imageData = (char *)imageOut;
 
 	if(cvIm1->nChannels == 4)
 	{
 		cvCvtColor(cvIm1, cvImRGB, CV_RGBA2RGB);
+		cvCvtColor(cvImRGB, cvImGray, CV_RGB2GRAY);
 	}
 	else if(cvIm1->nChannels == 3)
 	{
 		cvCopy(cvIm1, cvImRGB);
+		cvCvtColor(cvImRGB, cvImGray, CV_RGB2GRAY);
+	}
+	else
+	{ // nChannels= 1
+		cvCopy(cvIm1, cvImGray);
 	}
 
-	cvCvtColor(cvImRGB, cvImGray, CV_RGB2GRAY);
 }
 
 
@@ -364,9 +387,22 @@ void LogDCT()
 	cvLog(cvIm32Fin, cvIm32F);
 
 	cvDCT(cvIm32F, cvImDCT, CV_DXT_FORWARD);
+	/* OUTPUTS
+	 *
+	 char * LogDCT_outputnames_list[] = {
+		"LogDCT",
+		"Log DCT Cropped",
+		"Log DCT Inv",
+		"DCT Inv",
+		"Final"};
+		*/
+	if(LogDCT_output.curitem == 0) // "LogDCT"
+	{
+		cvConvertScale(cvImDCT, cvImGray, 100.);
+	}
 
 	// Reduce low DCT
-	float rad2 = (int)LogDCT_radius * (int)LogDCT_radius / 10000.;
+	float rad = (float)LogDCT_radius / 100.f;
 	for(int r  = 0; r<cvImDCT->height; r++)
 	{
 		float fr = (float)r / (float)cvImDCT->height;
@@ -375,32 +411,53 @@ void LogDCT()
 		for(int c  = 0; c<cvImDCT->width; c++)
 		{
 			float fc = (float)c / (float)cvImDCT->width;
-			float dc = fc*fc;
-			float dr = fr*fr;
-			if(dc > rad2 || dr > rad2)
+//			float dc = fc*fc;
+//			float dr = fr*fr;
+			if(fc > rad || fr > rad)
 			{
 				line[c] = 0;
 			}
 		}
 	}
-//	cvCircle(cvImDCT, cvPoint(0,0),
-//			 LogDCT_radius, cvScalarAll(0), -1);
-	cvConvertScale(cvImDCT, cvImGray, 100.);
+	if(LogDCT_output.curitem == 1) // "Log DCT Cropped"
+	{
+		cvConvertScale(cvImDCT, cvImGray, 100.);
+	}
+
+
 
 	cvDCT(cvImDCT, cvIm32F, CV_DXT_INVERSE);
+	if(LogDCT_output.curitem == 2) // "LogDCT Inv"
+	{
+		cvConvertScale(cvIm32F, cvImGray, 100.);
+	}
 
 	cvExp(cvIm32F, cvImDCT);
-	cvConvertScale(cvImDCT, cvImGray, 1.);
+	if(LogDCT_output.curitem == 3) // "DCT Inv"
+	{
+		cvConvertScale(cvImDCT, cvImGray, 1.);
+	}
+
+
+	//cvConvertScale(cvImDCT, cvImGray, 1.);
 
 	//cvConvertScale(cvIm32F, cvImGray, 1.);
 	cvConvertScale(cvImDCT, cvImDCT, LogDCT_coef);
+
+
 	// Substract low pass image from input image
 	cvSub(cvIm32Fin, cvImDCT, cvIm32F);
-	cvConvertScale(cvIm32F, cvImGray, 1.);
+	if(LogDCT_output.curitem == 4) // "DCT Inv - scal"
+	{
+		cvConvertScale(cvIm32F, cvImGray, 100.);
+	}
 	//cvConvertScale(cvImDCT, cvImGray, 1.);
 
 	cvAddS(cvIm32F, cvScalarAll(LogDCT_add), cvImDCT);
-	cvConvertScale(cvImDCT, cvImGray, 1.);
+	if(LogDCT_output.curitem == 5) // "Out"
+	{
+		cvConvertScale(cvImDCT, cvImGray, 1.);
+	}
 
 	finishImages();
 }
