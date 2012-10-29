@@ -17,6 +17,8 @@ unix:LIBS += -L/usr/local/lib
 unix:DEFINES += VERSION __LINUX_VERSION__
 
 INCLUDEPATH += /usr/local/include/SwPlugin/
+# add path to swimage_utils.h for IplImage <-> SwImage conversion
+INCLUDEPATH += ../../main/tools/inc
 
 LIBS += -L/usr/local/lib/ -lSwPluginCore
 
