@@ -55,8 +55,8 @@ char * LogDCT_outputnames_list[] = {
 		"Final"};
 
 swStringListStruct  LogDCT_output = {
-	5, // nb elements
-	4, // default element
+	6, // nb elements
+	5, // default element
 	LogDCT_outputnames_list
 	};
 
@@ -449,7 +449,7 @@ void LogDCT()
 	cvSub(cvIm32Fin, cvImDCT, cvIm32F);
 	if(LogDCT_output.curitem == 4) // "DCT Inv - scal"
 	{
-		cvConvertScale(cvIm32F, cvImGray, 100.);
+		cvConvertScale(cvIm32F, cvImGray, 1.);
 	}
 	//cvConvertScale(cvImDCT, cvImGray, 1.);
 
