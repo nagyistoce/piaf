@@ -95,6 +95,10 @@ void TimeLineWidget::paintEvent( QPaintEvent * e)
 	p.setPen(QColor(qRgb(0,255,0)));
 	p.drawRect(mCursorDisplayPos - 1, 0, 2, size().height()-1);
 
+	QString frameStr;
+	frameStr.sprintf("%5d", mCursorDisplayPos);
+	p.drawText(QPoint(0,0), frameStr);
+
 	p.end();
 }
 

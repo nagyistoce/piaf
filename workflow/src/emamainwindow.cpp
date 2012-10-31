@@ -253,7 +253,8 @@ void EmaMainWindow::appendCollection(QDomElement collecElem, EmaCollection * par
 					fileNode = fileNode.nextSibling();
 				}
 			}
-			// Adding sub-connections !
+
+			// Adding sub-collections
 			if(subcollecElem.tagName().compare("subcollections")==0)
 			{
 				EMAMW_printf(SWLOG_INFO, "\t\t\tAdding sub-collections...");
@@ -268,8 +269,8 @@ void EmaMainWindow::appendCollection(QDomElement collecElem, EmaCollection * par
 				}
 			}
 
-
 		}
+
 		subcollecNode = subcollecNode.nextSibling();
 	}
 
