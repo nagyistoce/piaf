@@ -459,21 +459,21 @@ void LogDCT()
 	cvDCT(cvImDCT, cvIm32F, CV_DXT_INVERSE);
 	if(LogDCT_output.curitem == 2) // "LogDCT Inv"
 	{
-		cvConvertScale(cvIm32F, cvImGray, 100.);
+		cvConvertScale(cvIm32F, cvImGray, 1.);
 	}
 
 	cvExp(cvIm32F, cvImDCT);
-	if(LogDCT_output.curitem == 3) // "DCT Inv"
-	{
-		cvConvertScale(cvImDCT, cvImGray, 1.);
-	}
+
 
 
 	//cvConvertScale(cvImDCT, cvImGray, 1.);
 
 	//cvConvertScale(cvIm32F, cvImGray, 1.);
 	cvConvertScale(cvImDCT, cvImDCT, LogDCT_coef);
-
+	if(LogDCT_output.curitem == 3) // "DCT Inv"
+	{
+		cvConvertScale(cvImDCT, cvImGray, 1.);
+	}
 
 	// Substract low pass image from input image
 	cvSub(cvIm32Fin, cvImDCT, cvIm32F);
