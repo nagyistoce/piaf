@@ -533,6 +533,7 @@ void PluginEditorForm::on_appendPluginButton_clicked()
 	{
 		return;
 	}
+
 	// Get selected item
 	AvailablePluginTreeWidgetItem * item =
 			(AvailablePluginTreeWidgetItem *)ui->availablePluginsTreeWidget->selectedItems().at(0);
@@ -545,7 +546,9 @@ void PluginEditorForm::on_appendPluginButton_clicked()
 
 	// Add this item
 	item->getFilter()->indexFunction = item->getIndexFunction();
+
 	PiafFilter * newFilter = mpFilterSequencer->addFilter(item->getFilter());
+
 	// Select the last one
 	ui->selectedPluginsTreeWidget->setCurrentItem(
 				ui->selectedPluginsTreeWidget->topLevelItem(
