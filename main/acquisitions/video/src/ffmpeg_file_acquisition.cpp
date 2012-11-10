@@ -38,7 +38,7 @@ std::string FFmpegFileVideoAcquisition::mRegistered =
 FileVideoAcquisition* FFmpegFileVideoAcquisition::creatorFunction(std::string path)
 {
 	PIAF_MSG(SWLOG_INFO, "Create FFmpegFileVideoAcquisition(path='%s')", path.c_str() );
-	return new FFmpegFileVideoAcquisition( path.c_str() );
+	return (FileVideoAcquisition *)new FFmpegFileVideoAcquisition( path.c_str() );
 }
 
 FFmpegFileVideoAcquisition::FFmpegFileVideoAcquisition()
@@ -74,8 +74,9 @@ long FFmpegFileVideoAcquisition::getFrameIndex() {
 }
 
 unsigned long long FFmpegFileVideoAcquisition::getAbsolutePosition() {
-	if(!m_pFormatCtx)
+	if(!m_pFormatCtx) {
 		return 0;
+	}
 
 	return url_ftell(URLPB(m_pFormatCtx->pb));
 }
@@ -139,6 +140,8 @@ void FFmpegFileVideoAcquisition::initPlayer() {
 
 	myAcqIsInitialised = false;
 	myVDIsInitialised = false;
+
+	clearImageInfoStruct(&mImageInfo);
 
 	if(!m_bAvcodecIsInitialized)
 	{
@@ -672,6 +675,14 @@ bool FFmpegFileVideoAcquisition::GetNextFrame()
 	m_movie_pos.prevAbsPosition =
 		m_prevPosition = url_ftell(URLPB(m_pFormatCtx->pb));
 	old_pos = m_prevPosition;
+
+
+	mImageInfo.Tick += 40000; ///< \bug FIXME
+	while(mImageInfo.Tick > 1000000)
+	{
+		mImageInfo.Tick -= 1000000;
+		mImageInfo.Date ++;
+	}
 
 	while(counter<25)
 	{

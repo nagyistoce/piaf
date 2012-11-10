@@ -70,13 +70,14 @@ void TimeLineWidget::paintEvent( QPaintEvent * e)
 	QPainter p( this );
 
 	// Draw bookmarks
-	p.setPen(QColor(qRgb(255,192,0)));
+	p.setPen( QColor( qRgb(255,192,0) ) );
 
 	int margin = 2;
 	QList<video_bookmark_t>::iterator it;
 	for(it = m_bookmarksList.begin(); it != m_bookmarksList.end(); ++it)
 	{
 		t_movie_pos bkmk = (*it).movie_pos;
+
 		PIAF_MSG(SWLOG_TRACE, "\t\tadded bookmark name='%s' "
 				 "prevAbsPos=%lld prevKeyFrame=%lld nbFrameSinceKey=%d",
 				 bkmk.name.toAscii().data(),

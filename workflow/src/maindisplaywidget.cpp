@@ -273,8 +273,10 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 {
 	if(mpFileVA)
 	{
+		PIAF_MSG(SWLOG_INFO, "Rewind FileVA");
 		mpFileVA->rewindMovie();
 	}
+
 	updateDisplay();
 
 	// to update navigation image widget
@@ -283,10 +285,14 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 
 void MainDisplayWidget::updateDisplay()
 {
-	IplImage * captureImage = ( mPlayGrayscale ? mpFileVA->readImageY() : mpFileVA->readImageRGB32() );
+	IplImage * captureImage = ( mPlayGrayscale ?
+									mpFileVA->readImageY() : mpFileVA->readImageRGB32() );
 	PIAF_MSG(SWLOG_DEBUG, "setImage with IplImage %dx%dx%dx%d",
 			 captureImage->width, captureImage->height, captureImage->nChannels, captureImage->depth
 			 );
+	t_image_info_struct info = mpFileVA->readImageInfo();
+
+
 	ui->mainImageWidget->setImage(captureImage, NULL);
 	if(mpegEncoder && mIsRecording)
 	{

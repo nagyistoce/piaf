@@ -167,6 +167,13 @@ public:
 	/** @brief Set video properties (not updated) */
 	int setVideoProperties(t_video_properties props);
 
+	// -------- IMAGE INFORMATION -------
+public:
+	/** @brief Read image information */
+	t_image_info_struct readImageInfo() { return mImageInfo; }
+
+protected:
+	t_image_info_struct mImageInfo;
 
 private:
 

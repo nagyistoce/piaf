@@ -29,7 +29,7 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>0</number>
+      <number>3</number>
      </property>
      <widget class="QWidget" name="pagePlugins">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -40,6 +40,9 @@
         <widget class="QTreeWidget" name="availablePluginsTreeWidget">
          <attribute name="headerMinimumSectionSize">
           <number>50</number>
+         </attribute>
+         <attribute name="headerShowSortIndicator" stdset="0">
+          <bool>true</bool>
          </attribute>
          <column>
           <property name="text">
@@ -74,6 +77,22 @@
           </size>
          </property>
         </widget>
+       </item>
+      </layout>
+     </widget>
+     <widget class="QWidget" name="page_stderr">
+      <property name="toolTip">
+       <string>Output of plugin</string>
+      </property>
+      <property name="statusTip">
+       <string>Output of plugin</string>
+      </property>
+      <layout class="QVBoxLayout" name="verticalLayout_5">
+       <property name="margin">
+        <number>1</number>
+       </property>
+       <item>
+        <widget class="QTextEdit" name="stderrBrowser"/>
        </item>
       </layout>
      </widget>

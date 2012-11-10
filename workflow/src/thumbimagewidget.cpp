@@ -26,6 +26,7 @@
 
 #include "thumbimagewidget.h"
 #include "ui_thumbimagewidget.h"
+#include "virtualdeviceacquisition.h"
 
 ThumbImageWidget::ThumbImageWidget(QWidget *parent) :
     QWidget(parent),

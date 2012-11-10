@@ -31,6 +31,7 @@
 #include "imgutils.h"
 #include "piaf-common.h"
 
+#include "virtualdeviceacquisition.h"
 
 ImageInfoWidget::ImageInfoWidget(QWidget *parent) :
 	QWidget(parent),
