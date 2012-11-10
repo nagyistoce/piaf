@@ -14,6 +14,8 @@ DEPENDPATH += inc
 OBJECTS_DIR = .obj-lib
 MOC_DIR = .moc-lib
 
+# include opencv to check if it's available
+include(../main/opencv.pri)
 
 ##INSTALLATION
 target.path = /usr/local/lib/
@@ -23,3 +25,8 @@ head.files = inc/*.h
 
 INSTALLS += target head
 
+# FIXME : check if OpenCV is installed
+INCLUDEPATH += ../main/tools/inc
+DEPENDPATH += ../main/tools/inc
+
+SOURCES += ../main/tools/src/swimage_utils.cpp

@@ -1401,10 +1401,19 @@ void PiafFilter::init()
 	pipeIn[1]  = 0;
 	pipeOut[0] = 0;
 	pipeOut[1] = 0;
+
+	pipeStderrIn[0]  = 0;
+	pipeStderrIn[1]  = 0;
+	pipeStderrOut[0] = 0;
+	pipeStderrOut[1] = 0;
+
 	pipeR = NULL;
 	pipeW = NULL;
+	pipeStderrR = NULL;
+
 	statusOpen = false;
 }
+
 /** @brief Return function descriptor */
 swFunctionDescriptor PiafFilter::getFunction(int idx)
 {
@@ -1429,9 +1438,13 @@ int PiafFilter::destroy()
 			__func__, __LINE__, this, exec_name);
 
 	if(!exec_name)
+	{
 		return 0;
+	}
 	if(exec_name[0] == '\0')
+	{
 		return 0;
+	}
 
 	unloadChildProcess();
 
@@ -1447,7 +1460,8 @@ int PiafFilter::destroy()
 	if(category) { delete [] category; category = NULL; }
 	if(subcategory) { delete [] subcategory;subcategory = NULL; }
 
-	if(nb_func) {
+	if(nb_func)
+	{
 		for(int i = 0; i < nb_func; i++)
 		{
 			// destroy it
@@ -1676,7 +1690,9 @@ int PiafFilter::loadChildProcess()
 				perror("fork() error !!");
 				break;
 		case 0 : // child process
+
 			printf("CHILD PROCESS =====> %s\n", exec_name);
+
 			// Child to Parent
 			close( pipeIn[0] );
 
@@ -1693,33 +1709,34 @@ int PiafFilter::loadChildProcess()
 				perror("Child C2P dup() error");
 			}
 
+			// now close STDIN
 			close( pipeOut[0]);
 
 			chdir(path);
 			if(execv(exec_name, NULL) == -1)
 			{
-				fprintf(stderr, "Child execv('%s') error.\n",
-					exec_name);
+				int errnum = errno;
+				PIAF_MSG(SWLOG_ERROR, "Child execv('%s') error %d='%s'.\n",
+						 exec_name, errnum, strerror(errnum));
 				exit(EXIT_FAILURE);;
 			}
 			exit(EXIT_SUCCESS);
 
 			break;
-		default : // parent process
+		default : // parent process = Piaf
 			// Child to Parent
-			printf(" PARENT PROCESS ====>\n");
+			PIAF_MSG(SWLOG_INFO, " PARENT PROCESS ====>\n");
 			close( pipeIn[1] );
 
 			// set non blocking
 			//fcntl(pipeIn[0], F_SETFL, fcntl(pipeIn[0], F_GETFL) | O_NONBLOCK);
 
 			pipeR = fdopen( pipeIn[0], "r");
-
-			if( pipeR == NULL)
+			if( pipeR == NULL )
 			{
 				int errnum = errno;
-				fprintf(stderr, "PiafFilter::%s:%d : ERROR: unable to open pipeR err=%d='%s'\n",
-						__func__, __LINE__, errnum, strerror(errnum));
+				PIAF_MSG(SWLOG_ERROR, "PiafFilter: ERROR: unable to open pipeR err=%d='%s'\n",
+						errnum, strerror(errnum));
 				return 0;
 			}
 

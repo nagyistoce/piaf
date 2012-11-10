@@ -28,8 +28,10 @@
 #include "swvideodetector.h"
 
 #include <QThread>
-#include <QImage>
 
+#include "imageinfo.h"
+
+#include <QImage>
 #define VIDEO_PROPS_DEVICE_NAME_LEN		256
 /** @brief Video input properties
 
@@ -225,6 +227,9 @@ public:
 
 	/** @brief Set video properties (not updated) */
 	virtual int setVideoProperties(t_video_properties props) = 0;
+
+	/** @brief Read image information */
+	virtual t_image_info_struct readImageInfo() = 0;
 
 };
 

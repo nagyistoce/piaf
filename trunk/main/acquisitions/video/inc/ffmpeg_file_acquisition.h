@@ -45,6 +45,8 @@
 #define PIX_FMT_RGBA PIX_FMT_RGBA32
 #endif
 
+#include "imageinfo.h"
+
 #include "nolinux_videodev.h"
 #include "virtualdeviceacquisition.h"
 #include "FileVideoAcquisition.h"
@@ -168,6 +170,7 @@ public:
 
 	/** @brief Set video properties (not updated) */
 	int setVideoProperties(t_video_properties props);
+
 
 	// end of VirtualDeviceAcquisition API
 
@@ -363,6 +366,15 @@ private:
 protected:
 	/// value used for registering in factory
 	static std::string mRegistered;
+
+	// -------- IMAGE INFORMATION -------
+public:
+	/** @brief Read image information */
+	t_image_info_struct readImageInfo() { return mImageInfo; }
+
+protected:
+	t_image_info_struct mImageInfo;
+
 };
 
 #endif

@@ -131,6 +131,7 @@ exists(tototatatutu) {
 		$$LEGACYPATH/inc/sw_component.h \
 		$$LEGACYPATH/inc/sw_library.h \
 		$$LEGACYPATH/inc/sw_structure.h \
+		$$LEGACYPATH/inc/imageinfo.h \
 		$$LEGACYPATH/inc/workshoplist.h \
 		$$LEGACYPATH/tools/inc/workshoptool.h \
 		$$LEGACYPATH/tools/inc/previewimage.h \
@@ -148,6 +149,7 @@ exists(tototatatutu) {
 		$$LEGACYPATH/src/objectsexplorer.cpp \
 		$$LEGACYPATH/src/sw_component.cpp \
 		$$LEGACYPATH/src/sw_library.cpp \
+		$$LEGACYPATH/src/imageinfo.cpp \
 		$$LEGACYPATH/src/workshop.cpp \
 		$$LEGACYPATH/src/workshoplist.cpp \
 		$$LEGACYPATH/tools/src/workshoptool.cpp \

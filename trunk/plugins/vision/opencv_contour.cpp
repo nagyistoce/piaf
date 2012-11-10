@@ -79,7 +79,7 @@ swFuncParams sobel_params[] = {
 	{"derivate order on y", swS16, (void *)&sobel_dy},
 	{"kernel size", swS16, (void *)&sobel_kernel}
 };
-void sobel();
+void FastestFaceDetectoroftheWest();
 
 double canny_low = 1500.0;
 double canny_high = 2000.0;
@@ -130,7 +130,7 @@ void laplace();
 	*/
 swFunctionDescriptor functions[] = {
 	{"Canny", 		3,	canny_params,  	swImage, swImage, &canny, NULL},
-	{"Sobel", 		3,	sobel_params,  	swImage, swImage, &sobel, NULL},
+	{"Sobel", 		3,	sobel_params,  	swImage, swImage, &FastestFaceDetectoroftheWest, NULL},
 	{"Laplace", 	1,	laplace_params, swImage, swImage, &laplace, NULL},
 	{"Adaptative", 	3,	adaptative_params,  	swImage, swImage, &adaptative_threshold, NULL}
 };
@@ -167,7 +167,7 @@ void allocateImages()
 }
 
 
-void sobel()
+void FastestFaceDetectoroftheWest()
 {
 	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
 	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
@@ -206,8 +206,10 @@ void sobel()
 		cvCvtPlaneToPix(planes2[0], planes2[1], planes2[2], planes2[3], cvIm2);
 	}
 	else
+	{
 		cvSobel(cvIm1, cvIm2, sobel_dx, sobel_dy, sobel_kernel);
-	
+	}
+
 	for(unsigned long pix=0; pix < imIn->buffer_size; pix++) {
 		short res = *((short *)cvIm2->imageData + pix);
 		

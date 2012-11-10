@@ -47,8 +47,17 @@
 #include <QStringList>
 
 #include "imgutils.h"
-#include "FileVideoAcquisition.h"
-#include "ffmpeg_file_acquisition.h"
+
+
+/** @brief Position in movie */
+typedef struct {
+        QString name;   /*!< Name of bookmark */
+        unsigned long long prevAbsPosition; /*!< Position in file of last frame */
+        unsigned long long prevKeyFramePosition; /*!< Position in file of last key frame */
+        int nbFramesSinceKeyFrame; /*!< Nb of frames since last key frame */
+} t_movie_pos;
+
+
 
 /** @brief Structure for caching images */
 typedef struct {
@@ -141,7 +150,12 @@ typedef struct {
 	float score;			/*! Final score factor in [0..100] */
 	QList<t_movie_pos> bookmarksList;	/*! List of bookmarks */
 
+
+	u32 Date; ///< Date as 32bit, like timet
+	u32 Tick; ///< Tick count, as us
+
 } t_image_info_struct;
+
 
 /** @brief Empty image struct cleanly (it contains objects) */
 void clearImageInfoStruct(t_image_info_struct * pinfo);
@@ -159,6 +173,7 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path);
 */
 void saveImageInfoStruct(t_image_info_struct * pinfo, QString path = "");
 
+class FFmpegFileVideoAcquisition;
 
 /** @brief Image processing analyse class
   */
@@ -198,7 +213,7 @@ private:
 	t_image_info_struct m_image_info_struct;
 
 	/// File video acquisition used to read movie properties
-	FFmpegFileVideoAcquisition mFileVA;
+	FFmpegFileVideoAcquisition  * mpFileVA;
 
 
 	/** @brief Original image */

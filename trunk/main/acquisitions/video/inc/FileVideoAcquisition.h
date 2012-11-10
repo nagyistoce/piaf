@@ -128,6 +128,8 @@ public:
 	 */
 	virtual void setAbsoluteFrame(int frame) = 0;
 
+	/** @brief Read image information */
+	virtual t_image_info_struct readImageInfo() = 0;
 
 	/** Return file size in bytes */
 	unsigned long long getFileSize() { return m_fileSize; }

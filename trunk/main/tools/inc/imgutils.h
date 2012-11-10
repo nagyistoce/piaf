@@ -80,6 +80,7 @@
 #endif
 #endif // IMG_EXTENSION
 
+#include "swvideodetector.h"
 
 // TYPEDEFS FOR MULTIPLE ARCHITECTURE TYPES (32bit, 64bit...)
 #ifndef u8

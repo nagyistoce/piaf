@@ -194,12 +194,16 @@ private:
 	/// communication buffer
 	char * buffer;
 	// communication pipes
-	FILE * pipeR; ///< File pipe for reading from plugin
-	FILE * pipeW; ///< File pipe for writing to plugin
+	FILE * pipeR; ///< File pipe for reading from plugin (plugin's stdout)
+	FILE * pipeW; ///< File pipe for writing to plugin (plugin's stdin)
+	FILE * pipeStderrR; ///< File pipe for reading from plugin (plugin's stderr output)
+
 	int childpid; ///< child pid for signal and process control
 
-	int pipeIn[2];
-	int pipeOut[2];
+	int pipeIn[2];	///< Pipe for stdin
+	int pipeOut[2];	///< Pipe for stdin
+	int pipeStderrIn[2];	///< Pipe for stderr
+	int pipeStderrOut[2];	///< Pipe for stderr
 
 	/** Reads function list from plugin */
 	void readFunctionList();
