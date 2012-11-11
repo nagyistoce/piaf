@@ -26,6 +26,7 @@
 #include "piaf-common.h"
 
 #include "swimage_utils.h"
+#include "virtualdeviceacquisition.h"
 #include "PiafFilter.h"
 
 #include <QMouseEvent>

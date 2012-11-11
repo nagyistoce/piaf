@@ -15,6 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 #include <QPainter>
+#include <stdio.h>
+
 #include "inc/timelinewidget.h"
 #include "piaf-common.h"
 

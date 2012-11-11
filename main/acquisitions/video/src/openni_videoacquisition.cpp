@@ -91,6 +91,8 @@ OpenNIVideoAcquisition::~OpenNIVideoAcquisition()
 
 int OpenNIVideoAcquisition::init()
 {
+	clearImageInfoStruct(&mImageInfo);
+
 	m_OpenNI_angle = 0;
 	m_OpenNI_led = 0;
 	m_got_rgb = 0;

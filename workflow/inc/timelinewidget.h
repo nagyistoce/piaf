@@ -20,7 +20,9 @@
 #include <QLabel>
 #include <QMouseEvent>
 #include <QKeyEvent>
+
 #include "imageinfo.h"
+#include "workflowtypes.h"
 
 /** @brief Timeline for movie navigation */
 class TimeLineWidget : public QLabel

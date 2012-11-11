@@ -23,7 +23,7 @@
 
 #include "inc/maindisplaywidget.h"
 #include "ui_maindisplaywidget.h"
-
+#include "ffmpeg_file_acquisition.h"
 
 #include "piaf-common.h"
 #include "PiafFilter.h"

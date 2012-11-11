@@ -233,7 +233,4 @@ public:
 
 };
 
-/** @brief Conversion tool IplImage -> QImage */
-QImage iplImageToQImage(IplImage * iplImage, bool swap_RB = false);
-
 #endif // VIRTUALDEVICEACQUISITION_H

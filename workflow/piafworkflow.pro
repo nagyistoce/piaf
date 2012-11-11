@@ -175,6 +175,7 @@ SOURCES += \
 	$$LEGACYPATH/acquisitions/video/src/videocapture.cpp \
 	$$LEGACYPATH/acquisitions/video/src/swvideodetector.cpp \
 	$$LEGACYPATH/acquisitions/video/src/uvccolor.c \
+	$$LEGACYPATH/src/imageinfo.cpp \
 	$$LEGACYPATH/tools/src/OpenCVEncoder.cpp \
 	tools/src/moviebookmarkform.cpp \
 	$$LEGACYPATH/acquisitions/video/src/virtualdeviceacquisition.cpp \
@@ -191,6 +192,7 @@ HEADERS += \
 	$$PIAFLIB/inc/SwPluginCore.h \
 	$$PIAFLIB/inc/swopencv.h \
 	$$LEGACYPATH/inc/piaf-common.h \
+	$$LEGACYPATH/inc/imageinfo.h \
 	$$LEGACYPATH/tools/inc/qlistboxmarker.h \
 	$$LEGACYPATH/tools/inc/OpenCVEncoder.h \
 	tools/inc/moviebookmarkform.h \
@@ -308,7 +310,6 @@ SOURCES += tools/src/PiafFilter.cpp \
 	src/mainimagewidget.cpp \
 	src/emamainwindow.cpp \
 	src/thumbimageframe.cpp \
-	src/imageinfo.cpp \
 	src/exifdisplayscrollarea.cpp \
 	src/metadatawidget.cpp \
 	src/emaimagemanager.cpp \
@@ -338,7 +339,6 @@ HEADERS += tools/inc/PiafFilter.h \
 	inc/mainimagewidget.h \
 	inc/emamainwindow.h \
 	inc/thumbimageframe.h \
-	inc/imageinfo.h \
 	../main/tools/inc/imgutils.h \
 	inc/exifdisplayscrollarea.h \
 	inc/metadatawidget.h \

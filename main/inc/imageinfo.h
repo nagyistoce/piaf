@@ -49,6 +49,10 @@
 #include "imgutils.h"
 
 
+/** @brief Convert an IplImage * to a QImage object */
+QImage iplImageToQImage(IplImage * iplImage, bool swap_RB = false);
+
+
 /** @brief Position in movie */
 typedef struct {
         QString name;   /*!< Name of bookmark */
