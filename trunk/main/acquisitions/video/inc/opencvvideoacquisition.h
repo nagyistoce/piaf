@@ -115,6 +115,13 @@ private:
 
 	/// Mutex for preventing from changing acquisition params during grabging
 	QMutex mGrabMutex;
+	// -------- IMAGE INFORMATION -------
+public:
+	/** @brief Read image information */
+	t_image_info_struct readImageInfo() { return mImageInfo; }
+
+protected:
+	t_image_info_struct mImageInfo;
 };
 
 #endif // OPENCVVIDEOACQUISITION_H

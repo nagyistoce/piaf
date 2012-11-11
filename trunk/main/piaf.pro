@@ -4,7 +4,7 @@
 TARGET = piaf
 
 VERSION = "`date +%Y%m%d`"
-
+QT += xml
 CONFIG += qt \
     warn_on \
     debug \
@@ -63,6 +63,7 @@ SOURCES += src/main.cpp \
     src/sw_component.cpp \
     src/sw_library.cpp \
     src/workshop.cpp \
+	src/imageinfo.cpp \
 	src/workshoplist.cpp \
 	components/src/workshopcomponent.cpp \
     components/src/workshopmeasure.cpp \
@@ -145,6 +146,7 @@ HEADERS += inc/workshop.h \
     ../piaflib/inc/SwTypes.h \
 	../piaflib/inc/SwImage.h \
 	inc/piaf-common.h \
+	inc/imageinfo.h \
 	components/inc/workshopcomponent.h \
     components/inc/workshopmeasure.h \
     components/inc/workshopimage.h \
@@ -293,6 +295,8 @@ HEADERS += tools/inc/imagetoavidialog.h
 
 SOURCES += tools/src/imagetoavidialog.cpp
 
+# since we get image info, use the Exiv2 library
+LIBS += -lexiv2
 
 
 # The following line was changed from FORMS to FORMS3 by qt3to4

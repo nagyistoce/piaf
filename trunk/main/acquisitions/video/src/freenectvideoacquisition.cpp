@@ -49,6 +49,7 @@ bool g_debug_FreenectVideoAcquisition = false;
 FreenectVideoAcquisition::FreenectVideoAcquisition(int idx_device)
 {
 	//m_current_format = m_requested_format = FREENECT_VIDEO_RGB;
+	clearImageInfoStruct(&mImageInfo);
 
 	m_current_format = m_requested_format = FREENECT_VIDEO_IR_8BIT;
 	m_freenect_angle = 0;

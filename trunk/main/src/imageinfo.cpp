@@ -45,6 +45,8 @@
 #include <iomanip>
 #include <cassert>
 
+#include "ffmpeg_file_acquisition.h"
+
 u8 g_debug_ImageInfo = EMALOG_DEBUG;
 
 /******************************************************************************/
@@ -81,6 +83,11 @@ void ImageInfo::purgeThumbs() {
 }
 
 void ImageInfo::purge() {
+	if(mpFileVA)
+	{
+		delete mpFileVA;
+		mpFileVA = NULL;
+	}
 
 	tmReleaseImage(&m_originalImage);
 	tmReleaseImage(&m_HistoImage); // Delete only at the end, because it's always the same size
@@ -145,7 +152,7 @@ void clearImageInfoStruct(t_image_info_struct * pinfo)
 
 void ImageInfo::init() {
 	m_originalImage = NULL;
-
+	mpFileVA = NULL;
 	m_thumbImage = m_scaledImage = m_grayImage = m_HSHistoImage =
 	m_HistoImage = m_ColorHistoImage =
 	hsvImage = hsvOutImage = h_plane = s_plane = NULL;
@@ -459,13 +466,18 @@ int ImageInfo::loadMovieFile(QString filename)
 	tBoxSize size;
 	size.x = size.y = 0;
 	size.width = 320; size.height = 240; //
-	if(mFileVA.openDevice( fi.absoluteFilePath().toUtf8().data(), size)<0) {
+	if(!mpFileVA)
+	{/// \bug FIXME: use factory
+		mpFileVA = new FFmpegFileVideoAcquisition();
+	}
+
+	if(mpFileVA->openDevice( fi.absoluteFilePath().toUtf8().data(), size)<0) {
 		PIAF_MSG(SWLOG_ERROR, "cannot open file '%s'", fi.absoluteFilePath().toUtf8().data());
 		return -1;
 	}
-	int retgrab = mFileVA.grab();
+	int retgrab = mpFileVA->grab();
 
-	t_video_properties props = mFileVA.getVideoProperties();
+	t_video_properties props = mpFileVA->getVideoProperties();
 
 	// Read properties
 	m_image_info_struct.width = props.frame_width;
@@ -478,11 +490,11 @@ int ImageInfo::loadMovieFile(QString filename)
 			  retgrab,
 			  m_image_info_struct.width, m_image_info_struct.height, m_image_info_struct.fps );
 
-	m_originalImage = tmCloneImage(mFileVA.readImageRGB32());
+	m_originalImage = tmCloneImage(mpFileVA->readImageRGB32());
 	// Invert R<->B
 	if(m_originalImage->nChannels == 4)
 	{
-		cvCvtColor(mFileVA.readImageRGB32(), m_originalImage, CV_BGRA2RGBA);
+		cvCvtColor(mpFileVA->readImageRGB32(), m_originalImage, CV_BGRA2RGBA);
 	}
 	return 0;
 }
@@ -1342,4 +1354,362 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path)
 
 	return 0;
 }
+
+
+
+static u32 * grayToBGR32 = NULL;
+static void init_grayToBGR32()
+{
+	if(grayToBGR32) {
+		return;
+	}
+
+	grayToBGR32 = new u32 [256];
+	for(int c = 0; c<256; c++) {
+		int Y = c;
+		u32 B = Y;// FIXME
+		u32 G = Y;
+		u32 R = Y;
+		grayToBGR32[c] = (R << 16) | (G<<8) | (B<<0);
+	}
+
+}
+
+
+
+QImage iplImageToQImage(IplImage * iplImage, bool swap_RB)
+{
+	if(!iplImage) {
+		PIAF_MSG(SWLOG_ERROR, "IplImage is null");
+		return QImage();
+	}
+
+	int depth = iplImage->nChannels;
+
+	bool rgb24_to_bgr32 = false;
+	if(depth == 3  ) {// RGB24 is obsolete on Qt => use 32bit instead
+		depth = 4;
+		rgb24_to_bgr32 = true;
+	}
+
+	u32 * grayToBGR32palette = grayToBGR32;
+	bool gray_to_bgr32 = false;
+
+
+	if(depth == 1) {// GRAY is obsolete on Qt => use 32bit instead
+		depth = 4;
+		gray_to_bgr32 = true;
+
+		init_grayToBGR32();
+
+		grayToBGR32palette = grayToBGR32;
+	}
+
+	int orig_width = iplImage->width;
+	int orig_height = iplImage->height;
+
+	QImage qImage(orig_width, orig_height,
+				   depth > 1 ? QImage::Format_RGB32 : QImage::Format_Indexed8);
+	memset(qImage.bits(), 127, orig_width*orig_height*depth);
+
+	switch(iplImage->depth) {
+	default:
+		fprintf(stderr, "imageinfowidget %s:%d : Unsupported depth = %d\n", __func__, __LINE__, iplImage->depth);
+		break;
+
+	case IPL_DEPTH_8U: {
+		if(!rgb24_to_bgr32 && !gray_to_bgr32) {
+			if(iplImage->nChannels != 4) {
+				//
+				if(!swap_RB)
+				{
+					for(int r=0; r<iplImage->height; r++) {
+						// NO need to swap R<->B
+						memcpy(qImage.bits() + r*orig_width*depth,
+							iplImage->imageData + r*iplImage->widthStep,
+							orig_width*depth);
+					}
+				} else {
+					for(int r=0; r<iplImage->height; r++) {
+						// need to swap R<->B
+						u8 * buf_out = (u8 *)(qImage.bits()) + r*orig_width*depth;
+						u8 * buf_in = (u8 *)(iplImage->imageData) + r*iplImage->widthStep;
+						memcpy(qImage.bits() + r*orig_width*depth,
+							iplImage->imageData + r*iplImage->widthStep,
+							orig_width*depth);
+
+						for(int pos3 = 0 ; pos3<orig_width*depth; pos3+=depth,
+							buf_out+=3, buf_in+=depth
+							 ) {
+							buf_out[2] = buf_in[0];
+							buf_out[0] = buf_in[2];
+						}
+					}
+				}
+			} else {
+
+				for(int r=0; r<iplImage->height; r++) {
+					// need to swap R<->B
+					u8 * buf_out = (u8 *)(qImage.bits()) + r*orig_width*depth;
+					u8 * buf_in = (u8 *)(iplImage->imageData) + r*iplImage->widthStep;
+					memcpy(qImage.bits() + r*orig_width*depth,
+						iplImage->imageData + r*iplImage->widthStep,
+						orig_width*depth);
+
+					if(swap_RB) {
+						for(int pos4 = 0 ; pos4<orig_width*depth; pos4+=depth,
+							buf_out+=4, buf_in+=depth
+							 ) {
+							buf_out[2] = buf_in[0];
+							buf_out[0] = buf_in[2];
+						}
+					}
+				}
+			}
+		}
+		else if(rgb24_to_bgr32) {
+			// RGB24 to BGR32
+			u8 * buffer3 = (u8 *)iplImage->imageData;
+			u8 * buffer4 = (u8 *)qImage.bits();
+			int orig_width4 = 4 * orig_width;
+
+			for(int r=0; r<iplImage->height; r++)
+			{
+				int pos3 = r * iplImage->widthStep;
+				int pos4 = r * orig_width4;
+				if(!swap_RB) {
+
+					for(int c=0; c<orig_width; c++, pos3+=3, pos4+=4)
+					{
+						buffer4[pos4   ] = buffer3[pos3];
+						buffer4[pos4 + 1] = buffer3[pos3+1];
+						buffer4[pos4 + 2] = buffer3[pos3+2];
+					}
+				} else { // SWAP R<->B
+					for(int c=0; c<orig_width; c++, pos3+=3, pos4+=4)
+					{
+						buffer4[pos4 + 2] = buffer3[pos3];
+						buffer4[pos4 + 1] = buffer3[pos3+1];
+						buffer4[pos4    ] = buffer3[pos3+2];
+					}
+				}
+			}
+		} else if(gray_to_bgr32) {
+			for(int r=0; r<iplImage->height; r++)
+			{
+				u32 * buffer4 = (u32 *)qImage.bits() + r*qImage.width();
+				u8 * bufferY = (u8 *)(iplImage->imageData + r*iplImage->widthStep);
+				for(int c=0; c<orig_width; c++) {
+					buffer4[c] = grayToBGR32palette[ (int)bufferY[c] ];
+				}
+			}
+		}
+		}break;
+	case IPL_DEPTH_16S: {
+		if(!rgb24_to_bgr32) {
+
+			u8 * buffer4 = (u8 *)qImage.bits();
+			short valmax = 0;
+
+			for(int r=0; r<iplImage->height; r++)
+			{
+				short * buffershort = (short *)(iplImage->imageData + r*iplImage->widthStep);
+				for(int c=0; c<iplImage->width; c++)
+					if(buffershort[c]>valmax)
+						valmax = buffershort[c];
+			}
+
+			if(valmax>0)
+				for(int r=0; r<iplImage->height; r++)
+				{
+					short * buffer3 = (short *)(iplImage->imageData
+									+ r * iplImage->widthStep);
+					int pos3 = 0;
+					int pos4 = r * orig_width;
+					for(int c=0; c<orig_width; c++, pos3++, pos4++)
+					{
+						int val = abs((int)buffer3[pos3]) * 255 / valmax;
+						if(val > 255) val = 255;
+						buffer4[pos4] = (u8)val;
+					}
+				}
+		}
+		else {
+			u8 * buffer4 = (u8 *)qImage.bits();
+			if(depth == 3) {
+
+				for(int r=0; r<iplImage->height; r++)
+				{
+					short * buffer3 = (short *)(iplImage->imageData + r * iplImage->widthStep);
+					int pos3 = 0;
+					int pos4 = r * orig_width*4;
+					for(int c=0; c<orig_width; c++, pos3+=3, pos4+=4)
+					{
+						buffer4[pos4   ] = buffer3[pos3];
+						buffer4[pos4 + 1] = buffer3[pos3+1];
+						buffer4[pos4 + 2] = buffer3[pos3+2];
+					}
+				}
+			} else if(depth == 1) {
+				short valmax = 0;
+				short * buffershort = (short *)(iplImage->imageData);
+				for(int pos=0; pos< iplImage->widthStep*iplImage->height; pos++)
+					if(buffershort[pos]>valmax)
+						valmax = buffershort[pos];
+
+				if(valmax>0) {
+					for(int r=0; r<iplImage->height; r++)
+					{
+						short * buffer3 = (short *)(iplImage->imageData
+											+ r * iplImage->widthStep);
+						int pos3 = 0;
+						int pos4 = r * orig_width;
+						for(int c=0; c<orig_width; c++, pos3++, pos4++)
+						{
+							int val = abs((int)buffer3[pos3]) * 255 / valmax;
+							if(val > 255) val = 255;
+							buffer4[pos4] = (u8)val;
+						}
+					}
+				}
+			}
+		}
+		}break;
+	case IPL_DEPTH_16U: {
+
+		if(!rgb24_to_bgr32) {
+
+			unsigned short valmax = 0;
+
+			for(int r=0; r<iplImage->height; r++)
+			{
+				unsigned short * buffershort = (unsigned short *)(iplImage->imageData + r*iplImage->widthStep);
+				for(int c=0; c<iplImage->width; c++) {
+					if(buffershort[c]>valmax) {
+						valmax = buffershort[c];
+					}
+				}
+			}
+
+			if(valmax>0) {
+				if(!gray_to_bgr32) {
+					u8 * buffer4 = (u8 *)qImage.bits();
+					for(int r=0; r<iplImage->height; r++)
+					{
+						unsigned short * buffer3 = (unsigned short *)(iplImage->imageData
+										+ r * iplImage->widthStep);
+						int pos3 = 0;
+						int pos4 = r * orig_width;
+						for(int c=0; c<orig_width; c++, pos3++, pos4++)
+						{
+							int val = abs((int)buffer3[pos3]) * 255 / valmax;
+							if(val > 255) val = 255;
+							buffer4[pos4] = (u8)val;
+						}
+					}
+				} else {
+					u32 * buffer4 = (u32 *)qImage.bits();
+					for(int r=0; r<iplImage->height; r++)
+					{
+						unsigned short * buffer3 = (unsigned short *)(iplImage->imageData
+										+ r * iplImage->widthStep);
+						int pos3 = 0;
+						int pos4 = r * orig_width;
+						for(int c=0; c<orig_width; c++, pos3++, pos4++)
+						{
+							int val = abs((int)buffer3[pos3]) * 255 / valmax;
+							if(val > 255) val = 255;
+							buffer4[pos4] = grayToBGR32palette[ val ];
+						}
+					}
+				}
+			}
+		}
+		else {
+			fprintf(stderr, "imageinfowidget %s:%d : U16  depth = %d -> BGR32\n", __func__, __LINE__, iplImage->depth);
+			u8 * buffer4 = (u8 *)qImage.bits();
+			if(depth == 3) {
+
+				for(int r=0; r<iplImage->height; r++)
+				{
+					short * buffer3 = (short *)(iplImage->imageData + r * iplImage->widthStep);
+					int pos3 = 0;
+					int pos4 = r * orig_width*4;
+					for(int c=0; c<orig_width; c++, pos3+=3, pos4+=4)
+					{
+						buffer4[pos4   ] = buffer3[pos3]/256;
+						buffer4[pos4 + 1] = buffer3[pos3+1]/256;
+						buffer4[pos4 + 2] = buffer3[pos3+2]/256;
+					}
+				}
+			} else if(depth == 1) {
+				short valmax = 0;
+				short * buffershort = (short *)(iplImage->imageData);
+				for(int pos=0; pos< iplImage->widthStep*iplImage->height; pos++)
+					if(buffershort[pos]>valmax)
+						valmax = buffershort[pos];
+
+				if(valmax>0)
+					for(int r=0; r<iplImage->height; r++)
+					{
+						short * buffer3 = (short *)(iplImage->imageData
+											+ r * iplImage->widthStep);
+						int pos3 = 0;
+						int pos4 = r * orig_width;
+						for(int c=0; c<orig_width; c++, pos3++, pos4++)
+						{
+							int val = abs((int)buffer3[pos3]) * 255 / valmax;
+							if(val > 255) val = 255;
+							buffer4[pos4] = (u8)val;
+						}
+					}
+			}
+		}
+		}break;
+	case IPL_DEPTH_32F: {
+		// create temp image
+		IplImage * image8bit = swCreateImage(cvGetSize(iplImage),
+											 IPL_DEPTH_8U, iplImage->nChannels);
+		double minVal=0. , maxVal = 255.;
+		CvPoint maxPt;
+		#ifdef OPENCV_22
+		try
+		#endif
+		{
+			cvMinMaxLoc(iplImage, &minVal, &maxVal, &maxPt);
+		}
+		#ifdef OPENCV_22
+		catch(cv::Exception e)
+		{
+			maxVal = 255.;
+		}
+		#endif
+		// Get dynamic of image
+		int limit = 1;
+		while (limit < maxVal)
+		{
+			limit = limit << 1;
+		}
+		// convert scale
+		cvConvertScale(iplImage, image8bit, 255./(double)limit, 0.);
+
+		// convert
+		qImage = iplImageToQImage(image8bit).copy();
+		swReleaseImage(&image8bit);
+
+		}break;
+	}
+
+	if(qImage.depth() == 8) {
+		qImage.setNumColors(256);
+
+		for(int c=0; c<256; c++) {
+			qImage.setColor(c, qRgb(c,c,c));
+		}
+	}
+
+	return qImage;
+}
+
+
 

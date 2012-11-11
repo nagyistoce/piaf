@@ -24,6 +24,8 @@
 
 OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 {
+	clearImageInfoStruct(&mImageInfo);
+
 	m_capture = NULL;
 	m_iplImage = m_grayImage = NULL;
 	m_idx_device = idx_device;

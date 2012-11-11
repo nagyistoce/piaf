@@ -261,6 +261,13 @@ public:
 
 	/** @brief Set the raw IR/RGB buffer (RGB or IR 8bit) */
 	int setRawImageBuffer(void * imgbuf, uint32_t timestamp = 0);
+	// -------- IMAGE INFORMATION -------
+public:
+	/** @brief Read image information */
+	t_image_info_struct readImageInfo() { return mImageInfo; }
+
+protected:
+	t_image_info_struct mImageInfo;
 };
 
 #endif // OPENNI_VIDEOACQUISITION_H

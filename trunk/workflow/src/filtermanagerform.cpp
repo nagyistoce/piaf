@@ -32,7 +32,7 @@
 
 #include "imgutils.h"
 #include "imageinfo.h"
-
+#include <stdio.h>
 
 int g_EMAFILT_debug_mode = EMALOG_DEBUG;
 

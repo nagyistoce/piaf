@@ -29,6 +29,9 @@
 #include <QToolTip>
 #include <QFileInfo>
 
+#include "virtualdeviceacquisition.h"
+
+
 int g_debug_ThumbImageFrame = SWLOG_DEBUG;
 
 
