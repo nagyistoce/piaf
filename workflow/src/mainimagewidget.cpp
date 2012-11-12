@@ -49,6 +49,8 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 {
 	m_inputIplImage = m_outputIplImage = NULL;
 
+	clearImageInfoStruct(&mImageInfo);
+
 	mSwapR_B = false;
 	mpFilterSequencer = NULL;
 	m_ui->setupUi(this);
@@ -139,11 +141,16 @@ void MainImageWidget::slotUpdateImage()
 	IplImage * imageIn = m_inputIplImage;
 	if(mpFilterSequencer)
 	{
-
-
+		PIAF_MSG(SWLOG_TRACE, "Date=%lu.%lu",
+				 (ulong) mImageInfo.Date,
+				 (ulong) mImageInfo.Tick
+				 );
 		//int ret = mpFilterSequencer->processImage(&image);
 		int ret = mpFilterSequencer->processImage(m_inputIplImage,
-												  &m_outputIplImage);
+												  &m_outputIplImage,
+												  mImageInfo.Date,
+												  mImageInfo.Tick
+												  );
 		if(ret>=0)
 		{
 			// convert back to display image
@@ -195,7 +202,10 @@ int MainImageWidget::setImage(IplImage * imageIn,
 		PIAF_MSG(SWLOG_ERROR, "setImage with IplImage=NULL");
 		return -1;
 	}
-
+	if(pinfo)
+	{
+		mImageInfo = *pinfo;
+	}
 //	static int s_MainImageWidget_setImage_IplImage_count = 0;
 //	const char turning_wheel[5] = "|/-\\";
 
@@ -268,12 +278,15 @@ void MainImageWidget::on_depthButton_toggled(bool checked)
 int MainImageWidget::setImage(QImage imageIn,
 								   t_image_info_struct * pinfo )
 {
-
 	fprintf(stderr, "MainImageWidget::%s:%d (QImage=%dx%dx%d, pinfo=%p)\n",
 			__func__, __LINE__,
 			imageIn.width(), imageIn.height(), imageIn.depth(),
 			pinfo
 			);
+	if(pinfo)
+	{
+		mImageInfo = *pinfo;
+	}
 
 	// if size did not change, do not copy the code
 	if(m_inputIplImage)
@@ -286,6 +299,7 @@ int MainImageWidget::setImage(QImage imageIn,
 		{
 			EMAMIW_printf(SWLOG_INFO, "=> release input image %dx%d x %d x %d\n",
 						  m_inputIplImage->width, m_inputIplImage->height, m_inputIplImage->depth, m_inputIplImage->nChannels);
+
 			swReleaseImage(&m_inputIplImage);
 			swReleaseImage(&m_outputIplImage);
 		}
@@ -308,6 +322,7 @@ int MainImageWidget::setImage(QImage imageIn,
 		EMAMIW_printf(SWLOG_INFO, "=> IplImage image %dx%d x %d x %d\n",
 					  m_inputIplImage->width, m_inputIplImage->height, m_inputIplImage->depth, m_inputIplImage->nChannels);
 	}
+
 	EMAMIW_printf(SWLOG_INFO, "=> IplImage image %dx%d x %d x %d\n",
 				  m_inputIplImage->width, m_inputIplImage->height, m_inputIplImage->depth, m_inputIplImage->nChannels);
 

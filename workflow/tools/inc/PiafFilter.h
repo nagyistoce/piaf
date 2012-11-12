@@ -120,7 +120,8 @@ public:
 	int processFunction(int indexFunction,
 						IplImage * img_in,
 						IplImage ** pimg_out,
-						int timeout_ms);
+						int timeout_ms,
+						u32 date = 0, u32 tick = 0);
 
 	/** @brief Force state of enabling flag */
 	void setEnabled(bool on ) {enabled = on; }
@@ -300,7 +301,8 @@ public:
 
 		@return <0 if error, >=0 if success
 	*/
-	int processImage(IplImage * imageIn, IplImage ** pimageOut);
+	int processImage(IplImage * imageIn, IplImage ** pimageOut,
+					 u32 date = 0, u32 tick = 0);
 
 	/** @brief Load a plugin sequence : { plugin>function>parameters => ... }
 

@@ -8,7 +8,7 @@
 							(init, start and stop, get properties, acquire, ...)
  ***************************************************************************/
 #include <math.h>
-
+#include <sys/stat.h>
 #include "file_video_acquisition_factory.h"
 
 #include "ffmpeg_file_acquisition.h"
@@ -170,6 +170,16 @@ int FFmpegFileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 		m_inbuff = NULL;
 	}
 	float lfps = 25.f;
+
+	struct stat bufstat;
+	if(stat(aDevice, &bufstat) == 0)
+	{
+		mImageInfo.Date = bufstat.st_ctime;
+	}
+	else
+	{
+		mImageInfo.Date = mImageInfo.Tick = 0;
+	}
 
    // Open video file
 	if(av_open_input_file(&m_pFormatCtx, aDevice, NULL, 0, NULL)!=0) {
@@ -676,13 +686,24 @@ bool FFmpegFileVideoAcquisition::GetNextFrame()
 		m_prevPosition = url_ftell(URLPB(m_pFormatCtx->pb));
 	old_pos = m_prevPosition;
 
+	if(m_video_properties.fps <= 0)
+	{
+		mImageInfo.Tick += 40000; ///< \bug FIXME
+	}
+	else
+	{
+		mImageInfo.Tick += 1000000.f / m_video_properties.fps;
+	}
 
-	mImageInfo.Tick += 40000; ///< \bug FIXME
 	while(mImageInfo.Tick > 1000000)
 	{
 		mImageInfo.Tick -= 1000000;
 		mImageInfo.Date ++;
 	}
+
+	PIAF_MSG(SWLOG_INFO, "FPS=%g Date=%lu.%lu",
+			 m_video_properties.fps,
+			 (ulong)mImageInfo.Date,  (ulong)mImageInfo.Tick );
 
 	while(counter<25)
 	{

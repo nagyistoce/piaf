@@ -1047,7 +1047,8 @@ void FilterSequencer::clearImageTmpList()
 	imageTmpList.clear();
 }
 
-int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
+int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut,
+								  u32 date, u32 tick)
 {
 	if(!imageIn)
 	{
@@ -1063,9 +1064,11 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 				imageIn,
 				imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
 	}
-	PIAF_MSG(SWLOG_DEBUG, "Process image IplImage *=%p = %dx%dx%dx%d",
+
+	PIAF_MSG(SWLOG_TRACE, "Process image IplImage *=%p = %dx%dx%dx%d date=%lu.%lu",
 			 imageIn,
-			 imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels);
+			 imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels,
+			 (ulong)date, (ulong)tick);
 
 
 	if(mLoadedFiltersList.isEmpty()) {
@@ -1156,7 +1159,8 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut)
 
 					ret = pv->processFunction(pv->indexFunction,
 											  imagePrev,
-											  &imageOut, 2000 );
+											  &imageOut, 2000,
+											  date, tick);
 					if(ret>=0)
 					{
 						step++;
@@ -1904,12 +1908,19 @@ void PiafFilter::sendRequest(char * req)
 int PiafFilter::processFunction(int indexFunction,
 								IplImage * img_in,
 								IplImage ** pimg_out,
-								int timeout_ms)
+								int timeout_ms,
+								u32 date, u32 tick)
 {
 	// wait for unlock on stdin/out
 	if(waitForUnlock(200) && !plugin_died)
 	{
 		mapIplImageToSwImage(img_in, &data_in);
+
+		data_in.Date = date;
+		data_in.TickCount = tick;
+
+		PIAF_MSG(SWLOG_TRACE, "Date=%lu tick=%lu",
+					   (ulong)date, (ulong)tick);
 
 		comLock = true; // lock
 		int ret = -1;
