@@ -67,6 +67,8 @@ public:
 protected:
 	virtual void changeEvent(QEvent *e);
 
+	t_image_info_struct mImageInfo;
+
 	QRect m_displayRect;
 	IplImage * m_inputIplImage;	///< input as IplImage, may be more than 8bit
 	IplImage * m_outputIplImage;///< output of filters as IplImage, may be more than 8bit

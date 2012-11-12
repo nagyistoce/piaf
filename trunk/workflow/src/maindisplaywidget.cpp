@@ -293,7 +293,7 @@ void MainDisplayWidget::updateDisplay()
 	t_image_info_struct info = mpFileVA->readImageInfo();
 
 
-	ui->mainImageWidget->setImage(captureImage, NULL);
+	ui->mainImageWidget->setImage(captureImage, &info);
 	if(mpegEncoder && mIsRecording)
 	{
 		PIAF_MSG(SWLOG_TRACE, "Recording...");
@@ -600,13 +600,13 @@ void MainDisplayWidget::updateSnapCounter()
 	QFileInfo fi;
 	do {
 		fileext.sprintf(FORMAT_IMG, mSnapCounter);
-		QString outname = mSourceName + fileext;
+		QString outname = g_workflow_settings.defaultMovieDir + mSourceName + fileext;
 		fi.setFile(outname);
 		if(fi.exists()) { mSnapCounter++; }
 	} while(fi.exists());
 	do {
 		fileext.sprintf(FORMAT_AVI, mMovieCounter);
-		QString outname = mSourceName + fileext;
+		QString outname = g_workflow_settings.defaultMovieDir + mSourceName + fileext;
 		fi.setFile(outname);
 		if(fi.exists()) { mMovieCounter++; }
 	} while(fi.exists());
@@ -732,7 +732,9 @@ void MainDisplayWidget::startRecording()
 
 	QString fileext;
 	fileext.sprintf(FORMAT_AVI, mMovieCounter);
-	QString movieFile = mSourceName + fileext;
+
+	QString movieFile = g_workflow_settings.defaultMovieDir
+			+ mSourceName + fileext;
 
 	PIAF_MSG(SWLOG_INFO, "Starting encoding file '%s'\n",
 			movieFile.toUtf8().data());

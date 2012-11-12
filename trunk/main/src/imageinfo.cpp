@@ -99,7 +99,7 @@ void ImageInfo::purge() {
 void clearImageInfoStruct(t_image_info_struct * pinfo)
 {
 	pinfo->valid = 0;
-
+	pinfo->Date = pinfo->Tick = 0;
 //			// EXIF TAGS
 //			QString  maker;	/*! Company which produces this camera */
 //			QString model;	/*! Model of this camera */
