@@ -31,11 +31,12 @@
 
 #include <QMouseEvent>
 #include <QMenu>
+#include <QDateTime>
 
 int g_EMAMainImgW_debug_mode = EMALOG_DEBUG;
 
 #define EMAMIW_printf(a,...)  { \
-		if(1 || g_EMAMainImgW_debug_mode<=(a)) { \
+		if(g_EMAMainImgW_debug_mode<=(a)) { \
 			fprintf(stderr,"EmaMainImageW::%s:%d : ",__func__,__LINE__); \
 			fprintf(stderr,__VA_ARGS__); \
 			fprintf(stderr,"\n"); \
@@ -179,10 +180,18 @@ void MainImageWidget::slotUpdateImage()
 					   imageIn->nChannels, imageIn->depth);
 		m_ui->depthButton->setText(OSDStr);
 
+
 		OSDStr.sprintf("%dx%d\n"
 					   "%dx%db",
 					   imageIn->width, imageIn->height,
 					   imageIn->nChannels, imageIn->depth);
+		if(mImageInfo.Date > 0)
+		{
+			QDateTime dateTime = QDateTime::fromTime_t(mImageInfo.Date);
+			dateTime.addMSecs(mImageInfo.Tick / 1000);
+			OSDStr += "\n" + dateTime.toString();
+		}
+
 		m_ui->OSDLabel->setText(OSDStr);
 
 		m_ui->globalImageLabel->setRefImage(imageIn);
