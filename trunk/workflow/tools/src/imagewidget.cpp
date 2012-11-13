@@ -594,11 +594,14 @@ void ImageWidget::mousePressEvent(QMouseEvent *e) {
 		case EDITMODE_PICKER: {
 			QPoint pt = displayToImage(e->pos());
 /// @todo Fixme : use input image and not display image
+
 			QRgb colorRGB = m_displayImage.pixel(pt);
 			int colorGrey = qGray(colorRGB);
-			fprintf(stderr, "ImgWidget::%s:%d : "
-					"(%d,%d) RGB=%d,%d,%d gray=%d",
+
+			fprintf(stderr, "ImgWidget::%s:%d : FIXME "
+					"mouse=(%d,%d) => in orig(%d,%d) RGB=%d,%d,%d gray=%d",
 					__func__, __LINE__,
+					e->pos().x(), e->pos().y(),
 					pt.x(), pt.y(),
 					qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB),
 					colorGrey);
@@ -674,6 +677,13 @@ void ImageWidget::mouseMoveEvent(QMouseEvent *e)
 		QPoint pt = displayToImage(e->pos());
 		QRgb colorRGB = m_displayImage.pixel(pt);
 		int colorGrey = qGray(colorRGB);
+		fprintf(stderr, "ImgWidget::%s:%d : FIXME "
+				"mouse=(%d,%d) => in orig(%d,%d) RGB=%d,%d,%d gray=%d",
+				__func__, __LINE__,
+				e->pos().x(), e->pos().y(),
+				pt.x(), pt.y(),
+				qRed(colorRGB), qGreen(colorRGB), qBlue(colorRGB),
+				colorGrey);
 
 		emit signalPicker(colorRGB, colorGrey, pt);
 		}
