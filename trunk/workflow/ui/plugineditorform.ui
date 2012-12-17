@@ -29,7 +29,7 @@
    <item>
     <widget class="QStackedWidget" name="stackedWidget">
      <property name="currentIndex">
-      <number>3</number>
+      <number>0</number>
      </property>
      <widget class="QWidget" name="pagePlugins">
       <layout class="QVBoxLayout" name="verticalLayout_3">
@@ -38,6 +38,9 @@
        </property>
        <item>
         <widget class="QTreeWidget" name="availablePluginsTreeWidget">
+         <property name="sortingEnabled">
+          <bool>true</bool>
+         </property>
          <attribute name="headerMinimumSectionSize">
           <number>50</number>
          </attribute>
