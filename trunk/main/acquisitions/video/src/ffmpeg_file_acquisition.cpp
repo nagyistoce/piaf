@@ -44,11 +44,14 @@ FileVideoAcquisition* FFmpegFileVideoAcquisition::creatorFunction(std::string pa
 FFmpegFileVideoAcquisition::FFmpegFileVideoAcquisition()
 {
 	m_bAvcodecIsInitialized = FALSE;
+
 	// no device is wanted, try default device
 	tBoxSize newSize;newSize.x=newSize.y=0;
 	newSize.width = 640;
 	newSize.height = 480;
+
 	initPlayer();
+
 	openDevice(NULL, newSize);
 }
 
@@ -319,12 +322,14 @@ int FFmpegFileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 	// rq. OLV : cette configuration doit remplacer les appels à calcBufferSize, display_frame, etc.
 	//avpicture_fill((AVPicture *)m_pFrame, receptBuffer, mImageSize.pix_fmt,
 	//    mImageSize.width, mImageSize.height);
-	int numBytes_orig = avpicture_get_size(m_pCodecCtx->pix_fmt, m_pCodecCtx->width,
-		m_pCodecCtx->height);
+	int numBytes_orig = avpicture_get_size(m_pCodecCtx->pix_fmt,
+										   m_pCodecCtx->width, m_pCodecCtx->height);
 
 	m_origbuff = new uint8_t [ numBytes_orig ];
-	avpicture_fill((AVPicture *)m_pFrame, m_origbuff, m_pCodecCtx->pix_fmt,
-		m_pCodecCtx->width, m_pCodecCtx->height);
+	avpicture_fill((AVPicture *)m_pFrame,
+				   m_origbuff,
+				   m_pCodecCtx->pix_fmt,
+				   m_pCodecCtx->width, m_pCodecCtx->height);
 	/*fprintf(stderr, "FileVA::%s:%d : avpicture_fill %d x %d m_pFrame=%p => m_inbuff [ %d ] in RGBA32....\n",
 			__func__, __LINE__,
 			m_pCodecCtx->width,
@@ -333,7 +338,8 @@ int FFmpegFileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 			numBytes_orig); fflush(stderr);*/
 
 	// Determine required buffer size and allocate buffer
-	numBytes = avpicture_get_size(PIX_FMT_RGBA32, m_pCodecCtx->width,
+	numBytes = avpicture_get_size(PIX_FMT_RGBA32,
+								  m_pCodecCtx->width,
 								  m_pCodecCtx->height);
 	fprintf(stderr, "FileVA::%s:%d : allocating %d x %d => m_inbuff [ %d ] in RGBA32....\n",
 			__func__, __LINE__,
@@ -702,7 +708,7 @@ bool FFmpegFileVideoAcquisition::GetNextFrame()
 	}
 
 	PIAF_MSG(SWLOG_INFO, "FPS=%g Date=%lu.%lu",
-			 m_video_properties.fps,
+			 m_fps,
 			 (ulong)mImageInfo.Date,  (ulong)mImageInfo.Tick );
 
 	while(counter<25)
