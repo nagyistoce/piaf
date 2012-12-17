@@ -179,6 +179,8 @@ int MainDisplayWidget::setMovieFile(QString moviePath,
 
 	int ret = 0;
 	if(mpFileVA->isDeviceReady()) {
+		// Read first image
+		mpFileVA->rewindMovie();
 		m_fullImage = iplImageToQImage( mpFileVA->readImageRGB32() );
 	} else {
 		PIAF_MSG(SWLOG_ERROR, "Could not open file '%s'", moviePath.toUtf8().data());

@@ -110,11 +110,11 @@ PluginEditorForm::PluginEditorForm(QWidget *parent) :
 	mHasGUI = false;
 
 	mpSelectedFilter = NULL;
-	// Load available plugins
-	mFilterSequencer.loadFilters();
+	//mFilterSequencer.loadFilters();
 	mpFilterSequencer = NULL;
 	mOwnFilterSequencer = false;
 
+	// Load available plugins
 	slot_refreshFilters();
 
 	// show plugins by default
@@ -255,7 +255,7 @@ void PluginEditorForm::on_filterSequencer_signalFilterDied(PiafFilter * filter)
 	}
 
 	// Display message
-	QMessageBox::warning(NULL, tr("Plugin ") + QString(filter->exec_name) + tr(" crashed"),
+	QMessageBox::warning(this, tr("Plugin ") + QString(filter->exec_name) + tr(" crashed"),
 						 tr("The plugin ") + QString(filter->exec_name)
 						 + tr(" crashed. It will not be reloaded automatically to let you correct the bug.")
 						 );
@@ -336,7 +336,7 @@ void PluginEditorForm::updateSelectedView()
 
 					if(!mNoWarning ) {
 						QString filename = QString(curF->exec_name);
-						QMessageBox::critical(NULL,
+						QMessageBox::critical(this,
 							tr("Filter Error"),
 							tr("Filter process ") + filename + tr(" died."),
 							QMessageBox::Abort,
@@ -559,7 +559,7 @@ void PluginEditorForm::on_appendPluginButton_clicked()
 void PluginEditorForm::on_loadButton_clicked()
 {
 	if(!mpFilterSequencer) {
-		QMessageBox::critical(NULL, tr("No sequencer"),
+		QMessageBox::critical(this, tr("No sequencer"),
 							  tr("No filter sequencer = nothing to save"));
 		return;
 	}
@@ -581,7 +581,7 @@ void PluginEditorForm::on_loadButton_clicked()
 void PluginEditorForm::on_saveButton_clicked()
 {
 	if(!mpFilterSequencer) {
-		QMessageBox::critical(NULL, tr("No sequencer"), tr("No filter sequencer = nothing to save"));
+		QMessageBox::critical(this, tr("No sequencer"), tr("No filter sequencer = nothing to save"));
 		return;
 	}
 

@@ -28,18 +28,6 @@
 #include "swimage_utils.h"
 
 //// Qt includes
-//#include <qlabel.h>
-//#include <q3vbox.h>
-//#include <qlayout.h>
-//#include <q3filedialog.h>
-//#include <qmessagebox.h>
-//#include <qtooltip.h>
-////Added by qt3to4:
-//#include <Q3GridLayout>
-//#include <QPixmap>
-//#include <QCloseEvent>
-//#include <QTimer>
-
 #include <QMessageBox>
 
 // standard includes
@@ -461,10 +449,9 @@ int FilterSequencer::loadFilters()
 {
 	// unload loaded ones
 	PIAF_MSG(SWLOG_INFO, "Reload filters : 1) unload all availables...");
-
 	unloadAllAvailable();
-	PIAF_MSG(SWLOG_INFO, "Reload filters : 2) all available filter in file settings...");
 
+	PIAF_MSG(SWLOG_INFO, "Reload filters : 2) all available filter in file settings...");
 	DEBUG_MSG("Loading filters in '%s'", BASE_DIRECTORY "filters/list");
 
 	//list all executable in directory /usr/local/piaf/filters/list
@@ -489,12 +476,18 @@ int FilterSequencer::loadFilters()
 
 			return 0;
 		}
+		PIAF_MSG(SWLOG_INFO, "Loading files from '%s'", home);
+	}
+	else
+	{
+		PIAF_MSG(SWLOG_INFO, "Loading files from " BASE_DIRECTORY "filters/list");
 	}
 
 	// read each filename and load file mesures
 	char line[512]="";
 
-	while(!feof(f)) {
+	while(!feof(f))
+	{
 		char * ret = fgets(line, 511, f);
 		// read executable name
 		if(ret && line[0] != '#') {
@@ -518,10 +511,15 @@ int FilterSequencer::loadFilters()
 					{
 						*(arg-1) = '\0';
 						//printf("Line='%s' a bIcon='%s'\n", line, arg);
+						PIAF_MSG(SWLOG_INFO, "\t[FilterSequencer] loading filter '%s'\n",
+								line);
 						loadFilter(line);
 					}
-					else
+					else {
+						PIAF_MSG(SWLOG_INFO, "\t[FilterSequencer] loading filter '%s'\n",
+								line);
 						loadFilter(line);
+					}
 				} else {
 					char *stepper = line+strlen(line)-1;
 					while( stepper > line && (*stepper == ' ' || *stepper == '\n' || *stepper == '\t')) {
@@ -529,8 +527,8 @@ int FilterSequencer::loadFilters()
 						stepper--;
 					}
 
-					fprintf(stderr, "\t[FilterSequencer] %s:%d: loading filter '%s'\n",
-							__func__, __LINE__, line);
+					PIAF_MSG(SWLOG_INFO, "\t[FilterSequencer] loading filter '%s'\n",
+							line);
 					loadFilter(line);
 				}
 			}

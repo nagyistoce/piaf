@@ -209,7 +209,7 @@ HEADERS += \
 	$$LEGACYPATH/inc/piaf-settings.h \
 	$$LEGACYPATH/inc/nolinux_videodev.h \
 	$$LEGACYPATH/tools/inc/swimage_utils.h \
-    ../main/acquisitions/video/inc/file_video_acquisition_factory.h
+	$$LEGACYPATH/acquisitions/video/inc/file_video_acquisition_factory.h
 
 
 linux-g++: {
