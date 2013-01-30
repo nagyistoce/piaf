@@ -120,8 +120,15 @@ unix: {
 		INCLUDEPATH += $$CVINCPATH/contrib
 		INCLUDEPATH += $$CVINCPATH/ml
 		INCLUDEPATH += $$CVINCPATH/highgui
-
 	}
+
+        exists($$CVINCPATH/nonfree/features2d.hpp) {
+                message("Using non free in recent OpenCV functions")
+                INCLUDEPATH += $$CVINCPATH/nonfree
+                DEFINES += OPENCV_NONFREE
+                LIBS += -lopencv_nonfree
+        }
+
 }
 
 win32: {
@@ -150,7 +157,7 @@ win32: {
 		INCLUDEPATH += "C:\Program Files\OpenCV\include"
 
 	}
-	LIBS += $$DYN_LIBS
+        LIBS += $$DYN_LIBS
 }
 
 
