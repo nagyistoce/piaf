@@ -12,9 +12,23 @@ if [ -f /Developer/Tools/Qt/qmake ]; then
 	QMAKE="/Developer/Tools/Qt/qmake -r -spec macx-g++ CONFIG+=release "
 fi
 
+
 cd piaflib
 echo " + building plugins library..."
-$QMAKE piaf-lib.pro && make $@ || print_install 
+$QMAKE piaf-lib.pro && make $@ || print_install
+
+
+if [ ! -f /usr/local/lib/libSwPluginCore.so ]; then
+	# Install lib if user is root
+	WHOAMI=$(whoami)
+	if [ "$WHOAMI" == "root" ]; then
+		echo "Your are root, so we install the lib now"
+		make install	
+	else
+		echo "Please run './build install' as root"
+	fi
+
+fi
 cd ..
 
 echo " + building Legacy GUI..."
