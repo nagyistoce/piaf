@@ -102,12 +102,18 @@ void ImageToAVIDialog::on_goButton_clicked()
 	while(it != list.end()) {
 		QString fileName = (*it);
 		++it;
-		fprintf(stderr, "ImgToAVI::%s:%d : load file '%s'\n", __func__, __LINE__,
-				fileName.toAscii().data());
 
+		fprintf(stderr, "ImgToAVI::%s:%d : loading file '%s' %g %% = %04d / %04d\n", __func__, __LINE__,
+				fileName.toAscii().data(), progress, file_count, (int)m_filesList.count());
 		inputImage.load(fileName);
 		// if no encoder, open first image
-		if(!inputImage.isNull()) {
+		if(inputImage.isNull())
+		{
+			fprintf(stderr, "ImgToAVI::%s:%d :ERROR: could not load file '%s'\n", __func__, __LINE__,
+					fileName.toAscii().data());
+		}
+		else
+		{
 			if(!encoder && !use_mencoder) {
 			// read size
 				width = inputImage.width();
@@ -144,6 +150,10 @@ void ImageToAVIDialog::on_goButton_clicked()
 
 					switch(depth) {
 					default:
+						fprintf(stderr, "%s:%d : cannot encode file '%s' : unsupported depth=%d\n", __func__, __LINE__,
+								fileName.toUtf8().data(),
+								depth);
+
 						break;
 					case 32:
 						//fprintf(stderr, "%s:%d : encode file '%s'\n", __func__, __LINE__,
@@ -157,8 +167,20 @@ void ImageToAVIDialog::on_goButton_clicked()
 						break;
 					}
 				}
+				else
+				{
+					fprintf(stderr, "ImageToAVIDlg::%s:%d : ERROR image size changed %dx%dx%d =>  file '%s'=%dx%dx%d\n", __func__, __LINE__,
+							width, height, depth,
+							fileName.toUtf8().data(),
+							inputImage.width(), inputImage.height(), inputImage.depth()/8
+							);
+				}
 
 				if(!ret_ok) {
+					fprintf(stderr, "ImageToAVIDlg::%s:%d : cannot encode image %dx%dx%d => ret=%d\n", __func__, __LINE__,
+							inputImage.width(), inputImage.height(), inputImage.depth()/8,
+							ret_ok
+							);
 					QString errFile;
 					errFile.sprintf("%dx%dx%d), ",
 									inputImage.width(),inputImage.height(), inputImage.depth()/8);
