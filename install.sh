@@ -24,5 +24,8 @@ echo
 echo "Installing piaf..."
 ./build.sh install || echo "Installation failed"
 
+echo "  running ldconfig"
+ldconfig
+
 echo "Done."
 

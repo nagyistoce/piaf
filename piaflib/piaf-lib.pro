@@ -19,6 +19,8 @@ include(../main/opencv.pri)
 
 ##INSTALLATION
 target.path = /usr/local/lib/
+target.files = *.so*
+
 
 head.path = /usr/local/include/SwPlugin/
 head.files = inc/*.h 

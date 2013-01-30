@@ -31,3 +31,8 @@ INCLUDEPATH +=          /usr/local/include/SwPlugin/
 DEPENDPATH +=		.
 DEPENDPATH +=		$$INCLUDEPATH
 
+
+# local link if not installed
+LIBS += -L../../piaflib 
+
+

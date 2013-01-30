@@ -21,11 +21,14 @@
 #include "OpenCVEncoder.h"
 #include <QMessageBox>
 
+#ifndef TMP_DIRECTORY
 #define TMP_DIRECTORY	"/tmp/"
+#endif // TMP_DIRECTORY
 
 ImageToAVIDialog::ImageToAVIDialog(QWidget *parent) :
 	QDialog(parent),
-	ui(new Ui::ImageToAVIDialog)
+	ui(new Ui::ImageToAVIDialog),
+	mSettings("Piaf", "ImageToAVIDialog")
 {
 	ui->setupUi(this);
 }
@@ -51,17 +54,32 @@ void ImageToAVIDialog::changeEvent(QEvent *e)
 
 void ImageToAVIDialog::on_destButton_clicked()
 {
+	QString lastPath = ".";
+	if(mSettings.value("LastPath").isValid())
+	{
+		lastPath = mSettings.value("LastPath").toString();
+	}
+
 	QString filePath = QFileDialog::getSaveFileName(NULL,
 												   tr("Create a AVI file"),
-												   ".",
+												   lastPath,
 												   tr("MJPEG/AVI (*.avi *.AVI)")
 												   );
-	if(filePath.isEmpty() || filePath.isNull()) {
+	if(filePath.isEmpty() || filePath.isNull())
+	{
 		ui->goButton->setEnabled(false);
-
 		return;
 	}
+
 	ui->destPathLineEdit->setText(filePath);
+
+	QFileInfo fi(filePath);
+	if(fi.exists())
+	{
+		mSettings.setValue("LastPath",
+						   fi.absoluteDir().absolutePath()
+						   );
+	}
 
 	// enable Go button
 	ui->goButton->setEnabled(true);
@@ -106,21 +124,25 @@ void ImageToAVIDialog::on_goButton_clicked()
 		fprintf(stderr, "ImgToAVI::%s:%d : loading file '%s' %g %% = %04d / %04d\n", __func__, __LINE__,
 				fileName.toAscii().data(), progress, file_count, (int)m_filesList.count());
 		inputImage.load(fileName);
+
 		// if no encoder, open first image
 		if(inputImage.isNull())
 		{
-			fprintf(stderr, "ImgToAVI::%s:%d :ERROR: could not load file '%s'\n", __func__, __LINE__,
+			fprintf(stderr, "ImgToAVI::%s:%d : ERROR: could not load file '%s'\n",
+					__func__, __LINE__,
 					fileName.toAscii().data());
 		}
 		else
 		{
-			if(!encoder && !use_mencoder) {
-			// read size
+			if(!encoder && !use_mencoder)
+			{
+				// read size
 				width = inputImage.width();
 				height = inputImage.height();
 				depth = inputImage.depth();
 
 				encoder = new OpenCVEncoder(width, height, ui->fpsSpinBox->value());
+
 				int started = encoder->startEncoder(ui->destPathLineEdit->text().toUtf8().data());
 				if(!started)
 				{
@@ -142,17 +164,17 @@ void ImageToAVIDialog::on_goButton_clicked()
 
 			}
 
-			if(encoder) { // Use OpenCV
+			if(encoder)
+			{	// Use OpenCV
 				int ret_ok = 0;
 				if( width == inputImage.width()
 					&& height == inputImage.height()
-					&& depth == inputImage.depth()) {
-
+					&& depth == inputImage.depth())
+				{
 					switch(depth) {
 					default:
 						fprintf(stderr, "%s:%d : cannot encode file '%s' : unsupported depth=%d\n", __func__, __LINE__,
-								fileName.toUtf8().data(),
-								depth);
+								fileName.toUtf8().data(), depth);
 
 						break;
 					case 32:
@@ -179,24 +201,28 @@ void ImageToAVIDialog::on_goButton_clicked()
 				if(!ret_ok) {
 					fprintf(stderr, "ImageToAVIDlg::%s:%d : cannot encode image %dx%dx%d => ret=%d\n", __func__, __LINE__,
 							inputImage.width(), inputImage.height(), inputImage.depth()/8,
-							ret_ok
-							);
+							ret_ok);
+
 					QString errFile;
 					errFile.sprintf("%dx%dx%d), ",
 									inputImage.width(),inputImage.height(), inputImage.depth()/8);
-					errorStr += fileName + tr("(could not encode:") + errFile + "\n";
+					errorStr += fileName + tr("(could not encode: ") + errFile + "\n";
 					error_count++;
 				}
 
-			} else if(use_mencoder) { // Use FFMPEG or Mencoder : create images
+			}
+			else if(use_mencoder)
+			{	// Use FFMPEG or Mencoder : create images
 				QString jpegPath;
 				jpegPath.sprintf("%simg%05d.jpg", TMP_DIRECTORY, file_count);
 				inputImage.save(jpegPath);
 			}
+
 		}
 
 		file_count++;
 		progress = (int)((use_mencoder ? 50.f : 100.f) * (float)file_count / m_filesList.count());
+
 		ui->progressBar->setValue(progress);
 	}
 
