@@ -40,10 +40,11 @@ void PiafConfigurationDialog::init()
 				QStringList lst( QStringList::split( "\t", str ) );
 				QStringList::Iterator itCmd = lst.begin();
 				QString cmd = *itCmd;
-				if(!cmd.isNull()) {
+				if(!cmd.isNull()  && (cmd.trimmed().size() != 0) ) {
 					itCmd++;
 					QString val = *itCmd;
-					fprintf(stderr, ".piafrc : '%s' : '%s'\n",
+					fprintf(stderr, "%s %s:%d .piafrc : '%s' : '%s'\n",
+							__FILE__, __func__, __LINE__,
 						cmd.latin1(), val.latin1());
 					if(!val.isNull()) {
 						if( cmd.contains("MeasureDir" ))
