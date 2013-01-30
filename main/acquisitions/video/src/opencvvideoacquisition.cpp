@@ -19,8 +19,11 @@
 
 #include "opencvvideoacquisition.h"
 #include "swvideodetector.h"
+#include "piaf-common.h"
 
 #define OpenCVAcq_printf(...) fprintf( stderr,"[OpenCV %d]::%s:%d: ", m_idx_device, __func__, __LINE__); fprintf( stderr, __VA_ARGS__);
+double swGetCaptureProperty(CvCapture * capture, int property);
+void swSetCaptureProperty(CvCapture * capture, int property, double value);
 
 OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 {
@@ -57,37 +60,43 @@ OpenCVVideoAcquisition::OpenCVVideoAcquisition(int idx_device)
 		// try to use a big image size
 		const int acq_widths[] = { 1920, 1600, 1280, 1024, 800, 720, 640, 360, 320, 160, 0 };
 		const int acq_heights[]= { 1080, 1200, 720, 768, 600, 576, 480, 288, 240, 120, 0 };
+		try {
 
-		for(int acq_idx = 0; acq_widths[acq_idx]>0; acq_idx++ )
-		{
-			int retwidth = cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_WIDTH ,acq_widths[acq_idx]);
-			int retheight = cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_HEIGHT ,acq_heights[acq_idx]);
-
-			// check if size is ok
-			double cur_width = cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_WIDTH);
-			double cur_height = cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_HEIGHT);
-
-			//
-			OpenCVAcq_printf( "OpenCVCap::%s:%d : setprop (%dx%d) returned %d,%d => cur size=%gx%g\n",
-					__func__, __LINE__,
-					acq_widths[acq_idx], acq_heights[acq_idx],
-					retwidth, retheight,
-					cur_width, cur_height
-					);
-
-			if((int)round(cur_width) == acq_widths[acq_idx]
-				&& (int)round(cur_height) == acq_heights[acq_idx]
-				&& m_video_properties.max_width<1)
+			for(int acq_idx = 0; acq_widths[acq_idx]>0; acq_idx++ )
 			{
-				m_video_properties.max_width = acq_widths[acq_idx];
-				m_video_properties.max_height = acq_heights[acq_idx];
+				int retwidth = cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_WIDTH ,acq_widths[acq_idx]);
+				int retheight = cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_HEIGHT ,acq_heights[acq_idx]);
+
+				// check if size is ok
+				double cur_width = swGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_WIDTH);
+				double cur_height = swGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_HEIGHT);
+
+				//
+				OpenCVAcq_printf( "OpenCVCap::%s:%d : setprop (%dx%d) returned %d,%d => cur size=%gx%g\n",
+						__func__, __LINE__,
+						acq_widths[acq_idx], acq_heights[acq_idx],
+						retwidth, retheight,
+						cur_width, cur_height
+						);
+
+				if((int)round(cur_width) == acq_widths[acq_idx]
+					&& (int)round(cur_height) == acq_heights[acq_idx]
+					&& m_video_properties.max_width<1)
+				{
+					m_video_properties.max_width = acq_widths[acq_idx];
+					m_video_properties.max_height = acq_heights[acq_idx];
+				}
 			}
+
+
+			// finally use max width/height
+			cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_WIDTH ,m_video_properties.max_width);
+			cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_HEIGHT ,m_video_properties.max_height);
 		}
-
-
-		// finally use max width/height
-		cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_WIDTH ,m_video_properties.max_width);
-		cvSetCaptureProperty(m_capture,CV_CAP_PROP_FRAME_HEIGHT ,m_video_properties.max_height);
+		catch (cv::Exception e)
+		{
+			PIAF_MSG(SWLOG_WARNING, "Caught OpenCV exception");
+		}
 	}
 
 }
@@ -329,7 +338,30 @@ t_video_properties OpenCVVideoAcquisition::getVideoProperties()
 }
 #define IMGSETTING_TO_CV	32768.
 
-
+double swGetCaptureProperty(CvCapture * capture, int property)
+{
+	double ret = -1.;
+	try {
+		ret = cvGetCaptureProperty(capture, property);
+	}
+	catch(cv::Exception e)
+	{
+		PIAF_MSG(SWLOG_ERROR, "Caught exception for capture=%p prop=%d",
+				 capture, property);
+	}
+	return ret;
+}
+void swSetCaptureProperty(CvCapture * capture, int property, double value)
+{
+	try {
+		cvSetCaptureProperty(capture, property, value);
+	}
+	catch(cv::Exception e)
+	{
+		PIAF_MSG(SWLOG_ERROR, "Caught exception for capture=%p prop=%d value=%g",
+				 capture, property, value);
+	}
+}
 
 /** @brief Update and return video properties */
 t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
@@ -338,32 +370,33 @@ t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
 		memset(&m_video_properties, 0, sizeof(t_video_properties));
 		return m_video_properties;
 	}
-		//	m_video_properties. = cvGetCaptureProperty(m_capture, );
-	m_video_properties.pos_msec =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_POS_MSEC );/*Film current position in milliseconds or video capture timestamp */
-	m_video_properties.pos_frames =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_POS_FRAMES );/*0-based index of the frame to be decoded/captured next */
-	m_video_properties.pos_avi_ratio =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_POS_AVI_RATIO );/*Relative position of the video file (0 - start of the film, 1 - end of the film) */
-	m_video_properties.frame_width =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_WIDTH );/*Width of the frames in the video stream */
-	m_video_properties.frame_height =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_HEIGHT );/*Height of the frames in the video stream */
-	m_video_properties.fps =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_FPS );/*Frame rate */
-	m_video_properties.fourcc_dble =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FOURCC );/*4-character code of codec */
-//		char   fourcc[5] =	cvGetCaptureProperty(m_capture, FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
-//		char   norm[8] =		cvGetCaptureProperty(m_capture, Norm: pal, ntsc, secam */
-	m_video_properties.frame_count =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_COUNT );/*Number of frames in the video file */
-	m_video_properties.format =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_FORMAT );/*The format of the Mat objects returned by retrieve() */
-	m_video_properties.mode =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_MODE );/*A backend-specific value indicating the current capture mode */
 
-	m_video_properties.brightness =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_BRIGHTNESS ) *IMGSETTING_TO_CV;/*Brightness of the image (only for cameras) */
-	m_video_properties.contrast =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONTRAST ) *IMGSETTING_TO_CV;/*Contrast of the image (only for cameras) */
-	m_video_properties.saturation =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_SATURATION ) *IMGSETTING_TO_CV;/*Saturation of the image (only for cameras) */
-	m_video_properties.hue =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_HUE ) *IMGSETTING_TO_CV;/*Hue of the image (only for cameras) */
+	//	m_video_properties. = swGetCaptureProperty(m_capture, );
+	m_video_properties.pos_msec =		swGetCaptureProperty(m_capture, CV_CAP_PROP_POS_MSEC );/*Film current position in milliseconds or video capture timestamp */
+	m_video_properties.pos_frames =		swGetCaptureProperty(m_capture, CV_CAP_PROP_POS_FRAMES );/*0-based index of the frame to be decoded/captured next */
+	m_video_properties.pos_avi_ratio =	swGetCaptureProperty(m_capture, CV_CAP_PROP_POS_AVI_RATIO );/*Relative position of the video file (0 - start of the film, 1 - end of the film) */
+	m_video_properties.frame_width =	swGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_WIDTH );/*Width of the frames in the video stream */
+	m_video_properties.frame_height =	swGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_HEIGHT );/*Height of the frames in the video stream */
+	m_video_properties.fps =			swGetCaptureProperty(m_capture, CV_CAP_PROP_FPS );/*Frame rate */
+	m_video_properties.fourcc_dble =	swGetCaptureProperty(m_capture, CV_CAP_PROP_FOURCC );/*4-character code of codec */
+//		char   fourcc[5] =	swGetCaptureProperty(m_capture, FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
+//		char   norm[8] =		swGetCaptureProperty(m_capture, Norm: pal, ntsc, secam */
+	m_video_properties.frame_count =	swGetCaptureProperty(m_capture, CV_CAP_PROP_FRAME_COUNT );/*Number of frames in the video file */
+	m_video_properties.format =			swGetCaptureProperty(m_capture, CV_CAP_PROP_FORMAT );/*The format of the Mat objects returned by retrieve() */
+	m_video_properties.mode =			swGetCaptureProperty(m_capture, CV_CAP_PROP_MODE );/*A backend-specific value indicating the current capture mode */
+
+	m_video_properties.brightness =		swGetCaptureProperty(m_capture, CV_CAP_PROP_BRIGHTNESS ) *IMGSETTING_TO_CV;/*Brightness of the image (only for cameras) */
+	m_video_properties.contrast =		swGetCaptureProperty(m_capture, CV_CAP_PROP_CONTRAST ) *IMGSETTING_TO_CV;/*Contrast of the image (only for cameras) */
+	m_video_properties.saturation =		swGetCaptureProperty(m_capture, CV_CAP_PROP_SATURATION ) *IMGSETTING_TO_CV;/*Saturation of the image (only for cameras) */
+	m_video_properties.hue =			swGetCaptureProperty(m_capture, CV_CAP_PROP_HUE ) *IMGSETTING_TO_CV;/*Hue of the image (only for cameras) */
 #ifdef CV_CAP_PROP_WHITE_BALANCE
-	m_video_properties.white_balance =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_WHITE_BALANCE ) *IMGSETTING_TO_CV;/*Currently unsupported */
+	m_video_properties.white_balance =	swGetCaptureProperty(m_capture, CV_CAP_PROP_WHITE_BALANCE ) *IMGSETTING_TO_CV;/*Currently unsupported */
 #endif
-	m_video_properties.gain =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_GAIN );/*Gain of the image (only for cameras) */
+	m_video_properties.gain =			swGetCaptureProperty(m_capture, CV_CAP_PROP_GAIN );/*Gain of the image (only for cameras) */
 #ifdef OPENCV_22	
-	m_video_properties.exposure =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_EXPOSURE );/*Exposure (only for cameras) */
+	m_video_properties.exposure =		swGetCaptureProperty(m_capture, CV_CAP_PROP_EXPOSURE );/*Exposure (only for cameras) */
 #endif
-	m_video_properties.convert_rgb =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_CONVERT_RGB );/*Boolean flags indicating whether images should be converted to RGB */
+	m_video_properties.convert_rgb =	swGetCaptureProperty(m_capture, CV_CAP_PROP_CONVERT_RGB );/*Boolean flags indicating whether images should be converted to RGB */
 
 		/*! CV_CAP_PROP_RECTIFICATION TOWRITE (note: only supported by DC1394 v 2.x backend currently)
 		– Property identifier. Can be one of the following:*/
@@ -376,11 +409,11 @@ t_video_properties OpenCVVideoAcquisition::updateVideoProperties()
 
 #define SETCAPTUREPROP(_prop,_prop_id)		if(props._prop !=m_video_properties._prop) \
 		{ \
-			cvSetCaptureProperty(m_capture,(_prop_id),props._prop); \
+			swSetCaptureProperty(m_capture,(_prop_id),props._prop); \
 		}
 #define SETCAPTUREPROPSCALED(_prop,_prop_id)		if(props._prop !=m_video_properties._prop) \
 		{ \
-			cvSetCaptureProperty(m_capture,(_prop_id),props._prop/IMGSETTING_TO_CV); \
+			swSetCaptureProperty(m_capture,(_prop_id),props._prop/IMGSETTING_TO_CV); \
 		}
 /* Set video properties (not updated) */
 int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
@@ -399,7 +432,7 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 	// lock grab mutex
 	mGrabMutex.lock();
 
-	//	m_video_properties. = cvGetCaptureProperty(m_capture, );
+	//	m_video_properties. = swGetCaptureProperty(m_capture, );
 	SETCAPTUREPROP( pos_msec , CV_CAP_PROP_POS_MSEC );/*Film current position in milliseconds or video capture timestamp */
 	SETCAPTUREPROP(	pos_frames , CV_CAP_PROP_POS_FRAMES );/*0-based index of the frame to be decoded/captured next */
 	SETCAPTUREPROP(	pos_avi_ratio , CV_CAP_PROP_POS_AVI_RATIO );/*Relative position of the video file (0 - start of the film, 1 - end of the film) */
@@ -452,8 +485,8 @@ int OpenCVVideoAcquisition::setVideoProperties(t_video_properties props)
 
 	SETCAPTUREPROP(	fps , CV_CAP_PROP_FPS );/*Frame rate */
 	SETCAPTUREPROP(	fourcc_dble , CV_CAP_PROP_FOURCC );/*4-character code of codec */
-	//		char   fourcc[5] =	cvGetCaptureProperty(m_capture, FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
-	//		char   norm[8] =		cvGetCaptureProperty(m_capture, Norm: pal, ntsc, secam */
+	//		char   fourcc[5] =	swGetCaptureProperty(m_capture, FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
+	//		char   norm[8] =		swGetCaptureProperty(m_capture, Norm: pal, ntsc, secam */
 	SETCAPTUREPROP(	frame_count , CV_CAP_PROP_FRAME_COUNT );/*Number of frames in the video file */
 	SETCAPTUREPROP(	format , CV_CAP_PROP_FORMAT );/*The format of the Mat objects returned by retrieve() */
 	SETCAPTUREPROP(	mode , CV_CAP_PROP_MODE );/*A backend-specific value indicating the current capture mode */
