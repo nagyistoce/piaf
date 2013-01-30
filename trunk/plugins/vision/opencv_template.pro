@@ -20,7 +20,13 @@ INCLUDEPATH += /usr/local/include/SwPlugin/
 # add path to swimage_utils.h for IplImage <-> SwImage conversion
 INCLUDEPATH += ../../main/tools/inc
 
+# local include
+INCLUDEPATH += ../../piaflib/inc/
+
 LIBS += -L/usr/local/lib/ -lSwPluginCore
+
+# in case the installation was not done, use local link
+LIBS += -L../../piaflib
 
 linux-g++:TMAKE_CXXFLAGS += -g -Wall -O2 \
 	-fexceptions -Wimplicit -Wreturn-type \

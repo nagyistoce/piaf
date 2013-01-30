@@ -20,11 +20,13 @@
 
 #include <QDialog>
 #include <QList>
+#include <QSettings>
 
 namespace Ui {
 	class ImageToAVIDialog;
 }
 
+/** \brief Conversion between a list of image files to AVI */
 class ImageToAVIDialog : public QDialog
 {
 	Q_OBJECT
@@ -43,11 +45,16 @@ private:
 	/// Number of files
 	QStringList m_filesList;
 	void appendFileList(QStringList files);
+
+    QSettings mSettings;
+
 private slots:
-	void on_filesButton_clicked();
+
+    void on_filesButton_clicked();
 	void on_dirButton_clicked();
 	void on_goButton_clicked();
 	void on_destButton_clicked();
+
 signals:
 	void signalNewMovie(QString);
 };
