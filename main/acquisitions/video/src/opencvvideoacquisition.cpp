@@ -22,6 +22,7 @@
 #include "piaf-common.h"
 
 #define OpenCVAcq_printf(...) fprintf( stderr,"[OpenCV %d]::%s:%d: ", m_idx_device, __func__, __LINE__); fprintf( stderr, __VA_ARGS__);
+
 double swGetCaptureProperty(CvCapture * capture, int property);
 void swSetCaptureProperty(CvCapture * capture, int property, double value);
 
@@ -247,6 +248,12 @@ int OpenCVVideoAcquisition::stopAcquisition()
 IplImage * OpenCVVideoAcquisition::readImageRaw()
 {
 	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED => return BGR32\n", __FILE__, __func__, __LINE__);
+	if(m_iplImage)
+	{
+		OpenCVAcq_printf("iplImage = %dx%dx%dbx%d",
+					 m_iplImage->width, m_iplImage->height, m_iplImage->depth, m_iplImage->nChannels
+					 );
+	}
 	return readImageRGB32();
 }
 

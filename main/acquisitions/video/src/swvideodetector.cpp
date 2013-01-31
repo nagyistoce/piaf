@@ -387,9 +387,32 @@ int swConvert(IplImage *imageIn, IplImage * imageRGBA)
 
 	if(imageIn->depth != imageRGBA->depth)
 	{
-		PIAF_MSG(SWLOG_ERROR, "Cannot convert with different depths %d != %d",
-				 imageIn->depth , imageRGBA->depth);
+		if(imageIn->width == imageRGBA->width
+				&& imageIn->height == imageRGBA->height
+				&& imageIn->nChannels == imageRGBA->nChannels)
+		{
+			try {
+				cvConvertScale(imageIn, imageRGBA, 1./16.);
+			} catch (cv::Exception e)
+			{
+				PIAF_MSG(SWLOG_ERROR, "Cannot convert with different depths %d != %d "
+						 " in=%dx%dx%dbx%d => out=%dx%dx%dbx%d",
+						 imageIn->depth , imageRGBA->depth,
+						 imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels,
+						 imageRGBA->width, imageRGBA->height, imageRGBA->depth, imageRGBA->nChannels
+						 );
 
+				return -1;
+			}
+
+			return 0;
+		}
+		PIAF_MSG(SWLOG_ERROR, "Cannot convert with different depths %d != %d "
+				 " in=%dx%dx%dbx%d => out=%dx%dx%dbx%d",
+				 imageIn->depth , imageRGBA->depth,
+				 imageIn->width, imageIn->height, imageIn->depth, imageIn->nChannels,
+				 imageRGBA->width, imageRGBA->height, imageRGBA->depth, imageRGBA->nChannels
+				 );
 		return -1;
 	}
 
