@@ -27,6 +27,7 @@
 #include <QSplashScreen>
 #include <QTranslator>
 #include <QDir>
+#include <QLibraryInfo>
 
 extern QSplashScreen * g_splash;
 
@@ -51,6 +52,16 @@ int main(int argc, char *argv[])
 
 	a.installTranslator( &tor );
 
+	// Load generic for buttons, ...
+	QTranslator tor2;
+	QString lang = localLang.languageToString(localLang.language());
+	QString shortlang = lang;
+	shortlang.truncate(2);
+	bool loaded2 = tor2.load("qt_" + shortlang.toLower(), QLibraryInfo::location(QLibraryInfo::TranslationsPath));
+	if(loaded2)
+	{
+		a.installTranslator( &tor2 );
+	}
 
 	a.processEvents();
 
