@@ -9,7 +9,8 @@
 # }
 # For MacOS X
 LIBS_EXT = dylib
-linux-g++:LIBS_EXT = so
+
+linux-g++*:LIBS_EXT = so
 INCLUDE_AVCODEC =
 LIBSWSLIBDIR =
 LIBSWSINCDIR = 
@@ -65,10 +66,10 @@ unix: {
 
 
 	# Check if we need to link with libswscale
-	LIBS_EXT = dylib
-
-
-	linux-g++: LIBS_EXT = so
+	
+	exists($$LIBSWSLIBDIR/libavcodec.$$LIBS_EXT) { 
+		DEFINES += HAS_FFMPEG
+	}
 
 	SWSCALE_H = $$LIBSWSLIBDIR/libswscale.$$LIBS_EXT
 	message ( Testing SWScale lib = '$$SWSCALE_H' )
