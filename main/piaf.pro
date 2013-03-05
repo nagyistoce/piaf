@@ -96,6 +96,11 @@ SOURCES += src/main.cpp \
 	tools/src/swimage_utils.cpp \
 	tools/src/imagewidget.cpp \
 	tools/src/time_histogram.cpp
+contains($$DEFINES, "HAS_FFMPEG") {
+	message("Add ffmpeg classes")
+	SOURCES += acquisitions/video/src/ffmpeg_file_acquisition.cpp 
+	HEADERS += acquisitions/video/inc/ffmpeg_file_acquisition.h
+}
 
 # Replaced by OpenCVEncoder.cpp
 # tools/src/FFMpegEncoder.cpp  

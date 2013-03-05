@@ -45,7 +45,9 @@
 #include <iomanip>
 #include <cassert>
 
+#ifdef HAS_FFMPEG
 #include "ffmpeg_file_acquisition.h"
+#endif
 
 u8 g_debug_ImageInfo = EMALOG_DEBUG;
 

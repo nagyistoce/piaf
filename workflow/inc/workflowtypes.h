@@ -25,7 +25,7 @@
 #ifndef WORKFLOWTYPES_H
 #define WORKFLOWTYPES_H
 
-#include <QtGui/QTreeWidgetItem>
+#include <QTreeWidgetItem>
 #include <QString>
 
 #include "imageinfo.h"

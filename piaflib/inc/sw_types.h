@@ -42,6 +42,10 @@ typedef double			d64;
 typedef long double 		d80;
 #endif
 
+#ifndef ulong
+typedef unsigned long ulong ;
+#endif
+
 /** @brief Region of interest / rectangle position and size */
 typedef struct _tBoxSize {
 	unsigned long x;
