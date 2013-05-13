@@ -468,8 +468,16 @@ int ImageInfo::loadMovieFile(QString filename)
 	tBoxSize size;
 	size.x = size.y = 0;
 	size.width = 320; size.height = 240; //
+
+	/// \todo add File support through factory
+#ifndef HAS_FFMPEG
+
+	PIAF_MSG(SWLOG_ERROR, "No file support for '%s'", fi.absoluteFilePath().toUtf8().data());
+	return -1;
+#else
 	if(!mpFileVA)
-	{/// \bug FIXME: use factory
+	{
+		/// \bug FIXME: use factory
 		mpFileVA = new FFmpegFileVideoAcquisition();
 	}
 
@@ -499,6 +507,7 @@ int ImageInfo::loadMovieFile(QString filename)
 		cvCvtColor(mpFileVA->readImageRGB32(), m_originalImage, CV_BGRA2RGBA);
 	}
 	return 0;
+#endif
 }
 
 int ImageInfo::loadFile(QString filename)

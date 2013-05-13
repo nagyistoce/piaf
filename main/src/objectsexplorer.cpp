@@ -17,7 +17,10 @@
  ***************************************************************************/
 #include "piaf-common.h"
 
+#include <unistd.h>
+
 // QT includes
+
 #include <qpixmap.h>
 #include <q3popupmenu.h>
 

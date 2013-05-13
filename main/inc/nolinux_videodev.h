@@ -1,15 +1,32 @@
-#if defined(_WIN32 ) || defined(__MACOSX__) || defined(__DARWIN_X11__)
+/*
+
+  VIDEO4LINUX - real or v4l-like support (for OSX, Win)...
+
+  */
+
+#ifdef HAS_V4L
+#include <linux/videodev.h>
+#endif
+
+#ifdef HAS_V4L2
+#include <linux/videodev2.h>
+#endif
+
+
+#ifndef HAS_V4L
+
+#include <stdint.h>
 
 #ifndef __WIN32_VIDEODEV_H
 #define __WIN32_VIDEODEV_H
 
 // special typedefs for win32
-typedef unsigned char	__u8;
-typedef unsigned short	__u16;
-typedef unsigned long	__u32;
-typedef char			__s8;
-typedef short			__s16;
-typedef long			__s32;
+typedef uint8_t	__u8;
+typedef uint16_t	__u16;
+typedef uint32_t	__u32;
+typedef int8_t		__s8;
+typedef int16_t		__s16;
+typedef int32_t		__s32;
 
 #define VID_TYPE_CAPTURE	1	/* Can capture */
 #define VID_TYPE_TUNER		2	/* Can tune */
@@ -351,10 +368,6 @@ struct video_code
 
 #endif /* __LINUX_VIDEODEV_H */
 
-
-#else //#ifdef _WIN32
-
-#include <linux/videodev.h>
 
 #endif //#ifdef _WIN32
 

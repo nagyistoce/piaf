@@ -89,7 +89,7 @@ unix: {
 
 
 	CV22_LIB = $$LIBSDIR/libopencv_core.$$LIBS_EXT
-        message ( Testing CV lib = '$$CV22_LIB' )
+	message ( Testing CV lib = $$CV22_LIB )
 	exists( $$CV22_LIB ) {
 		#message( " => Linking with -lcv ('$$CV_LIB' exists)")
 		LIBS += -lopencv_core -lopencv_imgproc -lopencv_legacy -lopencv_highgui 

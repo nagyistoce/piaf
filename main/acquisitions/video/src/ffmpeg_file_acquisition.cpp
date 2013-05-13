@@ -16,17 +16,26 @@
 #include "swvideodetector.h"
 #include "piaf-common.h"
 
+#ifdef HAS_SWSCALE
 extern "C" {
 #include <swscale.h>
 }
+#endif // HAS_SWSCALE
 
 #include <errno.h>
+
+#define CALC_FFMPEG_VERSION(a,b,c) ( a<<16 | b<<8 | c )
 
 #if LIBAVCODEC_VERSION_INT >=  ((51<<16)+(50<<8)+0)
 #define URLPB(pb) (pb)
 #else
 #define URLPB(pb) &(pb)
 #endif
+
+#if LIBAVFORMAT_BUILD < CALC_FFMPEG_VERSION(53, 2, 0)
+#define AVMEDIA_TYPE_VIDEO CODEC_TYPE_VIDEO
+#endif
+
 
 #define EXTENSION_AVI	"avi,wmv,mov,mpg,mp4"
 
@@ -202,7 +211,7 @@ int FFmpegFileVideoAcquisition::openDevice(const char * aDevice, tBoxSize )
 	m_videoStream=-1;
 	for(unsigned int i=0; i<m_pFormatCtx->nb_streams; i++)
 	{
-		if(m_pFormatCtx->streams[i]->codec->codec_type == CODEC_TYPE_VIDEO )
+		if(m_pFormatCtx->streams[i]->codec->codec_type == AVMEDIA_TYPE_VIDEO )
 		{
 			fprintf(stderr, "FileVA::%s:%d : choosed stream #%d for file '%s'\n",
 					__func__, __LINE__,
@@ -423,7 +432,7 @@ int FFmpegFileVideoAcquisition::setChannel(int ch)
 		return -1;
 	}
 	if((ch < (int)m_pFormatCtx->nb_streams) &&
-		(m_pFormatCtx->streams[ch]->codec->codec_type==CODEC_TYPE_VIDEO)
+		(m_pFormatCtx->streams[ch]->codec->codec_type == AVMEDIA_TYPE_VIDEO)
 		) {
 		m_videoStream = ch;
 	}
@@ -707,7 +716,7 @@ bool FFmpegFileVideoAcquisition::GetNextFrame()
 		mImageInfo.Date ++;
 	}
 
-	PIAF_MSG(SWLOG_INFO, "FPS=%g Date=%lu.%lu",
+	PIAF_MSG(SWLOG_TRACE, "FPS=%g Date=%lu.%lu",
 			 m_fps,
 			 (ulong)mImageInfo.Date,  (ulong)mImageInfo.Tick );
 
@@ -735,9 +744,31 @@ bool FFmpegFileVideoAcquisition::GetNextFrame()
 			// If it's a video packet from our video stream...
 			if(packet.stream_index == m_videoStream)
 			{
-				// Decode the packet
+/*
+#if LIBAVFORMAT_BUILD >= CALC_FFMPEG_VERSION(53, 2, 0)
+				avcodec_decode_video2(video_st->codec, picture, &got_picture, &packet);
+#elif LIBAVFORMAT_BUILD > 4628
+				avcodec_decode_video(video_st->codec,
+									 picture, &got_picture,
+									 packet.data, packet.size);
+#else
+				avcodec_decode_video(&video_st->codec,
+									 picture, &got_picture,
+									 packet.data, packet.size);
+#endif
+
+
+*/
+
+#if LIBAVFORMAT_BUILD >= CALC_FFMPEG_VERSION(53, 2, 0)
+				avcodec_decode_video2(m_pCodecCtx, m_pFrame, &frameFinished, &packet);
+#elif LIBAVFORMAT_BUILD > 4628
 				avcodec_decode_video(m_pCodecCtx, m_pFrame, &frameFinished,
 									 packet.data, packet.size);
+#else
+				avcodec_decode_video(&m_pCodecCtx, m_pFrame, &frameFinished,
+									 packet.data, packet.size);
+#endif
 				/*
 				PRINT_FIXME
 				FILE * fpacket = FileOpen("/tmp/packet.jpg", "wb");
@@ -1111,14 +1142,21 @@ int FFmpegFileVideoAcquisition::readImageRGB32(unsigned char * image,
 			for(int r = 0; r<mImageSize.height; r++)
 			{
 				int pos = r * pitch / 4;
+#if LIBAVFORMAT_BUILD < CALC_FFMPEG_VERSION(50, 0, 0)
+				PIAF_MSG(SWLOG_INFO, "Fix inversion of pixels 2 by 2");
 				if((r%2) == 0) {
 					memcpy(output+pos, input+pos, pitch);
+
 				} else {
 					for(int c = 0; c<mImageSize.width; c+=2) {
 						output[pos+c] = input[pos+c+1];
 						output[pos+c+1] = input[pos+c];
 					}
 				}
+#else
+				memcpy(output+pos, input+pos, pitch);
+#endif
+
 			}
 		}
 	}
@@ -1448,6 +1486,8 @@ int FFmpegFileVideoAcquisition::readImageRGB32NoAcq(unsigned char* image, long *
 				for(int r = 0; r<mImageSize.height; r++)
                 {
 					int posout = r * pitch / 4;
+#if LIBAVFORMAT_BUILD < CALC_FFMPEG_VERSION(50, 0, 0)
+					PIAF_MSG(SWLOG_INFO, "Fix inversion of pixels 2 by 2");
 
                     if((r%2) == 0) {
 						memcpy(output+posout, input+posout, pitch);
@@ -1457,6 +1497,11 @@ int FFmpegFileVideoAcquisition::readImageRGB32NoAcq(unsigned char* image, long *
 							output[posout+c+1] = input[posout+c];
                         }
                     }
+#else
+					memcpy(output+posout, input+posout, pitch);
+
+#endif
+
                 }
             }
 	}

@@ -21,6 +21,8 @@
 #include "OpenCVEncoder.h"
 #include <QMessageBox>
 
+#include <unistd.h>
+
 #ifndef TMP_DIRECTORY
 #define TMP_DIRECTORY	"/tmp/"
 #endif // TMP_DIRECTORY
