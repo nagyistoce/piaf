@@ -19,27 +19,55 @@ macx: DEFINES+= __MACOSX__
 DEFINES += PIAF_LEGACY
 LANGUAGE = C++
 
+include(../main/v4l2.pri)
+include(ffmpeg.pri)
+include(opencv.pri)
+
+
 unix: {
 	DEFINES += VERSION="`date +%Y%m%d`"
 	LIBS += -L/usr/local/lib
 }
 
-linux-g++: {
+linux-g++* {
 	DEFINES += _LINUX
 }
 
-linux-g++: {
+message("====== Checking supports for different libraries in DEFINES=$$DEFINES ======")
+LEGACYPATH = .
+
+contains(DEFINES, "HAS_FFMPEG") {
+	message("    + Add file support through FFMPEG")
+	HEADERS += \
+		$$LEGACYPATH/acquisitions/video/inc/ffmpeg_file_acquisition.h \
+
+	SOURCES += \
+		$$LEGACYPATH/acquisitions/video/src/ffmpeg_file_acquisition.cpp \
+}
+
+contains(DEFINES, "HAS_V4L") {
+	message("    + Add device support through V4L1")
+	SOURCES += $$LEGACYPATH/acquisitions/video/src/v4lutils.c
+	HEADERS += $$LEGACYPATH/acquisitions/video/inc/v4lutils.h
+}
+
+contains(DEFINES, "HAS_V4L2") {
+	message("    + Add device support through V4L2")
+	SOURCES += \
+			$$LEGACYPATH/acquisitions/video/src/jdatasrc.c
 	DEFINES += _V4L2
 
-	HEADERS += acquisitions/video/inc/V4L2Device.h \
-		acquisitions/video/inc/v4l2uvc.h \
-		acquisitions/video/inc/utils.h \
-		acquisitions/video/inc/uvccolor.h
+	HEADERS += $$LEGACYPATH/acquisitions/video/inc/V4L2Device.h \
+		$$LEGACYPATH/acquisitions/video/inc/v4l2uvc.h \
+		$$LEGACYPATH/acquisitions/video/inc/utils.h \
+		$$LEGACYPATH/acquisitions/video/inc/uvccolor.h
 
-	SOURCES += acquisitions/video/src/V4L2Device.cpp \
-		acquisitions/video/src/v4l2uvc.c \
-		acquisitions/video/src/utils.c
+	SOURCES += $$LEGACYPATH/acquisitions/video/src/V4L2Device.cpp \
+		$$LEGACYPATH/acquisitions/video/src/v4l2uvc.c \
+		$$LEGACYPATH/acquisitions/video/src/utils.c
 }
+
+
 
 win32: {
 	DEFINES += QT_DLL QWT_DLL
@@ -48,8 +76,6 @@ win32: {
 TRANSLATIONS = piaf_French.ts
 DEFINES += QT3_SUPPORT
 
-include(ffmpeg.pri)
-include(opencv.pri)
 
 INCLUDEPATH += inc/
 INCLUDEPATH += tools/inc/
@@ -77,10 +103,7 @@ SOURCES += src/main.cpp \
     tools/src/SwFilters.cpp \
     tools/src/workshopimagetool.cpp \
     tools/src/videoplayertool.cpp \
-    acquisitions/video/src/v4lutils.c \
-	acquisitions/video/src/jdatasrc.c \
 	#acquisitions/video/src/FileVideoAcquisition.cpp \
-	acquisitions/video/src/ffmpeg_file_acquisition.cpp \
 	acquisitions/video/src/videocapture.cpp \
 	acquisitions/video/src/swvideodetector.cpp \
 	acquisitions/video/src/uvccolor.c \

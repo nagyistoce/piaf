@@ -10,6 +10,49 @@
 # For MacOS X
 LIBS_EXT = dylib
 
+# Append avcodec
+PG=libavcodec
+system(pkg-config --exists $$PG) {
+
+	message($$PG v$$system(pkg-config --modversion $$PG) found)
+	LIBS += $$system(pkg-config --libs $$PG)
+	INCLUDEPATH += $$system(pkg-config --cflags $$PG | sed s/-I//g)
+
+
+	DEFINES += HAS_FFMPEG
+} else {
+	error($$PG "NOT FOUND => IT WILL NOT COMPILE")
+}
+
+
+# Append avformat
+PG=libavformat
+system(pkg-config --exists $$PG) {
+	message($$PG v$$system(pkg-config --modversion $$PG) found)
+	LIBS += $$system(pkg-config --libs $$PG)
+	INCLUDEPATH += $$system(pkg-config --cflags $$PG | sed s/-I//g)
+
+
+	DEFINES += HAS_FFMPEG
+} else {
+	error($$PG "NOT FOUND => IT WILL NOT COMPILE")
+}
+
+
+# Append swscale
+PG=libswscale
+system(pkg-config --exists $$PG) {
+
+	message($$PG v$$system(pkg-config --modversion $$PG) found)
+	LIBS += $$system(pkg-config --libs $$PG)
+	INCLUDEPATH += $$system(pkg-config --cflags $$PG | sed "s/\-I//g)
+
+	DEFINES += HAS_SWSCALE
+} else {
+	error($$PG "NOT FOUND => IT WILL NOT COMPILE")
+}
+
+
 linux-g++*:LIBS_EXT = so
 INCLUDE_AVCODEC =
 LIBSWSLIBDIR =
@@ -39,7 +82,9 @@ unix: {
 			LIBS += -L/usr/local/lib
 		} else {
 			exists( /usr/include/libavcodec/avcodec.h ) {
-				message("ffmpeg found in /usr/include/ffmpeg/libav*.")
+				message("ffmpeg found in /usr/include/libavcodec/libav*.")
+
+
 				# separated includes... damn ffmpeg daily modifications !!
 				INCLUDEPATH += /usr/include/libavcodec
 				INCLUDEPATH += /usr/include/libavformat
@@ -66,18 +111,19 @@ unix: {
 
 
 	# Check if we need to link with libswscale
-	
+	exists($$LIBSWSINCDIR/swscale.h) {
+		DEFINES += HAS_SWSCALE
+		INCLUDEPATH += $$LIBSWSINCDIR
+		LIBS += -lswscale
+	}
+
+	message("Testing if libs ate installed in $$LIBSWSLIBDIR/libavcodec.$$LIBS_EXT")
 	exists($$LIBSWSLIBDIR/libavcodec.$$LIBS_EXT) { 
 		DEFINES += HAS_FFMPEG
 	}
 
 	SWSCALE_H = $$LIBSWSLIBDIR/libswscale.$$LIBS_EXT
 	message ( Testing SWScale lib = '$$SWSCALE_H' )
-	exists( $$SWSCALE_H ) {
-		message("Linking with libswscale")
-		INCLUDEPATH += $$LIBSWSINCDIR
-		LIBS += -lswscale
-	}
 
 	LIBS += -lavutil -lavcodec -lavformat
 }
@@ -89,3 +135,9 @@ win32: {
 		-L"C:\Program Files\ffmpeg\bin" \
 		-lavcodec
 }
+
+
+
+
+message("FFMPEG: ")
+message("     - Includes : $$INCLUDEPATH")

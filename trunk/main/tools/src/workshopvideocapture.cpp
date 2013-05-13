@@ -16,6 +16,8 @@
  ***************************************************************************/
 #include "piaf-common.h"
 
+#include <unistd.h>
+
 // include files for Qt
 #include <qprinter.h>
 #include <qpainter.h>
@@ -53,7 +55,7 @@
 #endif
 
 
-#define IMAGEDIR BASE_DIRECTORY "images/pixmaps/"
+#define IMAGEDIR ":/images/pixmaps/"
 
 //#define __DEBUG_ZOOMING__
 
@@ -83,7 +85,7 @@ WorkshopVideoCaptureView::WorkshopVideoCaptureView(
 
 
 
-	QPixmap winIcon = QPixmap(BASE_DIRECTORY "images/pixmaps/camera-web.png");
+	QPixmap winIcon = QPixmap(":/images/pixmaps/camera-web.png");
 	display()->setIcon(winIcon);
 }
 
@@ -96,7 +98,7 @@ WorkshopVideoCaptureView::WorkshopVideoCaptureView(VideoCaptureDoc * pDoc,
 
 	init();
 
-	QPixmap winIcon = QPixmap(BASE_DIRECTORY "images/pixmaps/camera-web.png");
+	QPixmap winIcon = QPixmap(":/images/pixmaps/camera-web.png");
 	display()->setIcon(winIcon);
 }
 
@@ -185,7 +187,7 @@ VideoCaptureDoc *WorkshopVideoCaptureView::getDocument() const
 
 void WorkshopVideoCaptureView::setToolbar()
 {
-	chdir(BASE_DIRECTORY "images/pixmaps");
+	chdir(":/images/pixmaps");
 
 	//------------ HMI -------------
 	vBox = new Q3VBox(pWin);
@@ -204,7 +206,7 @@ void WorkshopVideoCaptureView::setToolbar()
 
 	// ------------- DEVICE SECTION
 	bDevice = new QPushButton(hBox);
-	if(pixIcon.load("IconDeviceParams.png"))
+	if(pixIcon.load(":/images/pixmaps/IconDeviceParams.png"))
 		bDevice->setPixmap(pixIcon);
 	else
 		bDevice->setText(tr("Device"));
@@ -214,13 +216,13 @@ void WorkshopVideoCaptureView::setToolbar()
 
 //	deviceMenu = new Q3PopupMenu(bDevice, "popupMenu_Device");
 
-//	pixIcon = QPixmap("IconDeviceSize.xpm");
+//	pixIcon = QPixmap(":/images/pixmaps/IconDeviceSize.xpm");
 //	actDevEdit = new QAction(pixIcon, tr("Acquisition size"), QString(""), this, "acq");
 //	actDevEdit->addTo(deviceMenu);
 //	connect(actDevEdit, SIGNAL(activated()), this, SLOT(slotDeviceSize()));
 //	deviceMenu->connectItem( 0, actDevEdit, SLOT(activated()) );
 
-//	pixIcon = QPixmap("IconDeviceParams.png");
+//	pixIcon = QPixmap(":/images/pixmaps/IconDeviceParams.png");
 //	actDevParams = new QAction(pixIcon, tr("Image settings"), QString(""), this, "device");
 //	actDevParams->addTo(deviceMenu);
 //	connect(actDevParams, SIGNAL(activated()), this, SLOT(slotDeviceParams()));
@@ -233,7 +235,7 @@ void WorkshopVideoCaptureView::setToolbar()
 
 	// --- play/pause
 	bPlayPause = new QPushButton(hBox);
-	if(pixIcon.load("IconPause.xpm"))
+	if(pixIcon.load(":/images/pixmaps/IconPause.xpm"))
 		bPlayPause->setPixmap(pixIcon);
 	else
 		bPlayPause->setText(tr("Pause"));
@@ -703,11 +705,11 @@ void WorkshopVideoCaptureView::slotPlayPause()
 	if(freeze) //
 	{
 		freeze = false;
-		QPixmap icon("IconPause.xpm");
+		QPixmap icon(":/images/pixmaps/IconPause.xpm");
 		bPlayPause->setPixmap(icon);
 	} else {
 		freeze = true;
-		QPixmap icon("IconPlay.xpm");
+		QPixmap icon(":/images/pixmaps/IconPlay.xpm");
 		bPlayPause->setPixmap(icon);
 	}
 }

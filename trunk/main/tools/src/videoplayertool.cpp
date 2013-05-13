@@ -55,7 +55,7 @@ VideoPlayerTool::VideoPlayerTool(QWidget *p_parent, const char *p_name,
 	m_pWorkshopMovie = NULL;
 
 	// change icon
-	QPixmap winIcon = QPixmap(BASE_DIRECTORY "images/pixmaps/movie.png");
+	QPixmap winIcon = QPixmap(":/images/pixmaps/movie.png");
 	display()->setIcon(winIcon);
 
 	pWin->hide();
@@ -88,7 +88,7 @@ void VideoPlayerTool::run()
 		}
 
 		QPixmap icon;
-		if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPlay.png"))
+		if(icon.load(":/images/pixmaps/VcrPlay.png"))
 		{
 			playMovie->setPixmap(icon);
 		}
@@ -198,7 +198,7 @@ void VideoPlayerTool::initPlayer()
 	pWin->setCaption(tr("Movie:") + fi.fileName());
 
 	// buttons
-	chdir(BASE_DIRECTORY "images/pixmaps");
+	chdir(":/images/pixmaps");
 
 	playerVBox = new Q3VBox(pWin);
 	playerVBox->resize(320, 266);
@@ -209,7 +209,7 @@ void VideoPlayerTool::initPlayer()
 	rewindMovie = new QPushButton( playHBox);
 	{
 		QPixmap pixIcon;
-		if(pixIcon.load("VcrRewind.png"))
+		if(pixIcon.load(":/images/pixmaps/VcrRewind.png"))
 			rewindMovie->setPixmap(pixIcon);
 		else
 			rewindMovie->setText(tr("Rewind"));
@@ -225,7 +225,7 @@ void VideoPlayerTool::initPlayer()
 	QPushButton * stepBackMovie = new QPushButton( playHBox);
 	{
 		QPixmap pixIcon;
-		if(pixIcon.load("VcrStepBackward.png"))
+		if(pixIcon.load(":/images/pixmaps/VcrStepBackward.png"))
 			stepBackMovie->setPixmap(pixIcon);
 		else
 			stepBackMovie->setText(tr("Back"));
@@ -237,7 +237,7 @@ void VideoPlayerTool::initPlayer()
 	playMovie = new QPushButton( playHBox);
 	{
 		QPixmap pixIcon;
-		if(pixIcon.load("VcrPlay.png"))
+		if(pixIcon.load(":/images/pixmaps/VcrPlay.png"))
 			playMovie->setPixmap(pixIcon);
 		else
 			playMovie->setText(tr("Play"));
@@ -249,7 +249,7 @@ void VideoPlayerTool::initPlayer()
 	stepMovie = new QPushButton( playHBox);
 	{
 		QPixmap pixIcon;
-		if(pixIcon.load("VcrStepForward.png"))
+		if(pixIcon.load(":/images/pixmaps/VcrStepForward.png"))
 			stepMovie->setPixmap(pixIcon);
 		else
 			stepMovie->setText(tr("Step"));
@@ -272,7 +272,7 @@ void VideoPlayerTool::initPlayer()
 	grayButton = new QPushButton( playHBox);
 	{
 		QPixmap pixIcon;
-		if(pixIcon.load(":images/22x22/view-color.png"))
+		if(pixIcon.load(":/images/pixmaps/:images/22x22/view-color.png"))
 			grayButton->setPixmap(pixIcon);
 		else
 			grayButton->setText(tr("Rewind"));
@@ -304,7 +304,7 @@ void VideoPlayerTool::initPlayer()
 	buttonBookmarks = new QPushButton( playHBox);
 	{
 		QPixmap pixMap;
-		if(pixMap.load("IconBookmark.png"))
+		if(pixMap.load(":/images/pixmaps/IconBookmark.png"))
 			buttonBookmarks->setPixmap(pixMap);
 		else
 			buttonBookmarks->setText(tr("Bkmk"));
@@ -379,7 +379,7 @@ void VideoPlayerTool::appendBookmark(t_movie_pos pos) {
 	//QImage thumbImage = Original
 
 	bool icon_visible = false;
-	QIcon pixIcon(BASE_DIRECTORY "images/pixmaps/IconBookmark.png");
+	QIcon pixIcon(":/images/pixmaps/IconBookmark.png");
 	if(m_fileVA) {
 		if(m_fileVA->getPrevAbsolutePosition() == pos.prevAbsPosition) {
 			// this position is the same than added position, so we can get the current image
@@ -609,7 +609,7 @@ void VideoPlayerTool::slotRewindMovie()
 	playTimer->stop();
 
 	QPixmap icon;
-	if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPlay.png"))
+	if(icon.load(":/images/pixmaps/VcrPlay.png"))
 		playMovie->setPixmap(icon);
 	//
 	playHBox->show();
@@ -645,11 +645,11 @@ void VideoPlayerTool::slotPlayPauseMovie()
 		if(playTimer->isActive()) {
 		  disconnect(playTimer, SIGNAL(timeout()), this, SLOT(slotBookmarkReached()));			
 		  playTimer->stop();
-			if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPlay.png"))
+			if(icon.load(":/images/pixmaps/VcrPlay.png"))
 				playMovie->setPixmap(icon);
 		} else {
 			playTimer->start((int)(1000.f / (playSpeed * playFPS)));
-			if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPause.png"))
+			if(icon.load(":/images/pixmaps/VcrPause.png"))
 				playMovie->setPixmap(icon);
 			
 		}
@@ -771,7 +771,7 @@ void VideoPlayerTool::slotStepMovie()
 		playContinuous = false;
 		QPixmap icon;
 
-		if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPlay.png")) {
+		if(icon.load(":/images/pixmaps/VcrPlay.png")) {
 			playMovie->setPixmap(icon);
 		}
 	}
@@ -783,7 +783,7 @@ void VideoPlayerTool::slotStepMovie()
 		playContinuous = false;
 
 		QPixmap icon;
-		if(icon.load(BASE_DIRECTORY "images/pixmaps/VcrPlay.png")) {
+		if(icon.load(":/images/pixmaps/VcrPlay.png")) {
 			playMovie->setPixmap(icon);
 		}
 	}
@@ -795,13 +795,13 @@ void VideoPlayerTool::on_grayButton_toggled(bool gray) {
 	playGrayscale = gray;
 	if(playGrayscale) {
 		QPixmap pixIcon;
-		if(pixIcon.load(":images/22x22/view-gray.png"))
+		if(pixIcon.load(":/images/pixmaps/:images/22x22/view-gray.png"))
 			grayButton->setPixmap(pixIcon);
 		else
 			grayButton->setText(tr("Gray"));
 	} else {
 		QPixmap pixIcon;
-		if(pixIcon.load(":images/22x22/view-color.png"))
+		if(pixIcon.load(":/images/pixmaps/:images/22x22/view-color.png"))
 			grayButton->setPixmap(pixIcon);
 		else
 			grayButton->setText(tr("Color"));

@@ -17,7 +17,10 @@
 
 #include "imagewidget.h"
 #include "piaf-common.h"
+
 #include <stdio.h>
+#include <unistd.h>
+
 #include <QPainter>
 #include <QShortcut>
 
@@ -253,7 +256,7 @@ void ImageWidget::setColorMode(int mode)
 		{
 			if(m_colorMode != COLORMODE_GREY)
 			{
-				fprintf(stderr, "%s:%d : convert to grey\n", __func__, __LINE__);
+//				fprintf(stderr, "%s:%d : convert to grey\n", __func__, __LINE__);
 				/// \todo FIXME : the colors are not exactly matched in the exact order
 				m_greyImage = m_pOriginalImage->convertToFormat(QImage::Format_Indexed8,
 															 Qt::OrderedDither | Qt::ColorOnly	);
@@ -671,19 +674,23 @@ void ImageWidget::zoomOnDisplayPixel( int xCenterOnDisp, int yCenterOnDisp,
 {
 	if(!dImage) return;
 
+
 	fprintf(stderr, "ImageWidget %p::%s:%d : mZoomFitFactor=%g image=%dx%d => center=%d,%d inc=%g\n",
-			this, __func__,__LINE__,
+			this, __func__, __LINE__,
 			mZoomFitFactor,
 			dImage->width(), dImage->height(),
 			xCenterOnDisp, yCenterOnDisp, zoominc);
 
-	if(mZoomFitFactor<=0. && dImage->width()>0 && dImage->height()>0) {
+	if( (mZoomFitFactor<=0. || mZoomFitFactor > 10000.f // infinity
+		 )
+			&& dImage->width()>0 && dImage->height()>0) {
 		int wdisp = size().width()-2;
 		int hdisp = size().height()-2;
 
 		mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
 								   (float)hdisp / (float)dImage->height() );
 	}
+
 
 	float curZoom = mZoomFitFactor;
 
@@ -747,12 +754,21 @@ void ImageWidget::wheelEvent ( QWheelEvent * e )
 	if(!mZoomFit) return;
 
 
-	if(mZoomFitFactor<0.) {
+	if(mZoomFitFactor<0.f
+			|| mZoomFitFactor > 10000.f // infinity
+			) {
 		int wdisp = size().width()-2;
 		int hdisp = size().height()-2;
 
-		mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
+		if(dImage->width()>0 && dImage->height()>0)
+		{
+			mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
 								   (float)hdisp / (float)dImage->height() );
+		}
+		else
+		{
+			return;
+		}
 	}
 
 	float curZoom = mZoomFitFactor;
@@ -823,6 +839,7 @@ void ImageWidget::paintEvent( QPaintEvent * )
 	{
 		int wdisp = size().width();
 		int hdisp = size().height();
+
 		if(mZoomFitFactor<0.) {
 			mZoomFitFactor = std::min( (float)wdisp / (float)dImage->width(),
 									   (float)hdisp / (float)dImage->height() );

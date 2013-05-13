@@ -36,6 +36,11 @@
 #include "virtualdeviceacquisition.h"
 #include <QMutex>
 
+#ifdef _LINUX
+#include <linux/videodev2.h>
+#endif
+
+
 #define DEFAULT_DEVICE 						"/dev/video0"
 #define MAX_CHANNELS							10
 #define NB_DEVICES_USE_SELECT		1

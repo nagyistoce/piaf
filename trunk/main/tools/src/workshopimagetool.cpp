@@ -118,7 +118,7 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv,
 			//fprintf(stderr, "WImgTool::%s:%d: downscale OK.\n", __func__, __LINE__);
 		}
 	}
-	QPixmap winIcon = QPixmap(BASE_DIRECTORY "images/pixmaps/stillimage.png");
+	QPixmap winIcon = QPixmap(":/images/pixmaps/:/images/pixmaps/stillimage.png");
 	display()->setIcon(winIcon);
 
 	pWin->setCaption( iv->getLabel() );
@@ -202,7 +202,7 @@ WorkshopImageTool::WorkshopImageTool(WorkshopImage *iv, QWidget *p_parent,
 		}
 	}
 
-	QPixmap winIcon = QPixmap(BASE_DIRECTORY "images/pixmaps/stillimage.png");
+	QPixmap winIcon = QPixmap(":/images/pixmaps/:/images/pixmaps/stillimage.png");
 	display()->setIcon(winIcon);
 	pWin->setCaption( iv->getLabel() );
 
@@ -388,12 +388,12 @@ void WorkshopImageTool::setToolbar()
 	// ------------- VIEW OPTIONS
 	//hBox->insertSeparator(-1);
 
-	chdir(BASE_DIRECTORY "images/pixmaps");
-	QDir dir( BASE_DIRECTORY "images/pixmaps");
+	chdir(":/images/pixmaps");
+	QDir dir( ":/images/pixmaps");
 	aMenuView = new QPushButton(hBox);
 	{
 		QPixmap pixMap;
-		if(pixMap.load("IconMenuView.png"))
+		if(pixMap.load(":/images/pixmaps/IconMenuView.png"))
 			aMenuView->setPixmap(pixMap);
 		else
 			aMenuView->setText(tr("View menu"));
@@ -408,8 +408,8 @@ void WorkshopImageTool::setToolbar()
 	// view selection mode menu
 
 	// zoom +
-	pixIcon = QIcon("IconZoomInView.png" );
-	actZoomInView = viewMenu->addAction(QIcon("IconZoomInView.png" ), tr("Zoom in"));
+	pixIcon = QIcon(":/images/pixmaps/IconZoomInView.png" );
+	actZoomInView = viewMenu->addAction(QIcon(":/images/pixmaps/IconZoomInView.png" ), tr("Zoom in"));
 	actZoomInView->setShortcut(QKeySequence(("Ctrl++")));
 	actZoomInView->setIconVisibleInMenu(true);
 	connect(actZoomInView, SIGNAL(activated()), this, SLOT(slotZoomInMode()));
@@ -418,13 +418,13 @@ void WorkshopImageTool::setToolbar()
 
 
 
-	pixIcon = QIcon("IconZoomOutView.png" );
+	pixIcon = QIcon(":/images/pixmaps/IconZoomOutView.png" );
 	actZoomOutView = viewMenu->addAction(pixIcon, tr("Zoom out"));
 	actZoomOutView->setShortcut(QKeySequence(("Ctrl+-")));
 	actZoomOutView->setIconVisibleInMenu(true);
 	connect(actZoomOutView, SIGNAL(activated()), this, SLOT(slotZoomOutMode()));
 
-	pixIcon = QIcon("IconMoveView.png" );
+	pixIcon = QIcon(":/images/pixmaps/IconMoveView.png" );
 	actMoveView = viewMenu->addAction(pixIcon, tr("Move"));
 	actMoveView->setIconVisibleInMenu(true);
 	actMoveView->setShortcut(QKeySequence(("Ctrl+M")));
@@ -433,19 +433,19 @@ void WorkshopImageTool::setToolbar()
 	// insert actions with immediate zooming
 	viewMenu->addSeparator();
 	// zoom +
-	pixIcon = QIcon("IconZoomInView.png" );
-	QAction * actZoomInOnce = viewMenu->addAction(QIcon("IconZoomInView.png" ), tr("Zoom in"));
+	pixIcon = QIcon(":/images/pixmaps/IconZoomInView.png" );
+	QAction * actZoomInOnce = viewMenu->addAction(QIcon(":/images/pixmaps/IconZoomInView.png" ), tr("Zoom in"));
 	//actZoomInOnce->setShortcut(QKeySequence(("+")));
 	actZoomInOnce->setIconVisibleInMenu(true);
 	connect(actZoomInOnce, SIGNAL(activated()), this, SLOT(slotZoomInOnce()));
 
-	pixIcon = QIcon("IconZoomFitView.png" );
+	pixIcon = QIcon(":/images/pixmaps/IconZoomFitView.png" );
 	actZoomFitView = viewMenu->addAction(pixIcon, tr("Zoom 1:1"));
 	//actZoomFitView->setShortcut(QKeySequence(("1")));
 	actZoomFitView->setIconVisibleInMenu(true);
 	connect(actZoomFitView, SIGNAL(activated()), this, SLOT(slotZoomFit()));
 
-	pixIcon = QIcon("IconZoomOutView.png" );
+	pixIcon = QIcon(":/images/pixmaps/IconZoomOutView.png" );
 	QAction * actZoomOutOnce = viewMenu->addAction(pixIcon, tr("Zoom out once"));
 	//actZoomOutOnce->setShortcut(QKeySequence(("-")));
 	actZoomOutOnce->setIconVisibleInMenu(true);
@@ -460,7 +460,7 @@ void WorkshopImageTool::setToolbar()
 	aMenuColor = new QPushButton(hBox);
 	{
 		QPixmap pixMap;
-		if(pixMap.load("IconColorGrey.png"))
+		if(pixMap.load(":/images/pixmaps/IconColorGrey.png"))
 			aMenuColor->setPixmap(pixMap);
 		else
 			aMenuColor->setText(tr("Color"));
@@ -473,7 +473,7 @@ void WorkshopImageTool::setToolbar()
 	aMenuColor->setPopup(colorMenu);
 
 	// buttons
-	pixIcon = QIcon("IconColorGrey.png" );
+	pixIcon = QIcon(":/images/pixmaps/IconColorGrey.png" );
 	actColorGrey = colorMenu->addAction(pixIcon, tr("Normal"));
 	actColorGrey->setIconVisibleInMenu(true);
 	actColorGrey->setShortcut(QKeySequence(("Ctrl+N")));
@@ -481,31 +481,31 @@ void WorkshopImageTool::setToolbar()
 	connect(actColorGrey, SIGNAL(activated()), this, SLOT(slotColorGreyMode()));
 //	colorMenu->connectItem( 0, actColorGrey, SLOT(activated()) );
 
-	pixIcon = QIcon("IconColorGreyInverted.png" );
+	pixIcon = QIcon(":/images/pixmaps/IconColorGreyInverted.png" );
 	actColorGreyInverted = colorMenu->addAction(pixIcon, tr("Grey inverted"));
 	actColorGreyInverted->setIconVisibleInMenu(true);
 	actColorGreyInverted->setShortcut(QKeySequence(("Ctrl+I")));
 	connect(actColorGreyInverted, SIGNAL(activated()), this, SLOT(slotColorGreyInvertMode()));
 
-	pixIcon = QIcon("IconColorThermicBlackToRed.png" );
+	pixIcon = QIcon(":/images/pixmaps/IconColorThermicBlackToRed.png" );
 	actColorThermicBlack2Red = colorMenu->addAction(pixIcon, tr("Thermic Black->Red"));
 	actColorThermicBlack2Red->setIconVisibleInMenu(true);
 	connect(actColorThermicBlack2Red, SIGNAL(activated()), this, SLOT(slotColorThermicBlackToRedMode()));
 
-	pixIcon = QIcon("IconColorThermicBlueToRed.png" );
+	pixIcon = QIcon(":/images/pixmaps/IconColorThermicBlueToRed.png" );
 	actColorThermicBlue2Red = colorMenu->addAction(pixIcon, tr("Thermic Blue->Red"));
 	actColorThermicBlue2Red->setIconVisibleInMenu(true);
 	actColorThermicBlue2Red->setIcon(pixIcon);
 	connect(actColorThermicBlue2Red, SIGNAL(activated()), this, SLOT(slotColorThermicBlueToRedMode()));
 
-	pixIcon = QIcon("IconColorGreyIndexed.png" );
+	pixIcon = QIcon(":/images/pixmaps/IconColorGreyIndexed.png" );
 	actColorIndexed = colorMenu->addAction(pixIcon, tr("Indexed"));
 	actColorIndexed->setIconVisibleInMenu(true);
 
 	connect(actColorIndexed, SIGNAL(activated()), this, SLOT(slotColorIndexedMode()));
 
 	// --- Color/grayscale pickers
-	pixIcon = QIcon(":/images/22x22/color-picker.png" );
+	pixIcon = QIcon(":/images/pixmaps/:/images/22x22/color-picker.png" );
 	QPushButton * colorPickerButton = new QPushButton(pixIcon, "", hBox);
 	colorPickerButton->setFlat(true);
 	connect(colorPickerButton, SIGNAL(clicked()), this, SLOT(slotColorPickerMode()));
@@ -517,7 +517,7 @@ void WorkshopImageTool::setToolbar()
 	aMenuMask = new QPushButton(hBox);
 	{
 		QPixmap pixMap;
-		if(pixMap.load("IconSelAreaMenu.xpm"))
+		if(pixMap.load(":/images/pixmaps/IconSelAreaMenu.xpm"))
 			aMenuMask->setPixmap(pixMap);
 		else
 			aMenuMask->setText(tr("Mask"));
@@ -532,22 +532,22 @@ void WorkshopImageTool::setToolbar()
 	// buttons
 //	actXXX->setShortcut(QKeySequence(("Ctrl+G")));
 
-	pixIcon = QPixmap("IconSelArea.xpm");
+	pixIcon = QPixmap(":/images/pixmaps/IconSelArea.xpm");
 	actSelMask = maskMenu->addAction(pixIcon, tr("Select area"));
 	actSelMask->setIconVisibleInMenu(true);
 	connect(actSelMask, SIGNAL(activated()), this, SLOT(slotSelMask()));
 
-	pixIcon = QPixmap("IconAddArea.xpm");
+	pixIcon = QPixmap(":/images/pixmaps/IconAddArea.xpm");
 	actAddMask = maskMenu->addAction(pixIcon, tr("Add area"));
 	actAddMask->setIconVisibleInMenu(true);
 	connect(actAddMask, SIGNAL(activated()), this, SLOT(slotAddMask()));
 
-	pixIcon = QPixmap("IconDelArea.xpm");
+	pixIcon = QPixmap(":/images/pixmaps/IconDelArea.xpm");
 	actDelSelectedMask = maskMenu->addAction(pixIcon, tr("Del selected area"));
 	actDelSelectedMask->setIconVisibleInMenu(true);
 	connect(actDelSelectedMask, SIGNAL(activated()), this, SLOT(slotDelSelectedMask()));
 
-	pixIcon = QPixmap("IconAllArea.xpm");
+	pixIcon = QPixmap(":/images/pixmaps/IconAllArea.xpm");
 	actAllMask = maskMenu->addAction(pixIcon, tr("Clear mask"));
 	actAllMask->setIconVisibleInMenu(true);
 	connect(actAllMask, SIGNAL(activated()), this, SLOT(slotClearMask()));
@@ -559,7 +559,7 @@ void WorkshopImageTool::setToolbar()
 		bExport = new QPushButton(hBox);
 		{
 			QPixmap pixMap;
-			if(pixMap.load("snapshot.png"))
+			if(pixMap.load(":/images/pixmaps/snapshot.png"))
 				bExport->setPixmap(pixMap);
 			else
 				bExport->setText(tr("Snapshot"));
@@ -575,7 +575,7 @@ void WorkshopImageTool::setToolbar()
 		bRecord = new QPushButton(hBox);
 		{
 			QPixmap pixMap;
-			if(pixMap.load("IconRecordPause.png"))
+			if(pixMap.load(":/images/pixmaps/IconRecordPause.png"))
 				bRecord->setPixmap(pixMap);
 			else
 				bRecord->setText(tr("Record"));
@@ -590,7 +590,7 @@ void WorkshopImageTool::setToolbar()
 	QPushButton * filtersButton = new QPushButton(hBox);
 	{
 		QPixmap pixMap;
-		if(pixMap.load("IconFilters.png")) {
+		if(pixMap.load(":/images/pixmaps/IconFilters.png")) {
 			filtersButton->setPixmap(pixMap);
 		} else {
 			filtersButton->setText(tr("Filters"));
@@ -867,7 +867,7 @@ void WorkshopImageTool::setOverlayRect(QRect overlayRect, QColor col)
 
 *************************************************************************/
 void WorkshopImageTool::slotZoomInMode(){
-	chdir(BASE_DIRECTORY "images/pixmaps");
+	chdir(":/images/pixmaps");
 
 	mToolMode = MODE_ZOOM_IN;
 	mpViewWidget->setEditMode(EDITMODE_NONE);
@@ -894,7 +894,7 @@ void WorkshopImageTool::setZoom(int zoomscale, int xcenter, int ycenter)
 }
 
 void WorkshopImageTool::slotZoomOutMode(){
-	chdir(BASE_DIRECTORY "images/pixmaps");
+	chdir(":/images/pixmaps");
 	mpViewWidget->setEditMode(EDITMODE_NONE);
 	mToolMode = MODE_ZOOM_OUT;
 	QCursor zoomCursor = QCursor( QBitmap( "CursorZoomOut.bmp", 0),
@@ -938,7 +938,7 @@ void WorkshopImageTool::slotZoomOutOnce(){
 
 void WorkshopImageTool::slotMoveMode(){
 	mToolMode = MODE_MOVE;
-	chdir(BASE_DIRECTORY "images/pixmaps");
+	chdir(":/images/pixmaps");
 
 	QCursor zoomCursor = QCursor( QBitmap( "CursorMove.bmp", 0),
 								  QBitmap( "CursorMoveMask.bmp", 0));
@@ -967,16 +967,16 @@ void WorkshopImageTool::slotMenuView()
 }
 
 void WorkshopImageTool::updateToolbar() {
-	chdir(BASE_DIRECTORY "images/pixmaps");
+	chdir(":/images/pixmaps");
 	switch(mToolMode) {
 	case MODE_ZOOM_IN:
-		aMenuView->setPixmap(QPixmap("IconZoomInView.png"));
+		aMenuView->setPixmap(QPixmap(":/images/pixmaps/IconZoomInView.png"));
 		break;
 	case MODE_ZOOM_OUT:
-		aMenuView->setPixmap(QPixmap("IconZoomOutView.png"));
+		aMenuView->setPixmap(QPixmap(":/images/pixmaps/IconZoomOutView.png"));
 		break;
 	case MODE_MOVE:
-		aMenuView->setPixmap(QPixmap("IconMoveView.png"));
+		aMenuView->setPixmap(QPixmap(":/images/pixmaps/IconMoveView.png"));
 		break;
 
 	default:
@@ -1027,7 +1027,7 @@ void WorkshopImageTool::slotColorPickerMode()
 {
 	fprintf(stderr, "WImgTool::%s:%d : load cursor\n", __func__, __LINE__);
 
-	chdir(BASE_DIRECTORY "images/pixmaps");
+	chdir(":/images/pixmaps");
 	mToolMode = MODE_PICKER;
 	QCursor zoomCursor = QCursor( QBitmap( "CursorPicker.bmp", 0),
 								  QBitmap( "CursorPickerMask.bmp", 0),
@@ -1040,23 +1040,23 @@ void WorkshopImageTool::slotColorPickerMode()
 void WorkshopImageTool::updateColorMenu() {
 	mpViewWidget->setColorMode(m_colorMode);
 
-	chdir(BASE_DIRECTORY "images/pixmaps");
+	chdir(":/images/pixmaps");
 	switch(m_colorMode) {
 	default:
 	case COLORMODE_GREY:
-		aMenuColor->setPixmap(QPixmap("IconColorGrey.png"));
+		aMenuColor->setPixmap(QPixmap(":/images/pixmaps/IconColorGrey.png"));
 		break;
 	case COLORMODE_INDEXED:
-		aMenuColor->setPixmap(QPixmap("IconColorGreyIndexed.png"));
+		aMenuColor->setPixmap(QPixmap(":/images/pixmaps/IconColorGreyIndexed.png"));
 		break;
 	case COLORMODE_GREY_INVERTED:
-		aMenuColor->setPixmap(QPixmap("IconColorGreyInverted.png"));
+		aMenuColor->setPixmap(QPixmap(":/images/pixmaps/IconColorGreyInverted.png"));
 		break;
 	case COLORMODE_THERMIC_BLACK2RED:
-		aMenuColor->setPixmap(QPixmap("IconColorThermicBlackToRed.png"));
+		aMenuColor->setPixmap(QPixmap(":/images/pixmaps/IconColorThermicBlackToRed.png"));
 		break;
 	case COLORMODE_THERMIC_BLUE2RED:
-		aMenuColor->setPixmap(QPixmap("IconColorThermicBlueToRed.png"));
+		aMenuColor->setPixmap(QPixmap(":/images/pixmaps/IconColorThermicBlueToRed.png"));
 		break;
 	}
 }
@@ -1098,19 +1098,19 @@ void WorkshopImageTool::slotMaskTools(int id)
 void WorkshopImageTool::updateToolbar() {
 	switch(ToolMode) {
 	case MODE_ZOOM_IN:
-		aMenuView->setPixmap(QPixmap("IconZoomInView.png"));
+		aMenuView->setPixmap(QPixmap(":/images/pixmaps/IconZoomInView.png"));
 		break;
 	case MODE_ZOOM_OUT:
-		aMenuView->setPixmap(QPixmap("IconZoomOutView.png"));
+		aMenuView->setPixmap(QPixmap(":/images/pixmaps/IconZoomOutView.png"));
 		break;
 	case MODE_MOVE:
-		aMenuView->setPixmap(QPixmap("IconMoveView.png"));
+		aMenuView->setPixmap(QPixmap(":/images/pixmaps/IconMoveView.png"));
 		break;
 	case MODE_SELECT:
-		aMenuMask->setPixmap(QPixmap("IconSelAreaMenu.xpm"));
+		aMenuMask->setPixmap(QPixmap(":/images/pixmaps/IconSelAreaMenu.xpm"));
 		break;
 	case MODE_ADD_RECT:
-		aMenuMask->setPixmap(QPixmap("IconAddAreaMenu.xpm"));
+		aMenuMask->setPixmap(QPixmap(":/images/pixmaps/IconAddAreaMenu.xpm"));
 		break;
 	default:
 		break;
@@ -1251,7 +1251,7 @@ void WorkshopImageTool::slotRecord()
 	if(isRecording()) //
 	{
 		QPixmap icon;
-		if(icon.load("IconRecordPause.png"))
+		if(icon.load(":/images/pixmaps/IconRecordPause.png"))
 			bRecord->setPixmap(icon);
 		else
 			bRecord->setText(tr("Record"));
@@ -1261,7 +1261,7 @@ void WorkshopImageTool::slotRecord()
 		startRecording();
 		if(isRecording()) {
 			QPixmap icon;
-			if(icon.load("IconRecord.png"))
+			if(icon.load(":/images/pixmaps/IconRecord.png"))
 				bRecord->setPixmap(icon);
 			else
 				bRecord->setText(tr("Recording"));

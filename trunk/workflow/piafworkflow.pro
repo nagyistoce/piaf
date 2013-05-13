@@ -42,7 +42,11 @@ mac:ICON = icons/ema-icon.icns
 # and an uppercase first letter for Mac & Windows
 mac::TARGET = PiafWorkflow
 win32::TARGET = PiafWorkflow
+
+include(../main/v4l2.pri)
 include(../main/opencv.pri)
+
+
 LIBS += -lexiv2
 DEPENDPATH += . \
     inc \
@@ -93,18 +97,6 @@ linux-g++: {
 
 LEGACYPATH=../main
 
-linux-g++: {
-	DEFINES += _V4L2
-
-	HEADERS += $$LEGACYPATH/acquisitions/video/inc/V4L2Device.h \
-		$$LEGACYPATH/acquisitions/video/inc/v4l2uvc.h \
-		$$LEGACYPATH/acquisitions/video/inc/utils.h \
-		$$LEGACYPATH/acquisitions/video/inc/uvccolor.h
-
-	SOURCES += $$LEGACYPATH/acquisitions/video/src/V4L2Device.cpp \
-		$$LEGACYPATH/acquisitions/video/src/v4l2uvc.c \
-		$$LEGACYPATH/acquisitions/video/src/utils.c
-}
 
 win32: {
 	DEFINES += QT_DLL QWT_DLL
@@ -167,11 +159,43 @@ exists(tototatatutu) {
 	FORMS += $$LEGACYPATH/tools/ui/swtoolmainwindow.ui \
 }
 
+message("====== Checking supports for different libraries in DEFINES=$$DEFINES ======")
+
+contains(DEFINES, "HAS_FFMPEG") {
+	message("    + Add file support through FFMPEG")
+	HEADERS += \
+		$$LEGACYPATH/acquisitions/video/inc/ffmpeg_file_acquisition.h \
+
+	SOURCES += \
+		$$LEGACYPATH/acquisitions/video/src/ffmpeg_file_acquisition.cpp \
+}
+
+contains(DEFINES, "HAS_V4L") {
+	message("    + Add device support through V4L1")
+	SOURCES += $$LEGACYPATH/acquisitions/video/src/v4lutils.c
+	HEADERS += $$LEGACYPATH/acquisitions/video/inc/v4lutils.h
+}
+
+contains(DEFINES, "HAS_V4L2") {
+	message("    + Add device support through V4L2")
+	SOURCES += \
+			$$LEGACYPATH/acquisitions/video/src/jdatasrc.c
+	DEFINES += _V4L2
+
+	HEADERS += $$LEGACYPATH/acquisitions/video/inc/V4L2Device.h \
+		$$LEGACYPATH/acquisitions/video/inc/v4l2uvc.h \
+		$$LEGACYPATH/acquisitions/video/inc/utils.h \
+		$$LEGACYPATH/acquisitions/video/inc/uvccolor.h
+
+	SOURCES += $$LEGACYPATH/acquisitions/video/src/V4L2Device.cpp \
+		$$LEGACYPATH/acquisitions/video/src/v4l2uvc.c \
+		$$LEGACYPATH/acquisitions/video/src/utils.c
+}
+
 # $$LEGACYPATH/src/main.cpp \
 SOURCES += \
 	$$PIAFLIB/src/SwPluginCore.cpp \
 #	$$LEGACYPATH/acquisitions/video/src/FileVideoAcquisition.cpp \
-	$$LEGACYPATH/acquisitions/video/src/ffmpeg_file_acquisition.cpp \
 	$$LEGACYPATH/acquisitions/video/src/videocapture.cpp \
 	$$LEGACYPATH/acquisitions/video/src/swvideodetector.cpp \
 	$$LEGACYPATH/acquisitions/video/src/uvccolor.c \
@@ -199,7 +223,6 @@ HEADERS += \
 	$$LEGACYPATH/acquisitions/video/inc/ccvt.h \
 	$$LEGACYPATH/acquisitions/video/inc/SwVideoAcquisition.h \
 	$$LEGACYPATH/acquisitions/video/inc/FileVideoAcquisition.h \
-	$$LEGACYPATH/acquisitions/video/inc/ffmpeg_file_acquisition.h \
 	$$LEGACYPATH/acquisitions/video/inc/videocapture.h \
 	$$LEGACYPATH/acquisitions/video/inc/swvideodetector.h \
 	$$LEGACYPATH/acquisitions/video/inc/virtualdeviceacquisition.h \
@@ -212,11 +235,6 @@ HEADERS += \
 	$$LEGACYPATH/acquisitions/video/inc/file_video_acquisition_factory.h
 
 
-linux-g++: {
-	SOURCES += $$LEGACYPATH/acquisitions/video/src/v4lutils.c \
-        	$$LEGACYPATH/acquisitions/video/src/jdatasrc.c  
-	HEADERS += $$LEGACYPATH/acquisitions/video/inc/v4lutils.h
-}
 # Replaced by OpenCVEncoder.cpp
 # tools/src/FFMpegEncoder.cpp
 #    tools/src/SwMpegEncoder.cpp \
@@ -384,8 +402,8 @@ unix: {
 	MOC_DIR = .moc
 	OBJECTS_DIR = .obj
 } else {
-		MOC_DIR = moc
-		OBJECTS_DIR = obj
+	MOC_DIR = moc
+	OBJECTS_DIR = obj
 }
 
 INCLUDEPATH += $$LEGACYPATH/ui $$LEGACYPATH/tools/ui

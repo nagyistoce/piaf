@@ -311,13 +311,8 @@ int ImageWidget::setEditMode(int mode)
 		break;
 
 	case EDITMODE_PICKER: {
-#ifndef WIN32
-		chdir(BASE_DIRECTORY "images/pixmaps");
-#else
-/// @todo porting to win32
-#endif
-		QCursor zoomCursor = QCursor( QBitmap( "CursorPicker.bmp", 0),
-									  QBitmap( "CursorPickerMask.bmp", 0),
+		QCursor zoomCursor = QCursor( QBitmap( ":images/pixmaps/CursorPicker.bmp", 0),
+									  QBitmap( ":images/pixmaps/CursorPickerMask.bmp", 0),
 									  1, 20);
 		setCursor(zoomCursor);
 		}break;
@@ -753,7 +748,8 @@ void ImageWidget::zoomOnDisplayPixel( int xCenterOnDisp, int yCenterOnDisp,
 			m_displayImageBGRA->width, m_displayImageBGRA->height,
 			xCenterOnDisp, yCenterOnDisp, zoominc);
 
-	if(mZoomFitFactor<=0. && m_displayImageBGRA->width>0 && m_displayImageBGRA->height>0) {
+	if((mZoomFitFactor<=0. || mZoomFitFactor > 10000.f ) /* infinity */
+		&& m_displayImageBGRA->width>0 && m_displayImageBGRA->height>0) {
 		int wdisp = size().width()-2;
 		int hdisp = size().height()-2;
 
@@ -821,6 +817,9 @@ void ImageWidget::wheelEvent ( QWheelEvent * e )
 	if(!e) return;
 	if(!m_displayImageBGRA) return;
 	if(!mZoomFit) return;
+	if(m_displayImageBGRA->width <= 0
+			|| m_displayImageBGRA->height <= 0
+			) return;
 
 
 	if(mZoomFitFactor<0.) {

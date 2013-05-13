@@ -18,6 +18,8 @@ if [ "$(whoami)" == "root" ] ; then
 
 	# For workflow, use exiv2 to read EXIF data
 	apt-get install -y libexiv2-dev
+
+	echo "done."
 else
 	echo "Yoo need to be root to install packages"
 fi

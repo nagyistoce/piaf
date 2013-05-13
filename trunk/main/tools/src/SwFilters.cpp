@@ -303,7 +303,7 @@ void SwFilterManager::init() {
 				if(curF->icon)
 					bIcon.load( curF->icon );
 				else
-					bIcon.load("filterwide.png");
+					bIcon.load(":/images/pixmaps/filterwide.png");
 				subcatItem->setPixmap(0, bIcon);
 			}
 
@@ -321,7 +321,7 @@ void SwFilterManager::init() {
 	qgrid->addWidget(filtersVBox, 0, 1);
 
 	bAdd = new QPushButton(filtersVBox);
-	if(bIcon.load("go-next.png")) {
+	if(bIcon.load(":/images/pixmaps/go-next.png")) {
 		bAdd->setPixmap(bIcon);
 	} else {
 		bAdd->setText(tr("Add"));
@@ -336,7 +336,7 @@ void SwFilterManager::init() {
 
 
 	bDel = new QPushButton(filtersVBox);
-	if(bIcon.load("go-previous.png")) {
+	if(bIcon.load(":/images/pixmaps/go-previous.png")) {
 		bDel->setPixmap(bIcon);
 	} else {
 		bDel->setText(tr("Delete"));
@@ -347,7 +347,7 @@ void SwFilterManager::init() {
 	QToolTip::add(bDel, tr("Remove plugin"));
 
 	bEdit = new QPushButton(filtersVBox);
-	if(bIcon.load("configure.png")) {
+	if(bIcon.load(":/images/pixmaps/configure.png")) {
 		bEdit->setPixmap(bIcon);
 	} else {
 		bEdit->setText(tr("Edit"));
@@ -358,7 +358,7 @@ void SwFilterManager::init() {
 	QToolTip::add(bEdit, tr("Edit plugin's parameters"));
 
 	bDisable = new QPushButton(filtersVBox);
-	if(bIcon.load("network-disconnect16.png")) {
+	if(bIcon.load(":/images/pixmaps/network-disconnect16.png")) {
 		bDisable->setPixmap(bIcon);
 	} else {
 		bDisable->setText(tr("Disable"));
@@ -370,7 +370,7 @@ void SwFilterManager::init() {
 
 
 	QPushButton * bTime = new QPushButton(filtersVBox);
-	if(bIcon.load("chronometer.png"))
+	if(bIcon.load(":/images/pixmaps/chronometer.png"))
 		bTime->setPixmap(bIcon);
 	else
 		bTime->setText(tr("Time"));
@@ -382,7 +382,7 @@ void SwFilterManager::init() {
 	Q3HBox * bBox = new Q3HBox(filtersVBox, 0);
 
 	bUp = new QPushButton(bBox);
-	if(bIcon.load("go-up.png"))
+	if(bIcon.load(":/images/pixmaps/go-up.png"))
 		bUp->setPixmap(bIcon);
 	else
 		bUp->setText(tr("Up"));
@@ -392,7 +392,7 @@ void SwFilterManager::init() {
 	QToolTip::add(bUp, tr("Move up selected plugin"));
 
 	bDown = new QPushButton(bBox);
-	if(bIcon.load("go-down.png"))
+	if(bIcon.load(":/images/pixmaps/go-down.png"))
 		bDown->setPixmap(bIcon);
 	else
 		bDown->setText(tr("Down"));
@@ -407,7 +407,7 @@ void SwFilterManager::init() {
 	Q3HBox * bBox2 = new Q3HBox(filtersVBox, 0);
 
 	bSave = new QPushButton(bBox2);
-	if(bIcon.load("document-save.png"))
+	if(bIcon.load(":/images/pixmaps/document-save.png"))
 		bSave->setPixmap(bIcon);
 	else
 		bSave->setText(tr("Save list"));
@@ -417,7 +417,7 @@ void SwFilterManager::init() {
 	QToolTip::add(bSave, tr("Save plugins list & parameters"));
 
 	bLoad = new QPushButton(bBox2);
-	if(bIcon.load("document-open.png"))
+	if(bIcon.load(":/images/pixmaps/document-open.png"))
 		bLoad->setPixmap(bIcon);
 	else
 		bLoad->setText(tr("Load list"));
