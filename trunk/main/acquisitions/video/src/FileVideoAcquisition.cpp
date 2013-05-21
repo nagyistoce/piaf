@@ -89,6 +89,8 @@ void FileVideoAcquisition::purge() {
 }
 
 
+
+
 // START COPY FROM VideoPlayerTool.cpp
 void FileVideoAcquisition::initPlayer() {
 	initVirtualDevice(); // init inherited functions and vars

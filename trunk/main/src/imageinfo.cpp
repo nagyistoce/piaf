@@ -45,9 +45,7 @@
 #include <iomanip>
 #include <cassert>
 
-#ifdef HAS_FFMPEG
-#include "ffmpeg_file_acquisition.h"
-#endif
+#include "file_video_acquisition_factory.h"
 
 u8 g_debug_ImageInfo = EMALOG_DEBUG;
 
@@ -469,24 +467,21 @@ int ImageInfo::loadMovieFile(QString filename)
 	size.x = size.y = 0;
 	size.width = 320; size.height = 240; //
 
-	/// \todo add File support through factory
-#ifndef HAS_FFMPEG
 
-	PIAF_MSG(SWLOG_ERROR, "No file support for '%s'", fi.absoluteFilePath().toUtf8().data());
-	return -1;
-#else
+	mpFileVA = FileVideoAcquisitionFactory::CreateInstance(fi.absoluteFilePath().toStdString());
 	if(!mpFileVA)
 	{
-		/// \bug FIXME: use factory
-		mpFileVA = new FFmpegFileVideoAcquisition();
-	}
-
-	if(mpFileVA->openDevice( fi.absoluteFilePath().toUtf8().data(), size)<0) {
-		PIAF_MSG(SWLOG_ERROR, "cannot open file '%s'", fi.absoluteFilePath().toUtf8().data());
+		PIAF_MSG(SWLOG_ERROR, "No file support for '%s'", fi.absoluteFilePath().toUtf8().data());
 		return -1;
 	}
-	int retgrab = mpFileVA->grab();
 
+	// Grab the first image
+	int retgrab = mpFileVA->grab();
+	if(retgrab<0)
+	{
+		PIAF_MSG(SWLOG_ERROR, "No file support for '%s'", fi.absoluteFilePath().toUtf8().data());
+		return retgrab;
+	}
 	t_video_properties props = mpFileVA->getVideoProperties();
 
 	// Read properties
@@ -507,7 +502,6 @@ int ImageInfo::loadMovieFile(QString filename)
 		cvCvtColor(mpFileVA->readImageRGB32(), m_originalImage, CV_BGRA2RGBA);
 	}
 	return 0;
-#endif
 }
 
 int ImageInfo::loadFile(QString filename)

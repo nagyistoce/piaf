@@ -9,6 +9,8 @@
  ***************************************************************************/
 #include <math.h>
 #include <sys/stat.h>
+
+
 #include "file_video_acquisition_factory.h"
 
 #include "ffmpeg_file_acquisition.h"
@@ -37,11 +39,12 @@ extern "C" {
 #endif
 
 
-#define EXTENSION_AVI	"avi,wmv,mov,mpg,mp4"
+#define EXTENSION_FFMPEG	"avi,wmv,mov,mpg,mp4"
+//#define EXTENSION_FFMPEG	"avi,wmv,mov,mpg"
 
 std::string FFmpegFileVideoAcquisition::mRegistered =
 	FileVideoAcquisitionFactory::RegisterCreatorFunction(
-		(EXTENSION_AVI), FFmpegFileVideoAcquisition::creatorFunction);
+		(EXTENSION_FFMPEG), FFmpegFileVideoAcquisition::creatorFunction);
 
 
 FileVideoAcquisition* FFmpegFileVideoAcquisition::creatorFunction(std::string path)
@@ -522,6 +525,8 @@ void FFmpegFileVideoAcquisition::setAbsoluteFrame(int frame)
 
 	readImageBuffer(&theSize);
 }
+
+
 void FFmpegFileVideoAcquisition::setAbsolutePosition(unsigned long long newpos)
 {
 	fprintf(stderr, "\tFileVA::%s:%d : newpos = %llu\n", __func__, __LINE__, newpos);

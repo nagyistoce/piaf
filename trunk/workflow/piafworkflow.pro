@@ -106,6 +106,7 @@ TRANSLATIONS = piaf_French.ts
 
 include($$LEGACYPATH/ffmpeg.pri)
 include($$LEGACYPATH/opencv.pri)
+include($$LEGACYPATH/openni.pri)
 
 INCLUDEPATH += $$LEGACYPATH/inc/
 INCLUDEPATH += $$LEGACYPATH/tools/inc/
@@ -191,6 +192,29 @@ contains(DEFINES, "HAS_V4L2") {
 		$$LEGACYPATH/acquisitions/video/src/v4l2uvc.c \
 		$$LEGACYPATH/acquisitions/video/src/utils.c
 }
+
+contains(DEFINES, "HAS_OPENNI") {
+#|| contains(DEFINES, "HAS_OPENNI2") {
+	message(" + Add support for OPENNI")
+
+	# File video source
+	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_file_acquisition.h
+	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_file_acquisition.cpp
+
+	# Live video source
+	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h
+	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp
+
+}
+
+contains(DEFINES, "HAS_HIGHGUI") {
+	message("    + Add file replay support through HighGUI")
+	# File video source
+	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/opencv_file_acquisition.h
+	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/opencv_file_acquisition.cpp
+}
+
+
 
 # $$LEGACYPATH/src/main.cpp \
 SOURCES += \
@@ -282,22 +306,6 @@ exists(/usr/local/include/libfreenect/libfreenect.h) {
 	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/freenectvideoacquisition.cpp
 }
 
-exists(/usr/include/ni) {
-	message("The system knows OpenNI ;)")
-	DEFINES += HAS_OPENNI
-	INCLUDEPATH += /usr/include/ni
-	LIBS += -lOpenNI
-
-	# Live video source
-	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h
-	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp
-
-
-	# Live video source
-	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_file_acquisition.h
-	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_file_acquisition.cpp
-
-}
 
 # Obsolete because of OpenCVEncoder
 # tools/inc/FFMpegEncoder.h \

@@ -233,7 +233,9 @@ int MainImageWidget::setImage(IplImage * imageIn,
 				|| m_inputIplImage->nChannels != imageIn->nChannels
 				))
 	{
-		PIAF_MSG(SWLOG_INFO, "Size changed");
+		PIAF_MSG(SWLOG_INFO, "Size changed to %dx%dx%dbx%d",
+				 imageIn->width, imageIn->height,
+				 imageIn->depth, imageIn->nChannels);
 		swReleaseImage(&m_inputIplImage);
 		swReleaseImage(&m_outputIplImage);
 	}

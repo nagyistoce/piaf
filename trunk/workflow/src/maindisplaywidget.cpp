@@ -23,7 +23,8 @@
 
 #include "inc/maindisplaywidget.h"
 #include "ui_maindisplaywidget.h"
-#include "ffmpeg_file_acquisition.h"
+//#include "ffmpeg_file_acquisition.h"
+#include "file_video_acquisition_factory.h"
 
 #include "piaf-common.h"
 #include "PiafFilter.h"
@@ -165,10 +166,11 @@ int MainDisplayWidget::setMovieFile(QString moviePath,
 	ui->stackedWidget->setCurrentIndex(0);
 	ui->stackedWidget->show();
 
-	tBoxSize boxsize; memset(&boxsize, 0, sizeof(tBoxSize));
-
+	tBoxSize boxsize;
+	memset(&boxsize, 0, sizeof(tBoxSize));
+	mpFileVA = FileVideoAcquisitionFactory::CreateInstance(moviePath.toStdString());
 	/// \todo : FIXME : use factory
-	mpFileVA = (FileVideoAcquisition*) new FFmpegFileVideoAcquisition(moviePath.toUtf8().data());
+//	mpFileVA = (FileVideoAcquisition*) new FFmpegFileVideoAcquisition(moviePath.toUtf8().data());
 	if(!mpFileVA)
 	{
 		QMessageBox::critical(NULL, tr("File error"),
@@ -287,9 +289,11 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 
 void MainDisplayWidget::updateDisplay()
 {
-	IplImage * captureImage = ( mPlayGrayscale ?
-									mpFileVA->readImageY() : mpFileVA->readImageRGB32() );
-	PIAF_MSG(SWLOG_DEBUG, "setImage with IplImage %dx%dx%dx%d",
+	IplImage * captureImage =
+			( mPlayGrayscale ?
+				  mpFileVA->readImageY()
+				: mpFileVA->readImageRGB32() );
+	PIAF_MSG(SWLOG_INFO, "setImage with IplImage %dx%dx%dx%d",
 			 captureImage->width, captureImage->height, captureImage->nChannels, captureImage->depth
 			 );
 	t_image_info_struct info = mpFileVA->readImageInfo();
@@ -379,6 +383,11 @@ void MainDisplayWidget::on_goNextButton_clicked()
 	{
 		ui->playButton->setChecked(false);
 	}
+	else {
+		PIAF_MSG(SWLOG_WARNING, "%p->GetNextFrame() failed",
+				 mpFileVA);
+	}
+
 	// to update navigation image widget
 	emit signalImageChanged(m_fullImage);
 

@@ -29,12 +29,17 @@
 // for LUT
 #include "openni_videoacquisition.h"
 
-#include <XnOpenNI.h>
-#include <XnLog.h>
+// OpenNI v1
+#ifdef HAS_OPENNI
 #include <XnCppWrapper.h>
 #include <XnFPSCalculator.h>
-
 using namespace xn;
+#endif
+
+// OpenNI v2
+#ifdef HAS_OPENNI2
+#include <OpenNI.h>
+#endif
 
 #include <QMutex>
 #include <QWaitCondition>
@@ -169,12 +174,18 @@ private:
 	  */
 	int checkOpenNIError(const char* function, int line);
 
+
+	int m_OPENNI_dev;
+
 	// OPENNI STRUCTURES
+#ifdef HAS_OPENNI2
+	Status mOpenNIStatus;
+
+#else // this is v1
 	XnStatus mOpenNIStatus;
 	/// OpenNI context
 	Context mContext;
 	Player mPlayer;
-	int m_OPENNI_dev;
 
 	DepthGenerator mDepthGenerator;
 	ImageGenerator mImageGenerator;
@@ -183,7 +194,7 @@ private:
 	DepthMetaData depthMD;
 	XnStatus nRetVal;
 	ScriptNode scriptNode;
-
+#endif // v1
 	/** \brief Enable depth stream */
 	bool mEnableDepth;
 	/** \brief Enable camera stream */

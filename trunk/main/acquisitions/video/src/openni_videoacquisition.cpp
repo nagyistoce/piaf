@@ -18,8 +18,10 @@
  ***************************************************************************/
 
 #define OPENNI_VIDEOACQUISITION_CPP
-#include "piaf-common.h"
 
+#include <stdio.h>
+
+#include "piaf-common.h"
 #include "openni_videoacquisition.h"
 
 //---------------------------------------------------------------------------
