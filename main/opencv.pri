@@ -95,6 +95,9 @@ unix: {
 		LIBS += -lopencv_core -lopencv_imgproc -lopencv_legacy -lopencv_highgui 
 		# for Haar (needed for pluigns)
 		LIBS += -lopencv_features2d -lopencv_video -lopencv_objdetect
+
+
+		DEFINES += HAS_HIGHGUI
 	} else {
 		# For Ubuntu 7.10 for example, the link option is -lcv instead of -lopencv
 		CV_LIB = $$LIBSDIR/libcv.$$LIBS_EXT
@@ -102,6 +105,7 @@ unix: {
 		exists( $$CV_LIB ) {
 			#message( " => Linking with -lcv ('$$CV_LIB' exists)")
 			LIBS += -lcxcore -lcv -lcvaux -lhighgui
+			DEFINES += HAS_HIGHGUI
 		} else {
 			# on MacOS X with OpenCV 1, we must also link with cxcore
 			#message( Dynamic libraries : '$$LIBS_EXT' )
@@ -118,6 +122,7 @@ unix: {
 
 				#message( " => Linking with -lopencv ('$$CV_LIB' does not exist)")
 				LIBS += -lopencv -lcvaux -lhighgui
+				DEFINES += HAS_HIGHGUI
 			}
 		}
 	}
@@ -136,12 +141,12 @@ unix: {
 		INCLUDEPATH += $$CVINCPATH/highgui
 	}
 
-        exists($$CVINCPATH/nonfree/features2d.hpp) {
-                message("Using non free in recent OpenCV functions")
-                INCLUDEPATH += $$CVINCPATH/nonfree
-                DEFINES += OPENCV_NONFREE
-                LIBS += -lopencv_nonfree
-        }
+	exists($$CVINCPATH/nonfree/features2d.hpp) {
+			message("Using non free in recent OpenCV functions")
+			INCLUDEPATH += $$CVINCPATH/nonfree
+			DEFINES += OPENCV_NONFREE
+			LIBS += -lopencv_nonfree
+	}
 
 }
 
@@ -171,7 +176,7 @@ win32: {
 		INCLUDEPATH += "C:\Program Files\OpenCV\include"
 
 	}
-        LIBS += $$DYN_LIBS
+	LIBS += $$DYN_LIBS
 }
 
 

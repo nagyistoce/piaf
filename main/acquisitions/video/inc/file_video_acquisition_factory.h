@@ -37,20 +37,22 @@ public:
 		std::string extension;
 		int pos = path.find_last_of('.');
 		extension = path.substr(pos+1);
-		PIAF_MSG(SWLOG_INFO, "Opening '%s' => ext='%s'",
-				 path.c_str(), extension.c_str());
+		PIAF_MSG(SWLOG_INFO, "Search file reader for path='%s' => ext='%s'. Search in %d items",
+				 path.c_str(), extension.c_str(),
+				 (int)get_mapFactory()->size());
+
 		t_mapFactory::iterator it = get_mapFactory()->find(extension);
 		if (it != get_mapFactory()->end())
 		{
 			if (it->second)
 			{
-				PIAF_MSG(SWLOG_DEBUG, "Found FileVideoAcquisition for ext='%s",
-						 extension.c_str());
-				return it->second(extension);
+				PIAF_MSG(SWLOG_DEBUG, "Found FileVideoAcquisition for ext='%s' => return %p",
+						 extension.c_str(), it->second(path));
+				return it->second(path);
 			}
 		}
 
-		PIAF_MSG(SWLOG_ERROR, "Found FileVideoAcquisition for ext='%s", extension.c_str());
+		PIAF_MSG(SWLOG_ERROR, "ERROR: NOT FOUND FileVideoAcquisition for ext='%s", extension.c_str());
 		return NULL;
 	}
 
@@ -58,7 +60,29 @@ public:
 											   CreatorFunction classCreator)
 	{
 		PIAF_MSG(SWLOG_INFO, "Adding creator for extension '%s'", extension.c_str());
-		get_mapFactory()->insert( std::pair<std::string, CreatorFunction>(extension, classCreator));
+		// Ex: extension = "avi,wmv,mov,mpg,mp4"
+		// Split and add one item for each
+		int cur_pos = 0;
+		int comma = 0;
+		do {
+			// => "avi", "wmv", ...
+			comma = extension.find(',', cur_pos);
+			std::string cur_ext;
+			if(comma > 0)
+			{
+				cur_ext = extension.substr(cur_pos, comma-cur_pos);
+			}
+			else
+			{
+				cur_ext = extension.substr(cur_pos, extension.size()-1);
+			}
+			PIAF_MSG(SWLOG_INFO, "  + adding creator for file extension '%s' (pos=%d..%d)",
+					 cur_ext.c_str(), cur_pos, comma);
+			cur_pos = comma+1;
+			get_mapFactory()->insert( std::pair<std::string, CreatorFunction>(cur_ext, classCreator));
+		} while(comma>0);
+
+
 		return extension;
 	}
 protected:

@@ -178,9 +178,38 @@ protected:
 
 
 	// Variables for VirtualDeviceAcquisition API
-	void initVirtualDevice();///< init of VirtualDeviceAcqiosition API variables
-	void purgeVirtualDevice();///< init of VirtualDeviceAcqiosition API variables
+	void initVirtualDevice() ///< init of VirtualDeviceAcqiosition API variables
+	{
+		/// Main video properties
+		memset(&m_video_properties, 0, sizeof(t_video_properties));
 
+		// Video file name
+		m_videoFileName[0] = '\0';
+		// File size in bytes
+		m_fileSize = 0;
+
+		// Real image size (because codec may change to fit block size)
+		mImageSize = cvSize(0, 0);
+
+		m_fps = 0.f;
+		m_period_ms = 0;	// File period in ms
+
+		// Index of current stream
+		m_videoStream = 0;
+		memset(&FileVA_Tm, 0, sizeof(struct tm));
+		memset(&FileVA_Tv, 0, sizeof(struct timeval));
+
+		timeref_sec = timestep_sec;
+		timestep_usec = timeref_usec = 0;
+		mPlayFrame = 0;
+		m_prevPosition = 0;
+		memset(&m_movie_pos, 0, sizeof(t_movie_pos));
+	}
+
+	void purgeVirtualDevice() ///< init of VirtualDeviceAcqiosition API variables
+	{
+		;  // nothing allocated
+	}
 };
 
 

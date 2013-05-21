@@ -2369,21 +2369,23 @@ void tmConvert(IplImage * img_src, IplImage * img_dest)
 		return;
 	}
 
+
 	if(img_src->depth == img_dest->depth)
 	{
-		if(img_src->nChannels==img_dest->nChannels)
+		if(img_src->nChannels == img_dest->nChannels)
 		{
 			cvCopy(img_src, img_dest);
 			return;
 		}
 
-		int code = 0;
+		int code = -1;
+		bool swap_R_B = false;
 		switch(img_src->nChannels)
 		{
 		default:
 			PIAF_MSG(SWLOG_ERROR, "Unsupported nChannels=%d for src", img_src->nChannels);
 			break;
-		case 1:
+		case 1: // GRAY =========> ....
 			switch(img_dest->nChannels)
 			{
 			default:
@@ -2397,7 +2399,7 @@ void tmConvert(IplImage * img_src, IplImage * img_dest)
 				break;
 			}
 			break;
-		case 3:
+		case 3: // RGB24 =========> ....
 			switch(img_dest->nChannels)
 			{
 			default:
@@ -2407,11 +2409,13 @@ void tmConvert(IplImage * img_src, IplImage * img_dest)
 				code = CV_RGB2GRAY;
 				break;
 			case 4: // 3 -> 4
+				PIAF_MSG(SWLOG_INFO, "colorModel='%s'",
+						 img_src->colorModel);
 				code = CV_RGB2BGRA;
 				break;
 			}
 			break;
-		case 4:
+		case 4: // BGR32 =========> ....
 			switch(img_dest->nChannels)
 			{
 			default:
@@ -2424,7 +2428,7 @@ void tmConvert(IplImage * img_src, IplImage * img_dest)
 				code = CV_BGRA2RGB;
 				break;
 			case 4: // 4 -> 4???
-
+				code = 0;
 				cvCopy(img_src, img_dest);
 				break;
 			}
@@ -2438,16 +2442,28 @@ void tmConvert(IplImage * img_src, IplImage * img_dest)
 			}
 			catch(cv::Exception)
 			{
-				PIAF_MSG(SWLOG_ERROR, "Could not conver %dx%dx%dx%d => %dx%dx%dx%d with code=%d",
+				PIAF_MSG(SWLOG_ERROR, "Could not convert %dx%dx%dx%d => %dx%dx%dx%d with code=%d",
 						 img_src->width, img_src->height, img_src->depth, img_src->nChannels,
 						 img_dest->width, img_dest->height, img_dest->depth, img_dest->nChannels,
 						 code
 						 );
 			}
 		}
+		else if(code < 0)
+		{
+			PIAF_MSG(SWLOG_ERROR, "UNSUPPORTED=> Could not convert %dx%dx%dx%d => %dx%dx%dx%d with code=%d",
+					 img_src->width, img_src->height, img_src->depth, img_src->nChannels,
+					 img_dest->width, img_dest->height, img_dest->depth, img_dest->nChannels,
+					 code
+					 );
+		}
 	}
 	else
 	{	// We need to convert the depth
+		PIAF_MSG(SWLOG_WARNING, "We need to convert the depth => %dx%dx%dx%d => %dx%dx%dx%d with tmp image",
+				 img_src->width, img_src->height, img_src->depth, img_src->nChannels,
+				 img_dest->width, img_dest->height, img_dest->depth, img_dest->nChannels
+				 );
 		// we convert into 8bit, any nChannels
 		IplImage * tmp = tmCreateImage(cvGetSize(img_src), IPL_DEPTH_8U, img_src->nChannels);
 		cvConvertScale(img_src, tmp, 1./16.);

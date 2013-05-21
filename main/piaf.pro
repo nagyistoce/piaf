@@ -19,9 +19,10 @@ macx: DEFINES+= __MACOSX__
 DEFINES += PIAF_LEGACY
 LANGUAGE = C++
 
-include(../main/v4l2.pri)
+include(v4l2.pri)
 include(ffmpeg.pri)
 include(opencv.pri)
+include(openni.pri)
 
 
 unix: {
@@ -67,6 +68,19 @@ contains(DEFINES, "HAS_V4L2") {
 		$$LEGACYPATH/acquisitions/video/src/utils.c
 }
 
+contains(DEFINES, "HAS_OPENNI") {
+# || contains(DEFINES, "HAS_OPENNI2") {
+	message(" + Add support for OPENNI")
+
+	# Live video source
+	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h
+	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp
+
+	# Live video source
+	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_file_acquisition.h
+	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_file_acquisition.cpp
+
+}
 
 
 win32: {
@@ -219,14 +233,6 @@ exists(/usr/local/include/libfreenect/libfreenect.h) {
 	SOURCES +=  acquisitions/video/src/freenectvideoacquisition.cpp
 }
 
-exists(/usr/include/ni) {
-	message("The system knows OpenNI ;)")
-	DEFINES += HAS_OPENNI
-	INCLUDEPATH += /usr/include/ni
-	LIBS += -lOpenNI
-	HEADERS +=  acquisitions/video/inc/openni_videoacquisition.h
-	SOURCES +=  acquisitions/video/src/openni_videoacquisition.cpp
-}
 
 # Obsolete because of OpenCVEncoder
 # tools/inc/FFMpegEncoder.h \ 

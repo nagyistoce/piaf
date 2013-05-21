@@ -29,10 +29,30 @@
 #define OPENNI_VID_EXTERN
 #endif
 
+// Includes for v1
+#ifdef HAS_OPENNI
 #include <XnOpenNI.h>
 #include <XnLog.h>
 #include <XnCppWrapper.h>
 #include <XnFPSCalculator.h>
+
+using namespace xn;
+#endif // HAS_OPENNI
+
+#ifdef HAS_OPENNI2
+#include <OniCAPI.h>
+#include <OniCEnums.h>
+#include <OniCProperties.h>
+#include <OniCTypes.h>
+#include <OniEnums.h>
+#include <OniPlatform.h>
+#include <OniProperties.h>
+#include <OniVersion.h>
+#include <OpenNI.h>
+
+using namespace openni;
+
+#endif // HAS_OPENNI
 
 #include <QMutex>
 #include <QWaitCondition>
@@ -79,16 +99,18 @@ Blue for
 #define OPENNI_FRAME_H		480
 #define OPENNI_FPS			30
 
-using namespace xn;
 
 OPENNI_VID_EXTERN float g_depth_LUT[OPENNI_RAW_MAX];
 OPENNI_VID_EXTERN u8 g_depth_grayLUT[OPENNI_RAW_MAX];
 OPENNI_VID_EXTERN float g_depth_8bit2m_LUT[256];
 
 void init_OpenNI_depth_LUT();
+
+#ifdef HAS_OPENNI2
+bool fileExists(const char *fn);
+#else
 XnBool fileExists(const char *fn);
-
-
+#endif
 
 /** @brief OpenNI based video acquisition device for PrimeSense based 3D cameras
 
@@ -106,7 +128,7 @@ public:
 	~OpenNIVideoAcquisition();
 
 	/** @brief Return true if acquisition device is ready */
-	bool isDeviceReady() { return (nRetVal== XN_STATUS_OK); }
+	bool isDeviceReady() { return (nRetVal == XN_STATUS_OK); }
 
 	/** @brief Return true if acquisition is running */
 	bool isAcquisitionRunning() { return m_captureIsInitialised; }
@@ -194,7 +216,6 @@ private:
 
 	/// Video properties from OpenCV capture API
 	t_video_properties m_video_properties ;
-
 
 	// OPENNI STRUCTURES
 	/// OpenNI context

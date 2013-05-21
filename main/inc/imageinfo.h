@@ -177,7 +177,7 @@ int loadImageInfoStruct(t_image_info_struct * pinfo, QString path);
 */
 void saveImageInfoStruct(t_image_info_struct * pinfo, QString path = "");
 
-class FFmpegFileVideoAcquisition;
+class FileVideoAcquisition;
 
 /** @brief Image processing analyse class
   */
@@ -217,7 +217,7 @@ private:
 	t_image_info_struct m_image_info_struct;
 
 	/// File video acquisition used to read movie properties
-	FFmpegFileVideoAcquisition  * mpFileVA;
+	FileVideoAcquisition  * mpFileVA;
 
 
 	/** @brief Original image */

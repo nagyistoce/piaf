@@ -23,6 +23,8 @@
 //---------------------------------------------------------------------------
 // Macros
 //---------------------------------------------------------------------------
+#ifdef HAS_OPENNI
+
 #define CHECK_RC(rc, what)											\
 	if (rc != XN_STATUS_OK)											\
 	{																\
@@ -33,6 +35,28 @@
 	}
 
 #define CHECK_XN_STATUS checkOpenNIError(__func__, __LINE__)
+#endif // v1
+
+#ifdef HAS_OPENNI2
+bool checkOpenNIStatus(openni::Status status, const char *display_error)
+{
+	if(status != openni::STATUS_OK)
+	{
+		DEBUG_MSG("'%s' failed: err=%d='%s'\n",
+				  display_error, (int)status,
+				  openni::OpenNI::getExtendedError());
+		return false;
+	}
+
+	return true;
+}
+
+#define CHECK_RC(rc, what)	checkOpenNIStatus(rc, what)
+
+#define CHECK_XN_STATUS checkOpenNIError(__func__, __LINE__)
+#endif // v2
+
+
 
 //return rc;
 
@@ -227,8 +251,13 @@ int OpenNIFileAcquisition::init()
 	m_got_rgb = 0;
 	m_got_depth = 0;
 
+#ifdef HAS_OPENNI2
+	mOpenNIStatus = openni::OpenNI::initialize();
+#else
 	mDepthGenerator = NULL;
 	mContext = NULL;
+#endif
+
 
 	m_captureIsInitialised = false;
 
@@ -258,9 +287,23 @@ int OpenNIFileAcquisition::init()
 
 	m_imageSize = cvSize(0,0);
 
+#ifdef HAS_OPENNI2
+	mOpenNIStatus = openni::OpenNI::initialize();
 
+	if(m_idx_device == 0) // take first
+	{
+		nRetVal = mDepthGenerator.Create(mContext);
+	}
+	else
+	{
+		/// \todo: FIXME : unsupported
+	}
+
+
+#else // v1
 	ScriptNode scriptNode;
 	EnumerationErrors errors;
+
 	nRetVal = XN_STATUS_OK;
 
 	const char *fn = NULL;
@@ -272,7 +315,8 @@ int OpenNIFileAcquisition::init()
 	{
 		fn = SAMPLE_XML_PATH_LOCAL;
 	}
-	else {
+	else
+	{
 		OPENNI_PRINTF("Could not find '%s' nor '%s'. Aborting." ,
 					  SAMPLE_XML_PATH, SAMPLE_XML_PATH_LOCAL);
 
@@ -368,6 +412,7 @@ int OpenNIFileAcquisition::init()
 
 	nRetVal = xnFPSInit(&xnFPS, 180);
 	CHECK_RC(nRetVal, "FPS Init");
+#endif
 
 	return 0;
 }
