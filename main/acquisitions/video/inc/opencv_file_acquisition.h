@@ -1,0 +1,333 @@
+/***************************************************************************
+	 opencv_file_acquisition.h - OpenCV acquisition class for video replay
+									 using highgui
+							 -------------------
+	begin                : Fri May 17 2013
+	copyright            : (C) 2013 by Christophe Seyve (CSE)
+	email                : cseyve@free.fr
+ ***************************************************************************/
+
+/***************************************************************************
+ *                                                                         *
+ *   This program is free software; you can redistribute it and/or modify  *
+ *   it under the terms of the GNU General Public License as published by  *
+ *   the Free Software Foundation; either version 2 of the License, or     *
+ *   (at your option) any later version.                                   *
+ *                                                                         *
+ ***************************************************************************/
+
+
+#ifndef OPENCV_FILE_VIDEOACQUISITION_H
+#define OPENCV_FILE_VIDEOACQUISITION_H
+
+
+#ifndef WIN32
+#include <sys/mman.h>
+
+#include <unistd.h>
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include <math.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <signal.h>
+#include <limits.h>
+#include <unistd.h>
+
+#else
+
+#endif
+
+#include "imageinfo.h"
+
+#include "virtualdeviceacquisition.h"
+#include "FileVideoAcquisition.h"
+
+#ifdef PIAF_LEGACY
+#include "workshopmovie.h"
+#else
+#include "workflowtypes.h"
+#endif 
+
+
+
+#include "ccvt.h"
+
+#ifndef MAX_PATH_LEN
+#define MAX_PATH_LEN	1024
+#endif
+
+#ifdef OPENCV2
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/highgui/highgui_c.h>
+#endif
+
+
+
+
+/** \brief OpenCV Video acquisition high-level class
+
+	using OpenCV/highgui for decoding, performs file device management
+	and image acquisitions and conversion to IplImage.
+
+	@author Christophe Seyve - Sisell - cseyve@free.fr
+	@version 0.1.0 \Date
+ */
+class OpenCVFileVideoAcquisition : public FileVideoAcquisition
+{
+public:
+	/// creator function registered in factory
+	static FileVideoAcquisition* creatorFunction(std::string path);
+
+	/** Constructor with device entry
+		\param movie filename
+		*/
+	OpenCVFileVideoAcquisition(const char * device);
+	
+	/** Constructor with SwV4LDevice pointer entry
+		\param aVD SwV4LDevice class entry. Rare usage.
+		*/
+	/// Destructor
+	~OpenCVFileVideoAcquisition();
+
+	/// Close video device (only on demand)
+	int VAcloseVD();
+	
+	void setCopyScale(int) { };
+	
+	/// Checks if video device is initialised
+	bool VDIsInitialised();	
+	/// Checks if video acquisition is initialised
+	bool AcqIsInitialised();
+	
+	/** @brief Open device and read first image */
+	int openDevice(const char * aDevice, tBoxSize newSize);
+
+	// FOR VirtualDeviceAcquisition PURE VIRTUAL API
+	/** \brief Use sequential mode
+		If true, grabbing is done when a new image is requested.
+		Else a thread is started to grab */
+	void setSequentialMode(bool on);
+
+	/** \brief Function called by the doc (parent) thread */
+	int grab();
+
+	/** \brief Return true if acquisition device is ready to start */
+	bool isDeviceReady() { return (mCapture != NULL); }
+
+	/** \brief Return true if acquisition is running */
+	bool isAcquisitionRunning() { return (mCapture != NULL); }
+
+	/** \brief Start acquisition */
+	int startAcquisition();
+
+	/** \brief Return image size */
+	CvSize getImageSize();
+
+	/** \brief Stop acquisition */
+	int stopAcquisition();
+
+	/** \brief Grabs one image and convert to RGB32 coding format
+		if sequential mode, return last acquired image, else read and return image
+
+		\return NULL if error
+		*/
+	IplImage * readImageRGB32();
+
+	/** \brief Grabs one image and convert to grayscale coding format
+		if sequential mode, return last acquired image, else read and return image
+
+		\return NULL if error
+		*/
+	IplImage * readImageY();
+
+	/** \brief Grabs one image of depth buffer, in meter
+		if sequential mode, return last acquired image, else read and return image
+
+		\return NULL if error
+		*/
+	IplImage * readImageDepth() { return 0; }
+
+	/** @brief Read image as raw data */
+	IplImage * readImageRaw();
+
+	/** @brief Get video properties (not updated) */
+	t_video_properties getVideoProperties() { updateVideoProperties(); return m_video_properties; }
+
+	/** @brief Update and return video properties */
+	t_video_properties updateVideoProperties();
+
+	/** @brief Set video properties (not updated) */
+	int setVideoProperties(t_video_properties props);
+
+
+	// end of VirtualDeviceAcquisition API
+
+	/// change acquisition size
+	int changeAcqParams(tBoxSize newSize, int channel);
+	
+	int setQuality(int) { return -1; };
+	
+	/// Set channel number (for devices which support multiple channels)
+	int setChannel(int ch);
+	int getcurrentchannel() { return m_videoStream;};
+
+	/// Get video capability (min and max size)
+	int getcapability(video_capability * vc);
+
+	/** Returns image buffer
+		@return pointer to image buffer
+		*/
+	unsigned char * readImageBuffer(long * buffersize); // read acquisition buffer adress
+	
+	
+	int readImageRaw(unsigned char ** rawimage, 
+		unsigned char ** compbuffer , long * compsize);
+	
+	/** Reads raw image (with coding from palette specifications, YUV420P for example)
+		\param image pointer to allocated buffer
+		\param contAcq perform or not continuous acquisition (e.g. launch another acquisition)
+		*/
+	int readImageRaw(unsigned char * rawimage, unsigned char * compimage, long * compsize, bool contAcq);
+	
+
+	/** Returns address of last acquisition buffer and launch no new acquisition */
+	unsigned char * getImageRawNoAcq();
+	
+	/** Read one frame in Y mode */
+	int readImageY(unsigned char* image, long * buffersize);
+	/** Read one frame in YUV mode */
+	int readImageYUV(unsigned char* image, long * buffersize);
+	/** Returns address of last acquisition buffer for Y field and launch no new acquisition */
+	int readImageYNoAcq(unsigned char* image, long * buffersize);
+	/** Returns address of last acquisition buffer for RGB32 field and launch no new acquisition */
+	int readImageRGB32NoAcq(unsigned char* image, long * buffersize);
+
+	/** Grabs one image and convert to RGB32 coding format
+		\param image pointer to allocated buffer
+		\param contAcq perform or not continuous acquisition (e.g. launch another acquisition)
+		@return 0 if error
+		*/
+	int readImageRGB32(unsigned char* image, long * buffersize, bool contAcq = false);
+	/** @brief Read image as raw data */
+
+
+	/**************** FROM FileVideoAcquisition (BEGIN) ************************/
+	/** Return the index of last read frame (needed for post-processing or permanent encoding) */
+	long getFrameIndex();
+	/** Return the absolute position to be stored in database (needed for post-processing or permanent encoding) */
+	unsigned long long getAbsolutePosition();
+	void rewindMovie();
+
+	/**************** FROM FileVideoAcquisition (END) ************************/
+
+	/** get position of picture n-1
+	 */
+	unsigned long long getPrevAbsolutePosition() { return m_prevPosition; }
+
+	/** set absolute position in file
+	 */
+	void setAbsolutePosition(unsigned long long newpos);
+	/** go to frame position in file
+	 */
+	void setAbsoluteFrame(int frame);
+
+
+	/** @brief Get last movie position */
+	t_movie_pos getMoviePosition() { return m_movie_pos; }
+
+
+	/// Not really used, just for Video Device compatibility
+	char * getnorm() { static char norm[]="pal"; return norm;};
+
+	int setNorm(char * norm);
+
+	/// Set picture brightness, contrast, saturation, color,
+	int setpicture(int br, int hue, int col, int cont, int white);
+
+	int getpicture(video_picture * pic);
+
+	/** Gets palette id.
+		@see linux/videodev.h
+		*/
+	int getPalette();
+	
+	bool endOfFile();
+	
+	/** @brief Go to absolute position in file (in bytes from start) */
+	void rewindToPosMovie(unsigned long long position);
+
+	/** @brief Read next frame */
+	bool GetNextFrame();
+
+private:
+	void init();
+	void purge();
+
+private:
+	/// Main video properties
+	t_video_properties m_video_properties;
+
+	std::string mVideoFilePath;
+
+	/// Highgui capture
+	CvCapture * mCapture;
+
+	/// Video file name
+	char m_videoFileName[MAX_PATH_LEN];
+
+	/// Real image size
+	CvSize mImageSize;
+
+	bool myVDIsInitialised;
+	bool myAcqIsInitialised;
+
+	// no of current stream
+	int m_videoStream;
+
+	// reference time & step
+	struct tm FileVA_Tm;
+	struct timeval FileVA_Tv;
+	
+	time_t timeref_sec;
+	time_t timestep_sec;
+
+#ifdef WIN32
+	// The type suseconds_t shall be a signed integer type capable of storing values at least in the range [-1, 1000000].
+	long timestep_usec;
+	long timeref_usec;
+#else
+	suseconds_t timestep_usec;
+	suseconds_t timeref_usec;
+#endif
+
+
+	// Previous picture position
+	unsigned long long m_prevPosition;
+
+
+	// Variables for VirtualDeviceAcquisition API
+	void initVirtualDevice();///< init of VirtualDeviceAcqiosition API variables
+	void purgeVirtualDevice();///< init of VirtualDeviceAcqiosition API variables
+
+	bool mSequentialMode; ///< Sequential mode vs threaded (default= true)
+	IplImage * m_imageRGB32;
+	IplImage * m_imageRaw;
+	IplImage * m_imageY;
+
+protected:
+	/// value used for registering in factory
+	static std::string mRegistered;
+
+	// -------- IMAGE INFORMATION -------
+public:
+	/** @brief Read image information */
+	t_image_info_struct readImageInfo() { return mImageInfo; }
+
+protected:
+	t_image_info_struct mImageInfo;
+};
+
+#endif
+
