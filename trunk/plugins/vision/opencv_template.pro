@@ -14,6 +14,8 @@ include(../../main/opencv.pri)
 
 unix:LIBS += -L/usr/local/lib 
 
+LIBS += -pg 
+
 unix:DEFINES += VERSION __LINUX_VERSION__
 
 INCLUDEPATH += /usr/local/include/SwPlugin/
@@ -28,7 +30,7 @@ LIBS += -L/usr/local/lib/ -lSwPluginCore
 # in case the installation was not done, use local link
 LIBS += -L../../piaflib
 
-linux-g++:TMAKE_CXXFLAGS += -g -Wall -O2 \
+linux-g++:TMAKE_CXXFLAGS += -g -Wall -O2 -pg \
 	-fexceptions -Wimplicit -Wreturn-type \
 	-Wunused -Wswitch -Wcomment -Wuninitialized -Wparentheses  \
 	-Wpointer-arith  -Wshadow

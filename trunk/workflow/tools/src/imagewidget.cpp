@@ -372,7 +372,10 @@ void ImageWidget::setColorMode(int mode)
 			m_pLUT = gLUT_BlueToRed;
 			break;
 		}
-		if(m_pLUT) {
+
+
+		if(m_pLUT)
+		{
 			try {
 				// convert using LUT
 				cvCvtColor(m_greyImage, m_displayImageBGRA, CV_GRAY2BGRA);
@@ -380,11 +383,14 @@ void ImageWidget::setColorMode(int mode)
 			}
 			catch(cv::Exception e)
 			{
-				cvZero(m_displayImageBGRA);
-				PIAF_MSG(SWLOG_ERROR, "invalid call to cvLUT: grey=%dx%dx%d "
-						 "=> display=%dx%dx%d / m_pLUT=%p=%dx%dx%d",
-						 m_greyImage->width, m_greyImage->height, m_greyImage->nChannels,
-						 m_displayImageBGRA->width, m_displayImageBGRA->height, m_displayImageBGRA->nChannels,
+				cvZero( m_displayImageBGRA );
+
+				PIAF_MSG(SWLOG_ERROR, "Invalid call to cvLUT: grey=%dx%dx%dbx%d "
+						 "=> display=%dx%dx%dbx%d / m_pLUT=%p=%dx%dx%d",
+						 m_greyImage->width, m_greyImage->height,
+							m_greyImage->depth, m_greyImage->nChannels,
+						 m_displayImageBGRA->width, m_displayImageBGRA->height,
+							m_displayImageBGRA->depth, m_displayImageBGRA->nChannels,
 						 m_pLUT, m_pLUT->width, m_pLUT->height, m_pLUT->nChannels
 						 );
 			}

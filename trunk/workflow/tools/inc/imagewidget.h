@@ -225,6 +225,7 @@ private:
 
 	QRect mCropRect; ///< Display rect in image (chen cropped)
 	QImage m_displayImage;	///< QImage for display
+
 	IplImage * m_pLUT; ///< pointer to look-up-table for colors
 	IplImage * m_pOriginalImage; ///< pointer to original image, not allocated
 	IplImage * m_greyImage; ///< pointer to grayscale version of original image, allocated
