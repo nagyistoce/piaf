@@ -260,10 +260,12 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 OpenNIFileAcquisition::~OpenNIFileAcquisition()
 {
 	stopAcquisition();
+#ifdef HAS_OPENNI2
 	if (m_streams != NULL)
 	{
 		delete [] m_streams;
 	}
+#endif
 	swReleaseImage(&m_depthRawImage16U);
 	swReleaseImage(&m_depthImage32F);
 	swReleaseImage(&m_cameraIRImage8U);
