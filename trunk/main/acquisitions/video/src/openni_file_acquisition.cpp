@@ -38,6 +38,8 @@
 #endif // v1
 
 #ifdef HAS_OPENNI2
+#define XN_STATUS_OK	STATUS_OK
+
 bool checkOpenNIStatus(openni::Status status, const char *display_error)
 {
 	if(status != openni::STATUS_OK)
@@ -61,57 +63,78 @@ bool checkOpenNIStatus(openni::Status status, const char *display_error)
 //return rc;
 
 #define OPENNI_PRINTF(...) { \
-	fprintf(stderr, "[OpenNI %p %d]::%s:%d : ", this, m_idx_device, __func__, __LINE__); \
+	fprintf(stderr, "[OpenNI %p '%s'']::%s:%d : ", \
+		this, mVideoFilePath.c_str() , __func__, __LINE__); \
 	fprintf(stderr, __VA_ARGS__); fprintf(stderr, "\n"); fflush(stderr); \
 }
 
 //---------------------------------------------------------------------------
 // Code
 //---------------------------------------------------------------------------
-extern void init_OpenNI_depth_LUT(); // from openni_videoacquisition
 
-using namespace xn;
+#define EXTENSION_OPENNI	"oni"
 
+std::string OpenNIFileAcquisition::mRegistered =
+	FileVideoAcquisitionFactory::RegisterCreatorFunction(
+		EXTENSION_OPENNI, OpenNIFileAcquisition::creatorFunction);
+
+
+FileVideoAcquisition* OpenNIFileAcquisition::creatorFunction(std::string path)
+{
+	PIAF_MSG(SWLOG_INFO, "Create OpenNIFileAcquisition(path='%s')", path.c_str() );
+
+	return (FileVideoAcquisition *)new OpenNIFileAcquisition( path.c_str() );
+}
 
 #define SAMPLE_XML_PATH "/etc/openni/SamplesConfig.xml"
 #define SAMPLE_XML_PATH_LOCAL "SamplesConfig.xml"
 
-OpenNIFileAcquisition::OpenNIFileAcquisition(int idx_device)
-{
-	m_idx_device = idx_device;
-	mVideoFilePath = "";
-
-	init_OpenNI_depth_LUT();
-
-	init();
-}
-
-
-OpenNIFileAcquisition::OpenNIFileAcquisition()
-{
-	mVideoFilePath = "";
-	m_idx_device = 0;
-
-	init();
-}
-
 OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 {
 	init();
-	PIAF_MSG(SWLOG_INFO, "Opening file '%s'...", filename);
+	OPENNI_PRINTF("Opening file '%s'...", filename);
 	mVideoFilePath = filename;
 
+#ifdef HAS_OPENNI2
+	mOpenNIStatus = OpenNI::initialize();
+	if(CHECK_XN_STATUS != 0)
+	{
+		PIAF_MSG(SWLOG_ERROR, "Could not init OpenNI API");
+		return;
+	}
+
+	// Open the file
+	mOpenNIStatus = mDevice.open(mVideoFilePath.c_str());
+	if(CHECK_XN_STATUS != 0)
+	{
+		PIAF_MSG(SWLOG_ERROR,
+				 "Could not open recorded file '%s'' or create player",
+				 mVideoFilePath.c_str());
+		return;
+	}
+#else
 	// Open filename
 	mOpenNIStatus = mContext.OpenFileRecording(filename, mPlayer);
-
-	if(CHECK_XN_STATUS ==0)
+#endif
+	if(CHECK_XN_STATUS != 0)
+	{
+		PIAF_MSG(SWLOG_ERROR,
+				 "Could not open recorded file '%s'' or create player",
+				 mVideoFilePath.c_str());
+	}
+	else
 	{
 		if(mEnableDepth)
 		{
 			DEBUG_MSG("OpenNI : creating depth generator...");
+#ifdef HAS_OPENNI2
+			// Create depth generator
+			mOpenNIStatus = mDepthGenerator.create(mDevice, SENSOR_DEPTH);
+#else
+
 			mOpenNIStatus = mContext.FindExistingNode(XN_NODE_TYPE_DEPTH,
 													  mDepthGenerator);
-
+#endif
 			if(checkOpenNIError(__func__, __LINE__) != 0)
 			{
 				PIAF_MSG(SWLOG_ERROR, "Could not find any Depth Generator in context.");
@@ -151,7 +174,26 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 
 
 				*/
+#ifdef HAS_OPENNI2
 
+				/// \todo use fov of sensor
+				float fHFOV = 1.f; //fov.fHFOV;
+				float fVFOV = 1.f; //fov.fVFOV;
+
+				if (!mDepthGenerator.isValid() )
+				{
+					mDepthSize = cvSize(0,0);
+					mDepthFPS = 0.f;
+					mMinDistance = 1.f;
+				} else {
+					VideoMode depthVideoMode = mDepthGenerator.getVideoMode();
+
+					mDepthSize.width = depthVideoMode.getResolutionX();
+					mDepthSize.height = depthVideoMode.getResolutionY();
+					mDepthFPS = depthVideoMode.getFps();
+					mMinDistance = 1.f; ///< \todo Weird
+				}
+#else
 				xn::DepthMetaData dmd;
 				mDepthGenerator.GetMetaData(dmd);
 				mDepthSize.width = (int)dmd.FullXRes();
@@ -160,16 +202,18 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 
 				XnFieldOfView fov;
 				mDepthGenerator.GetFieldOfView(fov);
+				float fHFOV = fov.fHFOV;
+				float fVFOV = fov.fVFOV;
+#endif
 				mMinDistance = 1.;
-				mScaleFactorWidth = 2.f * mMinDistance * tan(fov.fHFOV / 2.)/ (float)mDepthSize.width;
-				mScaleFactorHeight = 2.f * mMinDistance * tan(fov.fVFOV / 2.)/ (float)mDepthSize.height;
+				mScaleFactorWidth = 2.f * mMinDistance * tan(fHFOV / 2.)/ (float)mDepthSize.width;
+				mScaleFactorHeight = 2.f * mMinDistance * tan(fVFOV / 2.)/ (float)mDepthSize.height;
 
-				PIAF_MSG(SWLOG_INFO, "Opened file '%s': %dx%d @ %g fps, scX,Y=%g,%g",
+				OPENNI_PRINTF("Opened file '%s': %dx%d @ %g fps, scX,Y=%g,%g",
 						 filename,
 						 mDepthSize.width, mDepthSize.height,
 						 mDepthFPS,
 						 mScaleFactorWidth, mScaleFactorHeight);
-
 			}
 		}
 
@@ -177,8 +221,12 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 		if(mEnableCamera)
 		{
 			DEBUG_MSG("OpenNI : creating RGB generator ...");
+#ifdef HAS_OPENNI2
+			// Create depth generator
+			mOpenNIStatus = mImageGenerator.create(mDevice, SENSOR_COLOR);
+#else
 			mOpenNIStatus = mContext.FindExistingNode(XN_NODE_TYPE_IMAGE,mImageGenerator);
-
+#endif
 			if(checkOpenNIError(__func__, __LINE__) != 0)
 			{
 				PIAF_MSG(SWLOG_ERROR, "Could not find any Image Generator in context.");
@@ -187,31 +235,35 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 
 		// Repeat option
 		PIAF_MSG(SWLOG_INFO, "VideoRepeat=%c", mVideoRepeat ? 'T':'F');
-		if(!mVideoRepeat)
-		{
-			mOpenNIStatus = mPlayer.SetRepeat(FALSE); // So that when the video ends, the source stops generating
-		}
-		else
-		{
-			mOpenNIStatus = mPlayer.SetRepeat(TRUE);
-		}
-
+#ifdef HAS_OPENNI
+		mOpenNIStatus = mPlayer.SetRepeat(mVideoRepeat);
+		// So that when the video ends, the source stops generating
+#else
+		mOpenNIStatus = mDevice.getPlaybackControl()->setRepeatEnabled(mVideoRepeat);
+#endif
 
 		PIAF_MSG(SWLOG_INFO, "File '%s' opened ! Success", filename);
 	}
-	else
-	{
-		PIAF_MSG(SWLOG_ERROR,
-				 "Could not open recorded file %s or create player",
-				 mVideoFilePath.c_str());
-	}
+	m_captureIsInitialised = 1;
 
+
+	m_video_properties.frame_width = mImageInfo.width = mDepthSize.width;
+	m_video_properties.frame_height =mImageInfo.height = mDepthSize.height;
+	mImageInfo.filepath = QString::fromStdString( mVideoFilePath );
+	m_video_properties.fps = mImageInfo.fps = mDepthFPS;
+	/// \todo continue with other values
+
+	OPENNI_PRINTF("Calling startAcquisition");
+	startAcquisition();
 }
 
 OpenNIFileAcquisition::~OpenNIFileAcquisition()
 {
 	stopAcquisition();
-
+	if (m_streams != NULL)
+	{
+		delete [] m_streams;
+	}
 	swReleaseImage(&m_depthRawImage16U);
 	swReleaseImage(&m_depthImage32F);
 	swReleaseImage(&m_cameraIRImage8U);
@@ -223,7 +275,18 @@ OpenNIFileAcquisition::~OpenNIFileAcquisition()
 
 int OpenNIFileAcquisition::checkOpenNIError(const char* function, int line)
 {
-
+#ifdef HAS_OPENNI2
+	if (mOpenNIStatus != STATUS_OK)
+	{
+		fprintf(stderr, "ERROR: ******************************************\n"
+				  "OpenNIFileAcquisition::%s:%d : status='%s'\n"
+				  "******************************************\n\n",
+				  function,
+				  line,
+				  openni::OpenNI::getExtendedError());
+		return -1;
+	}
+#else
 	if (mOpenNIStatus != XN_STATUS_OK)
 	{
 		fprintf(stderr, "ERROR: ******************************************\n"
@@ -234,6 +297,7 @@ int OpenNIFileAcquisition::checkOpenNIError(const char* function, int line)
 				  xnGetStatusString(mOpenNIStatus));
 		return -1;
 	}
+#endif
 	return 0;
 }
 
@@ -241,6 +305,8 @@ int OpenNIFileAcquisition::checkOpenNIError(const char* function, int line)
 
 int OpenNIFileAcquisition::init()
 {
+	init_OpenNI_depth_LUT();
+
 	mEnableDepth = true; // pure depth by default
 	mEnableCamera = false;
 
@@ -253,6 +319,9 @@ int OpenNIFileAcquisition::init()
 
 #ifdef HAS_OPENNI2
 	mOpenNIStatus = openni::OpenNI::initialize();
+	m_streams = new openni::VideoStream*[2];
+	m_streams[0] = &mDepthGenerator;
+	m_streams[1] = &mImageGenerator;
 #else
 	mDepthGenerator = NULL;
 	mContext = NULL;
@@ -289,17 +358,6 @@ int OpenNIFileAcquisition::init()
 
 #ifdef HAS_OPENNI2
 	mOpenNIStatus = openni::OpenNI::initialize();
-
-	if(m_idx_device == 0) // take first
-	{
-		nRetVal = mDepthGenerator.Create(mContext);
-	}
-	else
-	{
-		/// \todo: FIXME : unsupported
-	}
-
-
 #else // v1
 	ScriptNode scriptNode;
 	EnumerationErrors errors;
@@ -423,24 +481,37 @@ int OpenNIFileAcquisition::startAcquisition()
 	OPENNI_PRINTF("Starting acquisition ...");
 
 	m_rgb_timestamp = m_depth_timestamp = 0;
-	if (nRetVal != XN_STATUS_OK)											\
+
+	if (mOpenNIStatus != XN_STATUS_OK)
 	{
 		OPENNI_PRINTF("Could not start acquisition ...");
 		return -1;
 	}
+#ifdef HAS_OPENNI2
+	if(!mDepthGenerator.isValid())
+#else
 	if(!mDepthGenerator)
+#endif
 	{
 		OPENNI_PRINTF("Could not start depth ...");
 		return -1;
 	}
 	m_run = true;
 
+#ifdef HAS_OPENNI2
+	mDepthGenerator.start();
+	mImageGenerator.start();
+#else
 	mDepthGenerator.StartGenerating();
+#endif
 
 	// start event thread
 	start();
 
 	m_captureIsInitialised = true;
+
+	// Grab first image to get the size
+	grab();
 
 	// update video properties
 	updateVideoProperties();
@@ -478,6 +549,66 @@ int OpenNIFileAcquisition::grab()
 		OPENNI_PRINTF("Capture is not initialized");
 		return -1;
 	}
+
+#if defined(HAS_OPENNI2) && defined(DIRECT_GRAB)
+	int changedIndex;
+	openni::Status rc = openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex);
+	if (rc != openni::STATUS_OK)
+	{
+		OPENNI_PRINTF("Wait failed with code=%d = %s",
+					  (int)rc, openni::OpenNI::getExtendedError());
+		return -1;
+	}
+
+	switch (changedIndex)
+	{
+	case 0:
+		rc = mDepthGenerator.readFrame(&m_depthFrame); break;
+	case 1:
+		rc = mImageGenerator.readFrame(&m_colorFrame); break;
+	default:
+		OPENNI_PRINTF("Error in wait\n");
+	}
+
+	//OPENNI_PRINTF("readFrame returned %d", (int)rc);
+	if (rc != STATUS_OK)
+	{
+		OPENNI_PRINTF("readFrame failed");
+	}
+	uint32_t timestamp = 0;
+	void * pDepthBufferVoid = NULL;
+	switch (changedIndex)
+	{
+	default:
+		break;
+	case 0: {
+		const openni::DepthPixel* pDepthMap = (const openni::DepthPixel*)m_depthFrame.getData();
+		int rowSize = m_depthFrame.getStrideInBytes() / sizeof(openni::DepthPixel);
+		timestamp = m_depthFrame.getTimestamp() ; /// \todo check timecode
+		pDepthBufferVoid = (void *)pDepthMap;
+
+//				OPENNI_PRINTF("Depth rowStride=%d timestamp=%llu",
+//						 rowSize, (unsigned long long)timestamp);
+		}break;
+	case 1: {
+		OPENNI_PRINTF("TO BE IMPLEMENTED"); /// \todo
+		}break;
+	}
+	setRawDepthBuffer( pDepthBufferVoid, timestamp );
+	m_video_properties.frame_width =
+			mImageInfo.width =
+			mDepthSize.width =
+			m_imageSize.width =
+			m_depthFrame.getWidth();
+	m_video_properties.frame_height =
+			mImageInfo.height =
+			mDepthSize.height =
+			m_imageSize.height =
+			m_depthFrame.getHeight();
+
+	return 0;
+#endif
+
 	// Wait for acq
 	if(!mGrabWaitCondition.wait(&mGrabMutex, 200))
 	{
@@ -485,13 +616,19 @@ int OpenNIFileAcquisition::grab()
 		return -1;
 	}
 
+	OPENNI_PRINTF("grab SUCCESS !");
+	printVideoProperties(&m_video_properties);
 	return 0;
 }
+
+
 /* Set the raw depth buffer (11 bit in 16bit short) */
 int OpenNIFileAcquisition::setRawDepthBuffer(void * depthbuf, uint32_t timestamp)
 {
 	if(!m_depthRawImage16U)
 	{
+		OPENNI_PRINTF("Create m_depthRawImage16U: %d x %d x 16U",
+					  m_imageSize.width, m_imageSize.height);
 		m_depthRawImage16U = swCreateImage(m_imageSize, IPL_DEPTH_16U, 1);
 	}
 
@@ -515,8 +652,9 @@ int OpenNIFileAcquisition::setRawDepthBuffer(void * depthbuf, uint32_t timestamp
 	m_got_depth ++;
 	m_depth_timestamp = timestamp;
 
-//	OPENNI_PRINTF("got depth %dx%d x 1",
-//				  m_imageSize.width, m_imageSize.height);
+	OPENNI_PRINTF("got depth %dx%d x 16b",
+				  m_imageSize.width,
+				  m_imageSize.height);
 
 	mGrabWaitCondition.wakeAll();
 
@@ -532,20 +670,45 @@ CvSize OpenNIFileAcquisition::getImageSize()
 /* Stop acquisition */
 int OpenNIFileAcquisition::stopAcquisition()
 {
-	if(mDepthGenerator) {
+	m_run = false;
+	int retry_ms = 0;
+	while(m_isRunning && retry_ms < 10000)
+	{
+		m_run = false;
+		retry_ms += 10;
+		usleep(10000);
+	}
+
+#ifdef HAS_OPENNI2
+	if(mDepthGenerator.isValid())
+	{
+		mDepthGenerator.stop();
+	}
+	if(mImageGenerator.isValid())
+	{
+		mImageGenerator.stop();
+	}
+#else
+	if(mDepthGenerator)
+	{
 		mDepthGenerator.StopGenerating();
 	}
-
-	m_run = false;
-	while(m_isRunning)
+	if(mImageGenerator)
 	{
-		usleep(1000);
+		mImageGenerator.StopGenerating();
 	}
+#endif
 
 
+
+#ifdef HAS_OPENNI2
+	mDepthGenerator.destroy();
+	mImageGenerator.destroy();
+#else
 	mDepthGenerator.Release();
 	scriptNode.Release();
 	mContext.Release();
+#endif
 
 	m_captureIsInitialised = 0;
 
@@ -559,35 +722,124 @@ void OpenNIFileAcquisition::run()
 	m_isRunning = true;
 	m_run = true;
 
+	OPENNI_PRINTF("OpenNI acquisition thread started");
+
 	//
-	while(m_run )//&& processEvents() >= 0)
+	while( m_run )//&& processEvents() >= 0)
 	{
-		nRetVal = mContext.WaitOneUpdateAll(mDepthGenerator);
-		if (nRetVal != XN_STATUS_OK)
+#ifdef HAS_OPENNI2
+		int changedIndex=0;
+
+#ifndef DIRECT_GRAB
+		mOpenNIStatus = OpenNI::waitForAnyStream(m_streams, 2, &changedIndex);
+//		OPENNI_PRINTF("waitForAnyStream returned with changed = %d !!",
+//					  changedIndex);
+		if (mOpenNIStatus != STATUS_OK)
 		{
-			OPENNI_PRINTF("UpdateData failed: '%s'", xnGetStatusString(nRetVal));
+			OPENNI_PRINTF("UpdateData failed wait 100ms");
 			usleep(100000);
 		}
+#else
+		mOpenNIStatus = STATUS_ERROR;
+		if(1)
+		{
+			OPENNI_PRINTF("stubbed");
+			usleep(100000);
+		}
+#endif
+
+#else
+		mOpenNIStatus = mContext.WaitOneUpdateAll(mDepthGenerator);
+		if (mOpenNIStatus != XN_STATUS_OK)
+		{
+			OPENNI_PRINTF("UpdateData failed: '%s'", xnGetStatusString(mOpenNIStatus));
+			usleep(100000);
+		}
+#endif
 		else
 		{
+			uint32_t timestamp=0;
+			void * pDepthBufferVoid = NULL;
+#ifdef HAS_OPENNI2
+			openni::Status rc ;
+			switch (changedIndex)
+			{
+			case 0:
+				rc = mDepthGenerator.readFrame(&m_depthFrame); break;
+			case 1:
+				rc = mImageGenerator.readFrame(&m_colorFrame); break;
+			default:
+				PIAF_MSG(SWLOG_ERROR, "Error in wait\n");
+			}
+
+			//OPENNI_PRINTF("readFrame returned %d", (int)rc);
+			if (rc != STATUS_OK)
+			{
+				OPENNI_PRINTF("readFrame failed");
+			}
+			switch (changedIndex)
+			{
+			default:
+				break;
+			case 0: {
+				const openni::DepthPixel* pDepthMap = (const openni::DepthPixel*)m_depthFrame.getData();
+				int rowSize = m_depthFrame.getStrideInBytes() / sizeof(openni::DepthPixel);
+				timestamp = m_depthFrame.getTimestamp() ; /// \todo check timecode
+				pDepthBufferVoid = (void *)pDepthMap;
+
+				m_video_properties.frame_width =
+						mImageInfo.width =
+						mDepthSize.width =
+						m_imageSize.width =
+						m_depthFrame.getWidth();
+				m_video_properties.frame_height =
+						mImageInfo.height =
+						mDepthSize.height =
+						m_imageSize.height =
+						m_depthFrame.getHeight();
+
+
+//				OPENNI_PRINTF("Depth rowStride=%d timestamp=%llu",
+//						 rowSize, (unsigned long long)timestamp);
+				}break;
+			case 1: {
+				OPENNI_PRINTF("TO BE IMPLEMENTED"); /// \todo
+				}break;
+			}
+#else
 			xnFPSMarkFrame(&xnFPS);
+			m_video_properties.frame_width =
+					mImageInfo.width =
+					m_imageSize.width =
+					mDepthSize.width ;
+			m_video_properties.frame_height =
+					mImageInfo.height =
+					m_imageSize.height =
+					mDepthSize.height ;
 
 			mDepthGenerator.GetMetaData(depthMD);
 			const XnDepthPixel* pDepthMap = depthMD.Data();
-
-//			OPENNI_PRINTF("Frame %d Middle point is: %u. FPS: %f\n",
-//						  depthMD.FrameID(), depthMD(depthMD.XRes() / 2, depthMD.YRes() / 2), xnFPSCalc(&xnFPS));
-			setRawDepthBuffer((void *)pDepthMap, depthMD.Timestamp());
+			pDepthBufferVoid = (void *)pDepthMap;
+			timestamp = depthMD.Timestamp();
+			//			OPENNI_PRINTF("Frame %d Middle point is: %u. FPS: %f\n",
+			//						  depthMD.FrameID(), depthMD(depthMD.XRes() / 2, depthMD.YRes() / 2), xnFPSCalc(&xnFPS));
+#endif
+			setRawDepthBuffer( pDepthBufferVoid, timestamp );
 		}
 	}
 
+	OPENNI_PRINTF("Thread has stopped");
 	m_isRunning = false;
 }
+
+
+
 IplImage * OpenNIFileAcquisition::readImageRaw()
 {
-	fprintf(stderr, "%s %s:%d : NOT IMPLEMENTED\n", __FILE__, __func__, __LINE__);
+	OPENNI_PRINTF("NOT IMPLEMENTED");
 	return NULL; /// \todo FIXME : return raw value
 }
+
 /** \brief Grabs one image and convert to RGB32 coding format
 	if sequential mode, return last acquired image, else read and return image
 
@@ -602,8 +854,13 @@ IplImage * OpenNIFileAcquisition::readImageRGB32()
 
 	if(!m_bgr32Image)
 	{
-		OPENNI_PRINTF("create BGR32 image\n");
 		m_bgr32Image = swCreateImage(m_imageSize, IPL_DEPTH_8U, 4);
+		OPENNI_PRINTF("create BGR32 image : %dx%dx%dbx%d",
+					  m_bgr32Image->width, m_bgr32Image->height, m_bgr32Image->depth, m_bgr32Image->nChannels
+					  );
+		// set the alpha channel
+		memset(m_bgr32Image->imageData, 255,
+			   m_bgr32Image->widthStep*m_bgr32Image->height);
 	}
 
 	int mode = (int)round(m_video_properties.mode);
@@ -641,7 +898,8 @@ IplImage * OpenNIFileAcquisition::readImageRGB32()
 				}
 			}
 
-			//OPENNI_PRINTF("mode = %d => 2Cm => gray => BGR32\n", mode);
+//			OPENNI_PRINTF("mode = %d => 2Cm => gray => BGR32 %dx%dx%dbx%d\n",
+//						  mode, m_bgr32Image->width, m_bgr32Image->height, m_bgr32Image->depth, m_bgr32Image->nChannels);
 
 			cvCvtColor(m_grayImage, m_bgr32Image, CV_GRAY2BGRA);
 		}
@@ -658,7 +916,9 @@ IplImage * OpenNIFileAcquisition::readImageRGB32()
 
 IplImage * OpenNIFileAcquisition::getDepthImage32F()
 {
-	if(!m_depthRawImage16U) return NULL;
+	if(!m_depthRawImage16U) {
+		OPENNI_PRINTF("No depth image m_depthRawImage16U");
+		return NULL; }
 	if(!m_depthImage32F)
 	{
 		CvSize imgSize = cvGetSize(m_depthRawImage16U);
@@ -680,6 +940,17 @@ IplImage * OpenNIFileAcquisition::getDepthImage32F()
 	return m_depthImage32F;
 }
 
+
+bool OpenNIFileAcquisition::isDeviceReady()
+{
+#ifdef HAS_OPENNI2
+	return mDepthGenerator.isValid();
+#else
+	return (mDepthGenerator);
+#endif
+}
+
+
 /** \brief Grabs one image and convert to grayscale coding format
 	if sequential mode, return last acquired image, else read and return image
 
@@ -687,7 +958,7 @@ IplImage * OpenNIFileAcquisition::getDepthImage32F()
 	*/
 IplImage * OpenNIFileAcquisition::readImageY()
 {
-	if(!m_captureIsInitialised) return NULL;
+	if(!m_captureIsInitialised) { return NULL; }
 	if(!m_grayImage)
 	{
 		m_grayImage = swCreateImage(m_imageSize, IPL_DEPTH_8U, 1);
@@ -716,6 +987,7 @@ IplImage * OpenNIFileAcquisition::readImageDepth()
 /** @brief Get video properties (not updated) */
 t_video_properties OpenNIFileAcquisition::getVideoProperties()
 {
+
 	return m_video_properties;
 }
 
@@ -787,7 +1059,49 @@ int OpenNIFileAcquisition::setVideoProperties(t_video_properties props)
 }
 
 
+/** Return the absolute position to be stored in database (needed for post-processing or permanent encoding) */
+unsigned long long OpenNIFileAcquisition::getAbsolutePosition()
+{
+	OPENNI_PRINTF("not implemented");
+	return 0;
+}
 
+void OpenNIFileAcquisition::rewindMovie()
+{
+	OPENNI_PRINTF("not implemented");
+}
+
+bool OpenNIFileAcquisition::endOfFile()
+{
+	/// \todo completer
+	return false;
+}
+
+/** @brief Go to absolute position in file (in bytes from start) */
+void OpenNIFileAcquisition::rewindToPosMovie(unsigned long long position)
+{
+	OPENNI_PRINTF("not implemented");
+}
+
+/** @brief Read next frame */
+bool OpenNIFileAcquisition::GetNextFrame()
+{
+	return (grab() >= 0);
+}
+
+/** set absolute position in file
+ */
+void OpenNIFileAcquisition::setAbsolutePosition(unsigned long long newpos)
+{
+	OPENNI_PRINTF("not implemented");
+}
+
+/** go to frame position in file
+ */
+void OpenNIFileAcquisition::setAbsoluteFrame(int frame)
+{
+	OPENNI_PRINTF("not implemented");
+}
 
 
 

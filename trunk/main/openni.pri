@@ -2,7 +2,7 @@
 
 exists(/usr/local/include/openni2) {
         message("The system knows OpenNI v2")
-		DEFINES += HAS_OPENNI2
+	DEFINES += HAS_OPENNI2
         INCLUDEPATH += /usr/local/include/openni2
         LIBS += -lOpenNI2
 } else {

@@ -193,18 +193,23 @@ contains(DEFINES, "HAS_V4L2") {
 		$$LEGACYPATH/acquisitions/video/src/utils.c
 }
 
-contains(DEFINES, "HAS_OPENNI") {
-#|| contains(DEFINES, "HAS_OPENNI2") {
+contains(DEFINES, "HAS_OPENNI")|contains(DEFINES, "HAS_OPENNI2") {
 	message(" + Add support for OPENNI")
+	# common functions
+	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_common.h
+	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_common.cpp
 
 	# File video source
 	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_file_acquisition.h
 	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_file_acquisition.cpp
 
 	# Live video source
-	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h
-	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp
-
+#	!contains(DEFINES, "HAS_OPENNI2") {
+#		HEADERS += $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h
+#		SOURCES += $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp
+#	} else {
+#		message("No support for live in OpenNI2 for the moment");
+#	}
 }
 
 contains(DEFINES, "HAS_HIGHGUI") {
@@ -230,7 +235,7 @@ SOURCES += \
 	$$LEGACYPATH/acquisitions/video/src/opencvvideoacquisition.cpp \
 	$$LEGACYPATH/src/plugineditdialog.cpp \
 	$$LEGACYPATH/tools/src/vidacqsettingswindow.cpp \
-	$$LEGACYPATH/tools/src/swimage_utils.cpp
+	$$LEGACYPATH/tools/src/swimage_utils.cpp \
 
 
 HEADERS += \
@@ -256,7 +261,8 @@ HEADERS += \
 	$$LEGACYPATH/inc/piaf-settings.h \
 	$$LEGACYPATH/inc/nolinux_videodev.h \
 	$$LEGACYPATH/tools/inc/swimage_utils.h \
-	$$LEGACYPATH/acquisitions/video/inc/file_video_acquisition_factory.h
+	$$LEGACYPATH/acquisitions/video/inc/file_video_acquisition_factory.h \
+    ../main/acquisitions/video/inc/openni_common.h
 
 
 # Replaced by OpenCVEncoder.cpp

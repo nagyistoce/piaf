@@ -22,24 +22,13 @@
 #ifndef OPENNI_FILE_ACQUISITION_H
 #define OPENNI_FILE_ACQUISITION_H
 
+#include "openni_common.h"
 
 #include "virtualdeviceacquisition.h"
 #include "file_video_acquisition_factory.h"
 
 // for LUT
 #include "openni_videoacquisition.h"
-
-// OpenNI v1
-#ifdef HAS_OPENNI
-#include <XnCppWrapper.h>
-#include <XnFPSCalculator.h>
-using namespace xn;
-#endif
-
-// OpenNI v2
-#ifdef HAS_OPENNI2
-#include <OpenNI.h>
-#endif
 
 #include <QMutex>
 #include <QWaitCondition>
@@ -51,17 +40,19 @@ using namespace xn;
   - Asus Xtion Pro and Xtion Pro Live
   - Microsoft Kinect
   */
-class OpenNIFileAcquisition : public VirtualDeviceAcquisition
+class OpenNIFileAcquisition : public FileVideoAcquisition
 {
 public:
-	/** @brief Default constructor with index of OpenNI device */
-	OpenNIFileAcquisition(int idx_device = 0);
-	OpenNIFileAcquisition();
-	OpenNIFileAcquisition(const char * filename);
+	/// creator function registered in factory
+	static FileVideoAcquisition* creatorFunction(std::string path);
+
+
+	/** @brief Default constructor with path of OpenNI file */
+	OpenNIFileAcquisition(const char * filenameONI);
 	~OpenNIFileAcquisition();
 
 	/** @brief Return true if acquisition device is ready */
-	bool isDeviceReady() { return (nRetVal== XN_STATUS_OK); }
+	bool isDeviceReady();
 
 	/** @brief Return true if acquisition is running */
 	bool isAcquisitionRunning() { return m_captureIsInitialised; }
@@ -108,6 +99,23 @@ public:
 	IplImage * readImageDepth();
 
 
+	/** Return the absolute position to be stored in database (needed for post-processing or permanent encoding) */
+	unsigned long long getAbsolutePosition();
+	void rewindMovie();
+	bool endOfFile();
+
+	/** @brief Go to absolute position in file (in bytes from start) */
+	void rewindToPosMovie(unsigned long long position);
+	/** @brief Read next frame */
+	bool GetNextFrame();
+	/** set absolute position in file
+	 */
+	void setAbsolutePosition(unsigned long long newpos);
+	/** go to frame position in file
+	 */
+	void setAbsoluteFrame(int frame);
+
+
 	/** @brief Get video properties (not updated) */
 	t_video_properties getVideoProperties();
 
@@ -119,6 +127,10 @@ public:
 
 	/// Thread loop
 	void run();
+
+protected:
+	/// value used for registering in factory
+	static std::string mRegistered;
 
 private:
 	int init();
@@ -180,6 +192,11 @@ private:
 	// OPENNI STRUCTURES
 #ifdef HAS_OPENNI2
 	Status mOpenNIStatus;
+	Device mDevice;
+	VideoStream mDepthGenerator, mImageGenerator;
+	VideoStream**		m_streams;
+	openni::VideoFrameRef		m_depthFrame;
+	openni::VideoFrameRef		m_colorFrame;
 
 #else // this is v1
 	XnStatus mOpenNIStatus;
@@ -256,6 +273,14 @@ public:
 
 	/** @brief Set the raw IR/RGB buffer (RGB or IR 8bit) */
 	int setRawImageBuffer(void * imgbuf, uint32_t timestamp = 0);
+
+	// -------- IMAGE INFORMATION -------
+public:
+	/** @brief Read image information */
+	t_image_info_struct readImageInfo() { return mImageInfo; }
+
+protected:
+	t_image_info_struct mImageInfo;
 };
 
 #endif // OPENNI_FILE_ACQUISITION_H

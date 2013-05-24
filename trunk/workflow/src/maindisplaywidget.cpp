@@ -144,6 +144,8 @@ void  MainDisplayWidget::zoomOn(int x, int y, float scale) {
 int MainDisplayWidget::setMovieFile(QString moviePath,
 									t_image_info_struct * pinfo)
 {
+	PIAF_MSG(SWLOG_INFO, "moviePath='%s' pinfo=%p",
+			 moviePath.toAscii().data(), pinfo);
 	mpImageInfoStruct = pinfo;
 
 	QFileInfo fi(moviePath);
@@ -169,6 +171,8 @@ int MainDisplayWidget::setMovieFile(QString moviePath,
 	tBoxSize boxsize;
 	memset(&boxsize, 0, sizeof(tBoxSize));
 	mpFileVA = FileVideoAcquisitionFactory::CreateInstance(moviePath.toStdString());
+
+
 	/// \todo : FIXME : use factory
 //	mpFileVA = (FileVideoAcquisition*) new FFmpegFileVideoAcquisition(moviePath.toUtf8().data());
 	if(!mpFileVA)
@@ -183,7 +187,13 @@ int MainDisplayWidget::setMovieFile(QString moviePath,
 	if(mpFileVA->isDeviceReady()) {
 		// Read first image
 		mpFileVA->rewindMovie();
-		m_fullImage = iplImageToQImage( mpFileVA->readImageRGB32() );
+		IplImage * firstImage = mpFileVA->readImageRGB32();
+		PIAF_MSG(SWLOG_INFO, "Device is ready -> first image = %dx%dx%dbx%d",
+				 firstImage->width, firstImage->height,
+				 firstImage->depth, firstImage->nChannels
+				 );
+
+		m_fullImage = iplImageToQImage( firstImage );
 	} else {
 		PIAF_MSG(SWLOG_ERROR, "Could not open file '%s'", moviePath.toUtf8().data());
 		ret = -1;
@@ -341,7 +351,14 @@ void MainDisplayWidget::on_playButton_toggled(bool checked)
 	{
 		if(mpFileVA)
 		{
-			mPlayTimer.start((int)(1000.f / (mPlaySpeed * (float)mpFileVA->getFrameRate())));
+			float fps = (float)mpFileVA->getFrameRate();
+			int period_ms = 25;
+			if(fps > 0)
+			{
+				period_ms = (int)(1000.f / (mPlaySpeed * fps));
+			}
+
+			mPlayTimer.start(period_ms);
 		}
 		else // Do not toggle
 		{
@@ -626,7 +643,6 @@ void MainDisplayWidget::updateSnapCounter()
 /* Set pointer to capture document */
 int MainDisplayWidget::setVideoCaptureDoc(VideoCaptureDoc * pVideoCaptureDoc)
 {
-
 	ui->stackedWidget->setCurrentIndex(1);
 
 	m_pVideoCaptureDoc = pVideoCaptureDoc;
@@ -648,6 +664,7 @@ int MainDisplayWidget::setVideoCaptureDoc(VideoCaptureDoc * pVideoCaptureDoc)
 	}
 
 	mSourceName = QString( m_pVideoCaptureDoc->getVideoProperties().devicename );
+
 	updateSnapCounter();
 
 	double fps = m_pVideoCaptureDoc->getVideoProperties().fps;
