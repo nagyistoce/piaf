@@ -12,11 +12,15 @@ OBJECTS_DIR 	= 	.obj
 # Include OpenCV definitions
 include(../../main/opencv.pri)
 
-unix:LIBS += -L/usr/local/lib 
-unix:LIBS += -lSwPluginCore -lfftw3 -lsfftw -lsrfftw
-
-unix:DEFINES += VERSION __LINUX_VERSION__
-
+unix: {
+	LIBS += -L/usr/local/lib 
+	LIBS += -lSwPluginCore -lfftw3 
+	exists(/usr/lib/libsfftw.so) {
+		DEFINES += HAS_SFFTW
+		LIBS += -lsfftw -lsrfftw
+	}
+	DEFINES += VERSION __LINUX_VERSION__
+}
 
 linux-g++:TMAKE_CXXFLAGS += -g -Wall -O2 \
 	-fexceptions -Wimplicit -Wreturn-type \

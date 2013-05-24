@@ -30,15 +30,9 @@
 #include "SwPluginCore.h"
 
 // specific code
+#ifdef HAS_SFFTW
 #include <srfftw.h>
-
-/* compile with :
-g++ -Wall -c -I/usr/local/sisell/include -I/usr/X11R6/include \
-	-I../../main/inc -I../../main/tools/inc -o outoffocus.o outoffocus.cpp
-g++ outoffocus.o SwPluginCore.o -lm -L/usr/local/lib -lfftw -lrfftw /usr/local/sisell/lib/libswvisionworkshop.a -o outoffocus 
-# needs SwPluginCore.o
-*/
-
+#endif
 
 
 /********************** GLOBAL SECTION ************************
