@@ -39,7 +39,7 @@ using namespace std;
 // Code
 //---------------------------------------------------------------------------
 
-#define EXTENSION_OPENCV	"oni"
+#define EXTENSION_OPENCV	"mpeg"
 
 std::string OpenCVFileVideoAcquisition::mRegistered =
 	FileVideoAcquisitionFactory::RegisterCreatorFunction(
@@ -128,6 +128,7 @@ int OpenCVFileVideoAcquisition::startAcquisition()
 
 	return 0;
 }
+
 
 /* Function called by the doc (parent) thread */
 int OpenCVFileVideoAcquisition::grab()

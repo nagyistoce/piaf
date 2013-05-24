@@ -52,14 +52,15 @@ public:
 			}
 		}
 
-		PIAF_MSG(SWLOG_ERROR, "ERROR: NOT FOUND FileVideoAcquisition for ext='%s", extension.c_str());
+		PIAF_MSG(SWLOG_ERROR, "ERROR: NOT FOUND FileVideoAcquisition for ext='%s'", extension.c_str());
 		return NULL;
 	}
 
 	static std::string RegisterCreatorFunction(const std::string  & extension,
 											   CreatorFunction classCreator)
 	{
-		PIAF_MSG(SWLOG_INFO, "Adding creator for extension '%s'", extension.c_str());
+		PIAF_MSG(SWLOG_INFO, "====== Adding creator for extension '%s' ======",
+				 extension.c_str());
 		// Ex: extension = "avi,wmv,mov,mpg,mp4"
 		// Split and add one item for each
 		int cur_pos = 0;
@@ -74,8 +75,9 @@ public:
 			}
 			else
 			{
-				cur_ext = extension.substr(cur_pos, extension.size()-1);
+				cur_ext = extension.substr(cur_pos, extension.size());
 			}
+
 			PIAF_MSG(SWLOG_INFO, "  + adding creator for file extension '%s' (pos=%d..%d)",
 					 cur_ext.c_str(), cur_pos, comma);
 			cur_pos = comma+1;

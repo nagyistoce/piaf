@@ -91,7 +91,7 @@ public:
 
 	// VIDEO PROPERTIES
 	/** @brief Return acquisition frame rate in frame per second */
-	float getFrameRate() { return m_fps; }
+	float getFrameRate() { return m_video_properties.fps; }
 	/** Return acquisition period in milliseconds,
 
 		computed from frame rate */

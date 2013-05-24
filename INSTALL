@@ -23,3 +23,13 @@ OR: go directly to the plugin directory, e.g. plugins/vision/ and run ./build_al
 user$ ./build_all.sh
 You don't need installation or restarting the GUI, the binaries are already updated so Piaf GUI can load then at any time.
 
+
+OPENNI SUPPORT
+==============
+
+For OpenNI2, you need to copy the directory where the OpenNI2 drivers are located into the directory where you compiled piafworkflow : 
+
+tof@tofx230:piaf/workflow$ cp -r /home/tof/src/OpenNI2-master/Redist/OpenNI-2.1.0-x86/Tools/OpenNI2 .
+
+
+

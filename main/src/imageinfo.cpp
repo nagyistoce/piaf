@@ -482,6 +482,7 @@ int ImageInfo::loadMovieFile(QString filename)
 		PIAF_MSG(SWLOG_ERROR, "No file support for '%s'", fi.absoluteFilePath().toUtf8().data());
 		return retgrab;
 	}
+
 	t_video_properties props = mpFileVA->getVideoProperties();
 
 	// Read properties
@@ -541,7 +542,7 @@ int ImageInfo::loadFile(QString filename)
 		readMetadata(filename);
 	}
 
-	if(m_originalImage) {
+	if(m_originalImage && m_originalImage->width>0) {
 		m_image_info_struct.width = m_originalImage->width;
 		m_image_info_struct.height = m_originalImage->height;
 		m_image_info_struct.nChannels = m_originalImage->nChannels;
@@ -560,6 +561,7 @@ int ImageInfo::loadFile(QString filename)
 				m_originalImage->width, m_originalImage->height,
 				m_originalImage->nChannels );
 		}
+
 
 #define IMGINFO_WIDTH	400
 #define IMGINFO_HEIGHT	400
@@ -1187,8 +1189,9 @@ void printImageInfoStruct(t_image_info_struct * pinfo)
 	// FILE DATA
 	fprintf(stderr, "File: '%s' / %ld bytes\n",
 			pinfo->filepath.toAscii().data(), (long)pinfo->filesize);
-	fprintf(stderr, "\t%d x %d x %d", pinfo->width, pinfo->height, pinfo->nChannels);
+	fprintf(stderr, "\t%d x %d x %d\t", pinfo->width, pinfo->height, pinfo->nChannels);
 	fprintf(stderr, "%s\n", pinfo->isMovie ? "Movie" : "Picture");
+
 	if(!pinfo->isMovie) {
 		fprintf(stderr, "\tEXIF: maker='%s', model='%s', date=%s orientation=%c "
 				"focal=%gmm=%g mm(eq 35mm), F/%g, %g s\n"
@@ -1209,6 +1212,8 @@ void printImageInfoStruct(t_image_info_struct * pinfo)
 	} else {
 		fprintf(stderr, "\t%g fps, FourCC='%s'\n", pinfo->fps, pinfo->FourCC);
 	}
+
+
 	fprintf(stderr, "\tKeywords={");
 	QStringList::iterator it;
 	for(it = pinfo->keywords.begin(); it != pinfo->keywords.end(); ++it)
