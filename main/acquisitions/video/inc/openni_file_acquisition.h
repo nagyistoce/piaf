@@ -135,6 +135,9 @@ protected:
 private:
 	int init();
 
+	/// Free-run mode : if set the thread run() does the acquisition in real time
+	bool mFreeRun;
+
 	/// Index of device for CpenCV
 	int m_idx_device;
 
@@ -151,6 +154,7 @@ private:
 
 	/// Last captured frame in BGR32 format
 	IplImage * m_bgr32Image;
+
 	/// Iteration of computation of BGR32 image
 	int m_bgr32Image_iteration;
 
@@ -218,6 +222,9 @@ private:
 	bool mEnableCamera;
 
 
+	/** @brief Acquire one frame now */
+	int acquireFrameNow();
+
 	// THREAD VARIABLES
 	/// Run command for thread
 	bool m_run;
@@ -246,11 +253,14 @@ private:
 
 	/// Raw image of IR camera (1 channel of IPL_DEPTH_8U)
 	IplImage * m_cameraIRImage8U;
+
 	/// Raw image of RGB camera (3 channels of IPL_DEPTH_8U)
 	IplImage * m_cameraRGBImage8U;
 
 	QWaitCondition mGrabWaitCondition;
 	QMutex mGrabMutex;
+
+
 public:
 	bool isRunning() { return m_run; }
 

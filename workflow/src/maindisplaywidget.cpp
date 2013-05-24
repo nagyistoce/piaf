@@ -303,7 +303,7 @@ void MainDisplayWidget::updateDisplay()
 			( mPlayGrayscale ?
 				  mpFileVA->readImageY()
 				: mpFileVA->readImageRGB32() );
-	PIAF_MSG(SWLOG_INFO, "setImage with IplImage %dx%dx%dx%d",
+	PIAF_MSG(SWLOG_TRACE, "setImage with IplImage %dx%dx%dx%d",
 			 captureImage->width, captureImage->height, captureImage->nChannels, captureImage->depth
 			 );
 	t_image_info_struct info = mpFileVA->readImageInfo();

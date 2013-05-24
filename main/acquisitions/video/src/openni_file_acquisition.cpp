@@ -544,15 +544,9 @@ int OpenNIFileAcquisition::setLEDMode(int led_mode)
 	return -1;
 }
 
-/* Function called by the doc (parent) thread */
-int OpenNIFileAcquisition::grab()
+int OpenNIFileAcquisition::acquireFrameNow()
 {
-	if(!m_captureIsInitialised) {
-		OPENNI_PRINTF("Capture is not initialized");
-		return -1;
-	}
 
-#if defined(HAS_OPENNI2) && defined(DIRECT_GRAB)
 	int changedIndex;
 	openni::Status rc = openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex);
 	if (rc != openni::STATUS_OK)
@@ -575,8 +569,11 @@ int OpenNIFileAcquisition::grab()
 	//OPENNI_PRINTF("readFrame returned %d", (int)rc);
 	if (rc != STATUS_OK)
 	{
-		OPENNI_PRINTF("readFrame failed");
+		OPENNI_PRINTF("readFrame failed for changedIndex=%d", changedIndex);
+		return -1;
 	}
+
+	// Get the current frame
 	uint32_t timestamp = 0;
 	void * pDepthBufferVoid = NULL;
 	switch (changedIndex)
@@ -585,18 +582,19 @@ int OpenNIFileAcquisition::grab()
 		break;
 	case 0: {
 		const openni::DepthPixel* pDepthMap = (const openni::DepthPixel*)m_depthFrame.getData();
-		int rowSize = m_depthFrame.getStrideInBytes() / sizeof(openni::DepthPixel);
 		timestamp = m_depthFrame.getTimestamp() ; /// \todo check timecode
 		pDepthBufferVoid = (void *)pDepthMap;
 
-//				OPENNI_PRINTF("Depth rowStride=%d timestamp=%llu",
-//						 rowSize, (unsigned long long)timestamp);
+		//int rowSize = m_depthFrame.getStrideInBytes() / sizeof(openni::DepthPixel);
+		//OPENNI_PRINTF("Depth rowStride=%d timestamp=%llu",
+		//			  rowSize, (unsigned long long)timestamp);
 		}break;
 	case 1: {
 		OPENNI_PRINTF("TO BE IMPLEMENTED"); /// \todo
 		}break;
 	}
-	setRawDepthBuffer( pDepthBufferVoid, timestamp );
+
+
 	m_video_properties.frame_width =
 			mImageInfo.width =
 			mDepthSize.width =
@@ -608,7 +606,25 @@ int OpenNIFileAcquisition::grab()
 			m_imageSize.height =
 			m_depthFrame.getHeight();
 
+	setRawDepthBuffer( pDepthBufferVoid, timestamp );
+
 	return 0;
+}
+
+/* Function called by the doc (parent) thread */
+int OpenNIFileAcquisition::grab()
+{
+	if(!m_captureIsInitialised) {
+		OPENNI_PRINTF("Capture is not initialized");
+		return -1;
+	}
+
+#if defined(HAS_OPENNI2)
+	//&& defined(DIRECT_GRAB)
+	if(!mFreeRun)
+	{
+		return acquireFrameNow();
+	} // else we wait for the grab
 #endif
 
 	// Wait for acq
@@ -630,23 +646,26 @@ int OpenNIFileAcquisition::setRawDepthBuffer(void * depthbuf, uint32_t timestamp
 	if(!m_depthRawImage16U)
 	{
 		OPENNI_PRINTF("Create m_depthRawImage16U: %d x %d x 16U",
-					  m_imageSize.width, m_imageSize.height);
-		m_depthRawImage16U = swCreateImage(m_imageSize, IPL_DEPTH_16U, 1);
+					  mDepthSize.width, mDepthSize.height);
+		m_depthRawImage16U = swCreateImage(mDepthSize, IPL_DEPTH_16U, 1);
 	}
 
-	if(m_depthRawImage16U->widthStep == (int)sizeof(uint16_t) * m_imageSize.width)
+	if(m_depthRawImage16U->widthStep == (int)sizeof(uint16_t) * mDepthSize.width)
 	{
 		// copy directly
 		memcpy(m_depthRawImage16U->imageData, depthbuf, m_depthRawImage16U->widthStep * m_depthRawImage16U->height);
 	}
 	else
 	{
+		OPENNI_PRINTF("pitch is not the same : m_depthRawImage16U->widthStep=%d != (int)sizeof(uint16_t) * m_imageSize.width=%d",
+					  m_depthRawImage16U->widthStep,
+					  mDepthSize.height );
 		// copy each line
 		u16 * depth16U = (u16 *)depthbuf;
-		for(int r = 0; r<m_imageSize.height; ++r)
+		for(int r = 0; r<mDepthSize.height; ++r)
 		{
 			memcpy(m_depthRawImage16U->imageData + r * m_depthRawImage16U->widthStep,
-				   depth16U + r * m_imageSize.width,
+				   depth16U + r * mDepthSize.width,
 				   m_imageSize.width * sizeof(u16));
 		}
 	}
@@ -654,9 +673,9 @@ int OpenNIFileAcquisition::setRawDepthBuffer(void * depthbuf, uint32_t timestamp
 	m_got_depth ++;
 	m_depth_timestamp = timestamp;
 
-	OPENNI_PRINTF("got depth %dx%d x 16b",
-				  m_imageSize.width,
-				  m_imageSize.height);
+//	OPENNI_PRINTF("got depth %dx%d x 16b",
+//				  m_imageSize.width,
+//				  m_imageSize.height);
 
 	mGrabWaitCondition.wakeAll();
 
@@ -731,25 +750,17 @@ void OpenNIFileAcquisition::run()
 	{
 #ifdef HAS_OPENNI2
 		int changedIndex=0;
-
-#ifndef DIRECT_GRAB
-		mOpenNIStatus = OpenNI::waitForAnyStream(m_streams, 2, &changedIndex);
-//		OPENNI_PRINTF("waitForAnyStream returned with changed = %d !!",
-//					  changedIndex);
-		if (mOpenNIStatus != STATUS_OK)
+		if(mFreeRun)
 		{
-			OPENNI_PRINTF("UpdateData failed wait 100ms");
-			usleep(100000);
+			mOpenNIStatus = OpenNI::waitForAnyStream(m_streams, 2, &changedIndex);
+			//		OPENNI_PRINTF("waitForAnyStream returned with changed = %d !!",
+			//					  changedIndex);
+			if (mOpenNIStatus != STATUS_OK)
+			{
+				OPENNI_PRINTF("UpdateData failed wait 100ms");
+				usleep(100000);
+			}
 		}
-#else
-		mOpenNIStatus = STATUS_ERROR;
-		if(1)
-		{
-			OPENNI_PRINTF("stubbed");
-			usleep(100000);
-		}
-#endif
-
 #else
 		mOpenNIStatus = mContext.WaitOneUpdateAll(mDepthGenerator);
 		if (mOpenNIStatus != XN_STATUS_OK)
@@ -866,7 +877,7 @@ IplImage * OpenNIFileAcquisition::readImageRGB32()
 	}
 
 	int mode = (int)round(m_video_properties.mode);
-	OPENNI_PRINTF("mode = %d", mode);
+	//OPENNI_PRINTF("mode = %d", mode);
 	switch(mode)
 	{
 	default:
@@ -1004,7 +1015,11 @@ t_video_properties OpenNIFileAcquisition::updateVideoProperties()
 
 //	m_video_properties. = cvGetCaptureProperty(m_capture, );
 	m_video_properties.pos_msec = m_depth_timestamp;
+#ifdef HAS_OPENNI2
+//	m_video_properties.frame_count = mDep;
+#else
 	m_video_properties.pos_frames =	m_got_depth;
+#endif
 	m_video_properties.pos_avi_ratio =	-1.;
 	m_video_properties.frame_width =	m_imageSize.width;
 	m_video_properties.frame_height =	m_imageSize.height;
@@ -1012,7 +1027,13 @@ t_video_properties OpenNIFileAcquisition::updateVideoProperties()
 //	m_video_properties.fourcc_dble =	cvGetCaptureProperty(m_capture, CV_CAP_PROP_FOURCC );/*4-character code of codec */
 //		char   fourcc[5] =	cvGetCaptureProperty(m_capture, FOURCC coding CV_CAP_PROP_FOURCC 4-character code of codec */
 //		char   norm[8] =		cvGetCaptureProperty(m_capture, Norm: pal, ntsc, secam */
-	m_video_properties.frame_count =	m_got_depth;
+#ifdef HAS_OPENNI2
+	m_video_properties.frame_count =	mDevice.getPlaybackControl()->getNumberOfFrames(mDepthGenerator);
+#else
+	OPENNI_PRINTF("not implemented for frame_count");
+#endif
+
+
 	//m_video_properties.format =			cvGetCaptureProperty(m_capture, CV_CAP_PROP_FORMAT );/*The format of the Mat objects returned by retrieve() */
 	m_video_properties.mode =	m_image_mode; /*A backend-specific value indicating the current capture mode */
 //	m_video_properties.brightness =		cvGetCaptureProperty(m_capture, CV_CAP_PROP_BRIGHTNESS );/*Brightness of the image (only for cameras) */
@@ -1052,7 +1073,6 @@ int OpenNIFileAcquisition::setVideoProperties(t_video_properties props)
 			break;
 		case OPENNI_MODE_3D:
 			break;
-
 		}
 		m_image_mode = mode;
 	}
@@ -1064,13 +1084,22 @@ int OpenNIFileAcquisition::setVideoProperties(t_video_properties props)
 /** Return the absolute position to be stored in database (needed for post-processing or permanent encoding) */
 unsigned long long OpenNIFileAcquisition::getAbsolutePosition()
 {
+#ifdef HAS_OPENNI2
+	return m_video_properties.pos_frames;
+#else
 	OPENNI_PRINTF("not implemented");
 	return 0;
+#endif
 }
 
 void OpenNIFileAcquisition::rewindMovie()
 {
+#ifdef HAS_OPENNI2
+	mDevice.getPlaybackControl()->seek(mDepthGenerator, 0);
+	mDevice.getPlaybackControl()->seek(mImageGenerator, 0);
+#else
 	OPENNI_PRINTF("not implemented");
+#endif
 }
 
 bool OpenNIFileAcquisition::endOfFile()
@@ -1082,7 +1111,12 @@ bool OpenNIFileAcquisition::endOfFile()
 /** @brief Go to absolute position in file (in bytes from start) */
 void OpenNIFileAcquisition::rewindToPosMovie(unsigned long long position)
 {
+#ifdef HAS_OPENNI2
+	mDevice.getPlaybackControl()->seek(mDepthGenerator, position);
+	mDevice.getPlaybackControl()->seek(mImageGenerator, position);
+#else
 	OPENNI_PRINTF("not implemented");
+#endif
 }
 
 /** @brief Read next frame */
@@ -1095,14 +1129,24 @@ bool OpenNIFileAcquisition::GetNextFrame()
  */
 void OpenNIFileAcquisition::setAbsolutePosition(unsigned long long newpos)
 {
+#ifdef HAS_OPENNI2
+	mDevice.getPlaybackControl()->seek(mDepthGenerator, newpos);
+	mDevice.getPlaybackControl()->seek(mImageGenerator, newpos);
+#else
 	OPENNI_PRINTF("not implemented");
+#endif
 }
 
 /** go to frame position in file
  */
 void OpenNIFileAcquisition::setAbsoluteFrame(int frame)
 {
+#ifdef HAS_OPENNI2
+	mDevice.getPlaybackControl()->seek(mDepthGenerator, frame);
+	mDevice.getPlaybackControl()->seek(mImageGenerator, frame);
+#else
 	OPENNI_PRINTF("not implemented");
+#endif
 }
 
 
