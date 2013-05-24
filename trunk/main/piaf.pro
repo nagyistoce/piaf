@@ -72,13 +72,17 @@ contains(DEFINES, "HAS_OPENNI") {
 # || contains(DEFINES, "HAS_OPENNI2") {
 	message(" + Add support for OPENNI")
 
+	# common
 	# Live video source
-	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h
-	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp
-
+	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h \
+		$$LEGACYPATH/acquisitions/video/inc/openni_common.h
+	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp \
+		$$LEGACYPATH/acquisitions/video/src/openni_common.cpp
+	!contains(DEFINES, "HAS_OPENNI2") {
 	# Live video source
 	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_file_acquisition.h
 	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_file_acquisition.cpp
+	}
 
 }
 
