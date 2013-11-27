@@ -23,45 +23,6 @@
 #include <QDir>
 #include <QApplication>
 
-//---------------------------------------------------------------------------
-// Macros
-//---------------------------------------------------------------------------
-#ifdef HAS_OPENNI
-
-#define CHECK_RC(rc, what)											\
-	if (rc != XN_STATUS_OK)											\
-	{																\
-		fprintf(stderr, "[OpenNI %d] %s:%d : '%s' failed: '%s'\n",	\
-				m_idx_device, __func__, __LINE__,					\
-				what, xnGetStatusString(rc));						\
-		fprintf(stderr, "\n"); fflush(stderr);						\
-	}
-
-#define CHECK_XN_STATUS checkOpenNIError(__func__, __LINE__)
-#endif // v1
-
-#ifdef HAS_OPENNI2
-#define XN_STATUS_OK	STATUS_OK
-
-bool checkOpenNIStatus(openni::Status status, const char *display_error)
-{
-	if(status != openni::STATUS_OK)
-	{
-		DEBUG_MSG("'%s' failed: err=%d='%s'\n",
-				  display_error, (int)status,
-				  openni::OpenNI::getExtendedError());
-		return false;
-	}
-
-	return true;
-}
-
-#define CHECK_RC(rc, what)	checkOpenNIStatus(rc, what)
-
-//#define CHECK_XN_STATUS checkOpenNIError(__func__, __LINE__)
-#define CHECK_XN_STATUS (checkOpenNIStatus(mOpenNIStatus, __func__)?0:1)
-#endif // v2
-
 
 #define OPENNI_PRINTF(...) { \
 	fprintf(stderr, "[OpenNI %p '%s'']::%s:%d : ", \
@@ -165,7 +126,9 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 				if(checkOpenNIError(__func__, __LINE__) != 0)
 				{
 					PIAF_MSG(SWLOG_ERROR, "Could not start Depth Generator.");
+#ifdef HAS_OPENNI2
 					mDepthGenerator.destroy();
+#endif
 				}
 
 				/*
@@ -596,7 +559,7 @@ int OpenNIFileAcquisition::setLEDMode(int led_mode)
 
 int OpenNIFileAcquisition::acquireFrameNow()
 {
-
+#ifdef HAS_OPENNI2
 	int changedIndex;
 	openni::Status rc = openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex);
 	if (rc != openni::STATUS_OK)
@@ -659,7 +622,7 @@ int OpenNIFileAcquisition::acquireFrameNow()
 			m_depthFrame.getHeight();
 
 	setRawDepthBuffer( pDepthBufferVoid, timestamp );
-
+#endif
 	return 0;
 }
 

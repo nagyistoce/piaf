@@ -822,17 +822,19 @@ void VideoPlayerTool::display_frame()
 	}
 
 	IplImage * lastImage = NULL;
-	if(!playGrayscale) {
+	//if(!playGrayscale)
+	{
 		//buffersize = theSize.width*theSize.height*4;
 
 		//m_fileVA->readImageRGB32NoAcq(detailsImage->bits(), &buffersize);
 		lastImage = m_fileVA->readImageRGB32();
 
-	} else {
+	}
+//  else {
 //		buffersize = theSize.width*theSize.height;
 //		m_fileVA->readImageYNoAcq(detailsImage->bits(), &buffersize);
-		lastImage = m_fileVA->readImageY();
-	}
+//		lastImage = m_fileVA->readImageY();
+//	}
 
 	QImage qImage = iplImageToQImage(lastImage, true);
 

@@ -81,6 +81,9 @@ public:
 	/** @brief Read image as data of the selected format */
 	IplImage * readImage();
 
+	/** @brief Read Raw image as data of the selected format */
+	IplImage * readImageRaw();
+
 	/** @brief Grabs one image and convert to RGB32 coding format
 		if sequential mode, return last acquired image, else read and return image
 

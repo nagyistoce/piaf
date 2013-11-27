@@ -107,7 +107,6 @@ int g_EMAMW_debug_mode = SWLOG_DEBUG;
 				} \
 			}
 
-
 EmaMainWindow::EmaMainWindow(QWidget *parent)
 	: QMainWindow(parent), ui(new Ui::EmaMainWindow),
 	  mSettings( PIAFWKFL_SETTINGS ),
@@ -2320,7 +2319,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 	// check if there are OpenNI supported devices are connected
 #if defined(HAS_OPENNI) 
-#|| defined(HAS_OPENNI2)
+//|| defined(HAS_OPENNI2)
 	if(!mOpenNIItem)
 	{
 		mOpenNIItem = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("OpenNI"));

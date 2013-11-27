@@ -761,6 +761,12 @@ CvHaarClassifierCascade* cascade = NULL;
 
 
 void findFace() {
+	static int count = 0;
+	count++;
+	if(count <= 1)
+	{
+		return;
+	}
 	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
 	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
 	unsigned char * imageIn  = (unsigned char *)imIn->buffer;
@@ -846,7 +852,7 @@ void signalhandler(int sig)
 			sig, sys_siglist[sig], getpid());
 	signal(sig, signalhandler);
 	
-	if(sig != SIGUSR1) {
+	if(sig != SIGUSR1 && sig != 27) {
 		fprintf(stderr, "[%s] RECEIVED SIGNAL %d = '%s' process %d => exit(0)\n",
 				__FILE__,
 				sig, sys_siglist[sig], getpid());

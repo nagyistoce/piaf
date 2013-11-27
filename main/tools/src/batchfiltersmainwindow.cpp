@@ -968,14 +968,14 @@ void BatchFiltersThread::run()
 									IplImage * readImage = NULL;
 									int ret = -1;
 									if(read_frame) {
-										if(mBatchOptions.use_grey)
-										{
+										//if(mBatchOptions.use_grey)
+										//{
 											//ret = fva->readImageYNoAcq((uchar *)image.buffer, &buffersize);
-											readImage = fva->readImageY();
-										} else {
+										//	readImage = fva->readImageY();
+										//} else {
 											//ret = fva->readImageRGB32NoAcq((uchar *)image.buffer, &buffersize);
 											readImage = fva->readImageRGB32();
-										}
+										//}
 										if(readImage) {
 											ret = 0;
 										}

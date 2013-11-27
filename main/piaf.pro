@@ -74,7 +74,8 @@ contains(DEFINES, "HAS_OPENNI") {
 
 	# common
 	# Live video source
-	HEADERS +=  $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h \
+	HEADERS += \
+		$$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h \
 		$$LEGACYPATH/acquisitions/video/inc/openni_common.h
 	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp \
 		$$LEGACYPATH/acquisitions/video/src/openni_common.cpp
