@@ -74,7 +74,7 @@ SOURCES += \
 	../colibri/src/imgutils.cpp \
 	../main/tools/src/swimage_utils.cpp
 
-HEADERS += inc/colibrimainwindow.h \
+HEADERS += \
 	../colibri/inc/imgutils.h \
 	../main/tools/inc/swimage_utils.h
 
