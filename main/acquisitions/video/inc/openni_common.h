@@ -42,8 +42,6 @@ using namespace xn;
 #endif // HAS_OPENNI
 
 
-
-
 #ifdef HAS_OPENNI2
 #include <OniCAPI.h>
 #include <OniCEnums.h>
@@ -143,12 +141,13 @@ void init_OpenNI_depth_LUT();
 #define XN_STATUS_OK	STATUS_OK
 
 /** \brief Check OpenNI status */
-bool checkOpenNIStatus(openni::Status status, const char *display_error);
+bool checkOpenNIStatus(openni::Status status,
+					   const char *display_error, int line);
 
 #define CHECK_RC(rc, what)	checkOpenNIStatus(rc, what)
 
 //#define CHECK_XN_STATUS checkOpenNIError(__func__, __LINE__)
-#define CHECK_XN_STATUS (checkOpenNIStatus(mOpenNIStatus, __func__)?0:1)
+#define CHECK_XN_STATUS (checkOpenNIStatus(mOpenNIStatus, __func__, __LINE__)?0:1)
 #endif // v2
 
 
@@ -164,8 +163,11 @@ class OpenNICommonAcquisition : public VirtualDeviceAcquisition
 {
 public:
 
-	/** @brief Default constructor with path of OpenNI file */
-	OpenNICommonAcquisition(const char * filenameONI);
+	/** @brief Default constructor with path of OpenNI file, NULL for live
+
+	*/
+	OpenNICommonAcquisition(const char * filenameONI = NULL);
+
 	~OpenNICommonAcquisition();
 
 	/** @brief Return true if acquisition device is ready */
@@ -204,7 +206,6 @@ public:
 	/** @brief Read image as data of selected format */
 	IplImage * readImage();
 
-
 	/** @brief Grabs one image and convert to RGB32 coding format
 		if sequential mode, return last acquired image, else read and return image
 
@@ -225,7 +226,6 @@ public:
 		\return NULL if error
 		*/
 	IplImage * readImageDepth();
-
 
 	/** Return the absolute position to be stored in database (needed for post-processing or permanent encoding) */
 	unsigned long long getAbsolutePosition();
@@ -258,13 +258,16 @@ public:
 
 protected:
 	/// value used for registering in factory
-	static std::string mRegistered;
-
-private:
-	int init();
-
+	//static std::string mRegistered;
+	bool m_isLive;	///< true if live device
 	/// Free-run mode : if set the thread run() does the acquisition in real time
 	bool mFreeRun;
+
+	QList<t_video_output_format> mOutputFormats;
+	int mOutputFormatIndex;
+//private:
+	int init();
+
 
 	/// Index of device for CpenCV
 	int m_idx_device;
