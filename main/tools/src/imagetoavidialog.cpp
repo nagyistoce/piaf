@@ -123,7 +123,7 @@ void ImageToAVIDialog::on_goButton_clicked()
 		QString fileName = (*it);
 		++it;
 
-		fprintf(stderr, "ImgToAVI::%s:%d : loading file '%s' %g %% = %04d / %04d\n", __func__, __LINE__,
+		fprintf(stderr, "ImgToAVI::%s:%d : loading file '%s' %d %% = %04d / %04d\n", __func__, __LINE__,
 				fileName.toAscii().data(), progress, file_count, (int)m_filesList.count());
 		inputImage.load(fileName);
 

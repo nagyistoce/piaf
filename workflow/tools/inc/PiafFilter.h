@@ -20,7 +20,7 @@
 
 // Qt includes
 #include <QList>
-#include <QLineEdit>
+#include <QObject>
 
 
 // SisellWorkshop filters defines
@@ -34,7 +34,7 @@
 #include "time_histogram.h"
 
 #define PIAFFILTER_MSG(...)	{ \
-			fprintf(stderr, "PIAFFILER  %s:%d: ", __FILE__, __func__, __LINE__); \
+			fprintf(stderr, "PIAFFILTER  [%s] %s:%d: ", __FILE__, __func__, __LINE__); \
 			fprintf(stderr, __VA_ARGS__); fprintf(stderr,"\n"); \
 			}
 

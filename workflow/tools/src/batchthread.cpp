@@ -51,7 +51,7 @@ BatchFiltersThread::BatchFiltersThread()
 	if(mpBatchTask)
 	{
 		mpBatchTask->options.reload_at_change = true;
-		mpBatchTask->options.use_grey = false;
+		mpBatchTask->options.output_mode = false;
 	}
 	mDisplayImage = NULL;
 }
@@ -74,7 +74,7 @@ void printBatchOptions(t_batch_options * pOptions)
 			"\t\t record_output=%c\n"
 			"\t\t sequence_name='%s'\n"
 			, pOptions,
-			pOptions->use_grey ? 'T':'F',
+			pOptions->output_mode ? 'T':'F',
 			pOptions->reload_at_change ? 'T':'F',
 			pOptions->view_image ? 'T':'F',
 			pOptions->record_output ? 'T':'F',
@@ -452,6 +452,8 @@ void BatchFiltersThread::run()
 							FileVideoAcquisition * fva =
 									(FileVideoAcquisition *)new FFmpegFileVideoAcquisition(
 										item->absoluteFilePath.toUtf8().data());
+							// Set the prefered mode
+							fva->setOutputFormat(mpBatchTask->options.output_mode);
 							CvSize size = cvSize(fva->getImageSize().width,
 												 fva->getImageSize().height);
 							if(size.width <=0 || size.height <=0)
@@ -472,7 +474,8 @@ void BatchFiltersThread::run()
 										 item->absoluteFilePath.toAscii().data() );
 								IplImage * loadedImage = swCreateImage(size,
 															IPL_DEPTH_8U,
-															mpBatchTask->options.use_grey ? 1:4);
+															mpBatchTask->options.output_mode ? 1:4);
+
 								// Loop on images
 								IplImage * outputImage = NULL;
 								int frame_idx = 0; // local file frame counter
@@ -506,11 +509,12 @@ void BatchFiltersThread::run()
 									IplImage * inputImage = NULL;
 									bool read_frame = fva->GetNextFrame();
 									int ret = -1;
-									if(read_frame) {
-										if(mpBatchTask->options.use_grey)
+									if(read_frame)
+									{
+										if(mpBatchTask->options.output_mode)
 										{
 											//ret = fva->readImageYNoAcq((uchar *)image.buffer, &buffersize);
-											inputImage = fva->readImageY();
+											inputImage = fva->readImage();
 											if(inputImage)
 											{
 												ret = 0;

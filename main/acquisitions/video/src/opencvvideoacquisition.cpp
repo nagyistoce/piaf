@@ -244,6 +244,35 @@ int OpenCVVideoAcquisition::stopAcquisition()
 
 	return 0;
 }
+/** \brief Get the list of output format */
+QList<t_video_output_format> OpenCVVideoAcquisition::getOutputFormats()
+{
+	t_video_output_format RGB32format;
+	RGB32format.id = 0;
+	strcpy(RGB32format.description, "BGR32");
+	RGB32format.ipl_depth = IPL_DEPTH_8U;
+	RGB32format.ipl_nchannels = 4;
+	QList<t_video_output_format> out;
+	out.append(RGB32format);
+	DEBUG_MSG("NOT IMPLEMENTED => only RGB32");
+
+	return out;
+}
+
+/** \brief Set the output format */
+int OpenCVVideoAcquisition::setOutputFormat(int id)
+{
+	DEBUG_MSG("NOT IMPLEMENTED => id=%d", id);
+
+	return id;
+}
+
+/** @brief Read image as data of selected format */
+IplImage * OpenCVVideoAcquisition::readImage()
+{
+	DEBUG_MSG("NOT IMPLEMENTED => return readimageRGB32()");
+	return readImageRGB32();
+}
 
 IplImage * OpenCVVideoAcquisition::readImageRaw()
 {

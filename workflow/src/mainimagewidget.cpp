@@ -57,6 +57,7 @@ MainImageWidget::MainImageWidget(QWidget *parent) :
 	m_ui->setupUi(this);
 
 	m_ui->OSDLabel->setVisible(false);
+	m_ui->OSDLabel_2->setVisible(false);
 
 	m_ui->globalImageLabel->switchToSmartZoomMode(true);
 	m_ui->globalImageLabel->setEditMode(EDITMODE_ZOOM);
@@ -193,6 +194,7 @@ void MainImageWidget::slotUpdateImage()
 		}
 
 		m_ui->OSDLabel->setText(OSDStr);
+		m_ui->OSDLabel_2->setText(OSDStr);
 
 		m_ui->globalImageLabel->setRefImage(imageIn);
 
@@ -283,6 +285,7 @@ int MainImageWidget::setImage(IplImage * imageIn,
 void MainImageWidget::on_depthButton_toggled(bool checked)
 {
 	m_ui->OSDLabel->setVisible(checked);
+	m_ui->OSDLabel_2->setVisible(checked);
 
 }
 

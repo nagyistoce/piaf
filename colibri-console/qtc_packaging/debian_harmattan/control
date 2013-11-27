@@ -1,0 +1,14 @@
+Source: colibri-console
+Section: user/other
+Priority: optional
+Maintainer: Christophe Seyve <tof@tofx230>
+Build-Depends: debhelper (>= 5), libqt4-dev
+Standards-Version: 3.7.3
+Homepage: <insert the upstream URL, if relevant>
+
+Package: colibri-console
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: <insert up to 60 chars description>
+ <insert long description, indented with spaces>
+XSBC-Maemo-Display-Name: colibri-console

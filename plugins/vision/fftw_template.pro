@@ -30,7 +30,8 @@ linux-g++:TMAKE_CXXFLAGS += -g -Wall -O2 \
 HEADERS =	
 SOURCES =	$$(SRCNAME).cpp 
 
-INCLUDEPATH +=          /usr/local/include/SwPlugin/
+INCLUDEPATH += /usr/local/include/SwPlugin/
+INCLUDEPATH += ../../piaflib/inc
 
 DEPENDPATH +=		.
 DEPENDPATH +=		$$INCLUDEPATH

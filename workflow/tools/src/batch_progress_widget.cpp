@@ -105,7 +105,7 @@ void BatchProgressWidget::allocateBatchTask()
 	}
 
 	mpBatchTask->options.reload_at_change = ui->reloadPluginCheckBox->isChecked();
-	mpBatchTask->options.use_grey = ui->greyButton->isChecked();
+	mpBatchTask->options.output_mode = ui->greyButton->isChecked();
 	mpBatchTask->options.record_output = ui->recordButton->isChecked();
 	mpBatchTask->options.view_image = ui->viewButton->isChecked() ;
 
@@ -449,7 +449,7 @@ void BatchProgressWidget::on_viewButton_toggled(bool checked)
 
 void BatchProgressWidget::on_greyButton_toggled(bool checked)
 {
-	mpBatchTask->options.use_grey = checked;
+	mpBatchTask->options.output_mode = checked;
 	if(checked)
 	{
 		ui->greyButton->setText(tr("Grey"));

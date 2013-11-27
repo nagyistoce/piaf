@@ -59,7 +59,7 @@ typedef struct {
 /** \brief Processing and display options
 */
 typedef struct {
-	bool use_grey;						///< use grayscale input image
+	int output_mode;						///< Output mode ID depending on user choice
 	bool reload_at_change;				///< reload plugin when file changes (usefull when all files aren't the same size)
 	bool record_output;					///< record output
 	bool view_image;					///< periodically display image when processing

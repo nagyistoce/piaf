@@ -27,8 +27,10 @@
 
 #include "swimage_utils.h"
 
+#ifndef CONSOLE
 //// Qt includes
 #include <QMessageBox>
+#endif
 
 // standard includes
 #include <stdio.h>
@@ -467,13 +469,17 @@ int FilterSequencer::loadFilters()
 		strcat(home, "/.piaf_plugins");
 		f = fopen(home, "r");
 		if(!f) {
+#ifndef CONSOLE
+
 			QMessageBox::critical(NULL,
 				tr("Filter Error"),
 				tr("Cannot find filter list, check installation."),
 				QMessageBox::Abort,
 				QMessageBox::NoButton,
 				QMessageBox::NoButton);
-
+#else
+			PIAF_MSG(SWLOG_ERROR, "Cannot find filter list, check installation");
+#endif
 			return 0;
 		}
 		PIAF_MSG(SWLOG_INFO, "Loading files from '%s'", home);
@@ -952,9 +958,11 @@ int FilterSequencer::loadSequence(char * filename)
 						 "seems not to be unknown.\n",
 						this, line);
 				QString errMsg = tr("Filter binary '")+line+ tr("' seems not to be unknown.");
+#ifndef CONSOLE
 				QMessageBox::critical(NULL, tr("Plugin loading error"),
 									  errMsg
 									  );
+#endif
 				emit signalPluginError(errMsg);
 
 			} else {
@@ -1243,6 +1251,7 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut,
 			fprintf(stderr, "[FilterSequencer]::%s:%d : a plugin failed & auto-reload is OFF\n",
 					__func__, __LINE__
 					);
+#ifndef CONSOLE
 			int answer = QMessageBox::question(NULL, tr("A plugin crashed"),
 											   tr("A plugin in sequence has crashed. "
 												  "Do you want to reload the whole sequence ? If you answer 'No', only the plugins with success will be restored"),
@@ -1260,6 +1269,9 @@ int FilterSequencer::processImage(IplImage * imageIn, IplImage ** pimageOut,
 				loadSequence(getPluginSequenceFile());
 			}
 			else
+#else
+			// no dot reload
+#endif
 			{
 				QList<PiafFilter *>::iterator pvit;
 				for(pvit = crashedPlugins.begin();

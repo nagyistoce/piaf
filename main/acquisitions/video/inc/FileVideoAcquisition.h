@@ -76,6 +76,9 @@ public:
 
 	/** return file name */
 	char * getDeviceName() { return m_videoFileName; }
+
+	/** return list of supported outputs */
+
 	
 	/** Constructor with SwV4LDevice pointer entry
 		\param aVD SwV4LDevice class entry. Rare usage.

@@ -42,11 +42,16 @@ extern "C" {
 }
 
 #include "huffman.h"
+#include <execinfo.h>
 
 
 #define g_debug_V4L2Device	0
 #define V4L2_printf(...)	{ \
+		void *bt[1024]; \
+		int bt_size; \
+		bt_size = backtrace(bt, 1024); \
 		fprintf(stderr,"[V4L2 '%s']::%s:%d: ",mVideoDevice,__func__,__LINE__); \
+		for(int bti=0;bti<bt_size; ++bti) { fprintf(stderr, "."); } \
 		fprintf(stderr,__VA_ARGS__);fprintf(stderr,"\n"); fflush(stderr);}
 
 #define CLEAR(x) memset (&(x), 0, sizeof (x))
@@ -196,10 +201,12 @@ void V4L2Device::setSequentialMode(bool on)
 /** \brief Start acquisition */
 int V4L2Device::startAcquisition()
 {
+	V4L2_printf("Calling start_capturing()...");
 	int retval = start_capturing();
-
-	updateVideoProperties();
-
+	if(retval >= 0)
+	{
+		updateVideoProperties();
+	}
 	return retval;
 }
 
@@ -356,11 +363,19 @@ int V4L2Device::close_device()
 		V4L2_printf("closing opened device fd=%d\n", vd.fd);
 		int ret = close(vd.fd);
 		vd.fd = 0;
-		int errnum = errno;
-		V4L2_printf("closing fd=%d returned %d with err=%d='%s'\n",
-					vd.fd,
-					ret, errnum, strerror(errnum)
-					);
+		if(ret < 0)
+		{
+			int errnum = errno;
+			V4L2_printf("closing fd=%d returned %d with err=%d='%s'\n",
+						vd.fd,
+						ret, errnum, strerror(errnum)
+						);
+		}
+		else
+		{
+			V4L2_printf("closing fd=%d returned %d: OK\n", vd.fd, ret );
+		}
+
 		return ret;
 	}
 
@@ -595,6 +610,35 @@ V4L2_CID_EXPOSURE_ABSOLUTE value: 100
 	printVideoProperties(&m_video_properties);
 
 	return 0;
+}
+/** \brief Get the list of output format */
+QList<t_video_output_format> V4L2Device::getOutputFormats()
+{
+	t_video_output_format RGB32format;
+	RGB32format.id = 0;
+	strcpy(RGB32format.description, "BGR32");
+	RGB32format.ipl_depth = IPL_DEPTH_8U;
+	RGB32format.ipl_nchannels = 4;
+	QList<t_video_output_format> out;
+	out.append(RGB32format);
+	DEBUG_MSG("NOT IMPLEMENTED => only RGB32");
+
+	return out;
+}
+
+/** \brief Set the output format */
+int V4L2Device::setOutputFormat(int id)
+{
+	DEBUG_MSG("NOT IMPLEMENTED => id=%d", id);
+
+	return id;
+}
+
+/** @brief Read image as data of selected format */
+IplImage * V4L2Device::readImage()
+{
+	DEBUG_MSG("NOT IMPLEMENTED => return readimageRGB32()");
+	return readImageRGB32();
 }
 
 
@@ -869,8 +913,8 @@ int V4L2Device::convert2Y(unsigned char * src, unsigned char * dest)
    //dy = Y[CurBuffer].bits();
    //du = U[CurBuffer].bits();
    //dv = V[CurBuffer].bits();
-	unsigned char *dy, *du, *dv;
-	int i;
+//unused:	unsigned char *dy, *du, *dv;
+//unused:	int i;
 	int n = m_imageSize.width*m_imageSize.height;
 
 	// Conversion RGB 32...certainement à compléter !
@@ -1015,7 +1059,7 @@ int V4L2Device::convert2Y(unsigned char * src, unsigned char * dest)
 /* Stop acquisition */
 int V4L2Device::stopAcquisition()
 {
-	V4L2_printf("Call VDClose...");
+	V4L2_printf("=> Call VDClose...");
 	return VDclose();
 }
 
@@ -1083,7 +1127,8 @@ int V4L2Device::init_mmap()
 					  vd.fd, buf.m.offset);
 
 		fprintf(stderr, "\tV4L2::%s:%d : buffers[n_buffers=%u].start = %p length=%d\n", 
-					__func__, __LINE__, n_buffers, buffers[n_buffers].start, buffers[n_buffers].length); 
+					__func__, __LINE__,
+				n_buffers, buffers[n_buffers].start, (int)buffers[n_buffers].length);
 		if (MAP_FAILED == buffers[n_buffers].start) {
 			errno_exit ("mmap");
 		}
@@ -1198,6 +1243,7 @@ int V4L2Device::start_capturing() {
 	initialised = true;
 	mGrabEnabled = true;
 
+
 	return 0;
 }
 
@@ -1243,11 +1289,13 @@ int V4L2Device::changeSize(tBoxSize * newSize)
 	h = m_video_properties.frame_height;
 
 	V4L2_printf(" => effective size=%dx%d \n", w, h);
+
 	unsigned char first = 1;
 	if(buffers) {
 		first = 0;
 		stop_capturing();
 	}
+
 	// Init memory map
     init_mmap();
 	
@@ -1609,7 +1657,7 @@ int V4L2Device::VDopen(char * device, tBoxSize *newSize)
 			__func__, __LINE__, device, 
 			!newSize?-1:(int)newSize->width, !newSize?-1:(int)newSize->height); fflush(stderr);
 
-	int q = 85;
+//unused:	int q = 85;
 	int maxc;
 	
 	if(mVideoDevice) {
@@ -2440,17 +2488,17 @@ int V4L2Device::setpicture(int br, int hue, int col, int cont, int white)
 	if(vd.fd ==-1)
 		return -1;
 
-	video_picture tmpPicture;
-	if(br>=0)
-		tmpPicture.brightness = br;
-	if(hue>=0)
-		tmpPicture.hue = hue;
-	if(col>=0)
-		tmpPicture.colour = col;
-	if(cont>=0)
-		tmpPicture.contrast = cont;
-	if(white>=0)
-		tmpPicture.whiteness = white;
+//	video_picture tmpPicture;
+//	if(br>=0)
+//		tmpPicture.brightness = br;
+//	if(hue>=0)
+//		tmpPicture.hue = hue;
+//	if(col>=0)
+//		tmpPicture.colour = col;
+//	if(cont>=0)
+//		tmpPicture.contrast = cont;
+//	if(white>=0)
+//		tmpPicture.whiteness = white;
 	v4l_setpicture(br, hue, col, cont, white);
 
 	return 0;

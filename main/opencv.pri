@@ -12,34 +12,42 @@
 LIBSDIR =
 LIBS_EXT = dylib
 
+BASEPATH= /usr
+linux-arm* {
+        message("Opencv.pri : compilation for ARM")
+        BASEPATH=/opt/eldk-5.3/armv7a-hf/sysroots/armv7ahf-vfp-neon-linux-gnueabi/usr
+}
 
-linux-g++: LIBS_EXT = so
+
+linux-g++*: LIBS_EXT = so
 unix: {
+	QMAKE_LIBDIR_QT -= /usr/lib
+
 	##################### OPENCV >= 2.2 #####################
 	# Test if OpenCV library is present
-	exists( /usr/local/include/opencv2/core/core.hpp ) {
-		message("OpenCV >= 2.2 found in /usr/local/include/opencv2/")
+	exists( $$BASEPATH/local/include/opencv2/core/core.hpp ) {
+		message("OpenCV >= 2.2 found in $$BASEPATH/local/include/opencv2/")
 		DEFINES += OPENCV_22 OPENCV2
-		INCLUDEPATH += /usr/local/include/opencv2
+		INCLUDEPATH += $$BASEPATH/local/include/opencv2
 
-		CVINSTPATH = /usr/local
-		CVINCPATH = /usr/local/include/opencv2
+		CVINSTPATH = $$BASEPATH/local
+		CVINCPATH = $$BASEPATH/local/include/opencv2
 
-		LIBS += -L/usr/local/lib
-		LIBSDIR = /usr/local/lib
+		LIBS += -L$$BASEPATH/local/lib
+		LIBSDIR = $$BASEPATH/local/lib
 	} else {
-		exists( /usr/include/opencv2/core/core.hpp ) {
-	                message("OpenCV >= 2.2 found in /usr/include/opencv2/")
+		exists( $$BASEPATH/include/opencv2/core/core.hpp ) {
+	                message("OpenCV >= 2.2 found in $$BASEPATH/include/opencv2/")
 
 			DEFINES += OPENCV_22 OPENCV2
 
-			#message("OpenCV found in /usr/include.")
-			CVINSTPATH = /usr
-			CVINCPATH = /usr/include/opencv2
-			INCLUDEPATH += /usr/include/opencv2
+			#message("OpenCV found in $$BASEPATH/include.")
+			CVINSTPATH = $$BASEPATH
+			CVINCPATH = $$BASEPATH/include/opencv2
+			INCLUDEPATH += $$BASEPATH/include/opencv2
 
-			LIBS += -L/usr/lib
-			LIBSDIR = /usr/lib
+			LIBS += -L$$BASEPATH/lib
+			LIBSDIR = $$BASEPATH/lib
 		} else {
                     # for MacPorts
                     exists( /opt/local/include/opencv2/core/core.hpp ) {
@@ -47,7 +55,7 @@ unix: {
 
                             DEFINES += OPENCV_22 OPENCV2
 
-                            #message("OpenCV found in /usr/include.")
+                            #message("OpenCV found in $$BASEPATH/include.")
                             CVINSTPATH = /opt/local/
                             CVINCPATH = /opt/local/include/opencv2
                             INCLUDEPATH += /opt/local/include/opencv2
@@ -58,26 +66,26 @@ unix: {
                     } else {
                         ##################### OPENCV <= 2.1 #####################
 			# Test if OpenCV library is present
-			exists( /usr/local/include/opencv/cv.hpp ) {
+			exists( $$BASEPATH/local/include/opencv/cv.hpp ) {
 				DEFINES += OPENCV_21 OPENCV2
-				#message("OpenCV found in /usr/local/include.")
-				INCLUDEPATH += /usr/local/include/opencv
+				#message("OpenCV found in $$BASEPATH/local/include.")
+				INCLUDEPATH += $$BASEPATH/local/include/opencv
 
-				CVINSTPATH = /usr/local
-				CVINCPATH = /usr/local/include/opencv
+				CVINSTPATH = $$BASEPATH/local
+				CVINCPATH = $$BASEPATH/local/include/opencv
 
-				LIBS += -L/usr/local/lib
-				LIBSDIR = /usr/local/lib
+				LIBS += -L$$BASEPATH/local/lib
+				LIBSDIR = $$BASEPATH/local/lib
 			} else {
-                                exists( /usr/include/opencv/cv.hpp ) {
+                                exists( $$BASEPATH/include/opencv/cv.hpp ) {
 					DEFINES += OPENCV_21 OPENCV2
-					#message("OpenCV found in /usr/include.")
-					CVINSTPATH = /usr
-					CVINCPATH = /usr/include/opencv
-					INCLUDEPATH += /usr/include/opencv
+					#message("OpenCV found in $$BASEPATH/include.")
+					CVINSTPATH = $$BASEPATH
+					CVINCPATH = $$BASEPATH/include/opencv
+					INCLUDEPATH += $$BASEPATH/include/opencv
 
-					LIBS += -L/usr/lib
-					LIBSDIR = /usr/lib
+					LIBS += -L$$BASEPATH/lib
+					LIBSDIR = $$BASEPATH/lib
 				} else {
 					message ( "OpenCV NOT FOUND => IT WILL NOT COMPILE" )
 				}
@@ -91,12 +99,10 @@ unix: {
 	CV22_LIB = $$LIBSDIR/libopencv_core.$$LIBS_EXT
 	message ( Testing CV lib = $$CV22_LIB )
 	exists( $$CV22_LIB ) {
-		#message( " => Linking with -lcv ('$$CV_LIB' exists)")
+		message( " => Linking with -lopencv_* ('$$CV_LIB' exists)")
 		LIBS += -lopencv_core -lopencv_imgproc -lopencv_legacy -lopencv_highgui 
 		# for Haar (needed for pluigns)
 		LIBS += -lopencv_features2d -lopencv_video -lopencv_objdetect
-
-
 		DEFINES += HAS_HIGHGUI
 	} else {
 		# For Ubuntu 7.10 for example, the link option is -lcv instead of -lopencv

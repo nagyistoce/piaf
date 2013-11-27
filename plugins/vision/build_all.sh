@@ -10,10 +10,12 @@ done
 
 export SRCNAME=example
 echo " + building $SRCNAME"
-qmake fftw_template.pro && make $@ || exit 0
+qmake fftw_template.pro && make $@ 
+#|| exit 0
 
 export SRCNAME=outoffocus
 echo " + building $SRCNAME"
-qmake fftw_template.pro && make $@ || exit 0
+qmake fftw_template.pro && make $@ 
+#|| exit 0
 
 echo "Done"

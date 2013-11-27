@@ -939,7 +939,7 @@ int swReceiveImage(void * data_out, FILE * fR, int timeout_ms, bool * pstopnow)
 
 		// New reading
 		ret = fgets(framemBuffer, 1024, fR);
-		if(ret>0) {
+		if(ret) {
 
 			fprintf(stderr, SWPLUGIN_SIDE_PRINT "%s:%d RETRY : '%s'\n", __func__, __LINE__, framemBuffer);
 			header = strstr(framemBuffer, SWFRAME_HEADER);

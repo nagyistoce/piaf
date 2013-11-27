@@ -57,6 +57,7 @@ XnBool fileExists(const char *fn)
 #define SAMPLE_XML_PATH "../../../../Data/SamplesConfig.xml"
 #define SAMPLE_XML_PATH_LOCAL "SamplesConfig.xml"
 
+
 OpenNIVideoAcquisition::OpenNIVideoAcquisition(int idx_device)
 {
 	m_idx_device = idx_device;
@@ -131,7 +132,6 @@ int OpenNIVideoAcquisition::init()
 	memset(&m_video_properties, 0, sizeof(t_video_properties));
 
 	m_imageSize = cvSize(0,0);
-
 
 	ScriptNode scriptNode;
 	EnumerationErrors errors;
@@ -288,6 +288,36 @@ bool OpenNIVideoAcquisition::isDeviceReady()
 	return (nRetVal == XN_STATUS_OK);
 #endif
 }
+/** \brief Get the list of output format */
+QList<t_video_output_format> OpenNIVideoAcquisition::getOutputFormats()
+{
+	t_video_output_format RGB32format;
+	RGB32format.id = 0;
+	strcpy(RGB32format.description, "BGR32");
+	RGB32format.ipl_depth = IPL_DEPTH_8U;
+	RGB32format.ipl_nchannels = 4;
+	QList<t_video_output_format> out;
+	out.append(RGB32format);
+	DEBUG_MSG("NOT IMPLEMENTED => only RGB32");
+
+	return out;
+}
+
+/** \brief Set the output format */
+int OpenNIVideoAcquisition::setOutputFormat(int id)
+{
+	DEBUG_MSG("NOT IMPLEMENTED => id=%d", id);
+
+	return id;
+}
+
+/** @brief Read image as data of selected format */
+IplImage * OpenNIVideoAcquisition::readImage()
+{
+	DEBUG_MSG("NOT IMPLEMENTED => return readimageRGB32()");
+	return readImageRGB32();
+}
+
 
 /** \brief Start acquisition */
 int OpenNIVideoAcquisition::startAcquisition()
