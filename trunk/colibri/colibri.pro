@@ -15,7 +15,9 @@ TEMPLATE = app
 LANGUAGE = C++
 
 INCLUDEPATH += ../piaflib/inc
-DEPENDPATH += ../piaflib/inc
+INCLUDEPATH += ../workflow/tools/inc
+
+DEPENDPATH += $$INCLUDEPATH
 
 CONFIG += qt thread \
     warn_on \
@@ -55,21 +57,24 @@ win32:TARGET = $$join(TARGET,,d)
 SOURCES += src/main.cpp \
     src/colibrimainwindow.cpp \
 	src/imgutils.cpp \
-	../main/tools/src/imagewidget.cpp \
-	../main/tools/src/swimage_utils.cpp
+	../workflow/tools/src/imagewidget.cpp \
+	../main/tools/src/swimage_utils.cpp \
+	../main/tools/src/qimage_utils.cpp
 
 HEADERS += inc/colibrimainwindow.h \
 	inc/imgutils.h \
-	../main/tools/inc/imagewidget.h \
-	../main/tools/inc/swimage_utils.h
+	../workflow/tools/inc/imagewidget.h \
+	../main/tools/inc/swimage_utils.h \
+	../main/tools/inc/qimage_utils.h
 
-linux-g++: {
+linux-g++* {
 	HEADERS += \
 		../piaflib/inc/SwPluginCore.h \
-		../main/tools/inc/SwFilters.h
+		../workflow/tools/inc/PiafFilter.h
 	SOURCES += ../piaflib/src/SwPluginCore.cpp \
-		../main/tools/src/SwFilters.cpp \
-		../main/acquisitions/video/src/swvideodetector.cpp
+		../workflow/tools/src/PiafFilter.cpp \
+		../main/acquisitions/video/src/swvideodetector.cpp \
+		../main/tools/src/time_histogram.cpp
 }
 
 FORMS += ui/colibrimainwindow.ui

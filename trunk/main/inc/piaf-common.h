@@ -33,6 +33,7 @@
 #define PRINT_FIXME fprintf(stderr, "%s : %s:%d FIXME\n", __FILE__, __func__, __LINE__);
 #ifndef DEBUG_MSG
 #include <sys/time.h>
+#include <stdio.h>
 
 #define DEBUG_MSG(...) { \
 							struct timeval l_nowtv; gettimeofday(&l_nowtv, NULL); \

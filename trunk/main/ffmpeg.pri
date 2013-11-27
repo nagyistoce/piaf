@@ -45,7 +45,7 @@ system(pkg-config --exists $$PG) {
 
 	message($$PG v$$system(pkg-config --modversion $$PG) found)
 	LIBS += $$system(pkg-config --libs $$PG)
-	INCLUDEPATH += $$system(pkg-config --cflags $$PG | sed "s/\-I//g)
+	INCLUDEPATH += $$system(pkg-config --cflags $$PG | sed "s/\-I//g")
 
 	DEFINES += HAS_SWSCALE
 } else {

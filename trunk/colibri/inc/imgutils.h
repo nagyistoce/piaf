@@ -55,6 +55,7 @@
 #endif
 
 // DEBUG IMAGES DIRECTORY AND EXTENSION
+#ifndef TMP_DIRECTORY
 #ifdef LINUX //not __X11_DARWIN__
 #define TMP_DIRECTORY	"/dev/shm/"
 #define IMG_EXTENSION	".pgm"
@@ -62,6 +63,9 @@
 #define TMP_DIRECTORY	"/Users/tof/tmp/"
 #define IMG_EXTENSION	".jpg"
 #endif
+#endif // TMP_DIRECTORY
+
+
 
 // TYPEDEFS FOR MULTIPLE ARCHITECTURE TYPES (32bit, 64bit...)
 #ifndef u8
@@ -124,6 +128,9 @@ void tmReleaseImage(IplImage ** img);
 /** @brief Copy an IplIMage into another */
 void tmCopyImage(IplImage * img_src, IplImage * img_dest);
 
+
+/** @brief Convert an IplImage into another, depending on nChannels */
+void tmConvert(IplImage * img_src, IplImage * img_dest);
 
 /** @brief Fast conversion from color/16bit image to 8bit grayscale image */
 IplImage * tmFastConvertToGrayscale(IplImage * img);

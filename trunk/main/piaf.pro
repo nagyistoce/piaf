@@ -115,6 +115,7 @@ SOURCES += src/main.cpp \
     components/src/workshopimage.cpp \
     components/src/workshopmovie.cpp \
 	tools/src/imgutils.cpp \
+	tools/src/qimage_utils.cpp \
 	tools/src/workshoptool.cpp \
 	tools/src/previewimage.cpp \
     tools/src/workshopvideocapture.cpp \

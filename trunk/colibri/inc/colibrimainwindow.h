@@ -36,7 +36,7 @@
 #include "imgutils.h"
 
 #ifndef WIN32
-#include "SwFilters.h"
+#include "PiafFilter.h"
 #endif
 
 namespace Ui
@@ -100,7 +100,7 @@ private:
 
 #ifndef WIN32
 	/// Processing sequence filter
-	SwFilterManager * m_pFilterManager;
+	FilterSequencer * m_pFilterManager;
 #else
 	/// \todo port to Win32
 #endif
@@ -152,7 +152,7 @@ private:
 	void startBackgroundThread();
 #ifndef WIN32
 	/// Processing sequence filter
-	SwFilterManager mFilterManager;
+	FilterSequencer mFilterManager;
 	IplImage * mOutputImage; ///< Piaf plugin image for processing
 #else
 	/// \todo port to Win32

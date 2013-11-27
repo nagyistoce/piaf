@@ -55,8 +55,9 @@ ColibriMainWindow::ColibriMainWindow(QWidget *parent)
 		//setStyleSheet(styleSheet);
 	}
 
-	qtImage.load(":/icons/Colibri128.png");
-	ui->imageLabel->setRefImage(&qtImage);
+	// Obsolete: setRefImage now uses IplImages
+//	qtImage.load(":/icons/Colibri128.png");
+//	ui->imageLabel->setRefImage(&qtImage);
 
 	connect(&m_timer, SIGNAL(timeout()), this, SLOT(on_m_timer_timeout()));
 
@@ -613,8 +614,7 @@ void ColibriMainWindow::displayImage(IplImage * iplImage)
 	if(!iplImage) return;
 
 	// load image to display
-	qtImage = iplImageToQImage(iplImage);
-	ui->imageLabel->setRefImage(&qtImage);
+	ui->imageLabel->setRefImage(iplImage);
 }
 
 CvCapture* capture = 0;

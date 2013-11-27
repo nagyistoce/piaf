@@ -36,10 +36,6 @@ cd main
 $QMAKE piaf.pro && make $@ || print_install 
 cd ..
 
-echo " + building Colibri GUI..."
-cd colibri
-$QMAKE && make $@ || print_install
-cd ..
 
 echo " + building Workflow GUI..."
 cd workflow
@@ -47,10 +43,22 @@ $QMAKE && make $@ || print_install
 cd ..
 
 
-echo "Building plugins..."
+echo " + building plugins..."
 
 cd plugins/vision/
 ./build_all.sh $@
+
+echo " + building Colibri-console GUI..."
+cd colibri-console
+$QMAKE && make $@ || print_install
+cd ..
+
+
+echo " + building Colibri GUI..."
+cd colibri
+$QMAKE && make $@ || print_install
+cd ..
+
 
 if [ ! -n "$1" ]; then
 	echo "Build done. Run ./install.sh as root for installation"
