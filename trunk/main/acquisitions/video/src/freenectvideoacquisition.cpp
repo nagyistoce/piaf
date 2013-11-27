@@ -22,6 +22,8 @@
 
 #include "swvideodetector.h"
 
+#include "piaf-common.h"
+
 // As global for one context shared by several objects
 freenect_context * m_freenect_ctx = NULL;
 
@@ -536,6 +538,38 @@ void init_freenect_depth_LUT()
 	g_freenect_depth_grayLUT[FREENECT_RAW_UNKNOWN] = 0;
 
 }
+
+
+/** \brief Get the list of output format */
+QList<t_video_output_format> FreenectVideoAcquisition::getOutputFormats()
+{
+	t_video_output_format RGB32format;
+	RGB32format.id = 0;
+	strcpy(RGB32format.description, "BGR32");
+	RGB32format.ipl_depth = IPL_DEPTH_8U;
+	RGB32format.ipl_nchannels = 4;
+	QList<t_video_output_format> out;
+	out.append(RGB32format);
+	PIAF_MSG(SWLOG_WARNING, "NOT IMPLEMENTED => only RGB32");
+
+	return out;
+}
+
+/** \brief Set the output format */
+int FreenectVideoAcquisition::setOutputFormat(int id)
+{
+	PIAF_MSG(SWLOG_WARNING, "NOT IMPLEMENTED => id=%d", id);
+
+	return id;
+}
+
+/** @brief Read image as data of selected format */
+IplImage * FreenectVideoAcquisition::readImage()
+{
+	PIAF_MSG(SWLOG_WARNING, "NOT IMPLEMENTED => return readimageRGB32()");
+	return readImageRGB32();
+}
+
 IplImage * FreenectVideoAcquisition::readImageRaw()
 {
 	return m_depthRawImage16U;
