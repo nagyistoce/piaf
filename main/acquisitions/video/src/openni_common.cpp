@@ -29,8 +29,13 @@
 
 #include <QDir>
 #include <QApplication>
+#include <QFileInfo>
 
-
+bool fileExists(const char * path)
+{
+	QFileInfo fi(path);
+	return fi.exists();
+}
 
 //---------------------------------------------------------------------------
 // Macros
@@ -553,7 +558,9 @@ int OpenNICommonAcquisition::startAcquisition()
 
 #else
 	// Open filename
-	mOpenNIStatus = mContext.OpenFileRecording(filename, mPlayer);
+	if(mVideoFilePath.length()>0) {
+		mOpenNIStatus = mContext.OpenFileRecording(mVideoFilePath.c_str(), mPlayer);
+	}
 #endif
 
 
@@ -671,7 +678,7 @@ int OpenNICommonAcquisition::startAcquisition()
 	CHECK_RC(nRetVal, "Find depth generator");
 
 	nRetVal = xnFPSInit(&xnFPS, 180);
-	m_video_properties.fps = xnFPS;
+	//m_video_properties.fps = xnFPS;
 	CHECK_RC(nRetVal, "FPS Init");
 #endif
 
@@ -1065,8 +1072,8 @@ void OpenNICommonAcquisition::run()
 					mImageInfo.height =
 					m_imageSize.height =
 					mDepthSize.height ;
-			m_video_properties.fps =
-					mImageInfo.fps = xnFPS;
+			/// \todo FIXME on OpenNI1 : m_video_properties.fps =
+			//		mImageInfo.fps = xnFPS;
 			mDepthGenerator.GetMetaData(depthMD);
 			const XnDepthPixel* pDepthMap = depthMD.Data();
 			pDepthBufferVoid = (void *)pDepthMap;
