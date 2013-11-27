@@ -81,7 +81,7 @@
 #endif
 
 // OpenNI's driver for Asus Xtion Pro and Microsoft kinect
-#ifdef HAS_OPENNI
+#if defined(HAS_OPENNI) || defined(HAS_OPENNI2)
 #include "openni_videoacquisition.h"
 #endif
 
@@ -2319,7 +2319,8 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 
 	// check if there are OpenNI supported devices are connected
-#ifdef HAS_OPENNI
+#if defined(HAS_OPENNI) 
+#|| defined(HAS_OPENNI2)
 	if(!mOpenNIItem)
 	{
 		mOpenNIItem = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("OpenNI"));

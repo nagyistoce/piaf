@@ -138,6 +138,15 @@ public:
 	/** \brief Stop acquisition */
 	int stopAcquisition();
 
+	/** \brief Get the list of output format */
+	QList<t_video_output_format> getOutputFormats();
+
+	/** \brief Set the output format */
+	int setOutputFormat(int id);
+
+	/** @brief Read image as data of selected format */
+	IplImage * readImage();
+
 	/** @brief Read image as raw data */
 	IplImage * readImageRaw();
 

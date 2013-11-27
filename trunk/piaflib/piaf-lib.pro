@@ -8,14 +8,16 @@ HEADERS = inc/SwPluginCore.h
 
 SOURCES = src/SwPluginCore.cpp
 
+# include opencv to check if it's available
+include(../main/opencv.pri)
+
 INCLUDEPATH += inc
 DEPENDPATH += inc
 
 OBJECTS_DIR = .obj-lib
 MOC_DIR = .moc-lib
 
-# include opencv to check if it's available
-include(../main/opencv.pri)
+
 
 ##INSTALLATION
 target.path = /usr/local/lib/

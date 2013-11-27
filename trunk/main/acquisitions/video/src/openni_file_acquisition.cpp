@@ -20,6 +20,9 @@
 #include "piaf-common.h"
 #include "openni_file_acquisition.h"
 
+#include <QDir>
+#include <QApplication>
+
 //---------------------------------------------------------------------------
 // Macros
 //---------------------------------------------------------------------------
@@ -55,12 +58,10 @@ bool checkOpenNIStatus(openni::Status status, const char *display_error)
 
 #define CHECK_RC(rc, what)	checkOpenNIStatus(rc, what)
 
-#define CHECK_XN_STATUS checkOpenNIError(__func__, __LINE__)
+//#define CHECK_XN_STATUS checkOpenNIError(__func__, __LINE__)
+#define CHECK_XN_STATUS (checkOpenNIStatus(mOpenNIStatus, __func__)?0:1)
 #endif // v2
 
-
-
-//return rc;
 
 #define OPENNI_PRINTF(...) { \
 	fprintf(stderr, "[OpenNI %p '%s'']::%s:%d : ", \
@@ -83,6 +84,16 @@ FileVideoAcquisition* OpenNIFileAcquisition::creatorFunction(std::string path)
 {
 	PIAF_MSG(SWLOG_INFO, "Create OpenNIFileAcquisition(path='%s')", path.c_str() );
 
+#ifdef HAS_OPENNI2
+	// Go back to apps path
+	QDir dir;
+	dir.cd( QApplication::applicationDirPath() );
+	PIAF_MSG(SWLOG_INFO, "Current path = '%s'",
+			 dir.absolutePath().toAscii().data());
+
+	openni::Status status = openni::OpenNI::initialize();
+ #endif
+
 	return (FileVideoAcquisition *)new OpenNIFileAcquisition( path.c_str() );
 }
 
@@ -93,9 +104,17 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 {
 	init();
 	OPENNI_PRINTF("Opening file '%s'...", filename);
+
 	mVideoFilePath = filename;
 
+
 #ifdef HAS_OPENNI2
+	// Go back to apps path
+	QDir dir;
+	dir.cd( QApplication::applicationDirPath() );
+	PIAF_MSG(SWLOG_INFO, "Current path = '%s'",
+			 dir.absolutePath().toAscii().data());
+
 	mOpenNIStatus = OpenNI::initialize();
 	if(CHECK_XN_STATUS != 0)
 	{
@@ -103,12 +122,13 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 		return;
 	}
 
+
 	// Open the file
 	mOpenNIStatus = mDevice.open(mVideoFilePath.c_str());
 	if(CHECK_XN_STATUS != 0)
 	{
 		PIAF_MSG(SWLOG_ERROR,
-				 "Could not open recorded file '%s'' or create player",
+				 "Could not open recorded file '%s' or create player",
 				 mVideoFilePath.c_str());
 		return;
 	}
@@ -141,6 +161,13 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 			}
 			else
 			{
+//				mDepthGenerator.start();
+				if(checkOpenNIError(__func__, __LINE__) != 0)
+				{
+					PIAF_MSG(SWLOG_ERROR, "Could not start Depth Generator.");
+					mDepthGenerator.destroy();
+				}
+
 				/*
 
 				-			  mDepthSize.width/2
@@ -231,6 +258,19 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 			{
 				PIAF_MSG(SWLOG_ERROR, "Could not find any Image Generator in context.");
 			}
+			else
+			{
+#ifdef HAS_OPENNI2
+				// Create RGB generator
+//				mImageGenerator.start();
+				if(checkOpenNIError(__func__, __LINE__) != 0)
+				{
+					PIAF_MSG(SWLOG_ERROR, "Could not start Image Generator in context.");
+					mImageGenerator.destroy();
+				}
+#endif
+
+			}
 		}
 
 		// Repeat option
@@ -309,6 +349,8 @@ int OpenNIFileAcquisition::init()
 {
 	init_OpenNI_depth_LUT();
 
+	mFreeRun = false; // frame by frame
+
 	mEnableDepth = true; // pure depth by default
 	mEnableCamera = false;
 
@@ -320,7 +362,15 @@ int OpenNIFileAcquisition::init()
 	m_got_depth = 0;
 
 #ifdef HAS_OPENNI2
+	// Go back to apps path
+	QDir dir;
+	dir.cd( QApplication::applicationDirPath() );
+
+	PIAF_MSG(SWLOG_INFO, "OpenNI::initialize() from current path = '%s'",
+			 dir.absolutePath().toAscii().data());
+
 	mOpenNIStatus = openni::OpenNI::initialize();
+
 	m_streams = new openni::VideoStream*[2];
 	m_streams[0] = &mDepthGenerator;
 	m_streams[1] = &mImageGenerator;
@@ -559,14 +609,16 @@ int OpenNIFileAcquisition::acquireFrameNow()
 	switch (changedIndex)
 	{
 	case 0:
-		rc = mDepthGenerator.readFrame(&m_depthFrame); break;
+		rc = mDepthGenerator.readFrame(&m_depthFrame);
+		break;
 	case 1:
-		rc = mImageGenerator.readFrame(&m_colorFrame); break;
+		rc = mImageGenerator.readFrame(&m_colorFrame);
+		break;
 	default:
 		OPENNI_PRINTF("Error in wait\n");
 	}
 
-	//OPENNI_PRINTF("readFrame returned %d", (int)rc);
+	OPENNI_PRINTF("readFrame returned %d", (int)rc);
 	if (rc != STATUS_OK)
 	{
 		OPENNI_PRINTF("readFrame failed for changedIndex=%d", changedIndex);
@@ -845,13 +897,36 @@ void OpenNIFileAcquisition::run()
 	m_isRunning = false;
 }
 
-
-
-IplImage * OpenNIFileAcquisition::readImageRaw()
+/** \brief Get the list of output format */
+QList<t_video_output_format> OpenNIFileAcquisition::getOutputFormats()
 {
-	OPENNI_PRINTF("NOT IMPLEMENTED");
-	return NULL; /// \todo FIXME : return raw value
+	t_video_output_format RGB32format;
+	RGB32format.id = 0;
+	strcpy(RGB32format.description, "BGR32");
+	RGB32format.ipl_depth = IPL_DEPTH_8U;
+	RGB32format.ipl_nchannels = 4;
+	QList<t_video_output_format> out;
+	out.append(RGB32format);
+	DEBUG_MSG("NOT IMPLEMENTED => only RGB32");
+
+	return out;
 }
+
+/** \brief Set the output format */
+int OpenNIFileAcquisition::setOutputFormat(int id)
+{
+	DEBUG_MSG("NOT IMPLEMENTED => id=%d", id);
+
+	return id;
+}
+
+/** @brief Read image as data of selected format */
+IplImage * OpenNIFileAcquisition::readImage()
+{
+	DEBUG_MSG("NOT IMPLEMENTED => return readimageRGB32()");
+	return readImageRGB32();
+}
+
 
 /** \brief Grabs one image and convert to RGB32 coding format
 	if sequential mode, return last acquired image, else read and return image
@@ -863,7 +938,13 @@ IplImage * OpenNIFileAcquisition::readImageRGB32()
 	if(!m_captureIsInitialised) {
 		OPENNI_PRINTF("m_captureIsInitialised = %d", m_captureIsInitialised);
 
-		return NULL; }
+		return NULL;
+	}
+
+	if(m_depthRawImage16U) {
+		// Return this image
+		return m_depthRawImage16U;
+	}
 
 	if(!m_bgr32Image)
 	{
@@ -877,11 +958,12 @@ IplImage * OpenNIFileAcquisition::readImageRGB32()
 	}
 
 	int mode = (int)round(m_video_properties.mode);
-	//OPENNI_PRINTF("mode = %d", mode);
+
+	OPENNI_PRINTF("mode = %d", mode);
 	switch(mode)
 	{
 	default:
-		OPENNI_PRINTF("FIXME");
+		OPENNI_PRINTF("FIXME: unsupported mode %d", mode);
 //		if(m_requested_format == FREENECT_VIDEO_RGB && m_cameraRGBImage8U) {
 //			cvCvtColor(m_cameraRGBImage8U, m_bgr32Image, CV_RGB2BGRA);
 //		} else if(m_cameraRGBImage8U) {
@@ -1095,8 +1177,16 @@ unsigned long long OpenNIFileAcquisition::getAbsolutePosition()
 void OpenNIFileAcquisition::rewindMovie()
 {
 #ifdef HAS_OPENNI2
-	mDevice.getPlaybackControl()->seek(mDepthGenerator, 0);
-	mDevice.getPlaybackControl()->seek(mImageGenerator, 0);
+	OPENNI_PRINTF("not implemented/COMMENTED");
+	return ;
+	if(mDevice.getPlaybackControl() && mDepthGenerator.isValid())
+	{
+		mDevice.getPlaybackControl()->seek(mDepthGenerator, 0);
+	}
+	if(mDevice.getPlaybackControl() && mImageGenerator.isValid())
+	{
+		mDevice.getPlaybackControl()->seek(mImageGenerator, 0);
+	}
 #else
 	OPENNI_PRINTF("not implemented");
 #endif

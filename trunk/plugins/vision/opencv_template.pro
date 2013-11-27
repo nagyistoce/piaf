@@ -25,6 +25,9 @@ INCLUDEPATH += ../../main/tools/inc
 # local include
 INCLUDEPATH += ../../piaflib/inc/
 
+
+DEPENDPATH += $$INCLUDEPATH
+
 LIBS += -L/usr/local/lib/ -lSwPluginCore
 
 # in case the installation was not done, use local link

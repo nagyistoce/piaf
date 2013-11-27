@@ -94,7 +94,7 @@ void TimeHistogramWidget::displayHisto(t_time_histogram time_histo)
 			swReleaseImage(&mHistoImg);
 			return;
 		}
-		if(time_histo.value_max < time_histo.overflow_count) {
+		if(time_histo.value_max < (unsigned)time_histo.overflow_count) {
 			time_histo.value_max = time_histo.overflow_count ;
 		}
 

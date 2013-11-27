@@ -226,8 +226,7 @@ void VideoCaptureDoc::start(Priority)
 		return;
 	}
 
-	fprintf(stderr, "VideoCaptureDoc::%s:%d : start video acquisition loop\n",
-					__func__, __LINE__);
+	PIAF_MSG(SWLOG_INFO, "VideoCaptureDoc: start video acquisition thread");
 	QThread::start();
 }
 
@@ -252,10 +251,13 @@ void VideoCaptureDoc::run()
 		m_run = false;
 		return;
 	}
+	PIAF_MSG(SWLOG_INFO, "VideoCaptureDoc: started video acquisition thread");
+//	// Start acquisition
+//	PIAF_MSG(SWLOG_INFO, "\tCall mpVAcq->startAcquisition();");
+//	mpVAcq->startAcquisition();
 
-	fprintf(stderr, "VideoCaptureDoc::%s:%d : started thread\n",
-					__func__, __LINE__);
 
+	PIAF_MSG(SWLOG_INFO, "VideoCaptureDoc: start grabbing loop");
 	m_run = m_running = true;
 	while(m_run)
 	{
@@ -281,12 +283,10 @@ void VideoCaptureDoc::run()
 		}
 	}
 
-	fprintf(stderr, "VideoCaptureDoc::%s:%d : stopped thread\n",
-					__func__, __LINE__);
+	PIAF_MSG(SWLOG_INFO, "\tstopped thread. Stopping acquisition");
 	if(mpVAcq)
 	{
-		fprintf(stderr, "VideoCaptureDoc::%s:%d : stop video acquisition device",
-						__func__, __LINE__);
+		PIAF_MSG(SWLOG_INFO, "\tCall mpVAcq->stopAcquisition();");
 		mpVAcq->stopAcquisition();
 	}
 
@@ -484,7 +484,7 @@ int VideoCaptureDoc::waitForImage()
 	} else {
 		mImageBufferMutex.lock();
 
-		IplImage * imageIn = mpVAcq->readImageRaw();
+		IplImage * imageIn = mpVAcq->readImage();
 		if(imageIn)
 		{
 //			fprintf(stderr, "VideoCapture::%s:%d : Acquisition ok : readImageRaw() ok "
@@ -500,7 +500,8 @@ int VideoCaptureDoc::waitForImage()
 				{
 					swReleaseImage(&imageRGBA);
 
-					imageRGBA = swCreateImage(cvGetSize(imageIn), imageIn->depth,
+					imageRGBA = swCreateImage(cvGetSize(imageIn),
+											  imageIn->depth,
 											  imageIn->nChannels );
 					// update input size to force display change
 					imageSize = cvGetSize(imageRGBA);
@@ -566,7 +567,7 @@ int VideoCaptureDoc::loadImage()
 IplImage * VideoCaptureDoc::readImage()
 {
 	if(mpVAcq) {
-		return mpVAcq->readImageRaw();
+		return mpVAcq->readImage();
 	}
 
 	return NULL;

@@ -1,0 +1,9 @@
+
+tof@tofx230:~/src/opencv-2.4.6.1/build$ cmake -DOPENNI_INCLUDE_DIR=/usr/local/include/openni2/ -DOPENNI_LIB_DIR=/usr/local/lib ..
+
+
+CUDA/Accelerated support : 
+libblas-dev
+libbz2-dev
+
+

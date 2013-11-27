@@ -135,6 +135,9 @@
               <height>22</height>
              </size>
             </property>
+            <property name="shortcut">
+             <string>End</string>
+            </property>
             <property name="flat">
              <bool>true</bool>
             </property>
@@ -263,6 +266,9 @@
               <height>22</height>
              </size>
             </property>
+            <property name="shortcut">
+             <string>Home</string>
+            </property>
             <property name="flat">
              <bool>true</bool>
             </property>
@@ -291,6 +297,9 @@
               <width>22</width>
               <height>22</height>
              </size>
+            </property>
+            <property name="shortcut">
+             <string>Left</string>
             </property>
             <property name="flat">
              <bool>true</bool>
@@ -356,6 +365,9 @@
               <width>22</width>
               <height>22</height>
              </size>
+            </property>
+            <property name="shortcut">
+             <string>Right</string>
             </property>
             <property name="flat">
              <bool>true</bool>

@@ -7,7 +7,7 @@ QT += xml
 
 
 # Use lowercase name for Linux
-linux-g++: {
+linux-g++* {
 	TARGET = piafworkflow
 } else {
 	TARGET = PiafWorkflow

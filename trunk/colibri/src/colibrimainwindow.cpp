@@ -1,8 +1,7 @@
 /***************************************************************************
- *  wafmeter - Woman Acceptance Factor measurement / Qt GUI class
+ *  colibrimainwindow.cpp - UI + Background processing thread for colibri console
  *
- *  2009-08-10 21:22:13
- *  Copyright  2007  Christophe Seyve
+ *  Copyright  2011  Christophe Seyve
  *  Email cseyve@free.fr
  ****************************************************************************/
 
@@ -21,6 +20,7 @@
  *  along with this program; if not, write to the Free Software
  *  Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  */
+
 
 #include "colibrimainwindow.h"
 #include "ui_colibrimainwindow.h"
@@ -644,6 +644,8 @@ void ColibriMainWindow::on_camButton_toggled(bool checked)
 			retry++;
 		} while(!capture && retry < 5);
 	}
+
+
 	if(!capture) {
 		QMessageBox::critical(NULL, tr("No webcam"),
 							  tr("Unable to find webcam. Please try disconnect/reconnect."));

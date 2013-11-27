@@ -496,7 +496,7 @@ int ImageInfo::loadMovieFile(QString filename)
 			  retgrab,
 			  m_image_info_struct.width, m_image_info_struct.height, m_image_info_struct.fps );
 
-	m_originalImage = tmCloneImage(mpFileVA->readImageRGB32());
+	m_originalImage = tmCloneImage( mpFileVA->readImageRGB32());
 	// Invert R<->B
 	if(m_originalImage->nChannels == 4)
 	{

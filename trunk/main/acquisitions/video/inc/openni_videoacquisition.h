@@ -72,8 +72,14 @@ public:
 	/** @brief Stop acquisition */
 	int stopAcquisition();
 
-	/** @brief Read image as raw data */
-	IplImage * readImageRaw();
+	/** \brief Get the list of output format */
+	QList<t_video_output_format> getOutputFormats();
+
+	/** \brief Set the output format */
+	int setOutputFormat(int id);
+
+	/** @brief Read image as data of the selected format */
+	IplImage * readImage();
 
 	/** @brief Grabs one image and convert to RGB32 coding format
 		if sequential mode, return last acquired image, else read and return image

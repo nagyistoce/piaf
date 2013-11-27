@@ -1,13 +1,13 @@
 # -------------------------------------------------
 # Project created by QtCreator 2009-08-10T21:22:13
 # -------------------------------------------------
-TARGET = Colibri
-QT = core gui
+TARGET = colibri-embedded
+QT = core console
 
-linux-g++* {
-	QT += qt3support
-	DEFINES += QT3_SUPPORT
-	include(../main/ffmpeg.pri)
+linux-g++: {
+#	QT += qt3support
+#	DEFINES += QT3_SUPPORT
+#	include(../main/ffmpeg.pri)
 }
 include(../main/opencv.pri)
 
@@ -81,11 +81,11 @@ INCLUDEPATH += ../main/acquisitions/video/inc/
 
 DEPENDPATH += $$INCLUDEPATH
 win32: {
-	OBJECTS_DIR = obj
-	MOC_DIR = moc
+	OBJECTS_DIR = obj-embed
+	MOC_DIR = moc-embed
 } else {
-	OBJECTS_DIR = .obj
-	MOC_DIR = .moc
+	OBJECTS_DIR = .obj-embed
+	MOC_DIR = .moc-embed
 }
 RESOURCES += colibri.qrc
 
@@ -103,4 +103,5 @@ message( " libs : $$LIBS ")
 message( "FINAL CONFIGURATION ================================================== ")
 message( "")
 message( "")
+
 

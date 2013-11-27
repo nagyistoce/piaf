@@ -32,6 +32,16 @@
 #include "imageinfo.h"
 
 #include <QImage>
+
+/** \brief File output type */
+typedef struct {
+	int id;					///< ID left to user to copy data (ex: enum)
+	char description[64];	///< Description of the data output: "YUYV", ...
+	int ipl_depth;			///< depth in the OpenCV way: IPL_DEPTH_16U, ...
+	int ipl_nchannels;		///< Nchannels in the OpenCV way
+} t_video_output_format;
+
+
 #define VIDEO_PROPS_DEVICE_NAME_LEN		256
 /** @brief Video input properties
 
@@ -195,29 +205,23 @@ public:
 	/** \brief Stop acquisition */
 	virtual int stopAcquisition() = 0;
 
-	/** \brief Grabs one image and convert to RGB32 coding format
-		if sequential mode, return last acquired image, else read and return image
+	/** \brief Get the list of output format */
+	virtual QList<t_video_output_format> getOutputFormats() = 0;
 
-		\return NULL if error
+	/** \brief Set the output format */
+	virtual int setOutputFormat(int id) = 0;
+
+	/** \brief Grabs one image and convert to selected output
+	 *
+	 *\return NULL if error
+		*/
+	virtual IplImage * readImage() = 0;
+
+	/** \brief Grabs one image and convert to RGB32 for display or thumbnails
+	 *
+	 *\return NULL if error
 		*/
 	virtual IplImage * readImageRGB32() = 0;
-
-	/** \brief Grabs one image and convert to grayscale coding format
-		if sequential mode, return last acquired image, else read and return image
-
-		\return NULL if error
-		*/
-	virtual IplImage * readImageY() = 0;
-
-	/** \brief Grabs one image of depth buffer, in meter
-		if sequential mode, return last acquired image, else read and return image
-
-		\return NULL if error
-		*/
-	virtual IplImage * readImageDepth() = 0;
-
-	/** @brief Read image as raw data */
-	virtual IplImage * readImageRaw() = 0;
 
 	/** @brief Get video properties (not updated) */
 	virtual t_video_properties getVideoProperties() = 0;

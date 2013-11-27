@@ -299,10 +299,8 @@ void MainDisplayWidget::on_goFirstButton_clicked()
 
 void MainDisplayWidget::updateDisplay()
 {
-	IplImage * captureImage =
-			( mPlayGrayscale ?
-				  mpFileVA->readImageY()
-				: mpFileVA->readImageRGB32() );
+	IplImage * captureImage = mpFileVA->readImage();
+
 	PIAF_MSG(SWLOG_TRACE, "setImage with IplImage %dx%dx%dx%d",
 			 captureImage->width, captureImage->height, captureImage->nChannels, captureImage->depth
 			 );
