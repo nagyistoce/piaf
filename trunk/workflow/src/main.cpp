@@ -64,7 +64,6 @@ int main(int argc, char *argv[])
 	}
 
 	a.processEvents();
-
 	g_splash->showMessage(QObject::tr("Starting GUI..."), Qt::AlignBottom | Qt::AlignHCenter);
 
 	EmaMainWindow w;
