@@ -346,30 +346,4 @@ void adaptative_threshold() {
 
 }
 
-
-void signalhandler(int sig)
-{
-	fprintf(stderr, "================== RECEIVED SIGNAL %d = '%s' From process %d ==============\n", sig, sys_siglist[sig], getpid());
-	signal(sig, signalhandler);
-	if(sig != SIGUSR1)
-		exit(0);
-}
-int main(int argc, char *argv[])
-{
-	// SwPluginCore load
-	for(int i=0; i<NSIG; i++)
-		signal(i, signalhandler);
-	
-	fprintf(stderr, "registerCategory...\n");
-	plugin.registerCategory(CATEGORY, SUBCATEGORY);
-	
-	// register functions 
-	fprintf(stderr, "registerFunctions...\n");
-	plugin.registerFunctions(functions, nb_functions );
-
-	// process loop
-	fprintf(stderr, "loop...\n");
-	plugin.loop();
-	
-  	return EXIT_SUCCESS;
-}
+PLUGIN_CORE_FUNC

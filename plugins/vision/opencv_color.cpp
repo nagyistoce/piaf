@@ -106,6 +106,12 @@ swFuncParams RGB_params[] = {
 };
 void RGB();
 
+float scale = 1.f/16.f;
+swFuncParams scale_params[] = {
+	{"factor", swFloat, (void *)&scale}
+};
+void convertScale();
+
 /* swFunctionDescriptor :
 	char * : function name
 	int : number of parameters
@@ -119,9 +125,10 @@ swFunctionDescriptor functions[] = {
 	{"HSV->n", 		1,	HSV_params,  	swImage, swImage, &HSV, NULL},
 	{"HSL->n",		1,	HSL_params,  	swImage, swImage, &HSL, NULL},
 	{"R<->B",		0,	YCrCb_params,	swImage, swImage, &swapR_B, NULL},
-	{"YCrCb",		1,	YCrCb_params,	swImage, swImage, &YCrCb, NULL}
+	{"YCrCb",		1,	YCrCb_params,	swImage, swImage, &YCrCb, NULL},
+	{"Scale to 8U",	1,	scale_params,	swImage, swImage, &convertScale, NULL}
 };
-int nb_functions = 5;
+int nb_functions = 6;
 
 
 IplImage * cvIm1 = NULL;
@@ -224,6 +231,26 @@ void finishImages()
 	{
 		cvCopy(cvIm1, cvIm2);
 	}
+}
+
+IplImage * cv8U = NULL;
+IplImage * cvRawIn = NULL;
+
+void convertScale()
+{
+	swImageStruct * imIn = ((swImageStruct *)plugin.data_in);
+	fprintf(stderr, "convert to IplImage %dx%dx%dx%d\n",
+			imIn->width, imIn->height, imIn->depth, imIn->bytedepth);
+	convertSwImageToIplImage(imIn, &cvRawIn);
+	if(!cv8U)
+	{
+		cv8U = cvCreateImage(cvSize(imIn->width, imIn->height),
+							 IPL_DEPTH_8U, imIn->depth);
+	}
+	cvConvertScale(cvRawIn, cv8U, scale);
+
+	swImageStruct * imOut = ((swImageStruct *)plugin.data_out);
+	mapIplImageToSwImage(cv8U, imOut);
 }
 
 void RGB()
@@ -380,50 +407,4 @@ void YCrCb()
 
 
 // DO NOT MODIFY BELOW THIS LINE ------------------------------------------------------------------------------
-
-
-void signalhandler(int sig)
-{
-	fprintf(stderr, "================== RECEIVED SIGNAL %d = '%s' From process %d ==============\n", sig, sys_siglist[sig], getpid());
-	signal(sig, signalhandler);
-	if(sig != SIGUSR1)
-		exit(0);
-}
-int main(int argc, char *argv[])
-{
-	// SwPluginCore load
-	for(int i=0; i<NSIG; i++) {
-		signal(i, signalhandler);
-	}
-
-	fprintf(stderr, "registerCategory '%s'/'%s'...\n", CATEGORY, SUBCATEGORY);
-	plugin.registerCategory(CATEGORY, SUBCATEGORY);
-
-	// register functions
-	fprintf(stderr, "register %d functions...\n", nb_functions);
-	plugin.registerFunctions(functions, nb_functions );
-
-	// process loop
-	fprintf(stderr, "loop...\n");
-	plugin.loop();
-
-	return EXIT_SUCCESS;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+PLUGIN_CORE_FUNC
