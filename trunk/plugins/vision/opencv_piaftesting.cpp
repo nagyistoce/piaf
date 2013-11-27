@@ -168,36 +168,5 @@ void long_time()
 
 
 
-void signalhandler(int sig)
-{
-	fprintf(stderr, "%s : ================== RECEIVED SIGNAL %d = '%s' From process %d ==============\n", 
-		__FILE__, sig, sys_siglist[sig], getppid());
-	signal(sig, signalhandler);
-
-	if(sig != SIGUSR1) {
-		fprintf(stderr, "%s : ================== RECEIVED SIGNAL != SIGUSR1 => exit !! Bye. =====\n",
-			__FILE__);
-		exit(0);
-	}
-}
 /***************** END ON PLUGIN DECLARATIONS **********************/
-
-int main(int argc, char *argv[])
-{    
-	// SwPluginCore load
-	for(int i=0; i<NSIG; i++)
-		signal(i, signalhandler);
-
-	fprintf(stderr, "registerCategory...\n");
-	plugin.registerCategory(CATEGORY, SUBCATEGORY);
-
-	// register functions
-	fprintf(stderr, "registerFunctions...\n");
-	plugin.registerFunctions(functions, nb_functions );
-
-	// process loop
-	fprintf(stderr, "loop...\n");
-	plugin.loop();
-	
-	return 1;
-}
+PLUGIN_CORE_FUNC
