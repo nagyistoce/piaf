@@ -47,6 +47,8 @@ echo " + building plugins..."
 
 cd plugins/vision/
 ./build_all.sh $@
+cd ../../
+
 
 echo " + building Colibri-console GUI..."
 cd colibri-console

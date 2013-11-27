@@ -236,6 +236,7 @@ SOURCES += \
 	$$LEGACYPATH/src/plugineditdialog.cpp \
 	$$LEGACYPATH/tools/src/vidacqsettingswindow.cpp \
 	$$LEGACYPATH/tools/src/swimage_utils.cpp \
+	$$LEGACYPATH/tools/src/qimage_utils.cpp \
 
 
 HEADERS += \
@@ -261,6 +262,7 @@ HEADERS += \
 	$$LEGACYPATH/inc/piaf-settings.h \
 	$$LEGACYPATH/inc/nolinux_videodev.h \
 	$$LEGACYPATH/tools/inc/swimage_utils.h \
+	$$LEGACYPATH/tools/inc/qimage_utils.h \
 	$$LEGACYPATH/acquisitions/video/inc/file_video_acquisition_factory.h \
     ../main/acquisitions/video/inc/openni_common.h
 
