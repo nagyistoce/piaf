@@ -315,7 +315,11 @@ void EmaMainWindow::loadSettings()
 
 	g_workflow_settings.maxV4L2 = 5;// because fast
 	g_workflow_settings.maxOpenCV = 5;// because slow: need to open devices
-	g_workflow_settings.maxOpenNI = 5;// because slow: need to open devices
+#ifdef HAS_OPENNI2
+	g_workflow_settings.maxOpenNI = 1;// because only one device supported
+#else
+	g_workflow_settings.maxOpenNI = 1;// because slow: need to open devices
+#endif
 	g_workflow_settings.maxFreenect = 5;// because slow: need to open devices
 
 	// Concatenate configuration directories
@@ -2318,8 +2322,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 
 
 	// check if there are OpenNI supported devices are connected
-#if defined(HAS_OPENNI) 
-//|| defined(HAS_OPENNI2)
+#if defined(HAS_OPENNI) || defined(HAS_OPENNI2)
 	if(!mOpenNIItem)
 	{
 		mOpenNIItem = new CaptureTreeWidgetItem(ui->deviceTreeWidget, tr("OpenNI"));

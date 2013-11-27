@@ -204,12 +204,12 @@ contains(DEFINES, "HAS_OPENNI")|contains(DEFINES, "HAS_OPENNI2") {
 	SOURCES +=  $$LEGACYPATH/acquisitions/video/src/openni_file_acquisition.cpp
 
 	# Live video source
-	!contains(DEFINES, "HAS_OPENNI2") {
+#	!contains(DEFINES, "HAS_OPENNI2") {
 		HEADERS += $$LEGACYPATH/acquisitions/video/inc/openni_videoacquisition.h
 		SOURCES += $$LEGACYPATH/acquisitions/video/src/openni_videoacquisition.cpp
-	} else {
-		message("No support for live in OpenNI2 for the moment")
-	}
+#	} else {
+#		message("No support for live in OpenNI2 for the moment")
+#	}
 }
 
 contains(DEFINES, "HAS_HIGHGUI") {

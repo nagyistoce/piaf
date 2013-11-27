@@ -2460,10 +2460,15 @@ void tmConvert(IplImage * img_src, IplImage * img_dest)
 	}
 	else
 	{	// We need to convert the depth
-		PIAF_MSG(SWLOG_WARNING, "We need to convert the depth => %dx%dx%dx%d => %dx%dx%dx%d with tmp image",
+		static int count_err = 0;
+		if((count_err++) % 300 == 0)
+		{
+			PIAF_MSG(SWLOG_WARNING, "We need to convert the depth / 16. => %dx%dx%dx%d => %dx%dx%dx%d with tmp image",
 				 img_src->width, img_src->height, img_src->depth, img_src->nChannels,
 				 img_dest->width, img_dest->height, img_dest->depth, img_dest->nChannels
 				 );
+		}
+
 		// we convert into 8bit, any nChannels
 		IplImage * tmp = tmCreateImage(cvGetSize(img_src), IPL_DEPTH_8U, img_src->nChannels);
 		cvConvertScale(img_src, tmp, 1./16.);
