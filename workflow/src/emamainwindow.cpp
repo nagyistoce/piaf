@@ -2329,7 +2329,7 @@ void EmaMainWindow::on_deviceRefreshButton_clicked()
 		mOpenNIItem->setIcon(0, QIcon(":/icons/22x22/openni.png"));
 	}
 
-	fprintf(stderr, "[EmaMainW]::%s:%d : scanning OpenNI devices...\n", __func__, __LINE__);
+	PIAF_MSG(SWLOG_INFO,"============== scanning OpenNI devices...==============\n");
 	int openni_idx = 0;
 	bool openni_found;
 	do {

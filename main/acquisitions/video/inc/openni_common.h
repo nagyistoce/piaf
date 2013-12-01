@@ -114,7 +114,7 @@ void init_OpenNI_depth_LUT();
 
 
 
-#include "virtualdeviceacquisition.h"
+#include "FileVideoAcquisition.h"
 #include <QMutex>
 #include <QWaitCondition>
 
@@ -159,7 +159,7 @@ bool checkOpenNIStatus(openni::Status status,
 	- Asus Xtion Pro and Xtion Pro Live
 	- Microsoft Kinect
 */
-class OpenNICommonAcquisition : public VirtualDeviceAcquisition
+class OpenNICommonAcquisition : public FileVideoAcquisition
 {
 public:
 
@@ -167,6 +167,10 @@ public:
 
 	*/
 	OpenNICommonAcquisition(const char * filenameONI = NULL);
+	/** @brief Default constructor with path of OpenNI live device
+
+	*/
+	OpenNICommonAcquisition(int idx = 0);
 
 	~OpenNICommonAcquisition();
 
@@ -274,7 +278,7 @@ protected:
 
 	/// File path
 	std::string mVideoFilePath;
-
+	openni::PlaybackControl* mPlaybackControl;
 	/// Option to play movie in loop mode
 	bool mVideoRepeat;
 
@@ -330,6 +334,8 @@ protected:
 	Device mDevice;
 	VideoStream mDepthGenerator, mImageGenerator;
 	VideoStream**		m_streams;
+	int m_nb_streams;
+
 	openni::VideoFrameRef		m_depthFrame;
 	openni::VideoFrameRef		m_colorFrame;
 

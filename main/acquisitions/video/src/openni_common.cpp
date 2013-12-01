@@ -184,6 +184,29 @@ bool g_openni_initialized = false;
 
 
 
+OpenNICommonAcquisition::OpenNICommonAcquisition(int idx_device)
+{
+	m_idx_device = idx_device;
+	init();
+
+
+
+	/// \todo continue with other values
+
+	OPENNI_PRINTF("Calling startAcquisition");
+	int retstart = startAcquisition();
+
+	m_captureIsInitialised = (retstart >= 0 ? 1 : 0);
+
+	OPENNI_PRINTF(" => startAcquisition returned %d", retstart);
+
+	m_video_properties.frame_width = mImageInfo.width = mDepthSize.width;
+	m_video_properties.frame_height =mImageInfo.height = mDepthSize.height;
+	mImageInfo.filepath = QString::fromStdString( mVideoFilePath );
+	m_video_properties.fps = mImageInfo.fps = mDepthFPS;
+
+}
+
 OpenNICommonAcquisition::OpenNICommonAcquisition(const char * filename)
 {
 
@@ -202,18 +225,19 @@ OpenNICommonAcquisition::OpenNICommonAcquisition(const char * filename)
 
 	init(); // init and open device
 
-	m_captureIsInitialised = 1;
+	/// \todo continue with other values
 
+	OPENNI_PRINTF("Calling startAcquisition");
+	int retstart = startAcquisition();
+	m_captureIsInitialised = (retstart >= 0 ? 1 : 0);
+
+	OPENNI_PRINTF(" => startAcquisition returned %d", retstart);
 
 	m_video_properties.frame_width = mImageInfo.width = mDepthSize.width;
 	m_video_properties.frame_height =mImageInfo.height = mDepthSize.height;
 	mImageInfo.filepath = QString::fromStdString( mVideoFilePath );
 	m_video_properties.fps = mImageInfo.fps = mDepthFPS;
-	/// \todo continue with other values
 
-	OPENNI_PRINTF("Calling startAcquisition");
-	int retstart = startAcquisition();
-	OPENNI_PRINTF(" => startAcquisition returned %d", retstart);
 }
 
 OpenNICommonAcquisition::~OpenNICommonAcquisition()
@@ -270,8 +294,6 @@ int OpenNICommonAcquisition::init()
 	{
 		init_OpenNI_depth_LUT();
 		g_openni_initialized = true;
-
-
 	}
 
 	m_isLive = false;
@@ -289,17 +311,14 @@ int OpenNICommonAcquisition::init()
 	m_got_depth = 0;
 
 
-
-
 #ifdef HAS_OPENNI2
-	m_streams = new openni::VideoStream*[2];
-	m_streams[0] = NULL;
-	m_streams[1] = NULL;
+	m_nb_streams = 3;
+	m_streams = new openni::VideoStream * [m_nb_streams];
+	memset(m_streams, 0, m_nb_streams * sizeof(openni::VideoStream *));
 #else
 	mDepthGenerator = NULL;
 	mContext = NULL;
 #endif
-
 
 	m_captureIsInitialised = false;
 
@@ -368,18 +387,41 @@ int OpenNICommonAcquisition::startAcquisition()
 					 mVideoFilePath.c_str());
 			return -1;
 		}
+
+		mPlaybackControl = mDevice.getPlaybackControl();
 	}
 	else
 	{
 		m_isLive = true;
+		mPlaybackControl = NULL;
+		// Enumerate devices
+		openni::Array<openni::DeviceInfo> deviceList;
+		openni::OpenNI::enumerateDevices(&deviceList);
 
-		const char* deviceURI = openni::ANY_DEVICE;
-		mOpenNIStatus = mDevice.open(deviceURI);
-		if(CHECK_XN_STATUS != 0)
+		const char* deviceUri = openni::ANY_DEVICE;
+
+		if(deviceList.getSize()>0)
 		{
-			PIAF_MSG(SWLOG_ERROR,
-					 "Could not create live player");
-			//	return -1;
+			OPENNI_PRINTF("%d devices : ", (int)deviceList.getSize());
+			for(int idx = 0; idx < deviceList.getSize(); ++idx)
+			{
+				deviceUri = deviceList[ idx ].getUri();
+				OPENNI_PRINTF("\tDevice [%d] = '%s'", idx, deviceUri);
+			}
+
+			deviceUri = deviceList[ m_idx_device ].getUri();
+
+			mOpenNIStatus = mDevice.open(deviceUri);
+			if(CHECK_XN_STATUS != 0)
+			{
+				PIAF_MSG(SWLOG_ERROR,
+						 "Could not create live player");
+				//	return -1;
+			}
+		}
+		else {
+			OPENNI_PRINTF("0 device. Abort");
+			return -1;
 		}
 	}
 	if(! mDevice.isValid() )
@@ -696,6 +738,7 @@ int OpenNICommonAcquisition::startAcquisition()
 
 		mOutputFormats.append(Depth16U_format);
 	}
+
 	if(IS_VALID(mImageGenerator))
 	{
 		m_streams[1] = &mImageGenerator;
@@ -729,7 +772,8 @@ int OpenNICommonAcquisition::startAcquisition()
 
 
 #ifdef HAS_OPENNI2
-	if(mFreeRun || m_isLive)
+	// FOr movies it does not work if the start is not called...
+	//if(mFreeRun || m_isLive)
 	{
 		OPENNI_PRINTF("Free-run => start devices");
 		if(IS_VALID(mDepthGenerator)) { mDepthGenerator.start(); }
@@ -740,12 +784,15 @@ int OpenNICommonAcquisition::startAcquisition()
 #endif
 
 	// start event thread
-	start();
-
+	if(mFreeRun)
+	{
+		OPENNI_PRINTF("Start freerun thread");
+		start();
+	}
 	m_captureIsInitialised = true;
 
 	// Grab first image to get the size
-	grab();
+//	grab();
 
 	// update video properties
 	updateVideoProperties();
@@ -776,13 +823,18 @@ int OpenNICommonAcquisition::setLEDMode(int led_mode)
 	return -1;
 }
 
-
+#define READ_TIMEOUT_MS	200
 
 int OpenNICommonAcquisition::acquireFrameNow()
 {
+
+
+
+
 #ifdef HAS_OPENNI2
-	int changedIndex;
-	openni::Status rc = openni::OpenNI::waitForAnyStream(m_streams, 2, &changedIndex);
+	int changedIndex = -1;
+	openni::Status rc = openni::OpenNI::waitForAnyStream(
+				m_streams, 2, &changedIndex, READ_TIMEOUT_MS);
 	if (rc != openni::STATUS_OK)
 	{
 		OPENNI_PRINTF("Wait failed with code=%d = %s",
@@ -841,7 +893,16 @@ int OpenNICommonAcquisition::acquireFrameNow()
 			mDepthSize.height =
 			m_imageSize.height =
 			m_depthFrame.getHeight();
-
+	mPlayFrame ++;
+	if(m_video_properties.frame_count <= 0)
+	{
+		if (mPlaybackControl)
+		{
+			m_video_properties.frame_count = mPlaybackControl->getNumberOfFrames(mImageGenerator);
+		}
+	}
+	OPENNI_PRINTF("Framecount = %ld / %g",
+				  mPlayFrame, m_video_properties.frame_count);
 	setRawDepthBuffer( pDepthBufferVoid, timestamp );
 #endif
 	return 0;
@@ -1253,6 +1314,7 @@ IplImage * OpenNICommonAcquisition::getDepthImage32F()
 bool OpenNICommonAcquisition::isDeviceReady()
 {
 #ifdef HAS_OPENNI2
+	/// \todo depending on mode
 	return mDepthGenerator.isValid();
 #else
 	return (mDepthGenerator);
@@ -1377,6 +1439,16 @@ int OpenNICommonAcquisition::setVideoProperties(t_video_properties props)
 }
 
 
+
+/** @brief Read next frame */
+bool OpenNICommonAcquisition::GetNextFrame()
+{
+	return (grab() >= 0);
+}
+
+
+
+
 /** Return the absolute position to be stored in database (needed for post-processing or permanent encoding) */
 unsigned long long OpenNICommonAcquisition::getAbsolutePosition()
 {
@@ -1391,16 +1463,26 @@ unsigned long long OpenNICommonAcquisition::getAbsolutePosition()
 void OpenNICommonAcquisition::rewindMovie()
 {
 #ifdef HAS_OPENNI2
-	OPENNI_PRINTF("not implemented/COMMENTED");
-	return ;
-	if(mDevice.getPlaybackControl() && mDepthGenerator.isValid())
-	{
-		mDevice.getPlaybackControl()->seek(mDepthGenerator, 0);
+	if(!mPlaybackControl) {
+		OPENNI_PRINTF("not playback");
+		return ;
 	}
-	if(mDevice.getPlaybackControl() && mImageGenerator.isValid())
+
+	if(mPlayFrame>0)
 	{
-		mDevice.getPlaybackControl()->seek(mImageGenerator, 0);
+
+		if( mDepthGenerator.isValid())
+		{
+			mPlaybackControl->seek(mDepthGenerator, 0);
+		}
+
+		if( mImageGenerator.isValid())
+		{
+			mPlaybackControl->seek(mImageGenerator, 0);
+		}
 	}
+	mPlayFrame = 0;
+
 #else
 	OPENNI_PRINTF("not implemented");
 #endif
@@ -1423,11 +1505,6 @@ void OpenNICommonAcquisition::rewindToPosMovie(unsigned long long position)
 #endif
 }
 
-/** @brief Read next frame */
-bool OpenNICommonAcquisition::GetNextFrame()
-{
-	return (grab() >= 0);
-}
 
 /** set absolute position in file
  */
@@ -1452,7 +1529,6 @@ void OpenNICommonAcquisition::setAbsoluteFrame(int frame)
 	OPENNI_PRINTF("not implemented");
 #endif
 }
-
 
 
 
