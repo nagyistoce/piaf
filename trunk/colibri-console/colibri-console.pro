@@ -100,8 +100,7 @@ OTHER_FILES += \
     qtc_packaging/debian_harmattan/compat \
     qtc_packaging/debian_harmattan/changelog
 
-HEADERS += \
-    inc/colibrithread.h
+HEADERS +=  inc/colibrithread.h
 
 # FINAL CONFIGURATION ==================================================
 message( "")

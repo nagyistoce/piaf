@@ -60,7 +60,7 @@ OpenNIFileAcquisition::OpenNIFileAcquisition(const char * filename)
 
 OpenNIFileAcquisition::~OpenNIFileAcquisition()
 {
-	stopAcquisition();
+
 }
 
 

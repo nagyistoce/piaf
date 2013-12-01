@@ -31,13 +31,15 @@
 }
 
 OpenNIVideoAcquisition::OpenNIVideoAcquisition(int idx_device)
-	: OpenNICommonAcquisition(NULL)
+	: OpenNICommonAcquisition(idx_device)
 {
 	m_idx_device = idx_device;
+
+
 }
 
 OpenNIVideoAcquisition::OpenNIVideoAcquisition()
-	: OpenNICommonAcquisition(NULL)
+	: OpenNICommonAcquisition(0)
 {
 	m_idx_device = 0;
 }
@@ -49,5 +51,4 @@ OpenNIVideoAcquisition::~OpenNIVideoAcquisition()
 
 	stopAcquisition();
 }
-
 
