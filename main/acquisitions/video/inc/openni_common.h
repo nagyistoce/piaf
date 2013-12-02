@@ -278,7 +278,9 @@ protected:
 
 	/// File path
 	std::string mVideoFilePath;
+#ifdef HAS_OPENNI2
 	openni::PlaybackControl* mPlaybackControl;
+#endif
 	/// Option to play movie in loop mode
 	bool mVideoRepeat;
 
