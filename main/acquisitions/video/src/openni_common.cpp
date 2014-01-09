@@ -901,8 +901,9 @@ int OpenNICommonAcquisition::acquireFrameNow()
 			m_video_properties.frame_count = mPlaybackControl->getNumberOfFrames(mImageGenerator);
 		}
 	}
-	OPENNI_PRINTF("Framecount = %ld / %g",
-				  mPlayFrame, m_video_properties.frame_count);
+
+//	OPENNI_PRINTF("Framecount = %ld / %g",
+//				  mPlayFrame, m_video_properties.frame_count);
 	setRawDepthBuffer( pDepthBufferVoid, timestamp );
 #endif
 	return 0;
