@@ -446,6 +446,16 @@ linux-g++: {
 		-Wuninitialized \
 		-Wparentheses \
 		-Wpointer-arith
+	 QMAKE_CXXFLAGS +=   -O0 \=
+                -fexceptions \
+                -Wimplicit \
+                -Wreturn-type \
+                -Wunused \
+                -Wswitch \
+                -Wcomment \
+                -Wuninitialized \
+                -Wparentheses \
+                -Wpointer-arith
 
 	INCLUDEPATH += /usr/src/linux/include
 }

@@ -174,6 +174,7 @@ void MainImageWidget::slotUpdateImage()
 		m_displayImage = m_fullImage.copy();
 	}
 
+
 	if(imageIn)
 	{
 		QString OSDStr;
@@ -193,6 +194,7 @@ void MainImageWidget::slotUpdateImage()
 			OSDStr += "\n" + dateTime.toString();
 		}
 
+		/** ODS LABELS OVER THE IMAGE */
 		m_ui->OSDLabel->setText(OSDStr);
 		m_ui->OSDLabel_2->setText(OSDStr);
 

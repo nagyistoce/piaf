@@ -1676,10 +1676,11 @@ int PiafFilter::loadChildProcess()
 		fprintf(stderr, "PiafFilter::%s:%d : file='%s' => path='%s'\n", __func__, __LINE__,
 			exec_name, path );
 	}
+
 	// fork and
 	// Commmunication processing
 #ifndef WINDOWS
-        if( pipe( pipeOut ) == -1 || pipe( pipeIn ) == -1)
+	if( pipe( pipeOut ) == -1 || pipe( pipeIn ) == -1)
 	{
 		int errnum = errno;
 		fprintf(stderr, "PiafFilter::%s:%d : Error in pipe() : err=%d='%s'\n",
@@ -1705,7 +1706,8 @@ int PiafFilter::loadChildProcess()
 				break;
 		case 0 : // child process
 
-			printf("CHILD PROCESS =====> %s\n", exec_name);
+			printf("CHILD PROCESS =====> %s / PID=%d\n",
+				   exec_name, getpid());
 
 			// Child to Parent
 			close( pipeIn[0] );
@@ -1727,6 +1729,7 @@ int PiafFilter::loadChildProcess()
 			close( pipeOut[0]);
 
 			chdir(path);
+
 			if(execv(exec_name, NULL) == -1)
 			{
 				int errnum = errno;
@@ -1936,11 +1939,11 @@ int PiafFilter::processFunction(int indexFunction,
 		int ret = -1;
 		if(pipeW)
 		{
-			ret = swSendImage(indexFunction, &frame, swImage, &data_in, pipeW);
+			ret = swSendImage(indexFunction, &frame, swImage,
+							  &data_in, pipeW);
 		}
 		else
 		{
-
 			fprintf(stderr, "PiafFilters::%s:%d : ERROR: pipeW is null\n",
 						__func__, __LINE__);
 		}

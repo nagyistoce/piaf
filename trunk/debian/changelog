@@ -1,3 +1,10 @@
+piaf (1.svn20131231-1) unstable; urgency=low
+
+  * Debian 7 package release for amd64/multiarch
+  * Improved support for Primesense OpenNI2 devices (tested with Asus Xtion Pro Live)
+
+ -- Christophe Seyve <cseyve@free.fr>  Tue, 31 Dec 2013 15:35:00 +0200
+
 piaf (1.svn20130513-1) unstable; urgency=low
 
   * First Debian 7 package release

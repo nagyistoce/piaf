@@ -25,7 +25,7 @@ target.files = *.so*
 
 
 head.path = /usr/local/include/SwPlugin/
-head.files = inc/*.h 
+head.files = inc/*.h ../main/tools/inc/swimage_utils.h
 
 INSTALLS += target head
 
@@ -34,3 +34,4 @@ INCLUDEPATH += ../main/tools/inc
 DEPENDPATH += ../main/tools/inc
 
 SOURCES += ../main/tools/src/swimage_utils.cpp
+

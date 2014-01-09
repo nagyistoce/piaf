@@ -17,9 +17,9 @@ configure-stamp:
 	# Add here commands to configure the package.
 	#BUILD_STATIC=true 
 	# generate translation file
-	cd main
-	lrelease-qt4 piaf_French.ts -qm piaf_French.qm
-	qmake-qt4 piaf-lib.pro
+	#cd main
+	lrelease-qt4 main/piaf_French.ts -qm main/piaf_French.qm
+	./build.sh 2>&1 > build.log
 
 	touch configure-stamp
 
@@ -54,7 +54,8 @@ install: build
 
 	# Add here commands to install the package into debian/piaf.
 	export DESTDIR=$(CURDIR)/debian/piaf; \
-	install -D -o root -g root -m 0755 piaf $$DESTDIR/usr/bin/piaf; \
+	install -D -o root -g root -m 0755 main/piaf $$DESTDIR/usr/bin/piaf; \
+	install -D -o root -g root -m 0755 workflow/piafworkflow $$DESTDIR/usr/bin/piafworkflow; \
 	install -D -o root -g root -m 0644 piaf_French.qm $$DESTDIR/usr/local/piaf/piaf_French.qm; \
 	install -D -o root -g root -m 0644 debian/piaf.desktop $$DESTDIR/usr/local/piaf/applications/piaf.desktop; \
 	install -D -o root -g root -m 0644 debian/piaf-desktop.png $$DESTDIR/usr/share/pixmaps/piaf.png
