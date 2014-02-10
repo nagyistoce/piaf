@@ -873,6 +873,7 @@ int FilterSequencer::loadSequence(char * filename)
 		strcat(fname, FILTERLIST_EXTENSION);
 	}
 
+
 	PIAF_MSG(SWLOG_INFO, "[FilterSequencer %p]: Loading file '%s'...\n", this, filename);
 	// process each image
 
@@ -899,6 +900,7 @@ int FilterSequencer::loadSequence(char * filename)
 		if(retline) {
 			// check if filter is available
 			PiafFilter * foundPV = NULL;
+
 			if(mAvailableFiltersList.isEmpty())
 			{
 				PIAF_MSG(SWLOG_INFO, "Loading available plugins list ...");
