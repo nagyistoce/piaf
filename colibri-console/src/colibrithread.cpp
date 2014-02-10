@@ -87,11 +87,13 @@ void ColibriThread::run()
 						tmReleaseImage(&m_inputImage);
 						tmReleaseImage(&m_outputImage);
 					}
+					// Copy frame into input image
 					if(!m_inputImage) { m_inputImage = cvCloneImage(frame); }
 					else { cvCopy(frame, m_inputImage); }
 
-					// then process current image
+					// then process current image, and the output overwrites the input
 					int ret = computeImage(m_inputImage);
+
 					fprintf(stderr, "%s:%d : capture=%p ok, iteration=%d frame=%dx%dx%d => ret=%d\n",
 							__func__, __LINE__, m_capture, m_iteration,
 							frame->width, frame->height, frame->nChannels,
@@ -103,6 +105,9 @@ void ColibriThread::run()
 					else { cvCopy(m_inputImage, m_outputImage); }
 					mDisplayMutex.unlock();
 
+					// Save output for debug
+
+					cvSaveImage("/dev/shm/piafcolibri-output.png", m_outputImage);
 
 					m_iteration++;
 				}
@@ -117,12 +122,14 @@ void ColibriThread::run()
 /* Set the sequence file */
 int ColibriThread::setSequenceFile(char * path)
 {
-	COLIBRI_MSG("Load sequence '%s'", path);
+	COLIBRI_MSG("============ Loading sequence '%s' ============", path);
 	return mFilterSequencer.loadFilterList(path);
 }
 
 int ColibriThread::computeImage(IplImage * iplImage) {
-	if(!iplImage) { return -1; }
+	if(!iplImage) {
+		fprintf(stderr, "[Colibri] %s:%d : ERROR: Input image is null\n", __func__, __LINE__);
+		return -1; }
 
 	// Process this image with filters
 	int retproc = mFilterSequencer.processImage(iplImage,
