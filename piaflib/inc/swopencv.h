@@ -26,12 +26,15 @@
 #include <cvaux.h>
 #include <highgui.h>
 #else
+// With versions of OpenCV >= 2.2
 #include <opencv.hpp>
 #include <legacy/compat.hpp>
 #endif
 
 #else
+// Local  replacement for opencv functions
 #include "cversatz.h"
 #endif
 
 #endif // SWOPENCV_H
+

@@ -446,7 +446,7 @@ linux-g++: {
 		-Wuninitialized \
 		-Wparentheses \
 		-Wpointer-arith
-	 QMAKE_CXXFLAGS +=   -O0 \=
+	 QMAKE_CXXFLAGS +=   -O0 \
                 -fexceptions \
                 -Wimplicit \
                 -Wreturn-type \

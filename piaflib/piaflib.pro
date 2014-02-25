@@ -1,6 +1,8 @@
 # Project for Piaf API library
 TEMPLATE = lib
 
+CONFIG -= qt
+
 TARGET = SwPluginCore
 DEFINES += SWPLUGIN_SIDE
 
@@ -8,15 +10,24 @@ HEADERS = inc/SwPluginCore.h
 
 SOURCES = src/SwPluginCore.cpp
 
+message("OpenCV inc before: $$INCLUDEPATH")
 # include opencv to check if it's available
 include(../main/opencv.pri)
+
+message("OpenCV inc after: $$INCLUDEPATH")
 
 INCLUDEPATH += inc
 DEPENDPATH += inc
 
-OBJECTS_DIR = .obj-lib
-MOC_DIR = .moc-lib
-
+linux*arm* {
+	DESTDIR = ../lib/arm
+	OBJECTS_DIR = .obj-arm
+        MOC_DIR = .moc-arm
+} else {
+	DESTDIR = ../lib/x86
+	OBJECTS_DIR = .obj-lib
+	MOC_DIR = .moc-lib
+}
 
 
 ##INSTALLATION

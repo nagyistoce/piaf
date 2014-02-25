@@ -2,7 +2,7 @@
 
 # PG = opencv
 # system(pkg-config --exists $$PG) {
-#    message(opencv v$$system(pkg-config --modversion $$PG)found)
+#    message(opencv $$system(pkg-config --modversion $$PG)found)
 #    LIBS += $$system(pkg-config --libs $$PG)
 #    INCLUDEPATH += $$system(pkg-config --cflags $$PG | sed s/-I//g)
 # } else {
@@ -12,14 +12,16 @@
 LIBSDIR =
 LIBS_EXT = dylib
 
-BASEPATH= /usr
+BASEPATH=/usr
 linux-arm* {
-        message("Opencv.pri : compilation for ARM")
-        BASEPATH=/opt/eldk-5.3/armv7a-hf/sysroots/armv7ahf-vfp-neon-linux-gnueabi/usr
+	message("Opencv.pri : compilation for ARM")
+	BASEPATH=/opt/eldk-5.3/armv7a-hf/sysroots/armv7ahf-vfp-neon-linux-gnueabi/usr
 }
 
+linux* {
+	 LIBS_EXT = so
+}
 
-linux-g++*: LIBS_EXT = so
 unix: {
 	QMAKE_LIBDIR_QT -= /usr/lib
 
@@ -29,6 +31,8 @@ unix: {
 		message("OpenCV >= 2.2 found in $$BASEPATH/local/include/opencv2/")
 		DEFINES += OPENCV_22 OPENCV2
 		INCLUDEPATH += $$BASEPATH/local/include/opencv2
+		# add one level higher because opencv.hpp includes subdirs like "opencv2/core/core.hpp" 
+		INCLUDEPATH += $$BASEPATH/local/include
 
 		CVINSTPATH = $$BASEPATH/local
 		CVINCPATH = $$BASEPATH/local/include/opencv2
@@ -45,6 +49,8 @@ unix: {
 			CVINSTPATH = $$BASEPATH
 			CVINCPATH = $$BASEPATH/include/opencv2
 			INCLUDEPATH += $$BASEPATH/include/opencv2
+	                # add one level higher because opencv.hpp includes subdirs like "opencv2/core/core.hpp"
+			INCLUDEPATH += $$BASEPATH/include
 
 			LIBS += -L$$BASEPATH/lib
 			LIBSDIR = $$BASEPATH/lib
