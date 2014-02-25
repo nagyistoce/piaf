@@ -17,7 +17,7 @@ fi
 
 cd piaflib
 echo " + building plugins library..."
-$QMAKE piaf-lib.pro && make $@ || print_install
+$QMAKE piaflib.pro && make $@ || print_install
 
 
 if [ ! -f /usr/local/lib/libSwPluginCore.so ]; then
